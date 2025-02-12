@@ -1,0 +1,20 @@
+{
+  "category.nitsha.binds" : "Nitsha's FastBind",
+  "key.nitsha.binds" : "FastBind Menu",
+  "key.nitsha.prev_page" : "Previous page",
+  "key.nitsha.next_page" : "Next page",
+
+  "nitsha.binds.wip" : "Work in progress",
+  "nitsha.binds.save_bind" : "Save",
+  "nitsha.binds.insert_bind" : "Insert",
+  "nitsha.binds.copy_bind" : "Copy",
+  "nitsha.binds.delete_bind" : "Delete",
+
+  "nitsha.binds.configure" : "Configure",
+  "nitsha.binds.command" : "Command",
+
+  "nitsha.binds.name" : "Name",
+  "nitsha.binds.untitled" : "Untitled",
+  "nitsha.binds.list" : "List of binds",
+  "nitsha.binds.empty" : "Empty"
+}

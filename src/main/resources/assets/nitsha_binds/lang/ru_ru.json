@@ -1,0 +1,20 @@
+{
+  "category.nitsha.binds" : "Nitsha's FastBind",
+  "key.nitsha.binds" : "Меню FastBind",
+  "key.nitsha.prev_page" : "Предыдущая страница",
+  "key.nitsha.next_page" : "Следующая страница",
+
+  "nitsha.binds.wip" : "В разработке",
+  "nitsha.binds.save_bind" : "Сохранить",
+  "nitsha.binds.insert_bind" : "Вставить",
+  "nitsha.binds.copy_bind" : "Копировать",
+  "nitsha.binds.delete_bind" : "Удалить",
+
+  "nitsha.binds.configure" : "Настройка",
+  "nitsha.binds.command" : "Команда",
+
+  "nitsha.binds.name" : "Название",
+  "nitsha.binds.untitled" : "Без названия",
+  "nitsha.binds.list" : "Выбор бинда",
+  "nitsha.binds.empty" : "Не назначено"
+}

@@ -76,25 +76,14 @@ public class BindsGUI extends Screen {
             RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             ctx.drawTexture(RenderLayer::getGuiTextured, BACKGROUND, centerX, centerY, 0, 75, 125, 106, 256, 256);
             RenderSystem.disableBlend();
-            addText(ctx, Text.of(displayText), 125, centerX + 5, centerY + 7,"left");
-            addText(ctx, arrowsText, 125, centerX, centerY + 94,"center");
-            addText(ctx, Text.literal((currentPage + 1) + "/5").styled(style -> style.withColor(Formatting.GRAY)), 125, centerX  - 5, centerY + 7, "right");
+            GUIUtils.addText(ctx, Text.of(displayText), 125, centerX + 5, centerY + 7);
+            GUIUtils.addText(ctx, arrowsText, 125, centerX, centerY + 94, "center", "top");
+            GUIUtils.addText(ctx, Text.literal((currentPage + 1) + "/5").styled(style -> style.withColor(Formatting.GRAY)), 125, centerX  - 5, centerY + 7, "right", "top");
             super.render(ctx, mouseX, mouseY, delta);
         }
     }
 
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-    }
-
-    public static void addText(DrawContext ctx, Text text, int width, int offset, int y, String align) {
-        int chWidth = MinecraftClient.getInstance().textRenderer.getWidth(text);
-        int alignCoord = switch (align) {
-            case "left" -> offset;
-            case "center" -> ((width / 2)) - (chWidth / 2) + offset;
-            case "right" -> width - chWidth + offset;
-            default -> 0;
-        };
-        ctx.drawText(MinecraftClient.getInstance().textRenderer, text, alignCoord, y, 0xFFFFFFFF, true);
     }
 
     public void generateButtons(int startX, int startY) {
@@ -106,7 +95,7 @@ public class BindsGUI extends Screen {
         int currentY = startY;
         for (int row = 0; row < 8; row++) {
             String[] currentBind = BindsConfig.getBind(row + (8 * currentPage));
-            BindButton button = createBtn(truncateString(currentBind[0]), ItemsMapper.getItemStack(currentBind[1]), currentX, currentY, currentBind[2], true);
+            BindButton button = createBtn(GUIUtils.truncateString(currentBind[0], 12), ItemsMapper.getItemStack(currentBind[1]), currentX, currentY, currentBind[2], true);
             buttons.add(button);
             this.addDrawableChild(button);
             currentX += 31;
@@ -150,13 +139,6 @@ public class BindsGUI extends Screen {
         } else {
             return false;
         }
-    }
-
-    private static String truncateString(String str) {
-        if (str.length() > 12) {
-            return str.substring(0, 12) + "...";
-        }
-        return str;
     }
 
     private void updatePage(int dir) {

@@ -2,6 +2,7 @@ package com.nitsha.binds;
 
 import com.nitsha.binds.configs.KeyBinds;
 import com.nitsha.binds.gui.BindsConfig;
+import com.nitsha.binds.gui.node.NodeEditorGUI;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -39,6 +40,11 @@ public class MainClass implements ModInitializer {
                                 .styled(s -> s.withColor(Formatting.YELLOW))
                                 .append(Text.literal("(though mine's mirrored—oops)")
                                         .styled(s -> s.withColor(Formatting.GRAY).withItalic(true))), false);
+                        return 0;
+                    }));
+            dispatcher.register(ClientCommandManager.literal("nitsha::node-editor")
+                    .executes(context -> {
+                        MinecraftClient.getInstance().send(() -> MinecraftClient.getInstance().setScreen(new NodeEditorGUI()));
                         return 0;
                     }));
         });

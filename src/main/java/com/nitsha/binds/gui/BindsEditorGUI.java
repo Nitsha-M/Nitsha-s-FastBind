@@ -115,9 +115,9 @@ public class BindsEditorGUI extends Screen {
         ctx.drawTexture(RenderLayer::getGuiTextured, BACKGROUND, centerX, centerY, 52, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT, 320 , 320);
         RenderSystem.disableBlend();
 
-        BindsGUI.addText(ctx, Text.translatable("nitsha.binds.configure"), 149, centerX + 12 + 4, centerY + 14,"left");
-        BindsGUI.addText(ctx, Text.literal((currentPage + 1) + "/5").styled(style -> style.withColor(Formatting.GRAY)), 149, centerX - 12 - 4, centerY + 14,"right");
-        BindsGUI.addText(ctx, Text.translatable("nitsha.binds.command"), 149, centerX + 12, centerY + 143,"left");
+        GUIUtils.addText(ctx, Text.translatable("nitsha.binds.configure"), 149, centerX + 12 + 4, centerY + 14);
+        GUIUtils.addText(ctx, Text.literal((currentPage + 1) + "/5").styled(style -> style.withColor(Formatting.GRAY)), 149, centerX - 12 - 4, centerY + 14,"right", "top");
+        GUIUtils.addText(ctx, Text.translatable("nitsha.binds.command"), 149, centerX + 12, centerY + 143);
 
         if (isSelectorOpened) ctx.drawTexture(RenderLayer::getGuiTextured, BACKGROUND, centerX, centerY + TEXTURE_HEIGHT + 5, 52, 211, TEXTURE_WIDTH, 46, 320 , 320);
         super.render(ctx, mouseX, mouseY, delta);

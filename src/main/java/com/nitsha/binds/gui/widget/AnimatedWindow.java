@@ -5,12 +5,14 @@ import com.nitsha.binds.gui.GUIUtils;
 import com.nitsha.binds.gui.extend.PositionedDrawElement;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +42,7 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
     }
 
     private AnimationState animState;
-    private final float speed = 0.1f;
+    private final float speed = 0.6f;
     private float baseYOffset, topYOffset, alpha = 0.0f;
     private Runnable onFinish = null;
 
@@ -97,7 +99,7 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
         this.onFinish = onFinish;
     }
 
-    private void drawAnimatedBox(DrawContext ctx) {
+    private void drawAnimatedBox(DrawContext ctx, float delta) {
         if (delay > 0) {
             delay--;
             return;
@@ -105,9 +107,9 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
 
         switch (animState) {
             case DROPPING_ALL -> {
-                this.alpha = MathHelper.lerp(this.speed, this.alpha, 1.0f);
+                this.alpha = MathHelper.lerp(clampSpeed(speed * delta), this.alpha, 1.0f);
                 if (Math.abs(this.alpha - 1.0f) < 0.001f) this.alpha = 1.0f;
-                baseYOffset = MathHelper.lerp(speed, baseYOffset, this.y + 2);
+                baseYOffset = MathHelper.lerp(clampSpeed(speed * delta), baseYOffset, this.y + 2);
                 if (Math.abs(baseYOffset - (this.y + 2)) < 0.001f) {
                     baseYOffset = this.y + 2;
                     animState = AnimationState.LIFTING_TOP;
@@ -118,15 +120,15 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
                 }
             }
             case LIFTING_TOP -> {
-                topYOffset = MathHelper.lerp(speed, topYOffset, 2);
+                topYOffset = MathHelper.lerp(clampSpeed(speed * delta), topYOffset, 2);
                 if (Math.abs(topYOffset - 2) < 0.001f) {
                     topYOffset = 2;
                     animState = AnimationState.FINISHED;
                 }
             }
             case HIDING_TOP -> {
-                alpha = MathHelper.lerp(speed, alpha, 0.0f);
-                baseYOffset = MathHelper.lerp(speed, baseYOffset, y - 100);
+                alpha = MathHelper.lerp(clampSpeed(speed * delta), alpha, 0.0f);
+                baseYOffset = MathHelper.lerp(clampSpeed(speed * delta), baseYOffset, y - 100);
 
                 if (onFinish != null && baseYOffset < y - 49) {
                     this.visible = false;
@@ -141,7 +143,7 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
                 }
             }
             case LIFTING_ALL -> {
-                topYOffset = MathHelper.lerp(speed, topYOffset, 0);
+                topYOffset = MathHelper.lerp(clampSpeed(speed * delta), topYOffset, 0);
                 if (Math.abs(topYOffset) < 0.001f) {
                     topYOffset = 0;
                     animState = AnimationState.HIDDEN;
@@ -173,9 +175,6 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
         matrices.translate(this.x, yO, 20);
         //? }
 
-
-
-
         if (delay == 0 && visible) {
 
             for (PositionedDrawElement element : drawElements) {
@@ -194,11 +193,11 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
         matrices.pop();
         //? }
 
-        drawAnimatedBox(ctx);
+        drawAnimatedBox(ctx, delta);
 
-        this.width = MathHelper.lerp(speed, this.width, targetWidth);
+        this.width = MathHelper.lerp(clampSpeed(speed * delta), this.width, targetWidth);
         if (Math.abs(this.width - targetWidth) < 0.1f) this.width = targetWidth;
-        this.x = MathHelper.lerp(speed, this.x, targetX);
+        this.x = MathHelper.lerp(clampSpeed(speed * delta), this.x, targetX);
         if (Math.abs(this.x - targetX) < 0.1f) this.x = targetX;
     }
 
@@ -221,6 +220,10 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
     @Override
     public SelectionType getType() {
         return SelectionType.NONE;
+    }
+
+    private float clampSpeed(float value) {
+        return MathHelper.clamp(value, 0.001f, 1.0f);
     }
 
     @Override

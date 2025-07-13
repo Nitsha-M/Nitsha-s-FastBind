@@ -49,7 +49,7 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
     public static String activeKey = "STRUCTURE_BLOCK";
     private boolean isDraggingScrollbar = false;
 
-    private final float speed = 0.1f;
+    private final float speed = 0.6f;
     private float animHeight = 0, targetH = 0;
 
     private String currentCategory = "blocks";
@@ -87,6 +87,10 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
             if (i == 0) cat.setPressed(true);
             catBtns.add(cat);
         }
+    }
+
+    private float clampSpeed(float value) {
+        return MathHelper.clamp(value, 0.001f, 1.0f);
     }
 
     private void createButtons() {
@@ -169,10 +173,10 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
         matrices.push();
         //? }
         if (isOpen) {
-            this.animHeight = MathHelper.lerp(speed, this.animHeight, targetH);
+            this.animHeight = MathHelper.lerp(clampSpeed(speed * delta), this.animHeight, targetH);
             if (Math.abs(this.animHeight - targetH) < 0.1f) this.animHeight = targetH;
         } else {
-            this.animHeight = MathHelper.lerp(speed, this.animHeight, 0);
+            this.animHeight = MathHelper.lerp(clampSpeed(speed * delta), this.animHeight, 0);
             if (Math.abs(this.animHeight - 0) < 0.1f) this.animHeight = 0;
         }
         ctx.enableScissor(this.x, this.y, this.x + this.width + 14, Math.round(this.animHeight));

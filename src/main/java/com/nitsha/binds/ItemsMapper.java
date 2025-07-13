@@ -22,6 +22,7 @@ import java.util.Map;
 public class ItemsMapper {
     public static final Map<String, ItemStack> itemStackMap = new LinkedHashMap<>();
     public static final Map<String, Map<String, ItemStack>> categories = new HashMap<>();
+    private static final ItemStack standart = new ItemStack(Blocks.STRUCTURE_VOID);
     private static final ItemStack notFound = new ItemStack(Blocks.BARRIER);
 
     static {
@@ -35,7 +36,6 @@ public class ItemsMapper {
 
     private static Map<String, ItemStack> cat_BLOCKS() {
         Map<String, ItemStack> map = new LinkedHashMap<>();
-        map.put("STRUCTURE_VOID", new ItemStack(Items.STRUCTURE_VOID));
 
         // --- Земляные и сыпучие блоки ---
         map.put("GRASS", new ItemStack(Blocks.GRASS_BLOCK));
@@ -1686,7 +1686,7 @@ public class ItemsMapper {
     }
     *///?}
 
-    public static ItemStack getItemStack(String name) { return itemStackMap.getOrDefault(name, notFound); }
+    public static ItemStack getItemStack(String name) { return itemStackMap.getOrDefault(name, (name.equals("STRUCTURE_VOID")) ? standart : notFound); }
 
     public static int getItemStackIndex(String name) {
         int index = 0;

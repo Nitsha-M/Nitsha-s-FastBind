@@ -39,6 +39,9 @@ public class BindsConfig {
 
     public static void loadConfig() {
         if (CONFIG_FILE.exists()) {
+            if (CONFIG_FILE.length() == 0) {
+                generateEmptyList();
+            }
             try (FileReader reader = new FileReader(CONFIG_FILE)) {
                 Type listType = new TypeToken<List<String[]>>() {}.getType();
                 bindsList = GSON.fromJson(reader, listType);
@@ -53,6 +56,7 @@ public class BindsConfig {
             generateEmptyList();
         }
     }
+
 
     public static void generateEmptyList() {
         bindsList.clear();

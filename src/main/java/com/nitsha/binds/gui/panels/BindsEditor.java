@@ -16,7 +16,9 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.render.RenderLayer;
@@ -26,6 +28,7 @@ import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +53,8 @@ public class BindsEditor extends Screen {
     private static final Identifier ARROW_R_HOVER = MainClass.id("arrow_right_hover");
     private static final Identifier RANDOM = MainClass.id("random");
     private static final Identifier RANDOM_HOVER = MainClass.id("random_hover");
+    private static final Identifier CLOSE = MainClass.id("close");
+    private static final Identifier CLOSE_HOVER = MainClass.id("close_hover");
     //? } else {
     /*private static final Identifier ARROW_L = MainClass.id("textures/gui/sprites/arrow_left.png");
     private static final Identifier ARROW_L_HOVER = MainClass.id("textures/gui/sprites/arrow_left_hover.png");
@@ -57,6 +62,8 @@ public class BindsEditor extends Screen {
     private static final Identifier ARROW_R_HOVER = MainClass.id("textures/gui/sprites/arrow_right_hover.png");
     private static final Identifier RANDOM = MainClass.id("textures/gui/sprites/random.png");
     private static final Identifier RANDOM_HOVER = MainClass.id("textures/gui/sprites/random_hover.png");
+    private static final Identifier CLOSE = MainClass.id("textures/gui/sprites/close.png");
+    private static final Identifier CLOSE_HOVER = MainClass.id("textures/gui/sprites/close_hover.png");
     *///? }
 
     private final int TEXTURE_WIDTH = 141;
@@ -65,6 +72,7 @@ public class BindsEditor extends Screen {
     private TextFieldWidget bindNameField;
     private TextFieldWidget commandField;
 
+    private TexturedButtonWidget closeBtn;
     private BedrockButton saveBtn;
     private BedrockIconButton copyBtn;
     private BedrockIconButton pasteBtn;
@@ -157,13 +165,17 @@ public class BindsEditor extends Screen {
         this.leftA = GUIUtils.createTexturedBtn(-19, 43, 11, 11, new Identifier[]{ARROW_L, ARROW_L_HOVER}, button -> updatePage(-1));
         this.rightA = GUIUtils.createTexturedBtn(141, 43, 11, 11, new Identifier[]{ARROW_R, ARROW_R_HOVER}, button -> updatePage(1));
 
+        this.closeBtn = GUIUtils.createTexturedBtn(110, 7, 16, 16, new Identifier[]{CLOSE, CLOSE_HOVER}, button -> {
+            this.client.setScreen(null);
+        });
+
         this.rightBtn = new AnimatedSprite(22, 15, ARROW_SPRITE, 0, false, 0, 0, 220, 22, 2, 242, 15);
         this.leftBtn = new AnimatedSprite(22, 15, ARROW_SPRITE_LEFT, 0, false, 0, 0, 220, 22, 2, 242, 15);
 
         this.bindsW.addDrawElement(drawContext -> {
             GUIUtils.adaptiveDrawTexture(drawContext, FRAME, 4, 4, 0, 0, 125, 90, 125 , 90);
             GUIUtils.addText(drawContext, Text.translatable("nitsha.binds.configure"), 141, 8, 11);
-            GUIUtils.addText(drawContext, Text.literal((currentPage + 1) + "/5").styled(style -> style.withColor(Formatting.GRAY)), 133, 125, 11,"right", "top");
+            GUIUtils.addText(drawContext, Text.literal((currentPage + 1) + "/5").styled(style -> style.withColor(Formatting.GRAY)), 133, 108, 11,"right", "top");
 
             leftBtn.setPosition(-20, 42);
             rightBtn.setPosition(131, 42);
@@ -180,6 +192,7 @@ public class BindsEditor extends Screen {
             this.bindsW.addElement(rightA);
         });
 
+        this.bindsW.addElement(closeBtn);
         generateButtons(7, 31);
 
         this.addDrawableChild(this.bindsW);
@@ -352,7 +365,6 @@ public class BindsEditor extends Screen {
         updateSelected(ItemsMapper.getItemStack(BindsConfig.getBind(activeBind)[1]));
     }
 
-
     private void saveBind() {
         String cmd = commandField.getText();
         if (!cmd.isEmpty()) {
@@ -417,6 +429,9 @@ public class BindsEditor extends Screen {
             ItemButton[] buttonHolder = new ItemButton[1];
 
             buttonHolder[0] = new ItemButton(currentX, currentY, ItemsMapper.getItemStack(currentBind[1]), () -> {
+                if (!commandField.getText().isEmpty()) {
+                    this.saveBind();
+                }
                 for (ItemButton btn : buttons) {
                     btn.setSelected(false);
                 }

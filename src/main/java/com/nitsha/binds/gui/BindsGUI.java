@@ -6,6 +6,7 @@ import com.nitsha.binds.configs.BindsConfig;
 import com.nitsha.binds.configs.KeyBinds;
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.gui.panels.BindsEditor;
+import com.nitsha.binds.gui.widget.AnimatedWindow;
 import com.nitsha.binds.gui.widget.ItemButton;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,9 +18,11 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -51,10 +54,12 @@ public class BindsGUI extends Screen {
     private List<ItemButton> buttons;
     private int MENU_WIDTH = 125;
 
+    private static String textLEFT = KeyBindingHelper.getBoundKeyOf(KeyBinds.PREV_PAGE).toString().toUpperCase().replace("KEY.KEYBOARD.", "");
+    private static String textRIGHT = KeyBindingHelper.getBoundKeyOf(KeyBinds.NEXT_PAGE).toString().toUpperCase().replace("KEY.KEYBOARD.", "");
     public static Text arrowsText = Text.literal("⏴ ")
-            .append(Text.literal("[ F7 ]").styled(style -> style.withColor(Formatting.AQUA)))
+            .append(Text.literal("[ " + textLEFT + " ]").styled(style -> style.withColor(Formatting.AQUA)))
             .append(Text.literal("     ").styled(style -> style.withColor(Formatting.WHITE)))
-            .append(Text.literal("[ F9 ]").styled(style -> style.withColor(Formatting.AQUA)))
+            .append(Text.literal("[ " + textRIGHT + " ]").styled(style -> style.withColor(Formatting.AQUA)))
             .append(Text.literal(" ⏵")).styled(style -> style.withColor(Formatting.WHITE));
 
     public BindsGUI() {
@@ -167,6 +172,20 @@ public class BindsGUI extends Screen {
         currentPage += dir;
         if (currentPage == 5) currentPage = 0;
         generateButtons(centerX + 3, centerY + 27);
+    }
+
+    public static boolean isInside(double mouseX, double mouseY, int x, int y, int width, int height) {
+        boolean is = mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+        if (is) MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        return is;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (isInside(mouseX, mouseY, centerX + 3, centerY + 92, 51, 12)) updatePage(-1);
+        if (isInside(mouseX, mouseY, centerX + 70, centerY + 92, 51, 12)) updatePage(1);
+
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.nitsha.binds.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.nitsha.binds.MainClass;
+import com.nitsha.binds.gui.widget.AnimatedWindow;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -103,9 +104,18 @@ public class GUIUtils {
         Identifier hoverTexture = textures[1];
 
         //? if >1.21.1 {
-        return new TexturedButtonWidget(x, y, width, height, new ButtonTextures(defaultTexture, hoverTexture), onClick);
+        return new TexturedButtonWidget(x, y, width, height, new ButtonTextures(defaultTexture, hoverTexture), onClick) {
+            @Override
+            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                return false;
+            }
+        };
         //? } else if >=1.20.3 {
         /*return new TexturedButtonWidget(x, y, width, height, new ButtonTextures(defaultTexture, hoverTexture), onClick) {
+            @Override
+            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                return false;
+            }
             @Override
             public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
                 RenderSystem.enableBlend();
@@ -117,6 +127,10 @@ public class GUIUtils {
         *///? } else if >=1.20.2 {
         /*return new TexturedButtonWidget(x, y, width, height, new ButtonTextures(defaultTexture, hoverTexture), onClick) {
             @Override
+            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                return false;
+            }
+            @Override
             public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
@@ -126,6 +140,10 @@ public class GUIUtils {
         };
         *///? } else {
         /*return new TexturedButtonWidget(x, y, width, height, 0, 0, defaultTexture, onClick) {
+            @Override
+            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                return false;
+            }
             @Override
             public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
                 RenderSystem.enableBlend();

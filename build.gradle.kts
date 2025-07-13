@@ -92,3 +92,14 @@ tasks.processResources {
 
     filesMatching("fabric.mod.json") { expand(props) }
 }
+
+tasks.register<Copy>("copyJars") {
+    dependsOn(subprojects.map { it.tasks.named("build") })
+    from(subprojects.map { it.layout.buildDirectory.dir("libs") })
+    into(rootDir.resolve("build/all-jars"))
+    include("*.jar")
+}
+
+tasks.named("build") {
+    finalizedBy("copyJars")
+}

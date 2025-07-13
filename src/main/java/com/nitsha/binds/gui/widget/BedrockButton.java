@@ -92,6 +92,10 @@ public class BedrockButton extends ClickableWidget {
         return yOffset;
     }
 
+    private float clampSpeed(float value) {
+        return MathHelper.clamp(value, 0.001f, 1.0f);
+    }
+
     //? if >1.20.2 {
     @Override
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
@@ -108,7 +112,7 @@ public class BedrockButton extends ClickableWidget {
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
         int textWidth = textRenderer.getWidth(name);
         targetOffset = (isPressed) ? 2 : 0;
-        yOffset = MathHelper.lerp(speed, yOffset, targetOffset);
+        yOffset = MathHelper.lerp(clampSpeed(speed * delta), yOffset, targetOffset);
         if (Math.abs(yOffset - targetOffset) < 0.001f) yOffset = targetOffset;
 
         int fX = this.getX() + 1;

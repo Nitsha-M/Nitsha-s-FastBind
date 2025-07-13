@@ -8,7 +8,8 @@
     "Nitsha_M"
   ],
   "contact": {
-    "homepage" : "https://t.me/nitsha_m"
+    "homepage" : "https://modrinth.com/mod/nitshas-fastbind",
+    "issues": "https://github.com/Nitsha-M/Nitsha-s-FastBind/issues"
   },
   "license": "MIT",
   "icon": "assets/nitsha_binds/icon.png",
@@ -32,7 +33,7 @@
   "custom": {
     "modmenu": {
       "links": {
-        "modmenu.discord": "https://discord.com/users/533592008762064896"
+        "modmenu.discord": "https://discord.gg/zuwPkg5MHs"
       }
     }
   }

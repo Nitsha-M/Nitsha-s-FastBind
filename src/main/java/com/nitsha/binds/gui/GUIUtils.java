@@ -2,20 +2,22 @@ package com.nitsha.binds.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.nitsha.binds.MainClass;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.PressableWidget;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundManager;
-import net.minecraft.sound.SoundEvents;
+//? if >1.20.1 {
+import net.minecraft.client.gui.screen.ButtonTextures;
+//? }
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+//?if >=1.21.6 {
+/*import com.mojang.blaze3d.pipeline.RenderPipeline;
+import net.minecraft.client.gl.RenderPipelines;
+*///?} else {
+import net.minecraft.client.render.RenderLayer;
+//? }
 
 public class GUIUtils {
     // Cut a string
@@ -27,31 +29,117 @@ public class GUIUtils {
     }
 
     public static void addText(DrawContext ctx, Text text, int width, int offsetX, int offsetY) {
-        addText(ctx, text, width, offsetX, offsetY, "left", "top");
+        addText(ctx, text, width, offsetX, offsetY, "left", "top", 0xFFFFFFFF);
     }
 
     public static void addText(DrawContext ctx, Text text, int width, int offsetX, int offsetY, String hAlign, String vAlign) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        TextRenderer textRenderer = client.textRenderer;
+        addText(ctx, text, width, offsetX, offsetY, hAlign, vAlign, 0xFFFFFFFF);
+    }
+
+    public static void addText(DrawContext ctx, Text text, int width, int offsetX, int offsetY, int color) {
+        addText(ctx, text, width, offsetX, offsetY, "left", "top", color);
+    }
+
+    public static void addText(DrawContext ctx, Text text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color) {
+        if (text == null || text.getString().isBlank()) return;
+        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
         int chWidth = textRenderer.getWidth(text);
         int chHeight = textRenderer.fontHeight;
+
         int alignCoordX = switch (hAlign) {
             case "left" -> offsetX;
             case "center" -> (width / 2) - (chWidth / 2) + offsetX;
-            case "right" -> width - chWidth + offsetX;
+            case "right" -> offsetX - chWidth;
             default -> offsetX;
         };
+
         int alignCoordY = switch (vAlign) {
             case "top" -> offsetY;
             case "center" -> offsetY - (chHeight / 2);
             case "bottom" -> offsetY - chHeight;
             default -> offsetY;
         };
-        ctx.drawText(textRenderer, text, alignCoordX, alignCoordY, 0xFFFFFFFF, true);
+
+        ctx.drawTextWithShadow(textRenderer, text, alignCoordX, alignCoordY, color);
     }
 
-    // Draw resizable box
     public static void drawResizableBox(DrawContext ctx, Identifier texture, int x, int y, int width, int height, int edge, int tS) {
+        drawResizableBox(ctx, texture, x, y, width, height, edge, tS, 0xFFFFFFFF);
+    }
+
+    public static void adaptiveDrawTexture(DrawContext ctx, Identifier texture, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight, int color) {
+        //? if >=1.21.6 {
+        /*ctx.drawTexture(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, textureWidth, textureHeight, color);
+         *///?} else if <= 1.21.1 {
+        /*RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        float red   = ((color >> 16) & 0xFF) / 255.0f;
+        float green = ((color >> 8) & 0xFF) / 255.0f;
+        float blue  = (color & 0xFF) / 255.0f;
+        float alpha = ((color >> 24) & 0xFF) / 255.0f;
+        RenderSystem.setShaderColor(red, green, blue, alpha);
+        ctx.drawTexture(texture, x, y, 0, u, v,width, height, textureWidth, textureHeight);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.disableBlend();
+        *///?} else {
+        ctx.drawTexture(RenderLayer::getGuiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight, color);
+        //? }
+    }
+
+    public static void adaptiveDrawTexture(DrawContext ctx, Identifier texture, int x, int y, int u, int v, int width, int height, int textureWidth, int textureHeight) {
+        adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, textureWidth, textureHeight, 0xFFFFFFFF);
+    }
+
+    public static void adaptiveDrawTexture(DrawContext ctx, Identifier texture, int x, int y, int u, int v, int width, int height, int textureWidth) {
+        adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, textureWidth, textureWidth, 0xFFFFFFFF);
+    }
+
+    public static void adaptiveDrawTexture(DrawContext ctx, Identifier texture, int x, int y, int u, int v, int width, int height) {
+        adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, 256, 256, 0xFFFFFFFF);
+    }
+
+    public static TexturedButtonWidget createTexturedBtn(int x, int y, int width, int height, Identifier[] textures, ButtonWidget.PressAction onClick) {
+        Identifier defaultTexture = textures[0];
+        Identifier hoverTexture = textures[1];
+
+        //? if >1.21.1 {
+        return new TexturedButtonWidget(x, y, width, height, new ButtonTextures(defaultTexture, hoverTexture), onClick);
+        //? } else if >=1.20.3 {
+        /*return new TexturedButtonWidget(x, y, width, height, new ButtonTextures(defaultTexture, hoverTexture), onClick) {
+            @Override
+            public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                super.renderWidget(context, mouseX, mouseY, delta);
+                RenderSystem.disableBlend();
+            }
+        };
+        *///? } else if >=1.20.2 {
+        /*return new TexturedButtonWidget(x, y, width, height, new ButtonTextures(defaultTexture, hoverTexture), onClick) {
+            @Override
+            public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                super.renderButton(context, mouseX, mouseY, delta);
+                RenderSystem.disableBlend();
+            }
+        };
+        *///? } else {
+        /*return new TexturedButtonWidget(x, y, width, height, 0, 0, defaultTexture, onClick) {
+            @Override
+            public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                Identifier current = this.isHovered() ? hoverTexture : defaultTexture;
+                context.drawTexture(current, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
+                RenderSystem.disableBlend();
+            }
+        };
+         *///? }
+    }
+
+        // Draw resizable box
+    public static void drawResizableBox(DrawContext ctx, Identifier texture, int x, int y, int width, int height, int edge, int tS, int color) {
         int iW = width - edge * 2;
         int iH = height - edge * 2;
 
@@ -78,51 +166,10 @@ public class GUIUtils {
                 {tS, tS * iH}, {tS * iW, tS * iH}, {tS, tS * iH},
                 {tS, tS}, {tS * iW, tS}, {tS, tS}
         };
-
         for (int i = 0; i < 9; i++) {
-            ctx.drawTexture(RenderLayer::getGuiTextured, texture,
+            adaptiveDrawTexture(ctx, texture,
                     positions[i][0], positions[i][1], parts[i][0], parts[i][1],
-                    sizes[i][0], sizes[i][1], tSizes[i][0], tSizes[i][1]);
-        }
-    }
-
-    @Environment(EnvType.CLIENT)
-    public static class IconButton extends PressableWidget {
-        private final Runnable onClick;
-        private boolean enabled = true;
-        private final Identifier ICON;
-        int iconSize, iconX, iconY;
-
-        public IconButton(int x, int y, int width, int height, int iconSize, int iconX, int iconY, String iconName, Runnable onClick) {
-            super(x, y, width, height, Text.empty());
-            this.onClick = onClick;
-            this.iconSize = iconSize;
-            this.iconX = iconX;
-            this.iconY = iconY;
-            this.ICON = MainClass.id("textures/gui/sprites/" + iconName + ".png");
-        }
-
-        @Override
-        public void onPress() {
-            if (enabled) this.onClick.run();
-        }
-
-        public void setEnabledStatus(boolean s) {
-            this.enabled = s;
-        }
-
-        @Override
-        public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-            super.renderWidget(context, mouseX, mouseY, delta);
-            renderOverlay(context, mouseX, mouseY, delta);
-        }
-
-        @Override
-        protected void appendClickableNarrations(NarrationMessageBuilder builder) {
-        }
-
-        protected void renderOverlay(DrawContext context, int mouseX, int mouseY, float delta) {
-            context.drawTexture(RenderLayer::getGuiTextured, ICON, this.getX() + iconX, this.getY() + iconY, 0, 0, iconSize, iconSize, 20, 20);
+                    sizes[i][0], sizes[i][1], tSizes[i][0], tSizes[i][1], color);
         }
     }
 }

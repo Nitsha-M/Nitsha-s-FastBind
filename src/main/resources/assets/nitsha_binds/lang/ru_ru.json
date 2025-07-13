@@ -12,9 +12,17 @@
 
   "nitsha.binds.configure" : "Настройка",
   "nitsha.binds.command" : "Команда",
+  "nitsha.binds.command_example" : "без /",
 
   "nitsha.binds.name" : "Название",
   "nitsha.binds.untitled" : "Без названия",
   "nitsha.binds.list" : "Выбор бинда",
-  "nitsha.binds.empty" : "Не назначено"
+  "nitsha.binds.empty" : "Не назначено",
+
+
+
+  "nitsha.nodes.options.grid" : "Привязка к сетке",
+  "nitsha.nodes.options.background" : "Прозрачный фон",
+  "nitsha.nodes.options.background_blur" : "Размыть фон",
+  "nitsha.nodes.options.pause_game" : "Останавливать игру (только в одиночной игре)"
 }

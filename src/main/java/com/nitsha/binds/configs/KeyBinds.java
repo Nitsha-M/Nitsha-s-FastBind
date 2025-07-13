@@ -1,6 +1,5 @@
 package com.nitsha.binds.configs;
 
-import com.nitsha.binds.MainClass;
 import com.nitsha.binds.gui.BindsGUI;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;

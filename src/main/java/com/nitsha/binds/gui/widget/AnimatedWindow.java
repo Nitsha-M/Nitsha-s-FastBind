@@ -281,8 +281,11 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return super.keyReleased(keyCode, scanCode, modifiers);
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        for (Element child : this.children) {
+            if (child.keyPressed(keyCode, scanCode, modifiers)) return true;
+        }
+        return false;
     }
 
     @Override

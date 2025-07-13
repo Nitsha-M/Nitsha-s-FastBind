@@ -12,9 +12,16 @@
 
   "nitsha.binds.configure" : "Configure",
   "nitsha.binds.command" : "Command",
+  "nitsha.binds.command_example" : "without /",
 
   "nitsha.binds.name" : "Name",
   "nitsha.binds.untitled" : "Untitled",
   "nitsha.binds.list" : "List of binds",
-  "nitsha.binds.empty" : "Empty"
+  "nitsha.binds.empty" : "Empty",
+
+
+  "nitsha.nodes.options.grid" : "Snap to grid",
+  "nitsha.nodes.options.background" : "Transparent background",
+  "nitsha.nodes.options.background_blur" : "Background blur",
+  "nitsha.nodes.options.pause_game" : "Pause game (singleplayer only)"
 }

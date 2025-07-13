@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "nitsha_binds",
+  "id": "${id}",
   "version": "${version}",
   "name": "Nitsha's FastBind",
   "description": "Adds a menu with customizable buttons that can be programmed to execute various in-game commands.",
@@ -8,11 +8,12 @@
     "Nitsha_M"
   ],
   "contact": {
-    "homepage" : "https://t.me/nitsha_m"
+    "homepage" : "https://modrinth.com/mod/nitshas-fastbind",
+    "issues": "https://github.com/Nitsha-M/Nitsha-s-FastBind/issues"
   },
-  "license": "All-Rights-Reserved",
+  "license": "MIT",
   "icon": "assets/nitsha_binds/icon.png",
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
     "client": [
       "com.nitsha.binds.client.MainClassClient"
@@ -25,14 +26,14 @@
     "nitsha_binds.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric": "*",
-    "minecraft": "${minecraft_version}"
+    "fabricloader": ">=${fabricloader}",
+    "fabric": "${fabricapi}",
+    "minecraft": "${minecraft}"
   },
   "custom": {
     "modmenu": {
       "links": {
-        "modmenu.discord": "https://discord.com/users/533592008762064896"
+        "modmenu.discord": "https://discord.gg/zuwPkg5MHs"
       }
     }
   }

@@ -1,11 +1,12 @@
 package com.nitsha.binds;
 
 import com.nitsha.binds.configs.KeyBinds;
-import com.nitsha.binds.gui.BindsConfig;
+import com.nitsha.binds.configs.BindsConfig;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
@@ -17,6 +18,9 @@ import org.slf4j.LoggerFactory;
 public class MainClass implements ModInitializer {
     public static final String MOD_ID = "nitsha_binds";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final String MOD_VERSION = FabricLoader.getInstance().getModContainer(MOD_ID)
+                                            .map(mod -> mod.getMetadata().getVersion().getFriendlyString())
+                                            .orElse("Unknown");
 
     @Override
     public void onInitialize() {

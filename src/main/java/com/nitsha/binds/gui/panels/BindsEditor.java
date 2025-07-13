@@ -93,11 +93,9 @@ public class BindsEditor extends Screen {
     private AnimatedWindow iconsH;
     private IconSelector selector;
 
-    private boolean showNavButton = false;
-
     private final List<AnimatedWindow> animWindows = new ArrayList<>();
 
-    private int coeff = 200;
+    private final int coeff = 200;
 
     public BindsEditor() {
         super(NarratorManager.EMPTY);
@@ -108,6 +106,7 @@ public class BindsEditor extends Screen {
 
     protected void init() {
         super.init();
+        animWindows.clear();
         this.centerX = (this.width / 2) - (TEXTURE_WIDTH / 2);
         this.centerY = (this.height - TEXTURE_HEIGHT) / 2;
 
@@ -319,6 +318,11 @@ public class BindsEditor extends Screen {
             updatePage(1);
             return true;
         }
+        for (AnimatedWindow window : animWindows) {
+            if (window.keyPressed(keyCode, scanCode, modifiers)) {
+                return true;
+            }
+        }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
@@ -446,7 +450,6 @@ public class BindsEditor extends Screen {
             this.setMaxLength(length);
             this.setPlaceholder(Text.of(placeholder));
         }
-
 
         //? if >1.20.2 {
         public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {

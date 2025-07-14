@@ -1,9 +1,42 @@
-![Nitsha's FastBind](https://cdn.modrinth.com/data/cached_images/62f3ac676d1e1da1341d49c5a1485b3d65d58ada.png)
+![Nitsha's FastBind](https://cdn.modrinth.com/data/cached_images/39f0531ea927496960c31a51b68b569a5fab17a6.png)
+
+<p align="center">
+  <span><strong>Version 2.0 is now available!</strong></span>
+</p>
+<p align="center">
+    <a href="https://discord.gg/zuwPkg5MHs">
+        <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v2.0-1.21.3/assets/discord.png" width="200">
+    </a>
+    <a href="https://www.patreon.com/c/nitsha">
+        <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v2.0-1.21.3/assets/patreon.png" width="200">
+    </a>
+    <a href="https://modrinth.com/mod/nitshas-fastbind">
+        <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v2.0-1.21.3/assets/modrinth.png" width="200">
+    </a>
+    <a href="">
+        <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v2.0-1.21.3/assets/curseforge.png" width="200">
+    </a>
+</p>
+<hr class="solid">
 
 Adds a menu with buttons to which you can bind any in-game command.
 
-At the moment, only one command can be assigned to each button, but the functionality will be expanded in version 2.0!
-# How to use
+## New in 2.0 update
+* Added a greater variety of icons — from just 21 in version 1.0 to over 1500 (depending on Minecraft version)
+* Full support for Minecraft versions 1.20.x–1.21.x. I wanted also 1.19.x support, but this requires a lot of code rewriting. Maybe in future, who knows.
+* Configuration menu was fully redesigned! New, fresh design with simple animations.May contain some bugs. If so, feel free to open issue! <3
+
+<p align="center">
+  <img src="https://cdn.modrinth.com/data/cached_images/db61fa22b85f00817639f56c98f0e4e161a8ebb0.gif" width="400">
+</p>
+
+## How to use
+![How to use](https://cdn.modrinth.com/data/cached_images/532961e78990d7aa8d59b7d995228ccb1f06451d.png)
 By default, the **FastBind** menu opens while you are pressing the `F8` key. You can switch pages using the `F7` and `F9` keys. (each key bind can be changed in the options)
 
-![Customize each button however you like.](https://cdn.modrinth.com/data/cached_images/e744e19a3b41d0a0a230c77cff753064bdffdae5.png)
+## Customization
+![Customize each button](https://cdn.modrinth.com/data/cached_images/90a837084f4ba29645dc9133b8daee54e44ef96a.png)
+
+A large variety of icons based on in-game items. Choose whatever you like — all items are grouped into categories for your convenience.
+
+![A large variety of icons](https://cdn.modrinth.com/data/cached_images/9fd7d30b2d49eb9da998de14f33f79abfaa58b37.png)

@@ -13,7 +13,7 @@
     <a href="https://modrinth.com/mod/nitshas-fastbind">
         <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v2.0-1.21.3/assets/modrinth.png" width="200">
     </a>
-    <a href="">
+    <a href="https://www.curseforge.com/minecraft/mc-mods/nitshas-fastbind">
         <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v2.0-1.21.3/assets/curseforge.png" width="200">
     </a>
 </p>

@@ -18,11 +18,8 @@
   "nitsha.binds.untitled" : "Без названия",
   "nitsha.binds.list" : "Выбор бинда",
   "nitsha.binds.empty" : "Не назначено",
+  "nitsha.binds.iconSelector" : "Выбор иконки",
 
-
-
-  "nitsha.nodes.options.grid" : "Привязка к сетке",
-  "nitsha.nodes.options.background" : "Прозрачный фон",
-  "nitsha.nodes.options.background_blur" : "Размыть фон",
-  "nitsha.nodes.options.pause_game" : "Останавливать игру (только в одиночной игре)"
+  "nitsha.binds.selectPreset" : "Выбор пресета",
+  "nitsha.binds.renamePreset" : "Имя пресета"
 }

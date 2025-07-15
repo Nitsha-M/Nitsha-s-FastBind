@@ -18,10 +18,8 @@
   "nitsha.binds.untitled" : "Untitled",
   "nitsha.binds.list" : "List of binds",
   "nitsha.binds.empty" : "Empty",
+  "nitsha.binds.iconSelector" : "Icon selector",
 
-
-  "nitsha.nodes.options.grid" : "Snap to grid",
-  "nitsha.nodes.options.background" : "Transparent background",
-  "nitsha.nodes.options.background_blur" : "Background blur",
-  "nitsha.nodes.options.pause_game" : "Pause game (singleplayer only)"
+  "nitsha.binds.selectPreset" : "Select preset",
+  "nitsha.binds.renamePreset" : "Rename preset"
 }

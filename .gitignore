@@ -35,6 +35,7 @@ bin/
 *.zip
 *.tar.gz
 *.rar
+.env
 
 
 !gradle-wrapper.jar

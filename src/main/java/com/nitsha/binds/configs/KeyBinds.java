@@ -20,17 +20,17 @@ public class KeyBinds {
                 "category.nitsha.binds"
         ));
 
-        PREV_PAGE = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.nitsha.prev_page",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_F7,
-                "category.nitsha.binds"
-        ));
-
         NEXT_PAGE = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.nitsha.next_page",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_F9,
+                "category.nitsha.binds"
+        ));
+
+        PREV_PAGE = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.nitsha.prev_page",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_F7,
                 "category.nitsha.binds"
         ));
     }

@@ -25,7 +25,7 @@ public class BedrockButton extends ClickableWidget {
 
     private float yOffset = 0;
     private float targetOffset = 0;
-    private float speed = 0.3f;
+    private float speed = 0.8f;
     private int btnColor;
     private int btnHoverColor;
     private int textColor;

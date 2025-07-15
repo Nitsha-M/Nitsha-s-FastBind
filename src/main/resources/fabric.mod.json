@@ -26,9 +26,9 @@
     "nitsha_binds.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${fabricloader}",
-    "fabric": "${fabricapi}",
-    "minecraft": "${minecraft}"
+    "fabricloader": ">=0.15.11",
+    "fabric": "*",
+    "minecraft": "^${minecraft}"
   },
   "custom": {
     "modmenu": {

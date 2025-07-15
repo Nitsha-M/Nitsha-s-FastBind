@@ -5,6 +5,7 @@ import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.MainClass;
 import com.nitsha.binds.configs.BindsConfig;
 import com.nitsha.binds.configs.KeyBinds;
+import com.nitsha.binds.gui.BindsGUI;
 import com.nitsha.binds.gui.widget.AnimatedWindow;
 import com.nitsha.binds.gui.widget.ItemButton;
 import com.nitsha.binds.gui.GUIUtils;
@@ -14,6 +15,7 @@ import com.nitsha.binds.gui.widget.BedrockIconButton;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
@@ -22,9 +24,11 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -32,6 +36,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class BindsEditor extends Screen {
     private static final Identifier BACKGROUND = MainClass.id("textures/gui/test/editor_bg.png");
@@ -71,12 +76,14 @@ public class BindsEditor extends Screen {
 
     private TextFieldWidget bindNameField;
     private TextFieldWidget commandField;
+    private TextFieldWidget presetName;
 
     private TexturedButtonWidget closeBtn;
     private BedrockButton saveBtn;
     private BedrockIconButton copyBtn;
     private BedrockIconButton pasteBtn;
     private BedrockIconButton deleteBtn;
+    private BedrockButton savePrsBtn;
 
     private int centerX;
     private int centerY;
@@ -97,13 +104,18 @@ public class BindsEditor extends Screen {
     private TexturedButtonWidget random;
 
     private AnimatedWindow mainW;
+    private AnimatedWindow presetW;
     private AnimatedWindow bindsW;
     private AnimatedWindow iconsH;
     private IconSelector selector;
 
     private final List<AnimatedWindow> animWindows = new ArrayList<>();
+    private final List<BedrockButton> prsBtns = new ArrayList<>();
+    private final List<String> presetNames = (List<String>) BindsConfig.configs.get("presets");
 
     private final int coeff = 200;
+
+    private int currentPreset = BindsGUI.presetNum;
 
     public BindsEditor() {
         super(NarratorManager.EMPTY);
@@ -115,12 +127,14 @@ public class BindsEditor extends Screen {
     protected void init() {
         super.init();
         animWindows.clear();
+        prsBtns.clear();
         this.centerX = (this.width / 2) - (TEXTURE_WIDTH / 2);
         this.centerY = (this.height - TEXTURE_HEIGHT) / 2;
 
         isSelectorOpened = selectorOpening = false;
 
         createMainW();
+        createPresetW();
         createBindsW();
         createIconSelector();
         selectBind();
@@ -139,8 +153,8 @@ public class BindsEditor extends Screen {
         this.bindNameField = new TextField(this.textRenderer, 4, 106, 105, 20, 20,"", Text.translatable("nitsha.binds.name").getString());
         this.commandField = new TextField(this.textRenderer, 4, 142, 133, 20, Integer.MAX_VALUE,"", Text.translatable("nitsha.binds.command_example").getString());
 
-        this.editIconBtn = new ItemButton(111, 103, ItemsMapper.getItemStack(BindsConfig.getBind(activeBind)[1]), this::openIconsSelector, ITEMS_EDIT, "");
-        this.saveBtn = new BedrockButton("Save", 4, 164, 67, 20, this::saveBind);
+        this.editIconBtn = new ItemButton(111, 103, ItemsMapper.getItemStack(BindsConfig.getBind(currentPreset, activeBind)[1]), this::openIconsSelector, ITEMS_EDIT, "");
+        this.saveBtn = new BedrockButton(Text.translatable("nitsha.binds.save_bind").getString(), 4, 164, 67, 20, this::saveBind);
         this.copyBtn = new BedrockIconButton(73, 164, 20, 20, "copy", true, this::copyBind);
         this.pasteBtn = new BedrockIconButton(95, 164, 20, 20, "paste", false, this::pasteBind, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
         this.deleteBtn = new BedrockIconButton(117, 164, 20, 20, "delete", true, this::deleteBind, 0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF);
@@ -157,6 +171,62 @@ public class BindsEditor extends Screen {
         animWindows.add(this.mainW);
         this.mainW.open(() -> {});
         this.addDrawableChild(this.mainW);
+    }
+
+    public void createPresetW() {
+        this.presetW = new AnimatedWindow(96, 140, centerX - 118, centerY + ((TEXTURE_HEIGHT - 140) / 2), BACKGROUND, BACKGROUND_FLAT, 4);
+        this.presetW.addDrawElement(drawContext -> {
+            drawContext.drawText(textRenderer, Text.translatable("nitsha.binds.selectPreset").getString(), 5, 5, 0xFF212121, false);
+            drawContext.drawText(textRenderer, Text.translatable("nitsha.binds.renamePreset").getString(), 5, 83, 0xFF212121, false);
+        });
+
+        // Поля ввода
+        this.presetName = new TextField(this.textRenderer, 4, 92, 88, 20, 20, "", Text.translatable("nitsha.binds.name").getString());
+        this.presetName.setText(presetNames.get(currentPreset));
+
+        this.savePrsBtn = new BedrockButton(Text.translatable("nitsha.binds.save_bind").getString(), 4, 114, 88, 20, () -> {
+            String getName = this.presetName.getText();
+            String newName = (getName.isEmpty()) ? "Default" : getName;
+            BindsConfig.setNewPresetName(currentPreset, newName);
+            this.presetName.setText(newName);
+        });
+
+        this.presetW.addElement(this.presetName);
+        this.presetW.addElement(this.savePrsBtn);
+
+        int startX = 4;
+        int startY = 15;
+
+        for (int i = 0; i < 9; i++) {
+            int row = i / 3;
+            int col = i % 3;
+            int bx = startX + col * 30;
+            int by = startY + row * 22;
+
+            int finalI = i;
+            BedrockButton prs = new BedrockButton(String.valueOf(i + 1), bx, by, 28, 20, true, () -> {
+                this.selectPreset(finalI);
+                for (BedrockButton btn : prsBtns) { btn.setPressed(false); }
+                prsBtns.get(finalI).setPressed(true);
+            });
+            if (i == this.currentPreset) prs.setPressed(true);
+            prsBtns.add(prs);
+
+            this.presetW.addElement(prs);
+        }
+
+        animWindows.add(this.presetW);
+        this.presetW.open(() -> {});
+        this.addDrawableChild(this.presetW);
+    }
+
+    private void selectPreset(int i) {
+        currentPreset = i;
+        currentPage = 0;
+        activeBind = 0;
+        presetName.setText(presetNames.get(currentPreset));
+        generateButtons(7, 31);
+        this.selectBind();
     }
 
     public void createBindsW() {
@@ -207,7 +277,7 @@ public class BindsEditor extends Screen {
         });
         this.iconsH.addElement(random);
         this.iconsH.addDrawElement(drawCtx -> {
-            GUIUtils.addText(drawCtx, Text.of("Icon selector"), 140, 8, 10);
+            GUIUtils.addText(drawCtx, Text.translatable("nitsha.binds.iconSelector"), 140, 8, 10);
         });
         this.selector = new IconSelector(162, 126, centerX + 63, centerY + 36);
         animWindows.add(this.iconsH);
@@ -217,6 +287,7 @@ public class BindsEditor extends Screen {
     @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         mainW.render(ctx, mouseX, mouseY, delta);
+        presetW.render(ctx, mouseX, mouseY, delta);
         bindsW.render(ctx, mouseX, mouseY, delta);
         iconsH.render(ctx, mouseX, mouseY, delta);
         this.selector.render(ctx, mouseX, mouseY, delta);
@@ -345,8 +416,9 @@ public class BindsEditor extends Screen {
         selectorOpening = true;
 
         if (!isSelectorOpened) {
-            mainW.updateWidth(coeff);
-            bindsW.updateX(coeff / 2);
+            this.mainW.updateWidth(coeff);
+            this.bindsW.updateX(coeff / 2);
+            this.presetW.close(() -> {});
             this.selector.open(true);
             this.iconsH.open(() -> {
                 isSelectorOpened = true;
@@ -357,12 +429,13 @@ public class BindsEditor extends Screen {
             this.iconsH.close(() -> {
                 mainW.updateWidth(-coeff);
                 bindsW.updateX(-coeff / 2);
+                this.presetW.open(() -> {});
                 isSelectorOpened = false;
                 selectorOpening = false;
             });
         }
 
-        updateSelected(ItemsMapper.getItemStack(BindsConfig.getBind(activeBind)[1]));
+        updateSelected(ItemsMapper.getItemStack(BindsConfig.getBind(currentPreset, activeBind)[1]));
     }
 
     private void saveBind() {
@@ -370,20 +443,20 @@ public class BindsEditor extends Screen {
         if (!cmd.isEmpty()) {
             String bindName = bindNameField.getText().isEmpty() ? Text.translatable("nitsha.binds.untitled").getString() : bindNameField.getText();
             if (editIconBtnString.equals("STRUCTURE_VOID")) editIconBtnString = "GRASS";
-            BindsConfig.setBind(activeBind, new String[]{bindName, editIconBtnString, cmd});
+            BindsConfig.setBind(currentPreset, activeBind, new String[]{bindName, editIconBtnString, cmd});
             selectBind();
-            updateSelected(ItemsMapper.getItemStack(BindsConfig.getBind(activeBind)[1]));
+            updateSelected(ItemsMapper.getItemStack(BindsConfig.getBind(currentPreset, activeBind)[1]));
         }
     }
 
     private void deleteBind() {
-        BindsConfig.setBind(activeBind, new String[]{"", "STRUCTURE_VOID", ""});
+        BindsConfig.setBind(currentPreset, activeBind, new String[]{"", "STRUCTURE_VOID", ""});
         selectBind();
         updateSelected(new ItemStack(Items.STRUCTURE_VOID));
     }
 
     private void copyBind() {
-        String[] currentBind = BindsConfig.getBind(activeBind);
+        String[] currentBind = BindsConfig.getBind(currentPreset, activeBind);
         if(!currentBind[0].isEmpty()) {
             copied = currentBind;
             pasteBtn.setEnabled(true);
@@ -391,16 +464,16 @@ public class BindsEditor extends Screen {
     }
 
     private void pasteBind() {
-        BindsConfig.setBind(activeBind, copied);
+        BindsConfig.setBind(currentPreset, activeBind, copied);
         selectBind();
-        updateSelected(ItemsMapper.getItemStack(BindsConfig.getBind(activeBind)[1]));
+        updateSelected(ItemsMapper.getItemStack(BindsConfig.getBind(currentPreset, activeBind)[1]));
     }
 
     private void selectBind() {
-        String[] currentBind = BindsConfig.getBind(activeBind);
+        String[] currentBind = BindsConfig.getBind(currentPreset, activeBind);
         this.bindNameField.setText(currentBind[0]);
         this.commandField.setText(currentBind[2]);
-        editIconBtn.setIcon(ItemsMapper.getItemStack(BindsConfig.getBind(activeBind)[1]));
+        editIconBtn.setIcon(ItemsMapper.getItemStack(BindsConfig.getBind(currentPreset, activeBind)[1]));
         editIconBtnString = currentBind[1];
         IconSelector.updateButtons(currentBind[1]);
     }
@@ -424,7 +497,7 @@ public class BindsEditor extends Screen {
 
         for (int row = 0; row < 8; row++) {
             int bindIndex = row + (8 * currentPage);
-            String[] currentBind = BindsConfig.getBind(bindIndex);
+            String[] currentBind = BindsConfig.getBind(currentPreset, bindIndex);
 
             ItemButton[] buttonHolder = new ItemButton[1];
 

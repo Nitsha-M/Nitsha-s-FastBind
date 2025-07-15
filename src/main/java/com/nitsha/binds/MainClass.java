@@ -26,7 +26,9 @@ public class MainClass implements ModInitializer {
     public void onInitialize() {
         KeyBinds.register();
         ClientTickEvents.END_CLIENT_TICK.register(this::tick);
-        BindsConfig.loadConfig();
+        BindsConfig.migrateOldPresetFileIfExists();
+        BindsConfig.loadConfigs();
+        BindsConfig.loadPresets();
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("nitsha::welcome")
                     .executes(context -> {

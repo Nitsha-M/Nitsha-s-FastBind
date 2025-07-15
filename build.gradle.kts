@@ -1,6 +1,6 @@
 plugins {
     id("fabric-loom") version "1.10-SNAPSHOT"
-    id("maven-publish")
+    id("me.modmuss50.mod-publish-plugin") version "0.8.4"
 }
 
 class ModData {
@@ -13,8 +13,7 @@ val mod = ModData()
 
 version = "${mod.version}+${stonecutter.current.version}"
 group = mod.group
-
-base { archivesName.set(mod.id) }
+base.archivesName = mod.id as String
 
 repositories {
     mavenCentral()
@@ -61,23 +60,25 @@ dependencies {
     modApi("com.terraformersmc:modmenu:${findProperty("modmenu_version")}")
 }
 
+val javaversion = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
+    JavaVersion.VERSION_21 else JavaVersion.VERSION_17
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(javaversion.toString().toInt())
+}
+
 java {
     withSourcesJar()
-    val java = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
-        JavaVersion.VERSION_21 else JavaVersion.VERSION_17
-    targetCompatibility = java
-    sourceCompatibility = java
+
+    sourceCompatibility = javaversion
+    targetCompatibility = javaversion
 }
 
-var javaVer = "17"
-if (stonecutter.eval(stonecutter.current.version, ">=1.20.5")) {
-    javaVer = "21"
-}
-
-tasks.compileJava {
-    sourceCompatibility = "17"
-    targetCompatibility = javaVer
-    options.encoding = "UTF-8"
+tasks.register<Copy>("buildAndCollect") {
+    group = "build"
+    from(tasks.remapJar.get().archiveFile)
+    into(rootProject.layout.buildDirectory.file("libs/${mod.version}"))
+    dependsOn("build")
 }
 
 tasks.processResources {
@@ -87,19 +88,28 @@ tasks.processResources {
         put("minecraft", project.property("minecraft_version"))
         put("fabricloader", project.property("loader_version"))
         put("fabricapi", project.property("fabric_version"))
+        put("compatibility_level", "JAVA_${javaversion.ordinal + 1}")
     }
     filteringCharset = "UTF-8"
 
-    filesMatching("fabric.mod.json") { expand(props) }
+    filesMatching(listOf("fabric.mod.json", "*.mixins.json")) {
+        expand(props)
+    }
+    inputs.properties(props)
 }
 
-tasks.register<Copy>("copyJars") {
-    dependsOn(subprojects.map { it.tasks.named("build") })
-    from(subprojects.map { it.layout.buildDirectory.dir("libs") })
-    into(rootDir.resolve("build/all-jars"))
-    include("*.jar")
-}
+publishMods {
+    file = tasks.remapJar.get().archiveFile
+    changelog = file("../../changelog/${mod.version}.md").readText()
+    displayName = "Nitsha's FastBind ${mod.version} — MC${stonecutter.current.version}"
+    type = STABLE
+    version = "${mod.version}-${stonecutter.current.version}";
+    modLoaders.add("fabric")
 
-tasks.named("build") {
-    finalizedBy("copyJars")
+    modrinth {
+        projectId = "v0yaXjcg"
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        minecraftVersions.add(stonecutter.current.version)
+        requires("fabric-api")
+    }
 }

@@ -112,4 +112,11 @@ publishMods {
         minecraftVersions.add(stonecutter.current.version)
         requires("fabric-api")
     }
+
+    curseforge {
+        projectId = "1304893"
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        minecraftVersions.add(stonecutter.current.version)
+        requires("fabric-api")
+    }
 }

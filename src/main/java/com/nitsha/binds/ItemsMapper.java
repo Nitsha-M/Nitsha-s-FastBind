@@ -4,16 +4,18 @@ import net.minecraft.block.Blocks;
 //? if >=1.20.5 {
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.PotionContentsComponent;
-//?} else {
+import net.minecraft.registry.entry.RegistryEntry;
+//?} else if >=1.19.3 {
 /*import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
-*///?}
+*///?} else {
+/*import net.minecraft.potion.PotionUtil;*/
+//? }
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.Potions;
-import net.minecraft.registry.entry.RegistryEntry;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -42,17 +44,25 @@ public class ItemsMapper {
         map.put("PODZOL", new ItemStack(Blocks.PODZOL));
         map.put("DIRT", new ItemStack(Blocks.DIRT));
         map.put("COARSE_DIRT", new ItemStack(Blocks.COARSE_DIRT));
+        //? if >=1.17 {
         map.put("ROOTED_DIRT", new ItemStack(Blocks.ROOTED_DIRT));
         map.put("DIRT_PATH", new ItemStack(Blocks.DIRT_PATH));
+        //? }
         map.put("FARMLAND", new ItemStack(Blocks.FARMLAND));
+        //? if >=1.19 {
         map.put("MUD", new ItemStack(Blocks.MUD));
         map.put("PACKED_MUD", new ItemStack(Blocks.PACKED_MUD));
+        //? }
         map.put("CLAY", new ItemStack(Blocks.CLAY));
         map.put("GRAVEL", new ItemStack(Blocks.GRAVEL));
+        //? if >=1.20 {
         map.put("SUSPICIOUS_GRAVEL", new ItemStack(Blocks.SUSPICIOUS_GRAVEL));
+        //? }
         map.put("SAND", new ItemStack(Blocks.SAND));
         map.put("RED_SAND", new ItemStack(Blocks.RED_SAND));
+        //? if >=1.19.4 {
         map.put("SUSPICIOUS_SAND", new ItemStack(Blocks.SUSPICIOUS_SAND));
+        //? }
         map.put("SOUL_SAND", new ItemStack(Blocks.SOUL_SAND));
         map.put("SOUL_SOIL", new ItemStack(Blocks.SOUL_SOIL));
 
@@ -73,6 +83,7 @@ public class ItemsMapper {
         map.put("ANDESITE", new ItemStack(Blocks.ANDESITE));
         map.put("POLISHED_ANDESITE", new ItemStack(Blocks.POLISHED_ANDESITE));
 
+        //? if >=1.17 {
         map.put("DEEPSLATE", new ItemStack(Blocks.DEEPSLATE));
         map.put("COBBLED_DEEPSLATE", new ItemStack(Blocks.COBBLED_DEEPSLATE));
         map.put("POLISHED_DEEPSLATE", new ItemStack(Blocks.POLISHED_DEEPSLATE));
@@ -83,6 +94,7 @@ public class ItemsMapper {
         map.put("CHISELED_DEEPSLATE", new ItemStack(Blocks.CHISELED_DEEPSLATE));
 
         map.put("TUFF", new ItemStack(Blocks.TUFF));
+        //? }
         //? if >=1.20.3 {
         map.put("POLISHED_TUFF", new ItemStack(Blocks.POLISHED_TUFF));
         map.put("TUFF_BRICKS", new ItemStack(Blocks.TUFF_BRICKS));
@@ -107,7 +119,9 @@ public class ItemsMapper {
         map.put("CHISELED_NETHER_BRICKS", new ItemStack(Blocks.CHISELED_NETHER_BRICKS));
         map.put("CRACKED_NETHER_BRICKS", new ItemStack(Blocks.CRACKED_NETHER_BRICKS));
         map.put("BASALT", new ItemStack(Blocks.BASALT));
+        //? if >=1.17 {
         map.put("SMOOTH_BASALT", new ItemStack(Blocks.SMOOTH_BASALT));
+        //? }
         map.put("POLISHED_BASALT", new ItemStack(Blocks.POLISHED_BASALT));
         map.put("BLACKSTONE", new ItemStack(Blocks.BLACKSTONE));
         map.put("POLISHED_BLACKSTONE", new ItemStack(Blocks.POLISHED_BLACKSTONE));
@@ -123,8 +137,12 @@ public class ItemsMapper {
 
 // --- Кирпичи, Призмарин и Декорации ---
         map.put("BRICKS", new ItemStack(Blocks.BRICKS));
+        //? if >=1.19 {
         map.put("MUD_BRICKS", new ItemStack(Blocks.MUD_BRICKS));
+        //? }
+        //? if >=1.19.4 {
         map.put("DECORATED_POT", new ItemStack(Blocks.DECORATED_POT));
+        //? }
         map.put("PRISMARINE", new ItemStack(Blocks.PRISMARINE));
         map.put("PRISMARINE_BRICKS", new ItemStack(Blocks.PRISMARINE_BRICKS));
         map.put("DARK_PRISMARINE", new ItemStack(Blocks.DARK_PRISMARINE));
@@ -132,14 +150,16 @@ public class ItemsMapper {
 
 // --- Природные минералы и ресурсы ---
         map.put("COAL_BLOCK", new ItemStack(Blocks.COAL_BLOCK));
+        //? if >=1.17 {
         map.put("RAW_IRON_BLOCK", new ItemStack(Blocks.RAW_IRON_BLOCK));
         map.put("RAW_GOLD_BLOCK", new ItemStack(Blocks.RAW_GOLD_BLOCK));
         map.put("CALCITE", new ItemStack(Blocks.CALCITE));
         map.put("AMETHYST_BLOCK", new ItemStack(Blocks.AMETHYST_BLOCK));
         map.put("BUDDING_AMETHYST", new ItemStack(Blocks.BUDDING_AMETHYST));
-        map.put("LARGE_AMETHYST_BUD", new ItemStack(Blocks.LARGE_AMETHYST_BUD));
         map.put("MEDIUM_AMETHYST_BUD", new ItemStack(Blocks.MEDIUM_AMETHYST_BUD));
+        map.put("LARGE_AMETHYST_BUD", new ItemStack(Blocks.LARGE_AMETHYST_BUD));
         map.put("SMALL_AMETHYST_BUD", new ItemStack(Blocks.AMETHYST_CLUSTER));
+        //? }
         map.put("BONE_BLOCK", new ItemStack(Blocks.BONE_BLOCK));
         map.put("OBSIDIAN", new ItemStack(Blocks.OBSIDIAN));
         map.put("CRYING_OBSIDIAN", new ItemStack(Blocks.CRYING_OBSIDIAN));
@@ -153,7 +173,9 @@ public class ItemsMapper {
         map.put("COBBLESTONE_WALL", new ItemStack(Blocks.COBBLESTONE_WALL));
         map.put("MOSSY_COBBLESTONE_WALL", new ItemStack(Blocks.MOSSY_COBBLESTONE_WALL));
         map.put("BRICK_WALL", new ItemStack(Blocks.BRICK_WALL));
+        //? if >=1.19 {
         map.put("MUD_BRICK_WALL", new ItemStack(Blocks.MUD_BRICK_WALL));
+        //? }
         map.put("STONE_BRICK_WALL", new ItemStack(Blocks.STONE_BRICK_WALL));
         map.put("MOSSY_STONE_BRICK_WALL", new ItemStack(Blocks.MOSSY_STONE_BRICK_WALL));
         map.put("GRANITE_WALL", new ItemStack(Blocks.GRANITE_WALL));
@@ -168,10 +190,12 @@ public class ItemsMapper {
         map.put("BLACKSTONE_WALL", new ItemStack(Blocks.BLACKSTONE_WALL));
         map.put("POLISHED_BLACKSTONE_WALL", new ItemStack(Blocks.POLISHED_BLACKSTONE_WALL));
         map.put("POLISHED_BLACKSTONE_BRICK_WALL", new ItemStack(Blocks.POLISHED_BLACKSTONE_BRICK_WALL));
+        //? if >=1.17 {
         map.put("COBBLED_DEEPSLATE_WALL", new ItemStack(Blocks.COBBLED_DEEPSLATE_WALL));
         map.put("POLISHED_DEEPSLATE_WALL", new ItemStack(Blocks.POLISHED_DEEPSLATE_WALL));
         map.put("DEEPSLATE_BRICK_WALL", new ItemStack(Blocks.DEEPSLATE_BRICK_WALL));
         map.put("DEEPSLATE_TILE_WALL", new ItemStack(Blocks.DEEPSLATE_TILE_WALL));
+        //? }
         //? if >=1.20.3 {
         map.put("TUFF_WALL", new ItemStack(Blocks.TUFF_WALL));
         map.put("POLISHED_TUFF_WALL", new ItemStack(Blocks.POLISHED_TUFF_WALL));
@@ -180,7 +204,9 @@ public class ItemsMapper {
 
 // --- Прочие тематические блоки ---
         map.put("BEDROCK", new ItemStack(Blocks.BEDROCK));
+        //? if >=1.17 {
         map.put("TINTED_GLASS", new ItemStack(Blocks.TINTED_GLASS));
+        //? }
         map.put("ANVIL", new ItemStack(Blocks.ANVIL));
         map.put("STONECUTTER", new ItemStack(Blocks.STONECUTTER));
 
@@ -190,146 +216,216 @@ public class ItemsMapper {
         map.put("BIRCH_LOG", new ItemStack(Blocks.BIRCH_LOG));
         map.put("JUNGLE_LOG", new ItemStack(Blocks.JUNGLE_LOG));
         map.put("ACACIA_LOG", new ItemStack(Blocks.ACACIA_LOG));
+        //? if >=1.19.4 {
         map.put("CHERRY_LOG", new ItemStack(Blocks.CHERRY_LOG));
+        //? }
         map.put("DARK_OAK_LOG", new ItemStack(Blocks.DARK_OAK_LOG));
         //? if >=1.21.2 {
         map.put("PALE_OAK_LOG", new ItemStack(Blocks.PALE_OAK_LOG));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_LOG", new ItemStack(Blocks.MANGROVE_LOG));
         map.put("MANGROVE_ROOTS", new ItemStack(Blocks.MANGROVE_ROOTS));
         map.put("MUDDY_MANGROVE_ROOTS", new ItemStack(Blocks.MUDDY_MANGROVE_ROOTS));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_BLOCK", new ItemStack(Blocks.BAMBOO_BLOCK));
+        //? }
         map.put("STRIPPED_SPRUCE_LOG", new ItemStack(Blocks.STRIPPED_SPRUCE_LOG));
         map.put("STRIPPED_BIRCH_LOG", new ItemStack(Blocks.STRIPPED_BIRCH_LOG));
         map.put("STRIPPED_JUNGLE_LOG", new ItemStack(Blocks.STRIPPED_JUNGLE_LOG));
         map.put("STRIPPED_ACACIA_LOG", new ItemStack(Blocks.STRIPPED_ACACIA_LOG));
+        //? if >=1.19.4 {
         map.put("STRIPPED_CHERRY_LOG", new ItemStack(Blocks.STRIPPED_CHERRY_LOG));
+        //? }
         map.put("STRIPPED_DARK_OAK_LOG", new ItemStack(Blocks.STRIPPED_DARK_OAK_LOG));
         //? if >=1.21.2 {
         map.put("STRIPPED_PALE_OAK_LOG", new ItemStack(Blocks.STRIPPED_PALE_OAK_LOG));
         //?}
         map.put("STRIPPED_OAK_LOG", new ItemStack(Blocks.STRIPPED_OAK_LOG));
+        //? if >=1.19 {
         map.put("STRIPPED_MANGROVE_LOG", new ItemStack(Blocks.STRIPPED_MANGROVE_LOG));
+        //? }
+        //? if >=1.19.3 {
         map.put("STRIPPED_BAMBOO_BLOCK", new ItemStack(Blocks.STRIPPED_BAMBOO_BLOCK));
+        //? }
         map.put("OAK_WOOD", new ItemStack(Blocks.OAK_WOOD));
         map.put("SPRUCE_WOOD", new ItemStack(Blocks.SPRUCE_WOOD));
         map.put("BIRCH_WOOD", new ItemStack(Blocks.BIRCH_WOOD));
         map.put("JUNGLE_WOOD", new ItemStack(Blocks.JUNGLE_WOOD));
         map.put("ACACIA_WOOD", new ItemStack(Blocks.ACACIA_WOOD));
+        //? if >=1.19.4 {
         map.put("CHERRY_WOOD", new ItemStack(Blocks.CHERRY_WOOD));
+        //? }
         map.put("DARK_OAK_WOOD", new ItemStack(Blocks.DARK_OAK_WOOD));
+        //? if >=1.19 {
         map.put("MANGROVE_WOOD", new ItemStack(Blocks.MANGROVE_WOOD));
+        //? }
         map.put("STRIPPED_OAK_WOOD", new ItemStack(Blocks.STRIPPED_OAK_WOOD));
         map.put("STRIPPED_SPRUCE_WOOD", new ItemStack(Blocks.STRIPPED_SPRUCE_WOOD));
         map.put("STRIPPED_BIRCH_WOOD", new ItemStack(Blocks.STRIPPED_BIRCH_WOOD));
         map.put("STRIPPED_JUNGLE_WOOD", new ItemStack(Blocks.STRIPPED_JUNGLE_WOOD));
         map.put("STRIPPED_ACACIA_WOOD", new ItemStack(Blocks.STRIPPED_ACACIA_WOOD));
+        //? if >=1.19.4 {
         map.put("STRIPPED_CHERRY_WOOD", new ItemStack(Blocks.STRIPPED_CHERRY_WOOD));
+        //? }
         map.put("STRIPPED_DARK_OAK_WOOD", new ItemStack(Blocks.STRIPPED_DARK_OAK_WOOD));
         //? if >=1.21.2 {
         map.put("STRIPPED_PALE_OAK_WOOD", new ItemStack(Blocks.STRIPPED_PALE_OAK_WOOD));
         //?}
+        //? if >=1.19 {
         map.put("STRIPPED_MANGROVE_WOOD", new ItemStack(Blocks.STRIPPED_MANGROVE_WOOD));
+        //? }
         map.put("OAK_PLANKS", new ItemStack(Blocks.OAK_PLANKS));
         map.put("SPRUCE_PLANKS", new ItemStack(Blocks.SPRUCE_PLANKS));
         map.put("BIRCH_PLANKS", new ItemStack(Blocks.BIRCH_PLANKS));
         map.put("JUNGLE_PLANKS", new ItemStack(Blocks.JUNGLE_PLANKS));
         map.put("ACACIA_PLANKS", new ItemStack(Blocks.ACACIA_PLANKS));
+        //? if >=1.19.4 {
         map.put("CHERRY_PLANKS", new ItemStack(Blocks.CHERRY_PLANKS));
+        //? }
         map.put("DARK_OAK_PLANKS", new ItemStack(Blocks.DARK_OAK_PLANKS));
         //? if >=1.21.2 {
         map.put("PALE_OAK_WOOD", new ItemStack(Blocks.PALE_OAK_WOOD));
         map.put("PALE_OAK_PLANKS", new ItemStack(Blocks.PALE_OAK_PLANKS));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_PLANKS", new ItemStack(Blocks.MANGROVE_PLANKS));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_PLANKS", new ItemStack(Blocks.BAMBOO_PLANKS));
         map.put("BAMBOO_MOSAIC", new ItemStack(Blocks.BAMBOO_MOSAIC));
+        //? }
         map.put("OAK_SIGN", new ItemStack(Blocks.OAK_SIGN));
         map.put("SPRUCE_SIGN", new ItemStack(Blocks.SPRUCE_SIGN));
         map.put("BIRCH_SIGN", new ItemStack(Blocks.BIRCH_SIGN));
         map.put("ACACIA_SIGN", new ItemStack(Blocks.ACACIA_SIGN));
+        //? if >=1.19.4 {
         map.put("CHERRY_SIGN", new ItemStack(Blocks.CHERRY_SIGN));
+        //? }
         map.put("JUNGLE_SIGN", new ItemStack(Blocks.JUNGLE_SIGN));
         map.put("DARK_OAK_SIGN", new ItemStack(Blocks.DARK_OAK_SIGN));
         //? if >=1.21.2 {
         map.put("PALE_OAK_SIGN", new ItemStack(Blocks.PALE_OAK_SIGN));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_SIGN", new ItemStack(Blocks.MANGROVE_SIGN));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_SIGN", new ItemStack(Blocks.BAMBOO_SIGN));
         map.put("OAK_HANGING_SIGN", new ItemStack(Blocks.OAK_HANGING_SIGN));
         map.put("SPRUCE_HANGING_SIGN", new ItemStack(Blocks.SPRUCE_HANGING_SIGN));
         map.put("BIRCH_HANGING_SIGN", new ItemStack(Blocks.BIRCH_HANGING_SIGN));
         map.put("ACACIA_HANGING_SIGN", new ItemStack(Blocks.ACACIA_HANGING_SIGN));
+        //? }
+        //? if >=1.19.4 {
         map.put("CHERRY_HANGING_SIGN", new ItemStack(Blocks.CHERRY_HANGING_SIGN));
+        //? }
+        //? if >=1.19.3 {
         map.put("JUNGLE_HANGING_SIGN", new ItemStack(Blocks.JUNGLE_HANGING_SIGN));
         map.put("DARK_OAK_HANGING_SIGN", new ItemStack(Blocks.DARK_OAK_HANGING_SIGN));
+        //? }
         //? if >=1.21.2 {
         map.put("PALE_OAK_HANGING_SIGN", new ItemStack(Blocks.PALE_OAK_HANGING_SIGN));
         //?}
+        //? if >=1.19.3 {
         map.put("CRIMSON_HANGING_SIGN", new ItemStack(Blocks.CRIMSON_HANGING_SIGN));
         map.put("WARPED_HANGING_SIGN", new ItemStack(Blocks.WARPED_HANGING_SIGN));
+        //? if >=1.19 {
         map.put("MANGROVE_HANGING_SIGN", new ItemStack(Blocks.MANGROVE_HANGING_SIGN));
+        //? }
         map.put("BAMBOO_HANGING_SIGN", new ItemStack(Blocks.BAMBOO_HANGING_SIGN));
+        //? }
         map.put("OAK_PRESSURE_PLATE", new ItemStack(Blocks.OAK_PRESSURE_PLATE));
         map.put("SPRUCE_PRESSURE_PLATE", new ItemStack(Blocks.SPRUCE_PRESSURE_PLATE));
         map.put("BIRCH_PRESSURE_PLATE", new ItemStack(Blocks.BIRCH_PRESSURE_PLATE));
         map.put("JUNGLE_PRESSURE_PLATE", new ItemStack(Blocks.JUNGLE_PRESSURE_PLATE));
         map.put("ACACIA_PRESSURE_PLATE", new ItemStack(Blocks.ACACIA_PRESSURE_PLATE));
+        //? if >=1.19.4 {
         map.put("CHERRY_PRESSURE_PLATE", new ItemStack(Blocks.CHERRY_PRESSURE_PLATE));
+        //? }
         map.put("DARK_OAK_PRESSURE_PLATE", new ItemStack(Blocks.DARK_OAK_PRESSURE_PLATE));
         //? if >=1.21.2 {
         map.put("PALE_OAK_PRESSURE_PLATE", new ItemStack(Blocks.PALE_OAK_PRESSURE_PLATE));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_PRESSURE_PLATE", new ItemStack(Blocks.MANGROVE_PRESSURE_PLATE));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_PRESSURE_PLATE", new ItemStack(Blocks.BAMBOO_PRESSURE_PLATE));
+        //? }
         map.put("OAK_TRAPDOOR", new ItemStack(Blocks.OAK_TRAPDOOR));
         map.put("SPRUCE_TRAPDOOR", new ItemStack(Blocks.SPRUCE_TRAPDOOR));
         map.put("BIRCH_TRAPDOOR", new ItemStack(Blocks.BIRCH_TRAPDOOR));
         map.put("JUNGLE_TRAPDOOR", new ItemStack(Blocks.JUNGLE_TRAPDOOR));
         map.put("ACACIA_TRAPDOOR", new ItemStack(Blocks.ACACIA_TRAPDOOR));
+        //? if >=1.19.4 {
         map.put("CHERRY_TRAPDOOR", new ItemStack(Blocks.CHERRY_TRAPDOOR));
+        //? }
         map.put("DARK_OAK_TRAPDOOR", new ItemStack(Blocks.DARK_OAK_TRAPDOOR));
         //? if >=1.21.2 {
         map.put("PALE_OAK_TRAPDOOR", new ItemStack(Blocks.PALE_OAK_TRAPDOOR));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_TRAPDOOR", new ItemStack(Blocks.MANGROVE_TRAPDOOR));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_TRAPDOOR", new ItemStack(Blocks.BAMBOO_TRAPDOOR));
+        //? }
         map.put("OAK_BUTTON", new ItemStack(Blocks.OAK_BUTTON));
         map.put("SPRUCE_BUTTON", new ItemStack(Blocks.SPRUCE_BUTTON));
         map.put("BIRCH_BUTTON", new ItemStack(Blocks.BIRCH_BUTTON));
         map.put("JUNGLE_BUTTON", new ItemStack(Blocks.JUNGLE_BUTTON));
         map.put("ACACIA_BUTTON", new ItemStack(Blocks.ACACIA_BUTTON));
+        //? if >=1.19.4 {
         map.put("CHERRY_BUTTON", new ItemStack(Blocks.CHERRY_BUTTON));
+        //? }
         map.put("DARK_OAK_BUTTON", new ItemStack(Blocks.DARK_OAK_BUTTON));
         //? if >=1.21.2 {
         map.put("PALE_OAK_BUTTON", new ItemStack(Blocks.PALE_OAK_BUTTON));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_BUTTON", new ItemStack(Blocks.MANGROVE_BUTTON));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_BUTTON", new ItemStack(Blocks.BAMBOO_BUTTON));
+        //? }
         map.put("OAK_DOOR", new ItemStack(Blocks.OAK_DOOR));
         map.put("SPRUCE_DOOR", new ItemStack(Blocks.SPRUCE_DOOR));
         map.put("BIRCH_DOOR", new ItemStack(Blocks.BIRCH_DOOR));
         map.put("JUNGLE_DOOR", new ItemStack(Blocks.JUNGLE_DOOR));
         map.put("ACACIA_DOOR", new ItemStack(Blocks.ACACIA_DOOR));
+        //? if >=1.19.4 {
         map.put("CHERRY_DOOR", new ItemStack(Blocks.CHERRY_DOOR));
+        //? }
         map.put("DARK_OAK_DOOR", new ItemStack(Blocks.DARK_OAK_DOOR));
         //? if >=1.21.2 {
         map.put("PALE_OAK_DOOR", new ItemStack(Blocks.PALE_OAK_DOOR));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_DOOR", new ItemStack(Blocks.MANGROVE_DOOR));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_DOOR", new ItemStack(Blocks.BAMBOO_DOOR));
+        //? }
         map.put("OAK_FENCE", new ItemStack(Blocks.OAK_FENCE));
         map.put("SPRUCE_FENCE", new ItemStack(Blocks.SPRUCE_FENCE));
         map.put("BIRCH_FENCE", new ItemStack(Blocks.BIRCH_FENCE));
         map.put("JUNGLE_FENCE", new ItemStack(Blocks.JUNGLE_FENCE));
         map.put("ACACIA_FENCE", new ItemStack(Blocks.ACACIA_FENCE));
+        //? if >=1.19.4 {
         map.put("CHERRY_FENCE", new ItemStack(Blocks.CHERRY_FENCE));
+        //? }
         map.put("DARK_OAK_FENCE", new ItemStack(Blocks.DARK_OAK_FENCE));
         //? if >=1.21.2 {
         map.put("PALE_OAK_FENCE", new ItemStack(Blocks.PALE_OAK_FENCE));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_FENCE", new ItemStack(Blocks.MANGROVE_FENCE));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_FENCE", new ItemStack(Blocks.BAMBOO_FENCE));
+        //? }
         map.put("CRIMSON_FENCE", new ItemStack(Blocks.CRIMSON_FENCE));
         map.put("WARPED_FENCE", new ItemStack(Blocks.WARPED_FENCE));
         map.put("NETHER_BRICK_FENCE", new ItemStack(Blocks.NETHER_BRICK_FENCE));
@@ -338,13 +434,19 @@ public class ItemsMapper {
         map.put("BIRCH_FENCE_GATE", new ItemStack(Blocks.BIRCH_FENCE_GATE));
         map.put("JUNGLE_FENCE_GATE", new ItemStack(Blocks.JUNGLE_FENCE_GATE));
         map.put("ACACIA_FENCE_GATE", new ItemStack(Blocks.ACACIA_FENCE_GATE));
+        //? if >=1.19.4 {
         map.put("CHERRY_FENCE_GATE", new ItemStack(Blocks.CHERRY_FENCE_GATE));
+        //? }
         map.put("DARK_OAK_FENCE_GATE", new ItemStack(Blocks.DARK_OAK_FENCE_GATE));
         //? if >=1.21.2 {
         map.put("PALE_OAK_FENCE_GATE", new ItemStack(Blocks.PALE_OAK_FENCE_GATE));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_FENCE_GATE", new ItemStack(Blocks.MANGROVE_FENCE_GATE));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_FENCE_GATE", new ItemStack(Blocks.BAMBOO_FENCE_GATE));
+        //? }
         map.put("CRIMSON_FENCE_GATE", new ItemStack(Blocks.CRIMSON_FENCE_GATE));
         map.put("WARPED_FENCE_GATE", new ItemStack(Blocks.WARPED_FENCE_GATE));
 
@@ -353,7 +455,9 @@ public class ItemsMapper {
         map.put("BOOKSHELF", new ItemStack(Blocks.BOOKSHELF));
         map.put("BOWL", new ItemStack(Items.BOWL));
         map.put("CARTOGRAPHY_TABLE", new ItemStack(Blocks.CARTOGRAPHY_TABLE));
+        //? if >=1.19.3 {
         map.put("CHISELED_BOOKSHELF", new ItemStack(Blocks.CHISELED_BOOKSHELF));
+        //? }
         map.put("COMPOSTER", new ItemStack(Blocks.COMPOSTER));
         map.put("CRIMSON_DOOR", new ItemStack(Blocks.CRIMSON_DOOR));
         map.put("CRIMSON_PLANKS", new ItemStack(Blocks.CRIMSON_PLANKS));
@@ -383,14 +487,20 @@ public class ItemsMapper {
         map.put("BIRCH_STAIRS", new ItemStack(Blocks.BIRCH_STAIRS));
         map.put("JUNGLE_STAIRS", new ItemStack(Blocks.JUNGLE_STAIRS));
         map.put("ACACIA_STAIRS", new ItemStack(Blocks.ACACIA_STAIRS));
+        //? if >=1.19.4 {
         map.put("CHERRY_STAIRS", new ItemStack(Blocks.CHERRY_STAIRS));
+        //? }
         map.put("DARK_OAK_STAIRS", new ItemStack(Blocks.DARK_OAK_STAIRS));
         //? if >=1.21.2 {
         map.put("PALE_OAK_STAIRS", new ItemStack(Blocks.PALE_OAK_STAIRS));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_STAIRS", new ItemStack(Blocks.MANGROVE_STAIRS));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_STAIRS", new ItemStack(Blocks.BAMBOO_STAIRS));
         map.put("BAMBOO_MOSAIC_STAIRS", new ItemStack(Blocks.BAMBOO_MOSAIC_STAIRS));
+        //? }
         map.put("CRIMSON_STAIRS", new ItemStack(Blocks.CRIMSON_STAIRS));
         map.put("WARPED_STAIRS", new ItemStack(Blocks.WARPED_STAIRS));
         map.put("COBBLESTONE_STAIRS", new ItemStack(Blocks.COBBLESTONE_STAIRS));
@@ -405,7 +515,9 @@ public class ItemsMapper {
         map.put("DIORITE_STAIRS", new ItemStack(Blocks.DIORITE_STAIRS));
         map.put("ANDESITE_STAIRS", new ItemStack(Blocks.ANDESITE_STAIRS));
         map.put("BRICK_STAIRS", new ItemStack(Blocks.BRICK_STAIRS));
+        //? if >=1.19 {
         map.put("MUD_BRICK_STAIRS", new ItemStack(Blocks.MUD_BRICK_STAIRS));
+        //? }
         map.put("SANDSTONE_STAIRS", new ItemStack(Blocks.SANDSTONE_STAIRS));
         map.put("RED_SANDSTONE_STAIRS", new ItemStack(Blocks.RED_SANDSTONE_STAIRS));
         map.put("SMOOTH_SANDSTONE_STAIRS", new ItemStack(Blocks.SMOOTH_SANDSTONE_STAIRS));
@@ -427,6 +539,7 @@ public class ItemsMapper {
         map.put("POLISHED_TUFF_STAIRS", new ItemStack(Blocks.POLISHED_TUFF_STAIRS));
         map.put("TUFF_BRICK_STAIRS", new ItemStack(Blocks.TUFF_BRICK_STAIRS));
         //? }
+        //? if >=1.17 {
         map.put("CUT_COPPER_STAIRS", new ItemStack(Blocks.CUT_COPPER_STAIRS));
         map.put("EXPOSED_CUT_COPPER_STAIRS", new ItemStack(Blocks.EXPOSED_CUT_COPPER_STAIRS));
         map.put("WEATHERED_CUT_COPPER_STAIRS", new ItemStack(Blocks.WEATHERED_CUT_COPPER_STAIRS));
@@ -435,6 +548,7 @@ public class ItemsMapper {
         map.put("POLISHED_DEEPSLATE_STAIRS", new ItemStack(Blocks.POLISHED_DEEPSLATE_STAIRS));
         map.put("DEEPSLATE_BRICK_STAIRS", new ItemStack(Blocks.DEEPSLATE_BRICK_STAIRS));
         map.put("DEEPSLATE_TILE_STAIRS", new ItemStack(Blocks.DEEPSLATE_TILE_STAIRS));
+        //? }
 
         // Полублоки
         map.put("OAK_SLAB", new ItemStack(Blocks.OAK_SLAB));
@@ -442,14 +556,20 @@ public class ItemsMapper {
         map.put("BIRCH_SLAB", new ItemStack(Blocks.BIRCH_SLAB));
         map.put("JUNGLE_SLAB", new ItemStack(Blocks.JUNGLE_SLAB));
         map.put("ACACIA_SLAB", new ItemStack(Blocks.ACACIA_SLAB));
+        //? if >=1.19.4 {
         map.put("CHERRY_SLAB", new ItemStack(Blocks.CHERRY_SLAB));
+        //? }
         map.put("DARK_OAK_SLAB", new ItemStack(Blocks.DARK_OAK_SLAB));
         //? if >=1.21.2 {
         map.put("PALE_OAK_SLAB", new ItemStack(Blocks.PALE_OAK_SLAB));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_SLAB", new ItemStack(Blocks.MANGROVE_SLAB));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_SLAB", new ItemStack(Blocks.BAMBOO_SLAB));
         map.put("BAMBOO_MOSAIC_SLAB", new ItemStack(Blocks.BAMBOO_MOSAIC_SLAB));
+        //? }
         map.put("CRIMSON_SLAB", new ItemStack(Blocks.CRIMSON_SLAB));
         map.put("WARPED_SLAB", new ItemStack(Blocks.WARPED_SLAB));
         map.put("PETRIFIED_OAK_SLAB", new ItemStack(Blocks.PETRIFIED_OAK_SLAB));
@@ -466,7 +586,9 @@ public class ItemsMapper {
         map.put("DIORITE_SLAB", new ItemStack(Blocks.DIORITE_SLAB));
         map.put("ANDESITE_SLAB", new ItemStack(Blocks.ANDESITE_SLAB));
         map.put("BRICK_SLAB", new ItemStack(Blocks.BRICK_SLAB));
+        //? if >=1.19 {
         map.put("MUD_BRICK_SLAB", new ItemStack(Blocks.MUD_BRICK_SLAB));
+        //? }
         map.put("SANDSTONE_SLAB", new ItemStack(Blocks.SANDSTONE_SLAB));
         map.put("CUT_SANDSTONE_SLAB", new ItemStack(Blocks.CUT_SANDSTONE_SLAB));
         map.put("RED_SANDSTONE_SLAB", new ItemStack(Blocks.RED_SANDSTONE_SLAB));
@@ -490,6 +612,7 @@ public class ItemsMapper {
         map.put("POLISHED_TUFF_SLAB", new ItemStack(Blocks.POLISHED_TUFF_SLAB));
         map.put("TUFF_BRICK_SLAB", new ItemStack(Blocks.TUFF_BRICK_SLAB));
         //? }
+        //? if >=1.17 {
         map.put("CUT_COPPER_SLAB", new ItemStack(Blocks.CUT_COPPER_SLAB));
         map.put("EXPOSED_CUT_COPPER_SLAB", new ItemStack(Blocks.EXPOSED_CUT_COPPER_SLAB));
         map.put("WEATHERED_CUT_COPPER_SLAB", new ItemStack(Blocks.WEATHERED_CUT_COPPER_SLAB));
@@ -498,50 +621,67 @@ public class ItemsMapper {
         map.put("POLISHED_DEEPSLATE_SLAB", new ItemStack(Blocks.POLISHED_DEEPSLATE_SLAB));
         map.put("DEEPSLATE_BRICK_SLAB", new ItemStack(Blocks.DEEPSLATE_BRICK_SLAB));
         map.put("DEEPSLATE_TILE_SLAB", new ItemStack(Blocks.DEEPSLATE_TILE_SLAB));
+        //? }
 
         // Медные блоки
         //? if >=1.20.3 {
         map.put("CHISELED_COPPER", new ItemStack(Blocks.CHISELED_COPPER));
         //? }
+        //? if >=1.17 {
         map.put("COPPER_BLOCK", new ItemStack(Blocks.COPPER_BLOCK));
+        //? }
         //? if >=1.20.3 {
         map.put("COPPER_BULB", new ItemStack(Blocks.COPPER_BULB));
         map.put("COPPER_DOOR", new ItemStack(Blocks.COPPER_DOOR));
         map.put("COPPER_GRATE", new ItemStack(Blocks.COPPER_GRATE));
         map.put("COPPER_TRAPDOOR", new ItemStack(Blocks.COPPER_TRAPDOOR));
         //? }
+        //? if >=1.17 {
         map.put("CUT_COPPER", new ItemStack(Blocks.CUT_COPPER));
+        //? }
         //? if >=1.20.3 {
         map.put("EXPOSED_CHISELED_COPPER", new ItemStack(Blocks.EXPOSED_CHISELED_COPPER));
         //? }
+        //? if >=1.17 {
         map.put("EXPOSED_COPPER", new ItemStack(Blocks.EXPOSED_COPPER));
+        //? }
         //? if >=1.20.3 {
         map.put("EXPOSED_COPPER_BULB", new ItemStack(Blocks.EXPOSED_COPPER_BULB));
         map.put("EXPOSED_COPPER_DOOR", new ItemStack(Blocks.EXPOSED_COPPER_DOOR));
         map.put("EXPOSED_COPPER_GRATE", new ItemStack(Blocks.EXPOSED_COPPER_GRATE));
         //? }
+        //? if >=1.17 {
         map.put("EXPOSED_CUT_COPPER", new ItemStack(Blocks.EXPOSED_CUT_COPPER));
+        //? }
         //? if >=1.20.3 {
         map.put("OXIDIZED_CHISELED_COPPER", new ItemStack(Blocks.OXIDIZED_CHISELED_COPPER));
         //? }
+        //? if >=1.17 {
         map.put("OXIDIZED_COPPER", new ItemStack(Blocks.OXIDIZED_COPPER));
+        //? }
         //? if >=1.20.3 {
         map.put("OXIDIZED_COPPER_BULB", new ItemStack(Blocks.OXIDIZED_COPPER_BULB));
         map.put("OXIDIZED_COPPER_DOOR", new ItemStack(Blocks.OXIDIZED_COPPER_DOOR));
         map.put("OXIDIZED_COPPER_GRATE", new ItemStack(Blocks.OXIDIZED_COPPER_GRATE));
         //? }
+        //? if >=1.17 {
         map.put("OXIDIZED_CUT_COPPER", new ItemStack(Blocks.OXIDIZED_CUT_COPPER));
         map.put("RAW_COPPER_BLOCK", new ItemStack(Blocks.RAW_COPPER_BLOCK));
+        //? }
         //? if >=1.20.3 {
         map.put("WEATHERED_CHISELED_COPPER", new ItemStack(Blocks.WEATHERED_CHISELED_COPPER));
         //? }
+        //? if >=1.17 {
         map.put("WEATHERED_COPPER", new ItemStack(Blocks.WEATHERED_COPPER));
+        //? }
         //? if >=1.20.3 {
         map.put("WEATHERED_COPPER_BULB", new ItemStack(Blocks.WEATHERED_COPPER_BULB));
         map.put("WEATHERED_COPPER_DOOR", new ItemStack(Blocks.WEATHERED_COPPER_DOOR));
         map.put("WEATHERED_COPPER_GRATE", new ItemStack(Blocks.WEATHERED_COPPER_GRATE));
         //? }
+        //? if >=1.17 {
         map.put("WEATHERED_CUT_COPPER", new ItemStack(Blocks.WEATHERED_CUT_COPPER));
+        //? }
 
         // Кварцевые блоки
         map.put("CHISELED_QUARTZ_BLOCK", new ItemStack(Blocks.CHISELED_QUARTZ_BLOCK));
@@ -555,7 +695,10 @@ public class ItemsMapper {
         map.put("BELL", new ItemStack(Blocks.BELL));
         map.put("BLAST_FURNACE", new ItemStack(Blocks.BLAST_FURNACE));
         map.put("BREWING_STAND", new ItemStack(Blocks.BREWING_STAND));
+        //? if >=1.20 {
         map.put("CALIBRATED_SCULK_SENSOR", new ItemStack(Blocks.CALIBRATED_SCULK_SENSOR));
+        //? }
+
         map.put("CHEST", new ItemStack(Blocks.CHEST));
         map.put("COMPARATOR", new ItemStack(Blocks.COMPARATOR));
         //? if >=1.20.3 {
@@ -590,8 +733,12 @@ public class ItemsMapper {
         map.put("REDSTONE_TORCH", new ItemStack(Blocks.REDSTONE_TORCH));
         map.put("REDSTONE_WIRE", new ItemStack(Blocks.REDSTONE_WIRE));
         map.put("REPEATER", new ItemStack(Blocks.REPEATER));
+        //? if >=1.17 {
         map.put("SCULK_SENSOR", new ItemStack(Blocks.SCULK_SENSOR));
+        //? }
+        //? if >=1.19 {
         map.put("SCULK_SHRIEKER", new ItemStack(Blocks.SCULK_SHRIEKER));
+        //? }
         map.put("SMOKER", new ItemStack(Blocks.SMOKER));
         map.put("STICKY_PISTON", new ItemStack(Blocks.STICKY_PISTON));
         map.put("STONE_BUTTON", new ItemStack(Blocks.STONE_BUTTON));
@@ -610,12 +757,16 @@ public class ItemsMapper {
         map.put("BIRCH_SAPLING", new ItemStack(Blocks.BIRCH_SAPLING));
         map.put("JUNGLE_SAPLING", new ItemStack(Blocks.JUNGLE_SAPLING));
         map.put("ACACIA_SAPLING", new ItemStack(Blocks.ACACIA_SAPLING));
+        //? if >=1.19.4 {
         map.put("CHERRY_SAPLING", new ItemStack(Blocks.CHERRY_SAPLING));
+        //? }
         map.put("DARK_OAK_SAPLING", new ItemStack(Blocks.DARK_OAK_SAPLING));
         //? if >=1.21.2 {
         map.put("PALE_OAK_SAPLING", new ItemStack(Blocks.PALE_OAK_SAPLING));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_PROPAGULE", new ItemStack(Blocks.MANGROVE_PROPAGULE));
+        //? }
         //? if >=1.20.3 {
         map.put("SHORT_GRASS", new ItemStack(Blocks.SHORT_GRASS));
         //? }
@@ -623,7 +774,9 @@ public class ItemsMapper {
         map.put("DEAD_BUSH", new ItemStack(Blocks.DEAD_BUSH));
         map.put("SEAGRASS", new ItemStack(Blocks.SEAGRASS));
         map.put("DANDELION", new ItemStack(Blocks.DANDELION));
+        //? if >=1.19.4 {
         map.put("TORCHFLOWER", new ItemStack(Blocks.TORCHFLOWER));
+        //? }
         map.put("POPPY", new ItemStack(Blocks.POPPY));
         map.put("BLUE_ORCHID", new ItemStack(Blocks.BLUE_ORCHID));
         map.put("ALLIUM", new ItemStack(Blocks.ALLIUM));
@@ -643,14 +796,20 @@ public class ItemsMapper {
         map.put("BIRCH_LEAVES", new ItemStack(Blocks.BIRCH_LEAVES));
         map.put("JUNGLE_LEAVES", new ItemStack(Blocks.JUNGLE_LEAVES));
         map.put("ACACIA_LEAVES", new ItemStack(Blocks.ACACIA_LEAVES));
+        //? if >=1.19.4 {
         map.put("CHERRY_LEAVES", new ItemStack(Blocks.CHERRY_LEAVES));
+        //? }
         map.put("DARK_OAK_LEAVES", new ItemStack(Blocks.DARK_OAK_LEAVES));
         //? if >=1.21.2 {
         map.put("PALE_OAK_LEAVES", new ItemStack(Blocks.PALE_OAK_LEAVES));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_LEAVES", new ItemStack(Blocks.MANGROVE_LEAVES));
+        //? }
+        //? if >=1.17 {
         map.put("AZALEA_LEAVES", new ItemStack(Blocks.AZALEA_LEAVES));
         map.put("FLOWERING_AZALEA_LEAVES", new ItemStack(Blocks.FLOWERING_AZALEA_LEAVES));
+        //? }
         map.put("BROWN_MUSHROOM_BLOCK", new ItemStack(Blocks.BROWN_MUSHROOM_BLOCK));
         map.put("RED_MUSHROOM_BLOCK", new ItemStack(Blocks.RED_MUSHROOM_BLOCK));
         map.put("MUSHROOM_STEM", new ItemStack(Blocks.MUSHROOM_STEM));
@@ -660,9 +819,14 @@ public class ItemsMapper {
         map.put("PEONY", new ItemStack(Blocks.PEONY));
         map.put("TALL_GRASS", new ItemStack(Blocks.TALL_GRASS));
         map.put("LARGE_FERN", new ItemStack(Blocks.LARGE_FERN));
+        //? if >=1.19.4 {
         map.put("TORCHFLOWER_CROP", new ItemStack(Blocks.TORCHFLOWER_CROP));
+        //? }
+        //? if >=1.20 {
         map.put("PITCHER_CROP", new ItemStack(Blocks.PITCHER_CROP));
         map.put("PITCHER_PLANT", new ItemStack(Blocks.PITCHER_PLANT));
+        //? }
+
         map.put("BEETROOTS", new ItemStack(Blocks.BEETROOTS));
         map.put("WARPED_FUNGUS", new ItemStack(Blocks.WARPED_FUNGUS));
         map.put("WARPED_WART_BLOCK", new ItemStack(Blocks.WARPED_WART_BLOCK));
@@ -673,24 +837,32 @@ public class ItemsMapper {
         map.put("WEEPING_VINES", new ItemStack(Blocks.WEEPING_VINES));
         map.put("TWISTING_VINES", new ItemStack(Blocks.TWISTING_VINES));
         map.put("CRIMSON_ROOTS", new ItemStack(Blocks.CRIMSON_ROOTS));
+        //? if >=1.17 {
         map.put("POINTED_DRIPSTONE", new ItemStack(Blocks.POINTED_DRIPSTONE));
         map.put("DRIPSTONE_BLOCK", new ItemStack(Blocks.DRIPSTONE_BLOCK));
         map.put("SPORE_BLOSSOM", new ItemStack(Blocks.SPORE_BLOSSOM));
         map.put("AZALEA", new ItemStack(Blocks.AZALEA));
         map.put("FLOWERING_AZALEA", new ItemStack(Blocks.FLOWERING_AZALEA));
         map.put("MOSS_CARPET", new ItemStack(Blocks.MOSS_CARPET));
+        //? }
+        //? if >=1.19.4 {
         map.put("PINK_PETALS", new ItemStack(Blocks.PINK_PETALS));
+        //? }
+        //? if >=1.17 {
         map.put("MOSS_BLOCK", new ItemStack(Blocks.MOSS_BLOCK));
         map.put("BIG_DRIPLEAF", new ItemStack(Blocks.BIG_DRIPLEAF));
         map.put("SMALL_DRIPLEAF", new ItemStack(Blocks.SMALL_DRIPLEAF));
         map.put("HANGING_ROOTS", new ItemStack(Blocks.HANGING_ROOTS));
+        //? }
         //? if >=1.21.2 {
         map.put("PALE_MOSS_BLOCK", new ItemStack(Blocks.PALE_MOSS_BLOCK));
         map.put("PALE_MOSS_CARPET", new ItemStack(Blocks.PALE_MOSS_CARPET));
         map.put("PALE_HANGING_MOSS", new ItemStack(Blocks.PALE_HANGING_MOSS));
         //?}
         map.put("VINE", new ItemStack(Blocks.VINE));
+        //? if >=1.17 {
         map.put("GLOW_LICHEN", new ItemStack(Blocks.GLOW_LICHEN));
+        //? }
         map.put("BAMBOO", new ItemStack(Blocks.BAMBOO));
         map.put("CACTUS", new ItemStack(Blocks.CACTUS));
         map.put("COCOA", new ItemStack(Blocks.COCOA));
@@ -749,9 +921,11 @@ public class ItemsMapper {
         map.put("SOUL_CAMPFIRE", new ItemStack(Blocks.SOUL_CAMPFIRE));
         map.put("GLOWSTONE", new ItemStack(Blocks.GLOWSTONE));
         map.put("GLOWSTONE_DUST", new ItemStack(Items.GLOWSTONE_DUST));
+        //? if >=1.19 {
         map.put("OCHRE_FROGLIGHT", new ItemStack(Blocks.OCHRE_FROGLIGHT));
         map.put("PEARLESCENT_FROGLIGHT", new ItemStack(Blocks.PEARLESCENT_FROGLIGHT));
         map.put("VERDANT_FROGLIGHT", new ItemStack(Blocks.VERDANT_FROGLIGHT));
+        //? }
 
         // --- Моб-дропы и связанные предметы ---
         //? if >1.20.4 {
@@ -778,9 +952,11 @@ public class ItemsMapper {
         map.put("FILLED_MAP", new ItemStack(Items.FILLED_MAP));
 
         // --- Блоки и предметы, связанные со Скалком (Sculk) ---
+        //? if >=1.19 {
         map.put("SCULK", new ItemStack(Blocks.SCULK));
         map.put("SCULK_VEIN", new ItemStack(Blocks.SCULK_VEIN));
         map.put("SCULK_CATALYST", new ItemStack(Blocks.SCULK_CATALYST));
+        //? }
 
         // --- Остальные предметы и блоки ---
         map.put("BEEHIVE", new ItemStack(Blocks.BEEHIVE));
@@ -798,9 +974,13 @@ public class ItemsMapper {
         map.put("FLINT", new ItemStack(Items.FLINT));
         map.put("FLINT_AND_STEEL", new ItemStack(Items.FLINT_AND_STEEL));
         map.put("FLOWER_POT", new ItemStack(Blocks.FLOWER_POT));
+        //? if >=1.19 {
         map.put("FROGSPAWN", new ItemStack(Blocks.FROGSPAWN));
+        //? }
         map.put("ITEM_FRAME", new ItemStack(Items.ITEM_FRAME));
+        //? if >=1.17 {
         map.put("GLOW_ITEM_FRAME", new ItemStack(Items.GLOW_ITEM_FRAME));
+        //? }
         map.put("GOLD_NUGGET", new ItemStack(Items.GOLD_NUGGET));
         map.put("HAY_BLOCK", new ItemStack(Blocks.HAY_BLOCK));
         map.put("HONEY_BLOCK", new ItemStack(Blocks.HONEY_BLOCK));
@@ -808,7 +988,9 @@ public class ItemsMapper {
         map.put("IRON_BARS", new ItemStack(Blocks.IRON_BARS));
         map.put("IRON_NUGGET", new ItemStack(Items.IRON_NUGGET));
         map.put("LADDER", new ItemStack(Blocks.LADDER));
+        //? if >=1.17 {
         map.put("LIGHTNING_ROD", new ItemStack(Blocks.LIGHTNING_ROD));
+        //? }
         map.put("NETHER_BRICK", new ItemStack(Items.NETHER_BRICK));
         map.put("PAINTING", new ItemStack(Items.PAINTING));
         map.put("PAPER", new ItemStack(Items.PAPER));
@@ -899,25 +1081,41 @@ public class ItemsMapper {
         map.put("BIRCH_BOAT", new ItemStack(Items.BIRCH_BOAT));
         map.put("JUNGLE_BOAT", new ItemStack(Items.JUNGLE_BOAT));
         map.put("ACACIA_BOAT", new ItemStack(Items.ACACIA_BOAT));
+        //? if >=1.19.4 {
         map.put("CHERRY_BOAT", new ItemStack(Items.CHERRY_BOAT));
+        //? }
         map.put("DARK_OAK_BOAT", new ItemStack(Items.DARK_OAK_BOAT));
         //? if >=1.21.2 {
         map.put("PALE_OAK_BOAT", new ItemStack(Items.PALE_OAK_BOAT));
-        //?}
+        //? }
+        //? if >=1.19 {
         map.put("MANGROVE_BOAT", new ItemStack(Items.MANGROVE_BOAT));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_RAFT", new ItemStack(Items.BAMBOO_RAFT));
+        //? }
+        //? if >=1.19 {
         map.put("OAK_CHEST_BOAT", new ItemStack(Items.OAK_CHEST_BOAT));
         map.put("SPRUCE_CHEST_BOAT", new ItemStack(Items.SPRUCE_CHEST_BOAT));
         map.put("BIRCH_CHEST_BOAT", new ItemStack(Items.BIRCH_CHEST_BOAT));
         map.put("JUNGLE_CHEST_BOAT", new ItemStack(Items.JUNGLE_CHEST_BOAT));
         map.put("ACACIA_CHEST_BOAT", new ItemStack(Items.ACACIA_CHEST_BOAT));
+        //? }
+        //? if >=1.19.4 {
         map.put("CHERRY_CHEST_BOAT", new ItemStack(Items.CHERRY_CHEST_BOAT));
+        //? }
+        //? if >=1.19 {
         map.put("DARK_OAK_CHEST_BOAT", new ItemStack(Items.DARK_OAK_CHEST_BOAT));
+        //? }
         //? if >=1.21.2 {
         map.put("PALE_OAK_CHEST_BOAT", new ItemStack(Items.PALE_OAK_CHEST_BOAT));
         //?}
+        //? if >=1.19 {
         map.put("MANGROVE_CHEST_BOAT", new ItemStack(Items.MANGROVE_CHEST_BOAT));
+        //? }
+        //? if >=1.19.3 {
         map.put("BAMBOO_CHEST_RAFT", new ItemStack(Items.BAMBOO_CHEST_RAFT));
+        //? }
         map.put("SADDLE", new ItemStack(Items.SADDLE));
         map.put("MINECART", new ItemStack(Items.MINECART));
         map.put("CHEST_MINECART", new ItemStack(Items.CHEST_MINECART));
@@ -929,28 +1127,42 @@ public class ItemsMapper {
         map.put("WARPED_FUNGUS_ON_A_STICK", new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK));
         map.put("ELYTRA", new ItemStack(Items.ELYTRA));
         map.put("COMPASS", new ItemStack(Items.COMPASS));
+        //? if >=1.19 {
         map.put("RECOVERY_COMPASS", new ItemStack(Items.RECOVERY_COMPASS));
+        //? }
         map.put("FISHING_ROD", new ItemStack(Items.FISHING_ROD));
         map.put("CLOCK", new ItemStack(Items.CLOCK));
+        //? if >=1.17 {
         map.put("SPYGLASS", new ItemStack(Items.SPYGLASS));
+        //? }
         map.put("SHEARS", new ItemStack(Items.SHEARS));
         map.put("LEAD", new ItemStack(Items.LEAD));
         map.put("NAME_TAG", new ItemStack(Items.NAME_TAG));
         map.put("SHIELD", new ItemStack(Items.SHIELD));
         map.put("TOTEM_OF_UNDYING", new ItemStack(Items.TOTEM_OF_UNDYING));
+        //? if >=1.19 {
         map.put("GOAT_HORN", new ItemStack(Items.GOAT_HORN));
+        //? }
+        //? if >=1.19.4 {
         map.put("BRUSH", new ItemStack(Items.BRUSH));
+        //? }
         map.put("BUCKET", new ItemStack(Items.BUCKET));
         map.put("WATER_BUCKET", new ItemStack(Items.WATER_BUCKET));
         map.put("LAVA_BUCKET", new ItemStack(Items.LAVA_BUCKET));
+        //? if >=1.17 {
         map.put("POWDER_SNOW_BUCKET", new ItemStack(Items.POWDER_SNOW_BUCKET));
+        //? }
         map.put("MILK_BUCKET", new ItemStack(Items.MILK_BUCKET));
         map.put("PUFFERFISH_BUCKET", new ItemStack(Items.PUFFERFISH_BUCKET));
         map.put("SALMON_BUCKET", new ItemStack(Items.SALMON_BUCKET));
         map.put("COD_BUCKET", new ItemStack(Items.COD_BUCKET));
         map.put("TROPICAL_FISH_BUCKET", new ItemStack(Items.TROPICAL_FISH_BUCKET));
+        //? if >=1.17 {
         map.put("AXOLOTL_BUCKET", new ItemStack(Items.AXOLOTL_BUCKET));
+        //? }
+        //? if >=1.19 {
         map.put("TADPOLE_BUCKET", new ItemStack(Items.TADPOLE_BUCKET));
+        //? }
         //? if >=1.20.3 {
         map.put("TRIAL_KEY", new ItemStack(Items.TRIAL_KEY));
         //? }
@@ -1008,14 +1220,20 @@ public class ItemsMapper {
         map.put("COOKED_MUTTON", new ItemStack(Items.COOKED_MUTTON));
         map.put("CHORUS_FRUIT", new ItemStack(Items.CHORUS_FRUIT));
         map.put("POPPED_CHORUS_FRUIT", new ItemStack(Items.POPPED_CHORUS_FRUIT));
+        //? if >=1.19.4 {
         map.put("TORCHFLOWER_SEEDS", new ItemStack(Items.TORCHFLOWER_SEEDS));
+        //? }
+        //? if >=1.20 {
         map.put("PITCHER_POD", new ItemStack(Items.PITCHER_POD));
+        //? }
         map.put("BEETROOT", new ItemStack(Items.BEETROOT));
         map.put("BEETROOT_SEEDS", new ItemStack(Items.BEETROOT_SEEDS));
         map.put("BEETROOT_SOUP", new ItemStack(Items.BEETROOT_SOUP));
         map.put("SUSPICIOUS_STEW", new ItemStack(Items.SUSPICIOUS_STEW));
         map.put("SWEET_BERRIES", new ItemStack(Items.SWEET_BERRIES));
+        //? if >=1.17 {
         map.put("GLOW_BERRIES", new ItemStack(Items.GLOW_BERRIES));
+        //? }
         map.put("HONEYCOMB", new ItemStack(Items.HONEYCOMB));
         map.put("HONEY_BOTTLE", new ItemStack(Items.HONEY_BOTTLE));
         map.put("PUMPKIN_PIE", new ItemStack(Items.PUMPKIN_PIE));
@@ -1178,6 +1396,7 @@ public class ItemsMapper {
         map.put("BLACK_CONCRETE_POWDER", new ItemStack(Blocks.BLACK_CONCRETE_POWDER));
 
         // Свечки
+        //? if >=1.17 {
         map.put("CANDLE", new ItemStack(Blocks.CANDLE));
         map.put("WHITE_CANDLE", new ItemStack(Blocks.WHITE_CANDLE));
         map.put("ORANGE_CANDLE", new ItemStack(Blocks.ORANGE_CANDLE));
@@ -1195,6 +1414,7 @@ public class ItemsMapper {
         map.put("GREEN_CANDLE", new ItemStack(Blocks.GREEN_CANDLE));
         map.put("RED_CANDLE", new ItemStack(Blocks.RED_CANDLE));
         map.put("BLACK_CANDLE", new ItemStack(Blocks.BLACK_CANDLE));
+        //? }
 
         // Шерсть
         map.put("WHITE_WOOL", new ItemStack(Blocks.WHITE_WOOL));
@@ -1273,7 +1493,9 @@ public class ItemsMapper {
 
         // Красители
         map.put("INK_SAC", new ItemStack(Items.INK_SAC));
+        //? if >=1.17 {
         map.put("GLOW_INK_SAC", new ItemStack(Items.GLOW_INK_SAC));
+        //? }
         map.put("COCOA_BEANS", new ItemStack(Items.COCOA_BEANS));
         map.put("WHITE_DYE", new ItemStack(Items.WHITE_DYE));
         map.put("ORANGE_DYE", new ItemStack(Items.ORANGE_DYE));
@@ -1296,8 +1518,12 @@ public class ItemsMapper {
         //? if >1.20.4 {
         map.put("ARMADILLO_SPAWN_EGG", new ItemStack(Items.ARMADILLO_SPAWN_EGG));
         //?}
+        //? if >=1.19 {
         map.put("ALLAY_SPAWN_EGG", new ItemStack(Items.ALLAY_SPAWN_EGG));
+        //? }
+        //? if >=1.17 {
         map.put("AXOLOTL_SPAWN_EGG", new ItemStack(Items.AXOLOTL_SPAWN_EGG));
+        //? }
         map.put("BAT_SPAWN_EGG", new ItemStack(Items.BAT_SPAWN_EGG));
         map.put("BEE_SPAWN_EGG", new ItemStack(Items.BEE_SPAWN_EGG));
         map.put("BLAZE_SPAWN_EGG", new ItemStack(Items.BLAZE_SPAWN_EGG));
@@ -1308,7 +1534,9 @@ public class ItemsMapper {
         map.put("BREEZE_SPAWN_EGG", new ItemStack(Items.BREEZE_SPAWN_EGG));
         //? }
         map.put("CAT_SPAWN_EGG", new ItemStack(Items.CAT_SPAWN_EGG));
+        //? if >=1.19.3 {
         map.put("CAMEL_SPAWN_EGG", new ItemStack(Items.CAMEL_SPAWN_EGG));
+        //? }
         map.put("CAVE_SPIDER_SPAWN_EGG", new ItemStack(Items.CAVE_SPIDER_SPAWN_EGG));
         map.put("CHICKEN_SPAWN_EGG", new ItemStack(Items.CHICKEN_SPAWN_EGG));
         map.put("COD_SPAWN_EGG", new ItemStack(Items.COD_SPAWN_EGG));
@@ -1318,20 +1546,28 @@ public class ItemsMapper {
         map.put("DONKEY_SPAWN_EGG", new ItemStack(Items.DONKEY_SPAWN_EGG));
         map.put("DROWNED_SPAWN_EGG", new ItemStack(Items.DROWNED_SPAWN_EGG));
         map.put("ELDER_GUARDIAN_SPAWN_EGG", new ItemStack(Items.ELDER_GUARDIAN_SPAWN_EGG));
+        //? if >=1.19.3 {
         map.put("ENDER_DRAGON_SPAWN_EGG", new ItemStack(Items.ENDER_DRAGON_SPAWN_EGG));
+        //? }
         map.put("ENDERMAN_SPAWN_EGG", new ItemStack(Items.ENDERMAN_SPAWN_EGG));
         map.put("ENDERMITE_SPAWN_EGG", new ItemStack(Items.ENDERMITE_SPAWN_EGG));
         map.put("EVOKER_SPAWN_EGG", new ItemStack(Items.EVOKER_SPAWN_EGG));
         map.put("FOX_SPAWN_EGG", new ItemStack(Items.FOX_SPAWN_EGG));
+        //? if >=1.19 {
         map.put("FROG_SPAWN_EGG", new ItemStack(Items.FROG_SPAWN_EGG));
+        //? }
         map.put("GHAST_SPAWN_EGG", new ItemStack(Items.GHAST_SPAWN_EGG));
+        //? if >=1.17 {
         map.put("GLOW_SQUID_SPAWN_EGG", new ItemStack(Items.GLOW_SQUID_SPAWN_EGG));
         map.put("GOAT_SPAWN_EGG", new ItemStack(Items.GOAT_SPAWN_EGG));
+        //? }
         map.put("GUARDIAN_SPAWN_EGG", new ItemStack(Items.GUARDIAN_SPAWN_EGG));
         map.put("HOGLIN_SPAWN_EGG", new ItemStack(Items.HOGLIN_SPAWN_EGG));
         map.put("HORSE_SPAWN_EGG", new ItemStack(Items.HORSE_SPAWN_EGG));
         map.put("HUSK_SPAWN_EGG", new ItemStack(Items.HUSK_SPAWN_EGG));
+        //? if >=1.19.3 {
         map.put("IRON_GOLEM_SPAWN_EGG", new ItemStack(Items.IRON_GOLEM_SPAWN_EGG));
+        //? }
         map.put("LLAMA_SPAWN_EGG", new ItemStack(Items.LLAMA_SPAWN_EGG));
         map.put("MAGMA_CUBE_SPAWN_EGG", new ItemStack(Items.MAGMA_CUBE_SPAWN_EGG));
         map.put("MOOSHROOM_SPAWN_EGG", new ItemStack(Items.MOOSHROOM_SPAWN_EGG));
@@ -1355,13 +1591,19 @@ public class ItemsMapper {
         map.put("SKELETON_SPAWN_EGG", new ItemStack(Items.SKELETON_SPAWN_EGG));
         map.put("SKELETON_HORSE_SPAWN_EGG", new ItemStack(Items.SKELETON_HORSE_SPAWN_EGG));
         map.put("SLIME_SPAWN_EGG", new ItemStack(Items.SLIME_SPAWN_EGG));
+        //? if >=1.19.4 {
         map.put("SNIFFER_SPAWN_EGG", new ItemStack(Items.SNIFFER_SPAWN_EGG));
+        //? }
+        //? if >=1.19.3 {
         map.put("SNOW_GOLEM_SPAWN_EGG", new ItemStack(Items.SNOW_GOLEM_SPAWN_EGG));
+        //? }
         map.put("SPIDER_SPAWN_EGG", new ItemStack(Items.SPIDER_SPAWN_EGG));
         map.put("SQUID_SPAWN_EGG", new ItemStack(Items.SQUID_SPAWN_EGG));
         map.put("STRAY_SPAWN_EGG", new ItemStack(Items.STRAY_SPAWN_EGG));
         map.put("STRIDER_SPAWN_EGG", new ItemStack(Items.STRIDER_SPAWN_EGG));
+        //? if >=1.19 {
         map.put("TADPOLE_SPAWN_EGG", new ItemStack(Items.TADPOLE_SPAWN_EGG));
+        //? }
         map.put("TRADER_LLAMA_SPAWN_EGG", new ItemStack(Items.TRADER_LLAMA_SPAWN_EGG));
         map.put("TROPICAL_FISH_SPAWN_EGG", new ItemStack(Items.TROPICAL_FISH_SPAWN_EGG));
         map.put("TURTLE_SPAWN_EGG", new ItemStack(Items.TURTLE_SPAWN_EGG));
@@ -1369,9 +1611,13 @@ public class ItemsMapper {
         map.put("VILLAGER_SPAWN_EGG", new ItemStack(Items.VILLAGER_SPAWN_EGG));
         map.put("VINDICATOR_SPAWN_EGG", new ItemStack(Items.VINDICATOR_SPAWN_EGG));
         map.put("WANDERING_TRADER_SPAWN_EGG", new ItemStack(Items.WANDERING_TRADER_SPAWN_EGG));
+        //? if >=1.19 {
         map.put("WARDEN_SPAWN_EGG", new ItemStack(Items.WARDEN_SPAWN_EGG));
+        //? }
         map.put("WITCH_SPAWN_EGG", new ItemStack(Items.WITCH_SPAWN_EGG));
+        //? if >=1.19.3 {
         map.put("WITHER_SPAWN_EGG", new ItemStack(Items.WITHER_SPAWN_EGG));
+        //?}
         map.put("WITHER_SKELETON_SPAWN_EGG", new ItemStack(Items.WITHER_SKELETON_SPAWN_EGG));
         map.put("WOLF_SPAWN_EGG", new ItemStack(Items.WOLF_SPAWN_EGG));
         map.put("ZOGLIN_SPAWN_EGG", new ItemStack(Items.ZOGLIN_SPAWN_EGG));
@@ -1400,14 +1646,22 @@ public class ItemsMapper {
         map.put("MUSIC_DISC_WARD", new ItemStack(Items.MUSIC_DISC_WARD));
         map.put("MUSIC_DISC_11", new ItemStack(Items.MUSIC_DISC_11));
         map.put("MUSIC_DISC_WAIT", new ItemStack(Items.MUSIC_DISC_WAIT));
+        //? if >=1.18 {
         map.put("MUSIC_DISC_OTHERSIDE", new ItemStack(Items.MUSIC_DISC_OTHERSIDE));
+        //? }
+        //? if >=1.20 {
         map.put("MUSIC_DISC_RELIC", new ItemStack(Items.MUSIC_DISC_RELIC));
+        //? }
+        //? if >=1.19 {
         map.put("MUSIC_DISC_5", new ItemStack(Items.MUSIC_DISC_5));
+        //? }
         map.put("MUSIC_DISC_PIGSTEP", new ItemStack(Items.MUSIC_DISC_PIGSTEP));
         //? if >=1.21 {
         map.put("MUSIC_DISC_PRECIPICE", new ItemStack(Items.MUSIC_DISC_PRECIPICE));
         //?}
+        //? if >=1.19 {
         map.put("DISC_FRAGMENT_5", new ItemStack(Items.DISC_FRAGMENT_5));
+        //? }
 
         // Паттерны
         map.put("FLOWER_BANNER_PATTERN", new ItemStack(Items.FLOWER_BANNER_PATTERN));
@@ -1426,6 +1680,7 @@ public class ItemsMapper {
         //?}
 
         // Шаблоны брони
+        //? if >=1.19.4 {
         map.put("NETHERITE_UPGRADE_SMITHING_TEMPLATE", new ItemStack(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE));
         map.put("SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE));
         map.put("DUNE_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE));
@@ -1438,17 +1693,22 @@ public class ItemsMapper {
         map.put("SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE));
         map.put("RIB_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE));
         map.put("SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE));
+        //? }
+
+        //? if >=1.20 {
         map.put("WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE));
         map.put("SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE));
         map.put("SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE));
         map.put("RAISER_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE));
         map.put("HOST_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE));
+        //?}
         //? if >1.20.4 {
         map.put("FLOW_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE));
         map.put("BOLT_ARMOR_TRIM_SMITHING_TEMPLATE", new ItemStack(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE));
         //?}
 
         // Горшки
+        //? if >=1.20 {
         map.put("ANGLER_POTTERY_SHERD", new ItemStack(Items.ANGLER_POTTERY_SHERD));
         map.put("ARCHER_POTTERY_SHERD", new ItemStack(Items.ARCHER_POTTERY_SHERD));
         map.put("ARMS_UP_POTTERY_SHERD", new ItemStack(Items.ARMS_UP_POTTERY_SHERD));
@@ -1457,13 +1717,7 @@ public class ItemsMapper {
         map.put("BURN_POTTERY_SHERD", new ItemStack(Items.BURN_POTTERY_SHERD));
         map.put("DANGER_POTTERY_SHERD", new ItemStack(Items.DANGER_POTTERY_SHERD));
         map.put("EXPLORER_POTTERY_SHERD", new ItemStack(Items.EXPLORER_POTTERY_SHERD));
-        //? if >1.20.4 {
-        map.put("FLOW_POTTERY_SHERD", new ItemStack(Items.FLOW_POTTERY_SHERD));
-        //?}
         map.put("FRIEND_POTTERY_SHERD", new ItemStack(Items.FRIEND_POTTERY_SHERD));
-        //? if >1.20.4 {
-        map.put("GUSTER_POTTERY_SHERD", new ItemStack(Items.GUSTER_POTTERY_SHERD));
-        //?}
         map.put("HEART_POTTERY_SHERD", new ItemStack(Items.HEART_POTTERY_SHERD));
         map.put("HEARTBREAK_POTTERY_SHERD", new ItemStack(Items.HEARTBREAK_POTTERY_SHERD));
         map.put("HOWL_POTTERY_SHERD", new ItemStack(Items.HOWL_POTTERY_SHERD));
@@ -1471,13 +1725,21 @@ public class ItemsMapper {
         map.put("MOURNER_POTTERY_SHERD", new ItemStack(Items.MOURNER_POTTERY_SHERD));
         map.put("PLENTY_POTTERY_SHERD", new ItemStack(Items.PLENTY_POTTERY_SHERD));
         map.put("PRIZE_POTTERY_SHERD", new ItemStack(Items.PRIZE_POTTERY_SHERD));
-        //? if >1.20.4 {
-        map.put("SCRAPE_POTTERY_SHERD", new ItemStack(Items.SCRAPE_POTTERY_SHERD));
-        //?}
         map.put("SHEAF_POTTERY_SHERD", new ItemStack(Items.SHEAF_POTTERY_SHERD));
         map.put("SHELTER_POTTERY_SHERD", new ItemStack(Items.SHELTER_POTTERY_SHERD));
         map.put("SKULL_POTTERY_SHERD", new ItemStack(Items.SKULL_POTTERY_SHERD));
         map.put("SNORT_POTTERY_SHERD", new ItemStack(Items.SNORT_POTTERY_SHERD));
+        //?}
+        //? if >1.20.4 {
+        map.put("FLOW_POTTERY_SHERD", new ItemStack(Items.FLOW_POTTERY_SHERD));
+        //?}
+        //? if >1.20.4 {
+        map.put("GUSTER_POTTERY_SHERD", new ItemStack(Items.GUSTER_POTTERY_SHERD));
+        //?}
+        //? if >1.20.4 {
+        map.put("SCRAPE_POTTERY_SHERD", new ItemStack(Items.SCRAPE_POTTERY_SHERD));
+        //?}
+
         return map;
     }
 
@@ -1563,49 +1825,71 @@ public class ItemsMapper {
     private static Map<String, ItemStack> cat_GOLD() {
         Map<String, ItemStack> map = new LinkedHashMap<>();
         map.put("COAL_ORE", new ItemStack(Blocks.COAL_ORE));
+        //? if >=1.17 {
         map.put("DEEPSLATE_COAL_ORE", new ItemStack(Blocks.DEEPSLATE_COAL_ORE));
+        //? }
         map.put("COAL", new ItemStack(Items.COAL));
         map.put("CHARCOAL", new ItemStack(Items.CHARCOAL));
 
         map.put("IRON_ORE", new ItemStack(Blocks.IRON_ORE));
+        //? if >=1.17 {
         map.put("DEEPSLATE_IRON_ORE", new ItemStack(Blocks.DEEPSLATE_IRON_ORE));
+        //? }
+        //? if >=1.17 {
         map.put("RAW_IRON", new ItemStack(Items.RAW_IRON));
+        //? }
         map.put("IRON_INGOT", new ItemStack(Items.IRON_INGOT));
         map.put("IRON_BLOCK", new ItemStack(Blocks.IRON_BLOCK));
 
+        //? if >=1.17 {
         map.put("COPPER_ORE", new ItemStack(Blocks.COPPER_ORE));
         map.put("DEEPSLATE_COPPER_ORE", new ItemStack(Blocks.DEEPSLATE_COPPER_ORE));
         map.put("RAW_COPPER", new ItemStack(Items.RAW_COPPER));
         map.put("COPPER_INGOT", new ItemStack(Items.COPPER_INGOT));
+        //? }
 
         map.put("GOLD_ORE", new ItemStack(Blocks.GOLD_ORE));
+        //? if >=1.17 {
         map.put("DEEPSLATE_GOLD_ORE", new ItemStack(Blocks.DEEPSLATE_GOLD_ORE));
+        //? }
         map.put("NETHER_GOLD_ORE", new ItemStack(Blocks.NETHER_GOLD_ORE));
+        //? if >=1.17 {
         map.put("RAW_GOLD", new ItemStack(Items.RAW_GOLD));
+        //? }
         map.put("GOLD_INGOT", new ItemStack(Items.GOLD_INGOT));
         map.put("GOLD_BLOCK", new ItemStack(Blocks.GOLD_BLOCK));
 
         map.put("REDSTONE_ORE", new ItemStack(Blocks.REDSTONE_ORE));
+        //? if >=1.17 {
         map.put("DEEPSLATE_REDSTONE_ORE", new ItemStack(Blocks.DEEPSLATE_REDSTONE_ORE));
+        //? }
 
         map.put("LAPIS_ORE", new ItemStack(Blocks.LAPIS_ORE));
+        //? if >=1.17 {
         map.put("DEEPSLATE_LAPIS_ORE", new ItemStack(Blocks.DEEPSLATE_LAPIS_ORE));
+        //? }
         map.put("LAPIS_LAZULI", new ItemStack(Items.LAPIS_LAZULI));
         map.put("LAPIS_BLOCK", new ItemStack(Blocks.LAPIS_BLOCK));
 
         map.put("DIAMOND_ORE", new ItemStack(Blocks.DIAMOND_ORE));
+        //? if >=1.17 {
         map.put("DEEPSLATE_DIAMOND_ORE", new ItemStack(Blocks.DEEPSLATE_DIAMOND_ORE));
+        //? }
         map.put("DIAMOND", new ItemStack(Items.DIAMOND));
         map.put("DIAMOND_BLOCK", new ItemStack(Blocks.DIAMOND_BLOCK));
 
         map.put("EMERALD_ORE", new ItemStack(Blocks.EMERALD_ORE));
+        //? if >=1.17 {
         map.put("DEEPSLATE_EMERALD_ORE", new ItemStack(Blocks.DEEPSLATE_EMERALD_ORE));
+        //? }
         map.put("EMERALD", new ItemStack(Items.EMERALD));
         map.put("EMERALD_BLOCK", new ItemStack(Blocks.EMERALD_BLOCK));
 
         map.put("NETHER_QUARTZ_ORE", new ItemStack(Blocks.NETHER_QUARTZ_ORE));
         map.put("QUARTZ", new ItemStack(Items.QUARTZ));
+        //? if >=1.17 {
         map.put("AMETHYST_SHARD", new ItemStack(Items.AMETHYST_SHARD));
+        //? }
 
         map.put("ANCIENT_DEBRIS", new ItemStack(Blocks.ANCIENT_DEBRIS));
         map.put("NETHERITE_SCRAP", new ItemStack(Items.NETHERITE_SCRAP));
@@ -1619,7 +1903,9 @@ public class ItemsMapper {
         map.put("WITHER_SKELETON_SKULL", new ItemStack(Blocks.WITHER_SKELETON_SKULL));
         map.put("ZOMBIE_HEAD", new ItemStack(Blocks.ZOMBIE_HEAD));
         map.put("CREEPER_HEAD", new ItemStack(Blocks.CREEPER_HEAD));
+        //? if >=1.19.3 {
         map.put("PIGLIN_HEAD", new ItemStack(Blocks.PIGLIN_HEAD));
+        //? }
         map.put("PLAYER_HEAD", new ItemStack(Blocks.PLAYER_HEAD));
         map.put("DRAGON_HEAD", new ItemStack(Blocks.DRAGON_HEAD));
         map.put("DRAGON_EGG", new ItemStack(Blocks.DRAGON_EGG));
@@ -1636,9 +1922,13 @@ public class ItemsMapper {
         map.put("HEART_OF_THE_SEA", new ItemStack(Items.HEART_OF_THE_SEA));
         map.put("NAUTILUS_SHELL", new ItemStack(Items.NAUTILUS_SHELL));
         map.put("SHULKER_SHELL", new ItemStack(Items.SHULKER_SHELL));
+        //? if >=1.19 {
         map.put("ECHO_SHARD", new ItemStack(Items.ECHO_SHARD));
+        //? }
         map.put("GILDED_BLACKSTONE", new ItemStack(Blocks.GILDED_BLACKSTONE));
+        //? if >=1.20 {
         map.put("SNIFFER_EGG", new ItemStack(Blocks.SNIFFER_EGG));
+        //? }
         //? if >1.20.4 {
         map.put("HEAVY_CORE", new ItemStack(Blocks.HEAVY_CORE));
         map.put("WIND_CHARGE", new ItemStack(Items.WIND_CHARGE));
@@ -1661,7 +1951,9 @@ public class ItemsMapper {
         map.put("STRUCTURE_BLOCK", new ItemStack(Blocks.STRUCTURE_BLOCK));
         map.put("JIGSAW", new ItemStack(Blocks.JIGSAW));
         map.put("DEBUG_STICK", new ItemStack(Items.DEBUG_STICK));
+        //? if >=1.19 {
         map.put("REINFORCED_DEEPSLATE", new ItemStack(Blocks.REINFORCED_DEEPSLATE));
+        //? }
         return map;
     }
 
@@ -1676,7 +1968,7 @@ public class ItemsMapper {
         potion.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(name));
         return potion;
     }
-    //? } else if <1.20.5 {
+    //? } else if >=1.19.3 {
     /*public static ItemStack getPotionItem(Potion potion, Item baseItem) {
         ItemStack stack = new ItemStack(baseItem);
         NbtCompound tag = new NbtCompound();
@@ -1684,7 +1976,14 @@ public class ItemsMapper {
         stack.setNbt(tag);
         return stack;
     }
-    *///?}
+    *///?} else {
+    /*public static ItemStack getPotionItem(Potion potion, Item baseItem) {
+        ItemStack stack = new ItemStack(baseItem);
+        PotionUtil.setPotion(stack, potion); // <-- вот это правильно в 1.19.2
+        return stack;
+    }
+    */
+    //? }
 
     public static ItemStack getItemStack(String name) { return itemStackMap.getOrDefault(name, (name.equals("STRUCTURE_VOID")) ? standart : notFound); }
 

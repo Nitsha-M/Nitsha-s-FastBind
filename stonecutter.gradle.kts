@@ -7,4 +7,5 @@ stonecutter active "1.21.3" /* [SC] DO NOT EDIT */
 
 stonecutter tasks {
     order("publishModrinth")
+    order("publishCurseforge")
 }

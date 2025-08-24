@@ -58,6 +58,10 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${findProperty("fabric_version")}")
 
     modApi("com.terraformersmc:modmenu:${findProperty("modmenu_version")}")
+
+    if (stonecutter.compare(stonecutter.current.version, "1.18.2") >= 0) {
+        testImplementation("net.fabricmc:fabric-loader-junit:${findProperty("loader_version")}")
+    }
 }
 
 val javaversion = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
@@ -65,6 +69,12 @@ val javaversion = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
 
 tasks.withType<JavaCompile>().configureEach {
     options.release.set(javaversion.toString().toInt())
+}
+
+configurations.configureEach {
+    resolutionStrategy {
+        force("net.fabricmc:fabric-loader:${findProperty("loader_version")}")
+    }
 }
 
 java {
@@ -109,6 +119,13 @@ publishMods {
     modrinth {
         projectId = "v0yaXjcg"
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        minecraftVersions.add(stonecutter.current.version)
+        requires("fabric-api")
+    }
+
+    curseforge {
+        projectId = "1304893"
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         minecraftVersions.add(stonecutter.current.version)
         requires("fabric-api")
     }

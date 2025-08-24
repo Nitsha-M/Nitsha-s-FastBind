@@ -1,0 +1,36 @@
+"filename", "language", "Java", "comment", "blank", "total"
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\FBLogger.java", "Java", 3, 0, 2, 5
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\ItemsMapper.java", "Java", 1447, 250, 83, 1780
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\MainClass.java", "Java", 62, 8, 10, 80
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\client\MainClassClient.java", "Java", 7, 0, 4, 11
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\configs\BindEntry.java", "Java", 15, 0, 3, 18
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\configs\BindHandler.java", "Java", 42, 0, 9, 51
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\configs\BindsConfig.java", "Java", 271, 4, 46, 321
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\configs\KeyBinds.java", "Java", 52, 0, 8, 60
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\configs\ModMenuApiImpl.java", "Java", 14, 0, 3, 17
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\panels\AdvancedOptions.java", "Java", 194, 9, 34, 237
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\panels\BasicOptionsWindow.java", "Java", 146, 5, 27, 178
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\panels\BindsList.java", "Java", 121, 10, 27, 158
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\panels\IconSelector.java", "Java", 248, 20, 56, 324
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\panels\PresetSelector.java", "Java", 83, 6, 16, 105
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\screen\BindsEditor.java", "Java", 408, 50, 74, 532
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\screen\BindsGUI.java", "Java", 289, 28, 45, 362
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\utils\AnimatedSprite.java", "Java", 112, 6, 19, 137
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\utils\DrawElement.java", "Java", 17, 8, 7, 32
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\utils\GUIUtils.java", "Java", 177, 219, 33, 429
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\ActionItem.java", "Java", 182, 16, 20, 218
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\AnimatedWindow.java", "Java", 294, 22, 64, 380
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\BedrockButton.java", "Java", 114, 29, 27, 170
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\BedrockIconButton.java", "Java", 66, 16, 12, 94
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\BedrockIconTextButton.java", "Java", 41, 15, 10, 66
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\ItemButton.java", "Java", 66, 16, 13, 95
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\KeybindSelector.java", "Java", 102, 13, 19, 134
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\PresetListItem.java", "Java", 121, 20, 19, 160
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\ScrollableWindow.java", "Java", 239, 14, 51, 304
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\SmallTextButton.java", "Java", 47, 13, 10, 70
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\TabButton.java", "Java", 51, 13, 11, 75
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\gui\widget\ToggleButton.java", "Java", 71, 15, 18, 104
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\utils\BindExecutor.java", "Java", 76, 0, 18, 94
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\utils\EasterEgg.java", "Java", 38, 0, 9, 47
+"d:\Nitsha Binds\src\main\java\com\nitsha\binds\utils\FastbindParser.java", "Java", 41, 0, 9, 50
+"Total", "-", 5257, 825, 816, 6898

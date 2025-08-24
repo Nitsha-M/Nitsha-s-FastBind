@@ -20,6 +20,9 @@
     ],
     "main": [
       "com.nitsha.binds.MainClass"
+    ],
+    "modmenu": [
+      "com.nitsha.binds.configs.ModMenuApiImpl"
     ]
   },
   "mixins": [
@@ -33,6 +36,8 @@
   "custom": {
     "modmenu": {
       "links": {
+        "modmenu.curseforge": "https://www.curseforge.com/minecraft/mc-mods/${id}",
+        "modmenu.modrinth": "https://modrinth.com/mod/${id}",
         "modmenu.discord": "https://discord.gg/zuwPkg5MHs"
       }
     }

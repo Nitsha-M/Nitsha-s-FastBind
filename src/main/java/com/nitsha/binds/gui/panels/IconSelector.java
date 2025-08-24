@@ -1,15 +1,16 @@
 package com.nitsha.binds.gui.panels;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.MainClass;
-import com.nitsha.binds.gui.GUIUtils;
-import com.nitsha.binds.gui.widget.BedrockButton;
+import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.widget.BedrockIconButton;
 import com.nitsha.binds.gui.widget.ItemButton;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.*;
+//? if >=1.17 {
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+//? }
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
@@ -18,17 +19,15 @@ import net.minecraft.potion.Potions;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import org.joml.Matrix3x2fStack;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class IconSelector extends AbstractParentElement implements Drawable, Element, Selectable {
+public class IconSelector extends AbstractParentElement implements Drawable, Element /*? if >=1.17 {*/ , Selectable /*? }*/ {
     private final List<Element> children = new ArrayList<>();
     private final List<BedrockIconButton> catBtns = new ArrayList<>();
-    public static final List<ItemButton> buttons = new ArrayList<>();
 
     private static final Identifier ITEMS = MainClass.id("textures/gui/test/items_4.png");
     private static final Identifier SCROLLER = MainClass.id("textures/gui/test/scroller.png");
@@ -36,7 +35,6 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
     private static final Identifier SCROLLER_BTN_HVR = MainClass.id("textures/gui/btns/button_hover.png");
 
     private int width, height, x, y;
-    private boolean isOpen;
 
     private int scrollOffset = 0;
     private int maxScroll = 0;
@@ -49,9 +47,6 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
     public static String activeKey = "STRUCTURE_BLOCK";
     private boolean isDraggingScrollbar = false;
 
-    private final float speed = 0.6f;
-    private float animHeight = 0, targetH = 0;
-
     private String currentCategory = "blocks";
     //? if <=1.20.4 {
     /*private ItemStack maceIcon = new ItemStack(Items.DIAMOND_HOE);
@@ -62,14 +57,14 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
                                       ItemsMapper.getPotionItem(Potions.SWIFTNESS, Items.POTION), new ItemStack(Items.ORANGE_SHULKER_BOX), new ItemStack(Items.NETHERITE_INGOT)};
     private final String[] categoriesList = {"blocks", "tools", "foods", "potions", "colored", "gold"};
 
-    public IconSelector(int width, int height, int x, int y) {
+    private final BindsEditor screen;
+
+    public IconSelector(BindsEditor screen, int x, int y, int width, int height) {
         this.x = x;
-        this.width = width;
         this.y = y;
+        this.width = width;
         this.height = height;
-        this.targetH = this.y + this.height + 22;
-        buttons.clear();
-        isOpen = false;
+        this.screen = screen;
         createButtons();
 
         int catNum = 6;
@@ -85,17 +80,13 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
                 createButtons();
             }, categories[i], 0xFFFFFFFF, 0xFF83CA6f, 0xFF212121, 0xFFFFFFFF);
             if (i == 0) cat.setPressed(true);
-            catBtns.add(cat);
+            this.catBtns.add(cat);
+            this.children.add(cat);
         }
     }
 
-    private float clampSpeed(float value) {
-        return MathHelper.clamp(value, 0.001f, 1.0f);
-    }
-
     private void createButtons() {
-        buttons.clear();
-
+        this.children.removeIf(element -> element instanceof ItemButton);
         Map<String, ItemStack> sourceMap = ItemsMapper.categories.getOrDefault(currentCategory, ItemsMapper.itemStackMap);
         List<Map.Entry<String, ItemStack>> fullList = new ArrayList<>(sourceMap.entrySet());
 
@@ -118,14 +109,14 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
             String key = entry.getKey();
 
             ItemButton button = new ItemButton(bx, by, 18, stack, () -> {
-                MinecraftClient.getInstance().getSoundManager()
-                        .play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                BindsEditor.editIconBtn.setIcon(stack);
-                BindsEditor.editIconBtnString = key;
+                screen.getBasicOptionsWindow().getEditIcon().setIcon(stack);
                 updateButtons(key);
+                BindsEditor.editIconBtnString = key;
+                if (!BindsEditor.getCBind().actions.isEmpty())  {
+                    screen.saveBind();
+                }
             }, ITEMS, key);
-
-            buttons.add(button);
+            this.children.add(button);
         }
 
         int rowAmount = (int) Math.ceil(fullList.size() / (float) COLUMNS);
@@ -134,58 +125,57 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
         updateButtons(activeKey);
     }
 
-    public static void pickRandom() {
+    public void pickRandom() {
         if (ItemsMapper.itemStackMap.isEmpty()) return;
 
         List<Map.Entry<String, ItemStack>> entries = new ArrayList<>(ItemsMapper.itemStackMap.entrySet());
         Map.Entry<String, ItemStack> entry = entries.get(new Random().nextInt(entries.size()));
 
         String key = entry.getKey();
-        BindsEditor.editIconBtn.setIcon(entry.getValue());
-        BindsEditor.editIconBtnString = key;
+        screen.getBasicOptionsWindow().getEditIcon().setIcon(entry.getValue());
         updateButtons(key);
-    }
-
-    public static void updateButtons(String key) {
-        activeKey = key;
-        for (ItemButton btn : buttons) {
-            boolean selected = btn.getKey().equals(key);
-            btn.setSelected(selected);
+        BindsEditor.editIconBtnString = key;
+        if (!BindsEditor.getCBind().actions.isEmpty())  {
+            screen.saveBind();
         }
     }
 
-    public int getX() {
-        return x;
+    public void updateButtons(String key) {
+        activeKey = key;
+        for (Element element : children) {
+            if (element instanceof ItemButton btn) {
+                boolean selected = btn.getKey().equals(key);
+                btn.setSelected(selected);
+            }
+        }
     }
 
-    public int getY() {
-        return y;
-    }
+    public int getX() { return x; }
+    public int getY() { return y; }
 
-    public void open(boolean o) {
-        this.isOpen = o;
+    public void setX(int x) { this.x = x; }
+    public void setY(int y) { this.y = y; }
+
+    public void resetScroll() {
+        scrollOffset = 0;
+        currentCategory = "blocks";
+        for (BedrockIconButton btn : catBtns) { btn.setPressed(false); }
+        catBtns.get(0).setPressed(true);
+        createButtons();
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
-        //? if <1.21.6 {
-        MatrixStack matrices = ctx.getMatrices();
-        matrices.push();
-        //? }
-        if (isOpen) {
-            this.animHeight = MathHelper.lerp(clampSpeed(speed * delta), this.animHeight, targetH);
-            if (Math.abs(this.animHeight - targetH) < 0.1f) this.animHeight = targetH;
-        } else {
-            this.animHeight = MathHelper.lerp(clampSpeed(speed * delta), this.animHeight, 0);
-            if (Math.abs(this.animHeight - 0) < 0.1f) this.animHeight = 0;
-        }
-        ctx.enableScissor(this.x, this.y, this.x + this.width + 14, Math.round(this.animHeight));
-
-        for (ItemButton button : buttons) {
-            button.render(ctx, mouseX, mouseY, delta);
-        }
-        for (BedrockIconButton button : catBtns) {
-            button.render(ctx, mouseX, mouseY, delta);
+    public void render(
+            //? if >=1.20 {
+            DrawContext ctx
+            //? } else {
+            /*MatrixStack ctx
+             *///? }
+            , int mouseX, int mouseY, float delta) {
+        for (Element element : this.children) {
+            if (element instanceof Drawable drawable) {
+                drawable.render(ctx, mouseX, mouseY, delta);
+            }
         }
 
         int scrollbarX = this.x + this.width + 1;
@@ -197,28 +187,44 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
         int scrollbarColor = (isHoveringScrollbar || isDraggingScrollbar) ? 0xFFFFFFFF : 0xFF8B8B8B;
         GUIUtils.drawResizableBox(ctx, SCROLLER, this.x + this.width, this.y, 10, this.height, 1, 3);
         GUIUtils.drawResizableBox(ctx, scrollbarTexture, this.x + this.width + 1, this.y + 1 + scrollBarOffset, 8, barSize, 3, 7);
-        ctx.drawHorizontalLine(this.x + this.width + 3, this.x + this.width + 6, this.y + (barSize / 2) + scrollBarOffset, scrollbarColor);
-        ctx.drawHorizontalLine(this.x + this.width + 3, this.x + this.width + 6, this.y + (barSize / 2) + scrollBarOffset - 2, scrollbarColor);
-        ctx.drawHorizontalLine(this.x + this.width + 3, this.x + this.width + 6, this.y + (barSize / 2) + scrollBarOffset + 2, scrollbarColor);
+        GUIUtils.drawFill(ctx,
+                this.x + this.width + 3,
+                this.y + (barSize / 2) + scrollBarOffset,
+                this.x + this.width + 7,
+                this.y + (barSize / 2) + scrollBarOffset + 1,
+                scrollbarColor);
 
-        ctx.disableScissor();
-        //? if <1.21.6 {
-        matrices.pop();
-        //? }
+        GUIUtils.drawFill(ctx,
+                this.x + this.width + 3,
+                this.y + (barSize / 2) + scrollBarOffset - 2,
+                this.x + this.width + 7,
+                this.y + (barSize / 2) + scrollBarOffset - 1,
+                scrollbarColor);
+
+        GUIUtils.drawFill(ctx,
+                this.x + this.width + 3,
+                this.y + (barSize / 2) + scrollBarOffset + 2,
+                this.x + this.width + 7,
+                this.y + (barSize / 2) + scrollBarOffset + 3,
+                scrollbarColor);
     }
 
+    //? if >=1.17 {
     @Override
     public void appendNarrations(NarrationMessageBuilder builder) { }
+    //? }
 
     @Override
     public List<? extends Element> children() {
         return children;
     }
 
+    //? if >=1.17 {
     @Override
     public SelectionType getType() {
         return SelectionType.NONE;
     }
+    //? }
 
     public void updateScrollLogic(int rowAmount) {
         this.maxScroll = Math.max(0, rowAmount - 7); // 7 видимых строк
@@ -232,11 +238,22 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
         scrollBarOffset = (int)(scrollProgress * scrollArea);
     }
 
+    public boolean isMouseInside(double mouseX, double mouseY) {
+        float windowX = this.x;
+        float windowY = this.y;
+        float windowWidth = this.width;
+        float windowHeight = this.height;
+
+        return mouseX >= windowX &&
+                mouseX <= windowX + windowWidth &&
+                mouseY >= windowY &&
+                mouseY <= windowY + windowHeight;
+    }
+
     //? if >=1.20.2 {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (!isOpen) return false;
-
+        if (!isMouseInside(mouseX, mouseY)) return false;
         scrollOffset = MathHelper.clamp(scrollOffset - (int) verticalAmount, 0, maxScroll);
 
         float scrollProgress = maxScroll > 0 ? scrollOffset / (float) maxScroll : 0;
@@ -249,8 +266,7 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
     //? } else {
     /*@Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (!isOpen) return false;
-
+        if (!isMouseOver(mouseX, mouseY)) return false;
         scrollOffset = MathHelper.clamp(scrollOffset - (int) amount, 0, maxScroll);
 
         float scrollProgress = maxScroll > 0 ? scrollOffset / (float) maxScroll : 0;
@@ -262,24 +278,11 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
     }
     *///? }
 
-    @Override
-    public void mouseMoved(double mouseX, double mouseY) {
-        if (!isOpen) return;
-        for (Element element : catBtns) {
-            element.mouseMoved(mouseX, mouseY);
-        }
-        for (Element element : buttons) {
-            element.mouseMoved(mouseX, mouseY);
-        }
-    }
-
     private int dragStartY = 0;
     private int dragStartScrollOffset = 0;
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (!isOpen) return false;
-
         if (button == 0) {
             int barX = this.x + this.width + 1;
             int barY = this.y + 1 + scrollBarOffset;
@@ -291,59 +294,36 @@ public class IconSelector extends AbstractParentElement implements Drawable, Ele
                 return true;
             }
         }
-
-        for (BedrockIconButton btn : catBtns) {
-            if (btn.isMouseOver(mouseX, mouseY)) {
-                btn.mouseClicked(mouseX, mouseY, button);
-                return true;
-            }
-        }
-
-        for (ItemButton btn : buttons) {
-            if (btn.isMouseOver(mouseX, mouseY)) {
-                btn.mouseClicked(mouseX, mouseY, button);
-                return true;
-            }
-        }
-
-        return true;
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (!isOpen) return false;
-
         if (button == 0 && isDraggingScrollbar) {
             isDraggingScrollbar = false;
+            return true;
         }
-
-        boolean handled = false;
-        for (Element element : catBtns) {
-            if (element.mouseReleased(mouseX, mouseY, button)) handled = true;
-        }
-        for (Element element : buttons) {
-            if (element.mouseReleased(mouseX, mouseY, button)) handled = true;
-        }
-        return handled;
+        return super.mouseReleased(mouseX, mouseY, button);
     }
-
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (!isOpen || !isDraggingScrollbar) return false;
+        if (isDraggingScrollbar && button == 0) {
+            int trackHeight = height - 2;
+            int scrollArea = trackHeight - barSize;
 
-        int trackHeight = height - 2;
-        int scrollArea = trackHeight - barSize;
+            int dy = (int) mouseY - dragStartY;
 
-        int dy = (int) mouseY - dragStartY;
+            float scrollProgress = (float) dy / scrollArea;
+            scrollOffset = MathHelper.clamp(dragStartScrollOffset + Math.round(scrollProgress * maxScroll), 0, maxScroll);
 
-        float scrollProgress = (float) dy / scrollArea;
-        scrollOffset = MathHelper.clamp(dragStartScrollOffset + Math.round(scrollProgress * maxScroll), 0, maxScroll);
+            float newProgress = maxScroll > 0 ? scrollOffset / (float) maxScroll : 0;
+            scrollBarOffset = (int)(newProgress * scrollArea);
 
-        float newProgress = maxScroll > 0 ? scrollOffset / (float) maxScroll : 0;
-        scrollBarOffset = (int)(newProgress * scrollArea);
+            createButtons();
+            return true;
+        }
 
-        createButtons();
-        return true;
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 }

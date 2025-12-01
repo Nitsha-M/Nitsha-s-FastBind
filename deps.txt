@@ -1,0 +1,433 @@
+Running Stonecutter 0.7.10
+
+> Configure project :1.16.5-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.17.1-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.17.1-forge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to reobfJar
+
+> Configure project :1.18-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.18-forge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to reobfJar
+
+> Configure project :1.18.1-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.18.1-forge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to reobfJar
+
+> Configure project :1.18.2-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.18.2-forge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to reobfJar
+
+> Configure project :1.19-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.19-forge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to reobfJar
+
+> Configure project :1.19.1-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.19.1-forge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to reobfJar
+
+> Configure project :1.19.2-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.19.2-forge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to reobfJar
+
+> Configure project :1.19.3-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.19.3-forge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to reobfJar
+
+> Configure project :1.19.4-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.19.4-forge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to reobfJar
+
+> Configure project :1.20.1-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.20.1-forge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to reobfJar
+
+> Configure project :1.20.2-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.20.4-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.20.4-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+
+> Configure project :1.20.6-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.20.6-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+
+> Configure project :1.21.1-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.21.1-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+
+> Configure project :1.21.10-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.21.10-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+Failed to parse MC version from NeoForge version 21.10.18-beta. Using capabilities of latest known Minecraft version with Minecraft version 1.21.10.
+
+> Configure project :1.21.2-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.21.2-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+
+> Configure project :1.21.3-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.21.3-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+
+> Configure project :1.21.4-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.21.4-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+
+> Configure project :1.21.5-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.21.5-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+
+> Configure project :1.21.6-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.21.6-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+
+> Configure project :1.21.7-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.21.7-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+
+> Configure project :1.21.8-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.21.8-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+
+> Configure project :1.21.9-fabric
+Modstitch/Common 0.7.1-unstable
+Fabric Loom: 1.11.8
+Final jar task set to remapJar
+Named jar task set to jar
+
+> Configure project :1.21.9-neoforge
+Modstitch/Common 0.7.1-unstable
+Named jar task set to jar
+Final jar task set to jar
+
+> Task :1.21.4-fabric:dependencies
+
+------------------------------------------------------------
+Project ':1.21.4-fabric'
+------------------------------------------------------------
+
+annotationProcessor - Annotation processors and their dependencies for source set 'main'.
++--- org.ow2.asm:asm:9.8
++--- org.ow2.asm:asm-analysis:9.8
++--- org.ow2.asm:asm-commons:9.8
++--- org.ow2.asm:asm-tree:9.8
+|    \--- org.ow2.asm:asm:9.8
++--- org.ow2.asm:asm-util:9.8
++--- net.fabricmc:sponge-mixin:0.15.5+mixin.0.8.7
++--- io.github.llamalad7:mixinextras-fabric:0.4.1
+\--- net.fabricmc:fabric-mixin-compile-extensions:0.6.0
+     +--- net.fabricmc:mapping-io:0.2.1
+     |    \--- org.ow2.asm:asm:9.1 -> 9.8
+     +--- net.fabricmc:sponge-mixin:0.11.4+mixin.0.8.5 -> 0.15.5+mixin.0.8.7
+     +--- org.ow2.asm:asm-tree:9.4 -> 9.8 (*)
+     \--- org.ow2.asm:asm:9.4 -> 9.8
+
+api - API dependencies for the 'main' feature. (n)
+No dependencies
+
+apiDependenciesMetadata
+\--- org.jetbrains.kotlin:kotlin-stdlib:2.1.20
+
+apiElements - API elements for the 'main' feature. (n)
+No dependencies
+
+apiElements-published (n)
+No dependencies
+
+cfrDecompilerClasspath
+\--- net.fabricmc:cfr:0.2.2
+
+compileClasspath - Compile classpath for 'main'.
++--- org.jetbrains.kotlin:kotlin-stdlib:2.1.20
+|    \--- org.jetbrains:annotations:13.0 -> 26.0.2
++--- org.jetbrains:annotations:26.0.2
++--- org.ow2.asm:asm:9.8
++--- org.ow2.asm:asm-analysis:9.8
++--- org.ow2.asm:asm-commons:9.8
++--- org.ow2.asm:asm-tree:9.8
++--- org.ow2.asm:asm-util:9.8
++--- net.fabricmc:sponge-mixin:0.15.5+mixin.0.8.7
++--- io.github.llamalad7:mixinextras-fabric:0.4.1
++--- com.fasterxml.jackson.core:jackson-annotations:2.13.4
++--- com.fasterxml.jackson.core:jackson-core:2.13.4
++--- com.fasterxml.jackson.core:jackson-databind:2.13.4.2
++--- com.github.oshi:oshi-core:6.6.5
++--- com.github.stephenc.jcip:jcip-annotations:1.0-1
++--- com.google.code.gson:gson:2.11.0
++--- com.google.guava:failureaccess:1.0.2
++--- com.google.guava:guava:33.3.1-jre
++--- com.ibm.icu:icu4j:76.1
++--- com.microsoft.azure:msal4j:1.17.2
++--- com.mojang:authlib:6.0.57
++--- com.mojang:blocklist:1.0.10
++--- com.mojang:brigadier:1.3.10
++--- com.mojang:datafixerupper:8.0.16
++--- com.mojang:jtracy:1.0.29
++--- com.mojang:logging:1.5.10
++--- com.mojang:patchy:2.2.10
++--- com.mojang:text2speech:1.17.9
++--- com.nimbusds:content-type:2.3
++--- com.nimbusds:lang-tag:1.7
++--- com.nimbusds:nimbus-jose-jwt:9.40
++--- com.nimbusds:oauth2-oidc-sdk:11.18
++--- commons-codec:commons-codec:1.17.1
++--- commons-io:commons-io:2.17.0
++--- commons-logging:commons-logging:1.3.4
++--- io.netty:netty-buffer:4.1.115.Final
++--- io.netty:netty-codec:4.1.115.Final
++--- io.netty:netty-common:4.1.115.Final
++--- io.netty:netty-handler:4.1.115.Final
++--- io.netty:netty-resolver:4.1.115.Final
++--- io.netty:netty-transport-classes-epoll:4.1.115.Final
++--- io.netty:netty-transport-native-unix-common:4.1.115.Final
++--- io.netty:netty-transport:4.1.115.Final
++--- it.unimi.dsi:fastutil:8.5.15
++--- net.java.dev.jna:jna-platform:5.15.0
++--- net.java.dev.jna:jna:5.15.0
++--- net.minidev:accessors-smart:2.5.1
++--- net.minidev:json-smart:2.5.1
++--- net.sf.jopt-simple:jopt-simple:5.0.4
++--- org.apache.commons:commons-compress:1.27.1
++--- org.apache.commons:commons-lang3:3.17.0
++--- org.apache.httpcomponents:httpclient:4.5.14
++--- org.apache.httpcomponents:httpcore:4.4.16
++--- org.apache.logging.log4j:log4j-api:2.24.1
++--- org.apache.logging.log4j:log4j-core:2.24.1
++--- org.apache.logging.log4j:log4j-slf4j2-impl:2.24.1
++--- org.jcraft:jorbis:0.0.17
++--- org.joml:joml:1.10.8
++--- org.lwjgl:lwjgl-freetype:3.3.3
++--- org.lwjgl:lwjgl-glfw:3.3.3
++--- org.lwjgl:lwjgl-jemalloc:3.3.3
++--- org.lwjgl:lwjgl-openal:3.3.3
++--- org.lwjgl:lwjgl-opengl:3.3.3
++--- org.lwjgl:lwjgl-stb:3.3.3
++--- org.lwjgl:lwjgl-tinyfd:3.3.3
++--- org.lwjgl:lwjgl:3.3.3
++--- org.lz4:lz4-java:1.8.0
++--- org.ow2.asm:asm:9.6 -> 9.8
++--- org.slf4j:slf4j-api:2.0.16
++--- net.minecraft:minecraft-merged-a172fc6613:1.21.4-loom.mappings.1_21_4.layered+hash.812975100-v2
++--- io.netty:netty-transport-native-epoll:4.1.115.Final
++--- net.fabricmc:fabric-loader:0.16.14
++--- remapped.net.fabricmc.fabric-api:fabric-api-8cd39af0:0.119.4+1.21.4
++--- remapped.net.fabricmc.fabric-api:fabric-transfer-api-v1-8cd39af0:5.4.9+efa825c904
++--- remapped.net.fabricmc.fabric-api:fabric-api-lookup-api-v1-8cd39af0:1.6.86+b1caf1e904
++--- remapped.net.fabricmc.fabric-api:fabric-blockrenderlayer-v1-8cd39af0:2.0.8+7feeb73304
++--- remapped.net.fabricmc.fabric-api:fabric-client-tags-api-v1-8cd39af0:1.1.29+20ea1e2304
++--- remapped.net.fabricmc.fabric-api:fabric-command-api-v1-8cd39af0:1.2.62+f71b366f04
++--- remapped.net.fabricmc.fabric-api:fabric-commands-v0-8cd39af0:0.2.79+df3654b304
++--- remapped.net.fabricmc.fabric-api:fabric-command-api-v2-8cd39af0:2.2.41+e496eb1504
++--- remapped.net.fabricmc.fabric-api:fabric-content-registries-v0-8cd39af0:9.1.19+25d1a67604
++--- remapped.net.fabricmc.fabric-api:fabric-data-generation-api-v1-8cd39af0:22.3.1+0f4e5f5504
++--- remapped.net.fabricmc.fabric-api:fabric-convention-tags-v1-8cd39af0:2.1.20+7f945d5b04
++--- remapped.net.fabricmc.fabric-api:fabric-convention-tags-v2-8cd39af0:2.14.1+aebda09404
++--- remapped.net.fabricmc.fabric-api:fabric-data-attachment-api-v1-8cd39af0:1.6.2+e99da0f704
++--- remapped.net.fabricmc.fabric-api:fabric-entity-events-v1-8cd39af0:2.0.15+62245bef04
++--- remapped.net.fabricmc.fabric-api:fabric-events-interaction-v0-8cd39af0:4.0.4+a4eebcf004
++--- remapped.net.fabricmc.fabric-api:fabric-gametest-api-v1-8cd39af0:2.0.26+7feeb73304
++--- remapped.net.fabricmc.fabric-api:fabric-item-api-v1-8cd39af0:11.4.0+189dd6fe04
++--- remapped.net.fabricmc.fabric-api:fabric-item-group-api-v1-8cd39af0:4.2.2+fcb9601404
++--- remapped.net.fabricmc.fabric-api:fabric-lifecycle-events-v1-8cd39af0:2.5.4+bf2a60eb04
++--- remapped.net.fabricmc.fabric-api:fabric-loot-api-v2-8cd39af0:3.0.38+3f89f5a504
++--- remapped.net.fabricmc.fabric-api:fabric-loot-api-v3-8cd39af0:1.0.26+203e6b2304
++--- remapped.net.fabricmc.fabric-api:fabric-message-api-v1-8cd39af0:6.0.26+238a33c004
++--- remapped.net.fabricmc.fabric-api:fabric-model-loading-api-v1-8cd39af0:4.3.0+ae23723504
++--- remapped.net.fabricmc.fabric-api:fabric-recipe-api-v1-8cd39af0:8.1.1+640e77ae04
++--- remapped.net.fabricmc.fabric-api:fabric-screen-handler-api-v1-8cd39af0:1.3.118+7feeb73304
++--- remapped.net.fabricmc.fabric-api:fabric-registry-sync-v0-8cd39af0:6.1.11+4a9c1ece04
++--- remapped.net.fabricmc.fabric-api:fabric-networking-api-v1-8cd39af0:4.4.0+db5e668204
++--- remapped.net.fabricmc.fabric-api:fabric-object-builder-api-v1-8cd39af0:18.0.14+38b0d59804
++--- remapped.net.fabricmc.fabric-api:fabric-particles-v1-8cd39af0:4.0.14+7feeb73304
++--- remapped.net.fabricmc.fabric-api:fabric-renderer-indigo-8cd39af0:2.0.3+50f0feb204
++--- remapped.net.fabricmc.fabric-api:fabric-renderer-api-v1-8cd39af0:5.0.3+50f0feb204
++--- remapped.net.fabricmc.fabric-api:fabric-rendering-fluids-v1-8cd39af0:3.1.19+7feeb73304
++--- remapped.net.fabricmc.fabric-api:fabric-rendering-v1-8cd39af0:10.2.1+0d31b09f04
++--- remapped.net.fabricmc.fabric-api:fabric-tag-api-v1-8cd39af0:1.0.7+7d48d43904
++--- remapped.net.fabricmc.fabric-api:fabric-resource-loader-v0-8cd39af0:3.1.1+360374ac04
++--- remapped.net.fabricmc.fabric-api:fabric-screen-api-v1-8cd39af0:2.0.38+7feeb73304
++--- remapped.net.fabricmc.fabric-api:fabric-api-base-8cd39af0:0.4.54+b47eab6b04
++--- remapped.net.fabricmc.fabric-api:fabric-biome-api-v1-8cd39af0:15.0.6+b1c29d8e04
++--- remapped.net.fabricmc.fabric-api:fabric-block-api-v1-8cd39af0:1.0.31+7feeb73304
++--- remapped.net.fabricmc.fabric-api:fabric-rendering-data-attachment-v1-8cd39af0:0.3.58+73761d2e04
++--- remapped.net.fabricmc.fabric-api:fabric-block-view-api-v2-8cd39af0:1.0.20+9c49cc8c04
++--- remapped.net.fabricmc.fabric-api:fabric-client-gametest-api-v1-8cd39af0:4.1.1+6816ccd404
++--- remapped.net.fabricmc.fabric-api:fabric-crash-report-info-v1-8cd39af0:0.3.6+7feeb73304
++--- remapped.net.fabricmc.fabric-api:fabric-dimensions-v1-8cd39af0:4.0.10+7feeb73304
++--- remapped.net.fabricmc.fabric-api:fabric-game-rule-api-v1-8cd39af0:1.0.63+7d48d43904
++--- remapped.net.fabricmc.fabric-api:fabric-keybindings-v0-8cd39af0:0.2.55+df3654b304
++--- remapped.net.fabricmc.fabric-api:fabric-key-binding-api-v1-8cd39af0:1.0.57+7d48d43904
++--- remapped.net.fabricmc.fabric-api:fabric-resource-conditions-api-v1-8cd39af0:5.0.13+203e6b2304
++--- remapped.net.fabricmc.fabric-api:fabric-sound-api-v1-8cd39af0:1.0.32+7feeb73304
++--- remapped.net.fabricmc.fabric-api:fabric-transitive-access-wideners-v1-8cd39af0:6.3.2+56e78b9b04
+\--- remapped.com.terraformersmc:modmenu-8cd39af0:13.0.3
+
+compileOnly - Compile only dependencies for 'main'. (n)
+\--- org.jetbrains:annotations:26.0.2 (n)
+
+compileOnlyApi - Compile-only API dependencies for the 'main' feature. (n)
+No dependencies
+
+compileOnlyDependenciesMetadata
+\--- org.jetbrains:annotations:26.0.2
+
+default - Configuration for default artifacts. (n)
+No dependencies
+
+fernflowerDecompilerClasspath
+Terminate batch job (Y/N)? 

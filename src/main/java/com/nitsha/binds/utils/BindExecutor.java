@@ -1,103 +1,217 @@
 package com.nitsha.binds.utils;
 
-import com.nitsha.binds.configs.BindEntry;
-import com.nitsha.binds.configs.BindsConfig;
+import com.nitsha.binds.configs.Bind;
+import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.gui.screen.BindsGUI;
 import com.nitsha.binds.gui.utils.TextUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
-import net.minecraft.util.Util;
+import net.minecraft.client.Minecraft;
+//? if <1.19.3 {
+/*import net.minecraft.network.protocol.game.ServerboundChatPacket;*/
+//?}
+import net.minecraft.Util;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import org.lwjgl.glfw.GLFW;
-//? if <1.19 {
-//? }
 
 import java.util.*;
 
 public class BindExecutor {
     private static final List<BindTask> activeTasks = new ArrayList<>();
 
-    public static void startBind(BindEntry bind) {
-        MinecraftClient client = MinecraftClient.getInstance();
+    public static void startBind(Bind bind) {
+        Minecraft client = Minecraft.getInstance();
         assert client.player != null;
 
-        if ((client.currentScreen != null && !(client.currentScreen instanceof BindsGUI)) || bind.actions.isEmpty()) return;
+        if ((client.screen != null && !(client.screen instanceof BindsGUI)) || bind.actions.isEmpty())
+            return;
 
         BindTask task = new BindTask(bind, client);
         activeTasks.add(task);
     }
 
-    public static void onTick(MinecraftClient client) {
+    // ? if fabric {
+    public static void onTick(Minecraft client) {
         activeTasks.removeIf(BindTask::tick);
     }
+    // ?} elif neoforge {
+    /*
+     public static void
+     onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event)
+     {
+     activeTasks.removeIf(BindTask::tick);
+     }
+     */
+    // ?} else {
+    /*
+     public static void
+     onClientTick(net.minecraftforge.event.TickEvent.ClientTickEvent event) {
+     if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
+     activeTasks.removeIf(BindTask::tick);
+     }
+     */// ?}
 
     private static class BindTask {
         private final Queue<Runnable> actions = new LinkedList<>();
         private long waitUntil = 0;
 
-        BindTask(BindEntry bind, MinecraftClient client) {
-            for (String raw : bind.actions) {
-
-                FastbindParser.ParsedEntry entry = FastbindParser.parse(raw);
+        BindTask(Bind bind, Minecraft client) {
+            for (Map<String, Object> action : bind.actions) {
+                String type = (String) action.get("type");
+                Object value = action.get("value");
 
                 actions.add(() -> {
-                    waitUntil = Util.getMeasuringTimeMs() + 10;
+                    waitUntil = Util.getMillis() + 10;
                 });
 
-                switch (entry.type) {
-                    case 1 -> {
-                        String cmd = entry.value;
-                        if(cmd.isEmpty()) break;
-                        if (client.player != null && client.getNetworkHandler() != null) {
-                            //? if >=1.19.3 {
-                            actions.add(() -> client.player.networkHandler.sendChatCommand(cmd));
-                            //? } else if >=1.19 {
-                            /*actions.add(() -> client.player.sendCommand(cmd));*/
-                            //? } else {
-                            /*client.player.networkHandler.sendPacket(new ChatMessageC2SPacket("/" + cmd));*/
-                            //? }
+                switch (type) {
+                    case "command":
+                        String cmd = String.valueOf(value);
+                        if (cmd.isEmpty())
+                            break;
+                        if (client.player != null && client.getConnection() != null) {
+                            // ? if >=1.19.3 {
+                            actions.add(() -> client.player.connection.sendCommand(cmd));
+                            // ?} else if >=1.19 {
+                            /*actions.add(() -> client.player.chat("/" + cmd));*/
+                            // ?} else {
+                            /*actions.add(() -> client.player.connection.send(new ServerboundChatPacket("/" + cmd)));*/
+                            // ?}
                         }
-                    }
-                    case 2 -> {
+                    break;
+                    case "delay":
                         try {
-                            String msText = entry.value;
-                            if (msText.isEmpty()) msText = "0";
-                            int ms = Integer.parseInt(msText);
+                            int ms;
+                            if (value instanceof Number) {
+                                ms = ((Number) value).intValue();
+                            } else {
+                                String msText = String.valueOf(value);
+                                if (msText.isEmpty())
+                                    msText = "0";
+                                ms = Integer.parseInt(msText);
+                            }
                             actions.add(() -> {
-                                long end = Util.getMeasuringTimeMs() + ms;
+                                long end = Util.getMillis() + ms;
                                 waitUntil = end;
                             });
-                        } catch (NumberFormatException ignored) {}
-                    }
-                    case 3 -> {
+                        } catch (NumberFormatException ignored) {
+                        }
+                    break;
+                    case "keybind":
                         try {
-                            int keyCode = Integer.parseInt(entry.value);
-                            if (keyCode == 0) break;
-                            long handle = MinecraftClient.getInstance().getWindow().getHandle();
+                            int keyCode;
+                            if (value instanceof Number) {
+                                keyCode = ((Number) value).intValue();
+                            } else {
+                                keyCode = Integer.parseInt(String.valueOf(value));
+                            }
+                            if (keyCode == 0)
+                                break;
+                            long handle = Minecraft.getInstance().getWindow().getWindow();
                             int scancode = GLFW.glfwGetKeyScancode(keyCode);
 
                             actions.add(() -> {
-                                client.keyboard.onKey(handle, keyCode, scancode, GLFW.GLFW_PRESS, 0);
+                                client.keyboardHandler.keyPress(handle, keyCode, scancode, GLFW.GLFW_PRESS, 0);
                             });
 
                             actions.add(() -> waitUntil = 100);
 
                             actions.add(() -> {
-                                client.keyboard.onKey(handle, keyCode, scancode, GLFW.GLFW_RELEASE, 0);
+                                client.keyboardHandler.keyPress(handle, keyCode, scancode, GLFW.GLFW_RELEASE, 0);
                             });
-                        } catch (NumberFormatException ignored) {}
-                    }
+                        } catch (NumberFormatException ignored) {
+                        }
+                    break;
+                    case "chatMessage":
+                        MutableComponent message;
+                        if (value instanceof Map) {
+                            Map<String, Object> formattedText = (Map<String, Object>) value;
+                            String text = (String) formattedText.get("text");
+                            message = Component.empty();
+
+                            if (formattedText.containsKey("marks")) {
+                                List<Map<String, Object>> marks = (List<Map<String, Object>>) formattedText
+                                        .get("marks");
+                                Style currentStyle = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
+                                int lastPos = 0;
+
+                                for (Map<String, Object> markData : marks) {
+                                    int pos = ((Number) markData.get("pos")).intValue();
+                                    int styleCode = ((Number) markData.get("style")).intValue();
+
+                                    if (pos > lastPos) {
+                                        message = message.append(
+                                                Component.literal(text.substring(lastPos, pos)).setStyle(currentStyle));
+                                    }
+
+                                    currentStyle = applyStyleCode(styleCode, currentStyle);
+                                    lastPos = pos;
+                                }
+
+                                if (lastPos < text.length()) {
+                                    message = message
+                                            .append(Component.literal(text.substring(lastPos)).setStyle(currentStyle));
+                                }
+                            } else {
+                                message = Component.literal(text);
+                            }
+                        } else {
+                            message = Component.literal(String.valueOf(value));
+                        }
+
+                        assert client.player != null;
+                        client.player.displayClientMessage(message, false);
+                    break;
+                    case "titleMessage":
+                        if (value instanceof Map) {
+                            Map<String, Object> titleData = (Map<String, Object>) value;
+
+                            MutableComponent titleComponent = Component.empty();
+                            if (titleData.containsKey("title") && titleData.get("title") instanceof Map) {
+                                Map<String, Object> titleFormatted = (Map<String, Object>) titleData.get("title");
+                                titleComponent = buildFormattedComponent(titleFormatted);
+                            }
+
+                            MutableComponent subtitleComponent = Component.empty();
+                            if (titleData.containsKey("subtitle") && titleData.get("subtitle") instanceof Map) {
+                                Map<String, Object> subtitleFormatted = (Map<String, Object>) titleData.get("subtitle");
+                                subtitleComponent = buildFormattedComponent(subtitleFormatted);
+                            }
+
+                            final MutableComponent finalTitle = titleComponent;
+                            final MutableComponent finalSubtitle = subtitleComponent;
+
+                            if (!finalTitle.getString().isEmpty() || !finalSubtitle.getString().isEmpty()) {
+                                actions.add(() -> {
+                                    if (client.gui != null) {
+                                        //? if >=1.21.6 {
+                                        // client.gui.clearTitles();
+                                        //? } else {
+                                        client.gui.clear();
+                                        //? }
+
+                                        client.gui.setTitle(finalTitle);
+                                        client.gui.setSubtitle(finalSubtitle);
+
+                                        client.gui.setTimes(10, 70, 20);
+                                    }
+                                });
+                            }
+                        }
+                    break;
                 }
             }
             assert client.player != null;
-            if (BindsConfig.getBooleanConfig("bindMsg", true)) {
-                client.player.sendMessage(TextUtils.translatable("nitsha.binds.bindActivate", "§3" + bind.name + "§r"), true);
+            if (BindsStorage.getBooleanConfig("bindMsg", true)) {
+                client.player.displayClientMessage(
+                        TextUtils.translatable("nitsha.binds.bindActivate", "§3" + bind.name + "§r"), true);
             }
         }
 
-
         boolean tick() {
             if (waitUntil > 0) {
-                if (Util.getMeasuringTimeMs() < waitUntil) {
+                if (Util.getMillis() < waitUntil) {
                     return false;
                 }
                 waitUntil = 0;
@@ -112,5 +226,91 @@ public class BindExecutor {
 
             return actions.isEmpty() && waitUntil <= 0;
         }
+
+        private static Style applyStyleCode(int code, Style baseStyle) {
+            if (code >= 0 && code <= 15) {
+                int[] colors = {
+                        0x1a1a1a, 0x0000AA, 0x00AA00, 0x00AAAA,
+                        0xAA0000, 0xAA00AA, 0xFFAA00, 0xAAAAAA,
+                        0x555555, 0x5555FF, 0x55FF55, 0x55FFFF,
+                        0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF
+                };
+                Style newStyle = baseStyle.withColor(TextColor.fromRgb(colors[code]));
+                if (baseStyle.isBold())
+                    newStyle = newStyle.withBold(true);
+                if (baseStyle.isItalic())
+                    newStyle = newStyle.withItalic(true);
+                if (baseStyle.isUnderlined())
+                    newStyle = newStyle.withUnderlined(true);
+                if (baseStyle.isStrikethrough())
+                    newStyle = newStyle.withStrikethrough(true);
+                if (baseStyle.isObfuscated())
+                    newStyle = newStyle.withObfuscated(true);
+                return newStyle;
+            }
+
+            switch (code) {
+                case 20:
+                    return baseStyle.withBold(true);
+                case 21:
+                    return baseStyle.withItalic(true);
+                case 22:
+                    return baseStyle.withUnderlined(true);
+                case 23:
+                    return baseStyle.withStrikethrough(true);
+                case 24:
+                    return baseStyle.withObfuscated(true);
+                case 99:
+                    return Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
+                default:
+                    return baseStyle;
+            }
+        }
+
+        private static MutableComponent buildFormattedComponent(Map<String, Object> formattedText) {
+            String text = (String) formattedText.get("text");
+            MutableComponent message = Component.empty();
+
+            if (text.isEmpty()) {
+                return message;
+            }
+
+            if (!formattedText.containsKey("marks")) {
+                return Component.literal(text);
+            }
+
+            List<Map<String, Object>> marks = (List<Map<String, Object>>) formattedText.get("marks");
+            if (marks.isEmpty()) {
+                return Component.literal(text);
+            }
+
+            marks.sort((a, b) -> {
+                int posA = ((Number) a.get("pos")).intValue();
+                int posB = ((Number) b.get("pos")).intValue();
+                return Integer.compare(posA, posB);
+            });
+
+            Style currentStyle = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
+            int lastPos = 0;
+
+            for (Map<String, Object> markData : marks) {
+                int pos = ((Number) markData.get("pos")).intValue();
+                int styleCode = ((Number) markData.get("style")).intValue();
+
+                if (pos > lastPos && pos <= text.length()) {
+                    message = message.append(Component.literal(text.substring(lastPos, pos)).setStyle(currentStyle));
+                }
+
+                currentStyle = applyStyleCode(styleCode, currentStyle);
+                lastPos = pos;
+            }
+
+            if (lastPos < text.length()) {
+                message = message.append(Component.literal(text.substring(lastPos)).setStyle(currentStyle));
+            }
+
+            return message;
+        }
+
     }
 }

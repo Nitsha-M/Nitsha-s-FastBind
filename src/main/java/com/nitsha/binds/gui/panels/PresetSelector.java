@@ -1,39 +1,43 @@
 package com.nitsha.binds.gui.panels;
 
-import com.nitsha.binds.MainClass;
-import com.nitsha.binds.configs.BindsConfig;
+import com.nitsha.binds.Main;
+import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.gui.screen.BindsEditor;
+import com.nitsha.binds.gui.screen.BindsGUI;
 import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.AnimatedWindow;
 import com.nitsha.binds.gui.widget.PresetListItem;
-import net.minecraft.client.MinecraftClient;
+import com.nitsha.binds.gui.widget.ScrollableWindow;
+import com.nitsha.binds.gui.widget.SmallTextButton;
+import com.mojang.blaze3d.vertex.PoseStack;
 //? if >=1.20 {
-import net.minecraft.client.gui.DrawContext;
-//? } else {
-/*import net.minecraft.client.gui.DrawableHelper;
- *///? }
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+//?}
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PresetSelector extends AnimatedWindow {
-    private static final Identifier SPRESET = MainClass.idSprite("select_preset");
-    private static final Identifier SPRESET_HOVER = MainClass.idSprite("select_preset_hover");
-    private static final Identifier TOP = MainClass.idSprite("top_normal");
-    private static final Identifier TOP_HOVER = MainClass.idSprite("top_hover");
-    private static final Identifier BOTTOM = MainClass.idSprite("bottom_normal");
-    private static final Identifier BOTTOM_HOVER = MainClass.idSprite("bottom_hover");
-    private final List<String> presetNames = (List<String>) BindsConfig.configs.get("presets");
+    private static final ResourceLocation SPRESET = Main.idSprite("select_preset");
+    private static final ResourceLocation SPRESET_HOVER = Main.idSprite("select_preset_hover");
+    private static final ResourceLocation TOP = Main.idSprite("top_normal");
+    private static final ResourceLocation TOP_HOVER = Main.idSprite("top_hover");
+    private static final ResourceLocation BOTTOM = Main.idSprite("bottom_normal");
+    private static final ResourceLocation BOTTOM_HOVER = Main.idSprite("bottom_hover");
+
+    private static final ResourceLocation ADD_NEW = Main.id("textures/gui/test/add_new_icon.png");
 
     private final List<PresetListItem> items = new ArrayList<>();
 
     private boolean isOpen = false;
     public BindsEditor screen;
 
-    public PresetSelector(BindsEditor screen, float x, float y, float width, int height, Identifier t1, Identifier t2, int delay) {
+    private ScrollableWindow presetsList;
+
+    public PresetSelector(BindsEditor screen, float x, float y, float width, int height, ResourceLocation t1, ResourceLocation t2, int delay) {
         super(x, y, width, height, t1, t2, delay);
         items.clear();
         this.screen = screen;
@@ -42,29 +46,47 @@ public class PresetSelector extends AnimatedWindow {
 
     private void initUI(BindsEditor screen) {
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            GUIUtils.addText(ctx, Text.of(GUIUtils.truncateString(BindsEditor.getPresetName(), 15)), 0, 5, 5, "top", "left", 0xFFFFFFFF, false);
+            GUIUtils.addText(ctx, Component.literal(GUIUtils.truncateString(BindsEditor.getPresetName(), 15)), 0, 5, 5, "top", "left", 0xFFFFFFFF, false);
+            if (this.isOpen()) GUIUtils.drawFill(ctx, 5, 15, getWidth() - 5, 16, 0xFF555555);
         });
 
-        this.addElement(GUIUtils.createTexturedBtn(113, 4, 9, 9, new Identifier[]{SPRESET, SPRESET_HOVER}, button -> {
+        this.addElement(GUIUtils.createTexturedBtn(113, 4, 9, 9, new ResourceLocation[]{SPRESET, SPRESET_HOVER}, button -> {
             openSelector(!isOpen);
         }));
-        this.addElement(GUIUtils.createTexturedBtn(91, 4, 9, 9, new Identifier[]{TOP, TOP_HOVER}, button -> {
+        this.addElement(GUIUtils.createTexturedBtn(91, 4, 9, 9, new ResourceLocation[]{TOP, TOP_HOVER}, button -> {
             screen.setNewPreset(-1);
         }));
-        this.addElement(GUIUtils.createTexturedBtn(102, 4, 9, 9, new Identifier[]{BOTTOM, BOTTOM_HOVER}, button -> {
+        this.addElement(GUIUtils.createTexturedBtn(102, 4, 9, 9, new ResourceLocation[]{BOTTOM, BOTTOM_HOVER}, button -> {
             screen.setNewPreset(1);
         }));
 
-        int tY = 15;
-        for (int i = 0; i < 9; i++) {
+        this.presetsList = new ScrollableWindow(2, this.getHeight(), 2, 17, getWidth() - 4, 130, false);
+        this.addElement(this.presetsList);
+
+        generatePresetsList();
+
+        this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.addNew"), 4, 151, 0xFF4d9109, getWidth() - 8, "left", ADD_NEW, ()-> {
+            BindsStorage.addPreset("Preset " + (items.size() + 1));
+            generatePresetsList();
+        }));
+
+        this.open(() -> {});
+    }
+
+    public void generatePresetsList() {
+        this.presetsList.clearChildren();
+        this.presetsList.setScrollableArea(0);
+        this.presetsList.resetScroll();
+        items.clear();
+        int tY = 0;
+        for (int i = 0; i < BindsStorage.presets.size(); i++) {
             int h = 20;
-            PresetListItem item = new PresetListItem(this, presetNames.get(i), 2, tY, this.getWidth() - 4, h, i);
-            this.addElement(item);
+            PresetListItem item = new PresetListItem(this, BindsStorage.presets.get(i).name, 0, tY, this.getWidth() - 4, h, i);
+            this.presetsList.addElement(item);
+            this.presetsList.addScrollableArea(h);
             items.add(item);
             tY += h;
         }
-
-        this.open(() -> {});
     }
 
     public List<PresetListItem> getItems() {
@@ -74,7 +96,7 @@ public class PresetSelector extends AnimatedWindow {
     public void openSelector(boolean status) {
         isOpen = status;
         if (!isOpen) saveAll();
-        this.setHeight(isOpen ? 202 : 19);
+        this.setHeight(isOpen ? 166 : 19);
     }
 
     public void saveAll() {
@@ -90,10 +112,10 @@ public class PresetSelector extends AnimatedWindow {
     @Override
     public void render(
             //? if >=1.20 {
-            DrawContext ctx
-            //? } else {
-            /*MatrixStack ctx
-             *///? }
+            GuiGraphics ctx
+            //?} else {
+            /*PoseStack ctx
+             *///?}
             , int mouseX, int mouseY, float delta) {
         GUIUtils.customScissor(ctx, getX(), getYOffset(), getWidth(), getHeight(), () -> {
             GUIUtils.matricesUtil(ctx, 0, 0, 500, () -> {

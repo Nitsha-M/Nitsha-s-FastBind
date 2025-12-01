@@ -1,3 +1,4 @@
+//? if fabric {
 package com.nitsha.binds.configs;
 
 import com.nitsha.binds.gui.screen.BindsEditor;
@@ -15,3 +16,4 @@ public class ModMenuApiImpl implements ModMenuApi
 		return parent -> new BindsEditor(parent);
 	}
 }
+//? }

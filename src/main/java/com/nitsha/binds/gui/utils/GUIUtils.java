@@ -2,55 +2,50 @@ package com.nitsha.binds.gui.utils;
 
 //? if <1.21.5 {
 import com.mojang.blaze3d.platform.GlStateManager;
-//? }
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
+//?}
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 //? if >=1.20 {
-import net.minecraft.client.gui.DrawContext;
-//? } else {
-/*import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.GuiGraphics;
+//?} else {
+/*import net.minecraft.client.gui.GuiComponent;
 import com.mojang.blaze3d.platform.GlStateManager;
-*///? }
+*///?}
 //? if >1.20.1 {
-import net.minecraft.client.gui.screen.ButtonTextures;
-//? }
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.PressableWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.util.Window;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.components.WidgetSprites;
+//?}
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.resources.ResourceLocation;
 //? if >=1.21.6 {
 /*import com.mojang.blaze3d.pipeline.RenderPipeline;
-import net.minecraft.client.gl.RenderPipelines;
-*///? }
+import net.minecraft.client.renderer.RenderPipelines;
+*///?}
 //? if <1.21.5 {
-import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.resources.model.BakedModel;
 //?}
 import com.mojang.blaze3d.systems.RenderSystem;
-//? if >1.19.2 {
-import net.minecraft.world.World;
-import org.joml.Matrix3x2f;
-import org.joml.Matrix3x2fStack;
+//? if >=1.19.3 {
 import org.joml.Matrix4f;
-import org.joml.Vector4f;
-//? } else {
-/*import net.minecraft.util.math.Matrix4f;*/
-//? }
+//?} else {
+/*import com.mojang.math.Matrix4f;
+ *///? }
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
 
 public class GUIUtils {
-    private static final MinecraftClient MC = MinecraftClient.getInstance();
+    private static final Minecraft MC = Minecraft.getInstance();
+
     // Cut a string
     public static String truncateString(String str, int maxLength) {
         if (str.length() > maxLength) {
@@ -59,63 +54,77 @@ public class GUIUtils {
         return str;
     }
 
-    public static void addText(Object ctx, Text text, int width, int offsetX, int offsetY) {
+    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY) {
         addText(ctx, text, width, offsetX, offsetY, "left", "top", 0xFFFFFFFF, true);
     }
 
-    public static void addText(Object ctx, Text text, int width, int offsetX, int offsetY, String hAlign, String vAlign) {
+    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign) {
         addText(ctx, text, width, offsetX, offsetY, hAlign, vAlign, 0xFFFFFFFF, true);
     }
 
-    public static void addText(Object ctx, Text text, int width, int offsetX, int offsetY, int color) {
+    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY, int color) {
         addText(ctx, text, width, offsetX, offsetY, "left", "top", color, true);
     }
 
-    public static void addText(Object ctx, Text text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color) {
+    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color) {
         addText(ctx, text, width, offsetX, offsetY, hAlign, vAlign, color, true);
     }
 
     // ---------------- Универсальный метод ----------------
 
-    public static void addText(Object ctx, Text text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color, boolean shadow) {
+    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color, boolean shadow) {
         if (text == null || text.getString().isBlank()) return;
-        TextRenderer tr = MC.textRenderer;
-        int chWidth = tr.getWidth(text);
-        int chHeight = tr.fontHeight;
+        Font font = MC.font;
+        int chWidth = font.width(text);
+        int chHeight = font.lineHeight;
 
-        int alignCoordX = switch (hAlign) {
-            case "center" -> (width / 2) - (chWidth / 2) + offsetX;
-            case "right"  -> offsetX - chWidth;
-            default       -> offsetX;
-        };
+        int alignCoordX;
+        switch (hAlign) {
+            case "center":
+                alignCoordX = (width / 2) - (chWidth / 2) + offsetX;
+                break;
+            case "right":
+                alignCoordX = offsetX - chWidth;
+                break;
+            default:
+                alignCoordX = offsetX;
+                break;
+        }
 
-        int alignCoordY = switch (vAlign) {
-            case "center" -> offsetY - (chHeight / 2);
-            case "bottom" -> offsetY - chHeight;
-            default       -> offsetY;
-        };
+        int alignCoordY;
+        switch (vAlign) {
+            case "center":
+                alignCoordY = offsetY - (chHeight / 2);
+                break;
+            case "bottom":
+                alignCoordY = offsetY - chHeight;
+                break;
+            default:
+                alignCoordY = offsetY;
+                break;
+        }
 
         //? if >=1.20 {
-        ((DrawContext)ctx).drawText(tr, text, alignCoordX, alignCoordY, color, shadow);
-        //? } else {
-        /*((MatrixStack)ctx).push();
+        ((GuiGraphics)ctx).drawString(font, text, alignCoordX, alignCoordY, color, shadow);
+        //?} else {
+        /*((PoseStack)ctx).pushPose();
         if (shadow) {
-            tr.drawWithShadow((MatrixStack)ctx, text, alignCoordX, alignCoordY, color);
+            font.drawShadow((PoseStack)ctx, text, alignCoordX, alignCoordY, color);
         } else {
-            tr.draw((MatrixStack)ctx, text, alignCoordX, alignCoordY, color);
+            font.draw((PoseStack)ctx, text, alignCoordX, alignCoordY, color);
         }
-        ((MatrixStack)ctx).pop();
-        *///? }
+        ((PoseStack)ctx).popPose();
+        *///?}
     }
 
-    public static void adaptiveDrawTexture(Object ctx, Identifier texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(Object ctx, ResourceLocation texture, int x, int y, int u, int v,
                                            int width, int height, int textureWidth, int textureHeight, int color) {
         //? if >=1.21.6 {
-        /*((DrawContext)ctx).drawTexture(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v,
+        /*((GuiGraphics)ctx).blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v,
                 width, height, textureWidth, textureHeight, color);
         *///?} else if >1.21.1 {
-        ((DrawContext)ctx).drawTexture(RenderLayer::getGuiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight, color);
-        //? } else if >=1.20 {
+        ((GuiGraphics)ctx).blit(RenderType::guiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight, color);
+        //?} else if >=1.20 {
         /*RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         float red = ((color >> 16) & 0xFF) / 255.0f;
@@ -123,12 +132,11 @@ public class GUIUtils {
         float blue = (color & 0xFF) / 255.0f;
         float alpha = ((color >> 24) & 0xFF) / 255.0f;
         RenderSystem.setShaderColor(red, green, blue, alpha);
-        ((DrawContext) ctx).drawTexture(texture, x, y, 0, u, v,width, height, textureWidth, textureHeight);
+        ((GuiGraphics) ctx).blit(texture, x, y, 0, u, v, width, height, textureWidth, textureHeight);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableBlend();
-        *///? } else if >=1.17 {
-        /*
-        RenderSystem.enableBlend();
+        *///?} else if >=1.17 {
+        /*RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
         float red   = ((color >> 16) & 0xFF) / 255.0f;
@@ -139,16 +147,15 @@ public class GUIUtils {
 
         RenderSystem.setShader(
            //? if >1.19.2 {
-          GameRenderer::getPositionTexProgram
+          GameRenderer::getPositionTexShader
           //?} else {
           GameRenderer::getPositionTexShader
           //?}
          );
         RenderSystem.setShaderTexture(0, texture);
 
-        // здесь именно перегрузка с размером атласа
-        DrawableHelper.drawTexture(
-            (MatrixStack) ctx,
+        GuiComponent.blit(
+            (PoseStack) ctx,
             x, y,
             u, v,
             width, height,
@@ -158,9 +165,8 @@ public class GUIUtils {
 
         RenderSystem.setShaderColor(1, 1, 1, 1);
         RenderSystem.disableBlend();
-        *///? } else {
-        /*
-        RenderSystem.enableBlend();
+        *///?} else {
+        /*RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
 
         float red   = ((color >> 16) & 0xFF) / 255.0f;
@@ -170,9 +176,9 @@ public class GUIUtils {
         GL11.glColor4f(red, green, blue, alpha);
         RenderSystem.color4f(red, green, blue, alpha);
 
-        MinecraftClient.getInstance().getTextureManager().bindTexture(texture);
-        DrawableHelper.drawTexture(
-                (MatrixStack) ctx,
+        Minecraft.getInstance().getTextureManager().bind(texture);
+        GuiComponent.blit(
+                (PoseStack) ctx,
                 x, y,
                 u, v,
                 width, height,
@@ -180,131 +186,131 @@ public class GUIUtils {
         );
 
         RenderSystem.color4f(1f, 1f, 1f, 1f);
-        RenderSystem.disableBlend();*/
-        //? }
+        RenderSystem.disableBlend();
+        *///?}
     }
 
-    public static void adaptiveDrawTexture(Object ctx, Identifier texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(Object ctx, ResourceLocation texture, int x, int y, int u, int v,
                                            int width, int height, int textureWidth, int textureHeight) {
         adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, textureWidth, textureHeight, 0xFFFFFFFF);
     }
 
-    public static void adaptiveDrawTexture(Object ctx, Identifier texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(Object ctx, ResourceLocation texture, int x, int y, int u, int v,
                                            int width, int height, int textureWidth) {
         adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, textureWidth, textureWidth, 0xFFFFFFFF);
     }
 
-    public static void adaptiveDrawTexture(Object ctx, Identifier texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(Object ctx, ResourceLocation texture, int x, int y, int u, int v,
                                            int width, int height) {
         adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, 256, 256, 0xFFFFFFFF);
     }
 
-    public static PressableWidget createTexturedBtn(int x, int y, int width, int height,
-                                                    Identifier[] textures, ButtonWidget.PressAction onClick) {
-        Identifier defaultTexture = textures[0];
-        Identifier hoverTexture   = textures[1];
+    public static AbstractWidget createTexturedBtn(int x, int y, int width, int height,
+                                                   ResourceLocation[] textures, Button.OnPress onClick) {
+        ResourceLocation defaultTexture = textures[0];
+        ResourceLocation hoverTexture   = textures[1];
 
         //? if >1.21.1 {
-        return new TexturedButtonWidget(x, y, width, height, new ButtonTextures(defaultTexture, hoverTexture), onClick) {
+        return new ImageButton(x, y, width, height, new WidgetSprites(defaultTexture, hoverTexture), onClick) {
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
                 return false;
             }
         };
-        //? } else if >=1.20.3 {
-        /*return new TexturedButtonWidget(x, y, width, height, new ButtonTextures(defaultTexture, hoverTexture), onClick) {
+        //?} else if >=1.20.3 {
+        /*return new ImageButton(x, y, width, height, new WidgetSprites(defaultTexture, hoverTexture), onClick) {
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
             @Override
-            public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+            public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 super.renderWidget(context, mouseX, mouseY, delta);
                 RenderSystem.disableBlend();
             }
         };
-        *///? } else if >=1.20.2 {
-        /*return new TexturedButtonWidget(x, y, width, height, new ButtonTextures(defaultTexture, hoverTexture), onClick) {
+        *///?} else if >=1.20.2 {
+        /*return new ImageButton(x, y, width, height, new WidgetSprites(defaultTexture, hoverTexture), onClick) {
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
             @Override
-            public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+            public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
-                super.renderButton(context, mouseX, mouseY, delta);
+                super.renderWidget(context, mouseX, mouseY, delta);
                 RenderSystem.disableBlend();
             }
         };
-        *///? } else >=1.20 {
-        /*return new TexturedButtonWidget(x, y, width, height, 0, 0, defaultTexture, onClick) {
+        *///?} else if >=1.20 {
+        /*return new ImageButton(x, y, width, height, 0, 0, defaultTexture, onClick) {
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
             @Override
-            public void renderButton(DrawContext ctx, int mouseX, int mouseY, float delta) {
+            public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
-                Identifier current = this.isHovered() ? hoverTexture : defaultTexture;
-                ctx.drawTexture(current, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
+                ResourceLocation current = this.isHovered() ? hoverTexture : defaultTexture;
+                ctx.blit(current, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
                 RenderSystem.disableBlend();
             }
         };
-        *///? } else >=1.19.3 {
-        /*return new TexturedButtonWidget(x, y, width, height, 0, 0, defaultTexture, onClick) {
+        *///?} else if >=1.19.3 {
+        /*return new ImageButton(x, y, width, height, 0, 0, defaultTexture, onClick) {
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
             @Override
-            public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
-                Identifier current = this.isHovered() ? hoverTexture : defaultTexture;
+                ResourceLocation current = this.isHovered() ? hoverTexture : defaultTexture;
                 RenderSystem.setShaderTexture(0, current);
-                DrawableHelper.drawTexture(matrices, this.getX(), this.getY(),
+                GuiComponent.blit(matrices, this.getX(), this.getY(),
                         0, 0, this.width, this.height, this.width, this.height);
                 RenderSystem.disableBlend();
             }
         };
-        *///? } else if >=1.17 {
-        /*return new TexturedButtonWidget(x, y, width, height, 0, 0, defaultTexture, onClick) {
+        *///?} else if >=1.17 {
+        /*return new ImageButton(x, y, width, height, 0, 0, defaultTexture, onClick) {
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
             @Override
-            public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
-                Identifier current = this.isHovered() ? hoverTexture : defaultTexture;
+                ResourceLocation current = this.isHovered() ? hoverTexture : defaultTexture;
                 RenderSystem.setShaderTexture(0, current);
-                DrawableHelper.drawTexture(matrices, this.x, this.y,
+                GuiComponent.blit(matrices, this.x, this.y,
                         0, 0, this.width, this.height, this.width, this.height);
                 RenderSystem.disableBlend();
             }
-        };*/
-        //? } else {
-        /*return new TexturedButtonWidget(x, y, width, height, 0, 0, 0, defaultTexture, onClick) {
+        };
+        *///?} else {
+        /*return new ImageButton(x, y, width, height, 0, 0, 0, defaultTexture, onClick) {
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
                 return false;
             }
 
             @Override
-            public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 RenderSystem.enableAlphaTest();
                 RenderSystem.alphaFunc(GL11.GL_GREATER, 0.0F);
-                MinecraftClient minecraftClient = MinecraftClient.getInstance();
-                Identifier current = this.isHovered() ? hoverTexture : defaultTexture;
-                minecraftClient.getTextureManager().bindTexture(current);
-                drawTexture(matrices, this.x, this.y, 0, 0, this.width, this.height, this.width, this.height);
+                Minecraft minecraftClient = Minecraft.getInstance();
+                ResourceLocation current = this.isHovered() ? hoverTexture : defaultTexture;
+                minecraftClient.getTextureManager().bind(current);
+                blit(matrices, this.x, this.y, 0, 0, this.width, this.height, this.width, this.height);
                 RenderSystem.disableAlphaTest();
                 RenderSystem.disableBlend();
             }
-        };*/
-        //? }
+        };
+        *///?}
     }
 
     // ------------------- RESIZABLE BOX -------------------
 
-    public static void drawResizableBox(Object ctx, Identifier texture,
+    public static void drawResizableBox(Object ctx, ResourceLocation texture,
                                         int x, int y, int width, int height, int edge, int tS, int color) {
         int iW = width - edge * 2;
         int iH = height - edge * 2;
@@ -340,191 +346,186 @@ public class GUIUtils {
         }
     }
 
-    public static void drawResizableBox(Object ctx, Identifier texture, int x, int y, int width, int height, int edge, int tS) {
+    public static void drawResizableBox(Object ctx, ResourceLocation texture, int x, int y, int width, int height, int edge, int tS) {
         drawResizableBox(ctx, texture, x, y, width, height, edge, tS, 0xFFFFFFFF);
     }
 
     public static float clampSpeed(float value) {
-        return MathHelper.clamp(value, 0.001f, 1.0f);
+        return Mth.clamp(value, 0.001f, 1.0f);
     }
 
     public static void matricesUtil(Object ctx, float x, float y, int zIndex, Runnable action) {
         //? if >=1.21.6 {
-        /*
-        ((DrawContext)ctx).getMatrices().pushMatrix();
-        ((DrawContext)ctx).getMatrices().translate(x, y);
+        /* GuiGraphics graphics = (GuiGraphics)ctx;
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
         action.run();
-        ((DrawContext)ctx).getMatrices().popMatrix();
-        */
-        //? } else if >=1.20 {
-        ((DrawContext)ctx).getMatrices().push();
-        ((DrawContext)ctx).getMatrices().translate(x, y, zIndex);
+        graphics.pose().popMatrix();
+        *///?} else if >=1.20 {
+        ((GuiGraphics)ctx).pose().pushPose();
+        ((GuiGraphics)ctx).pose().translate(x, y, zIndex);
         action.run();
-        ((DrawContext)ctx).getMatrices().translate(-x, -y, 0);
-        ((DrawContext)ctx).getMatrices().pop();
-        //? } else {
-        /*MatrixStack matrices = (MatrixStack) ctx;
-        matrices.push();
+        ((GuiGraphics)ctx).pose().translate(-x, -y, 0);
+        ((GuiGraphics)ctx).pose().popPose();
+        //?} else {
+        /*PoseStack matrices = (PoseStack) ctx;
+        matrices.pushPose();
         matrices.translate(x, y, zIndex);
         action.run();
         matrices.translate(-x, -y, 0);
-        matrices.pop();
-        *///? }
+        matrices.popPose();
+        *///?}
     }
 
     public static void customScissor(Object ctx, int x, int y, int width, int height, Runnable action) {
         //? if >=1.21.6 {
-        /*
-        ((DrawContext)ctx).enableScissor(0, 0, 10000, 10000);
-        ((DrawContext)ctx).getMatrices().pushMatrix();
-        ((DrawContext)ctx).enableScissor(x, y, x + width, y + height);
+        /*GuiGraphics graphics = (GuiGraphics)ctx;
+        graphics.enableScissor(0, 0, 10000, 10000);
+        graphics.pose().pushMatrix();
+        graphics.enableScissor(x, y, x + width, y + height);
         action.run();
-        ((DrawContext)ctx).disableScissor();
-        ((DrawContext)ctx).getMatrices().popMatrix();
-        ((DrawContext)ctx).disableScissor();
-        */
-        //? } else if >=1.16 {
-        MatrixStack matrices = /*? if >=1.20 { */ ((DrawContext)ctx).getMatrices()/*? } else {*/ /*(MatrixStack) ctx*/ /*? }*/;
-        matrices.push();
-        MinecraftClient mc = MinecraftClient.getInstance();
-        Window win = mc.getWindow();
-        double scale = win.getScaleFactor();
-        int fbHeight = win.getFramebufferHeight();
-        int sx = (int) Math.round(x * scale);
-        int sy = (int) Math.round(fbHeight - (y + height) * scale);
-        int sw = (int) Math.round(width * scale);
-        int sh = (int) Math.round(height * scale);
-
-        GUIUtils.drawFill(ctx, 0, 0, 0, 0, 0x00000000);
-        RenderSystem.enableScissor(sx, sy, sw, sh);
+        graphics.disableScissor();
+        graphics.pose().popMatrix();
+        graphics.disableScissor();
+        *///?} else if >=1.20 {
+        ((GuiGraphics)ctx).enableScissor(0, 0, 10000, 10000);
+        ((GuiGraphics)ctx).pose().pushPose();
+        ((GuiGraphics)ctx).enableScissor(x, y, x + width, y + height);
         action.run();
-        GUIUtils.drawFill(ctx, 0, 0, 0, 0, 0x00000000);
-        RenderSystem.disableScissor();
-        matrices.pop();
-        //? }
+        ((GuiGraphics)ctx).disableScissor();
+        ((GuiGraphics)ctx).pose().popPose();
+        ((GuiGraphics)ctx).disableScissor();
+        //?} else {
+        /*// Для версий <1.20 используем прямые вызовы GL
+        double scale = MC.getWindow().getGuiScale();
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        GL11.glScissor(
+            (int)(x * scale),
+            (int)(MC.getWindow().getHeight() - (y + height) * scale),
+            (int)(width * scale),
+            (int)(height * scale)
+        );
+        action.run();
+        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        *///?}
     }
 
     public static void matricesScale(Object ctx, float scale, Runnable action) {
         //? if >=1.21.6 {
-        /*
-        ((DrawContext)ctx).getMatrices().pushMatrix();
-        ((DrawContext)ctx).getMatrices().scale(scale, scale);
+        /*GuiGraphics graphics = (GuiGraphics)ctx;
+        graphics.pose().pushMatrix();
+        graphics.pose().scale(scale, scale);
         action.run();
-        ((DrawContext)ctx).getMatrices().popMatrix();
-        */
-        //? } else if >=1.20 {
-        DrawContext dctx = (DrawContext) ctx;
-        dctx.getMatrices().push();
-        dctx.getMatrices().scale(scale, scale, 1.0f);
+        graphics.pose().popMatrix();
+        *///?} else if >=1.20 {
+        GuiGraphics gctx = (GuiGraphics) ctx;
+        gctx.pose().pushPose();
+        gctx.pose().scale(scale, scale, 1.0f);
         action.run();
-        dctx.getMatrices().pop();
-        //? } else {
-        /*MatrixStack matrices = (MatrixStack) ctx;
-        matrices.push();
+        gctx.pose().popPose();
+        //?} else {
+        /*PoseStack matrices = (PoseStack) ctx;
+        matrices.pushPose();
         matrices.scale(scale, scale, 1.0f);
         action.run();
-        matrices.pop();
-        *///? }
+        matrices.popPose();
+        *///?}
     }
 
     // Draw
 
     public static void drawFill(Object ctx, int x1, int y1, int x2, int y2, int color) {
         //? if >=1.20 {
-        DrawContext context = (DrawContext) ctx;
+        GuiGraphics context = (GuiGraphics) ctx;
         context.fill(x1, y1, x2, y2, color);
-        //? } else {
-        /*MatrixStack matrices = (MatrixStack) ctx;
-        DrawableHelper.fill(matrices, x1, y1, x2, y2, color);
-        *///? }
+        //?} else {
+        /*PoseStack matrices = (PoseStack) ctx;
+        GuiComponent.fill(matrices, x1, y1, x2, y2, color);
+        *///?}
     }
 
     public static void drawItem(Object ctx, ItemStack stack, int x, int y, float scale) {
         //? if >=1.20 {
-        ((DrawContext)ctx).drawItem(stack, x, y);
-       //?} else if >=1.19.4 {
-        /*ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
-        itemRenderer.renderInGui((MatrixStack) ctx, stack, x, y);
+        ((GuiGraphics)ctx).renderItem(stack, x, y);
+        //?} else if >=1.19.4 {
+        /*ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+        itemRenderer.renderGuiItem((PoseStack) ctx, stack, x, y);
         *///?} else if >=1.17 {
-        /*
-        MinecraftClient client = MinecraftClient.getInstance();
+        /*Minecraft client = Minecraft.getInstance();
         ItemRenderer itemRenderer = client.getItemRenderer();
-        MatrixStack matrices = (MatrixStack) ctx;
-        matrices.push();
+        PoseStack matrices = (PoseStack) ctx;
+        matrices.pushPose();
         matrices.translate((float)x, (float)y, 150.0F);
         matrices.translate(8.0F, 8.0F, 0.0F);
         //? if >=1.19.3 {
-        matrices.multiplyPositionMatrix((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
+        matrices.last().pose().multiply((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
         //? } else if >=1.18 {
-        matrices.peek().getPositionMatrix().multiply(Matrix4f.scale(1.0F, -1.0F, 1.0F));
+        matrices.last().pose().multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
         //? } else {
-        matrices.peek().getModel().multiply(Matrix4f.scale(1.0F, -1.0F, 1.0F));
+        matrices.last().pose().multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
         //? }
         matrices.scale(16.0F, 16.0F, 16.0F);
-        VertexConsumerProvider.Immediate immediate = client.getBufferBuilders().getEntityVertexConsumers();
+        MultiBufferSource.BufferSource immediate = client.renderBuffers().bufferSource();
         //? if >=1.18 {
         BakedModel model = itemRenderer.getModel(stack, null, null, 0);
-        //? } else if >=1.17 {
-        BakedModel model = itemRenderer.getHeldItemModel(stack, null, null, 0);
         //? } else {
-        BakedModel model = itemRenderer.getHeldItemModel(stack, null, null);
+        BakedModel model = itemRenderer.getItemModelShaper().getItemModel(stack);
         //? }
-        boolean bl = !model.isSideLit();
-        if (bl) DiffuseLighting.disableGuiDepthLighting();
+        boolean bl = !model.usesBlockLight();
+        if (bl) Lighting.setupForFlatItems();
 
-        MatrixStack matrixStack = RenderSystem.getModelViewStack();
-        matrixStack.push();
+        PoseStack matrixStack = RenderSystem.getModelViewStack();
+        matrixStack.pushPose();
         //? if >=1.18 {
-        matrixStack.multiplyPositionMatrix(matrices.peek().getPositionMatrix());
+        matrixStack.mulPoseMatrix(matrices.last().pose());
         RenderSystem.applyModelViewMatrix();
         //? } else {
-        matrixStack.method_34425(matrices.peek().getModel());
+        matrixStack.mulPoseMatrix(matrices.last().pose());
         RenderSystem.applyModelViewMatrix();
         //? }
 
-        itemRenderer.renderItem(stack, ModelTransformation.Mode.GUI, false, new MatrixStack(), immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
-        immediate.draw();
+        itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, new PoseStack(), immediate, 15728880, OverlayTexture.NO_OVERLAY, model);
+        immediate.endBatch();
         RenderSystem.enableDepthTest();
-        if (bl) DiffuseLighting.enableGuiDepthLighting();
+        if (bl) Lighting.setupFor3DItems();
 
-
-        matrices.pop();
-        matrixStack.pop();
+        matrices.popPose();
+        matrixStack.popPose();
         RenderSystem.applyModelViewMatrix();
-        */
-        //? } else {
-        /*MinecraftClient client = MinecraftClient.getInstance();
+        *///?} else {
+        /*Minecraft client = Minecraft.getInstance();
         ItemRenderer itemRenderer = client.getItemRenderer();
-        MatrixStack matrices = (MatrixStack) ctx;
+        PoseStack matrices = (PoseStack) ctx;
         RenderSystem.pushMatrix();
         RenderSystem.enableRescaleNormal();
         RenderSystem.enableAlphaTest();
         RenderSystem.defaultAlphaFunc();
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.multMatrix(matrices.peek().getModel());
+        RenderSystem.multMatrix(matrices.last().pose());
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.translatef((float)x, (float)y, 150.0F);
         RenderSystem.translatef(8.0F, 8.0F, 0.0F);
         RenderSystem.scalef(1.0F, -1.0F, 1.0F);
         RenderSystem.scalef(16.0F, 16.0F, 16.0F);
-        BakedModel model = itemRenderer.getHeldItemModel(stack, null, null);
-        VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
-        boolean bl = !model.isSideLit();
-        if (bl) DiffuseLighting.disableGuiDepthLighting();
+        BakedModel model = itemRenderer.getItemModelShaper().getItemModel(stack);
+        MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
+        boolean bl = !model.usesBlockLight();
+        if (bl) Lighting.setupForFlatItems();
 
-        MatrixStack matrixStack = new MatrixStack();
+        PoseStack matrixStack = new PoseStack();
 
-        itemRenderer.renderItem(stack, ModelTransformation.Mode.GUI, false, matrixStack, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
-        immediate.draw();
+        itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, matrixStack, immediate, 15728880, OverlayTexture.NO_OVERLAY, model);
+        immediate.endBatch();
         RenderSystem.enableDepthTest();
-        if (bl) DiffuseLighting.enableGuiDepthLighting();
+        if (bl) Lighting.setupFor3DItems();
 
         RenderSystem.disableAlphaTest();
         RenderSystem.disableRescaleNormal();
-        RenderSystem.popMatrix();*/
-        //? }
+        RenderSystem.popMatrix();
+        *///?}
     }
+
     public static void drawItem(Object ctx, ItemStack stack, int x, int y) {
         drawItem(ctx, stack, x, y, 1);
     }

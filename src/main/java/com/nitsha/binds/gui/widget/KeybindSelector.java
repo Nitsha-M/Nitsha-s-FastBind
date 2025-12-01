@@ -1,29 +1,28 @@
 package com.nitsha.binds.gui.widget;
 
-import com.nitsha.binds.MainClass;
+import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 //? if >=1.20 {
-import net.minecraft.client.gui.DrawContext;
-//? } else {
-/*import net.minecraft.client.gui.DrawableHelper;
- *///? }
+import net.minecraft.client.gui.GuiGraphics;
+//?} else {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+ *///?}
 //? if >=1.17 {
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-//? }
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+//?}
+import net.minecraft.client.gui.components.AbstractButton;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
-public class KeybindSelector extends ClickableWidget {
+public class KeybindSelector extends AbstractButton {
     private static KeybindSelector focusedKeybind = null;
-    private static final Identifier NORMAL = MainClass.id("textures/gui/btns/keybind_normal.png");
-    private static final Identifier PRESSED = MainClass.id("textures/gui/btns/keybind_pressed.png");
+    private static final ResourceLocation NORMAL = Main.id("textures/gui/btns/keybind_normal.png");
+    private static final ResourceLocation PRESSED = Main.id("textures/gui/btns/keybind_pressed.png");
 
     private String name = TextUtils.translatable("nitsha.binds.advances.noKeyBind").getString();
     private int keyCode;
@@ -32,7 +31,7 @@ public class KeybindSelector extends ClickableWidget {
     private int x, y;
 
     public KeybindSelector(int x, int y, int width, int height) {
-        super(x, y, width, height, Text.of(""));
+        super(x, y, width, height, Component.literal(""));
         this.x = x;
         this.y = y;
     }
@@ -45,7 +44,7 @@ public class KeybindSelector extends ClickableWidget {
         this.keyCode = kC;
         this.name = (kC == 0)
                 ? TextUtils.translatable("nitsha.binds.advances.noKeyBind").getString()
-                : InputUtil.Type.KEYSYM.createFromCode(kC).getLocalizedText().getString();
+                : InputConstants.Type.KEYSYM.getOrCreate(kC).getDisplayName().getString();
     }
 
     public int getX() {
@@ -79,22 +78,26 @@ public class KeybindSelector extends ClickableWidget {
         focusedKeybind = fK;
     }
 
+    @Override
+    public void onPress() {
+    }
+
     //? if >1.20.2 {
     @Override
-    public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         rndr(ctx, mouseX, mouseY, delta);
     }
-    //? } else if >=1.20 {
+    //?} else if >=1.20 {
     /*@Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    *///? } else {
+    *///?} else {
     /*@Override
-    public void renderButton(MatrixStack context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    *///? }
+    *///?}
 
     private String calculateName(String insideName, String fullName, int max) {
         int textCut = Math.min(fullName.length(), max);
@@ -102,16 +105,16 @@ public class KeybindSelector extends ClickableWidget {
     }
 
     private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+        Font font = Minecraft.getInstance().font;
         int maxSymbols = (this.width / 7) - (isPressed ? 4 : 0);
         String cName = calculateName(this.name, (isPressed) ? "> " + this.name + " <" : this.name, maxSymbols);
         String fName = (isPressed) ? "> " + cName + " <" : cName;
-        int textWidth = textRenderer.getWidth(fName);
+        int textWidth = font.width(fName);
 
-        GUIUtils.drawResizableBox(ctx, (isPressed || hovered) ? PRESSED : NORMAL, getX(), getY(), getWidth(), getHeight(), 3, 7);
-        GUIUtils.addText(ctx, Text.of(fName), 0,
+        GUIUtils.drawResizableBox(ctx, (isPressed || isHovered()) ? PRESSED : NORMAL, getX(), getY(), getWidth(), getHeight(), 3, 7);
+        GUIUtils.addText(ctx, Component.literal(fName), 0,
                 this.getX() + ((this.width / 2) - (textWidth / 2)),
-                this.getY() + ((this.height / 2) - (textRenderer.fontHeight / 2)),
+                this.getY() + ((this.height / 2) - (font.lineHeight / 2)),
                 "top", "left", 0xFFFFFFFF, false);
     }
 
@@ -132,13 +135,13 @@ public class KeybindSelector extends ClickableWidget {
 
     //? if >=1.19.3 {
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
     }
-    //? } else if >=1.17 {
+    //?} else if >=1.17 {
     /*@Override
-    public void appendNarrations(NarrationMessageBuilder builder) {
+    public void updateNarration(NarrationElementOutput builder) {
     }*/
-    //? }
+    //?}
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {

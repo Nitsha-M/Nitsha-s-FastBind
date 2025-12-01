@@ -1,22 +1,28 @@
 package com.nitsha.binds.gui.utils;
 
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+//? if fabric {
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+//?} else {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+*/
+//?}
 
 public class TextUtils {
-    public static MutableText literal(String text) {
+    public static MutableComponent literal(String text) {
         //? if >=1.19 {
-        return Text.literal(text);
-        //? } else {
-        /*return new net.minecraft.text.LiteralText(text);*/
-        //? }
+        return Component.literal(text);
+        //?} else {
+        /*return new net.minecraft.network.chat.TextComponent(text);
+         *///?}
     }
 
-    public static MutableText translatable(String key, Object... args) {
+    public static MutableComponent translatable(String key, Object... args) {
         //? if >=1.19 {
-        return Text.translatable(key, args);
-        //? } else {
-        /*return new net.minecraft.text.TranslatableText(key, args);*/
-        //? }
+        return Component.translatable(key, args);
+        //?} else {
+        /*return new net.minecraft.network.chat.TranslatableComponent(key, args);
+         *///?}
     }
 }

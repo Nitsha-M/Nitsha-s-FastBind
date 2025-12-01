@@ -1,36 +1,38 @@
 package com.nitsha.binds.gui.widget;
 
-import com.nitsha.binds.MainClass;
-import com.nitsha.binds.configs.BindsConfig;
+import com.nitsha.binds.Main;
+import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.gui.panels.PresetSelector;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 //? if >=1.20 {
-import net.minecraft.client.gui.DrawContext;
-//? } else {
-/*import net.minecraft.client.gui.DrawableHelper;
- *///? }
-import net.minecraft.client.gui.widget.PressableWidget;import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.GuiGraphics;
+//?} else {
+/*import net.minecraft.client.gui.GuiComponent;
+import com.mojang.blaze3d.vertex.PoseStack;
+ *///?}
+import net.minecraft.client.gui.components.AbstractWidget;
 //? if >=1.17 {
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-//? }
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+//?}
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
-public class PresetListItem extends ClickableWidget {
+public class PresetListItem extends AbstractWidget {
     private final PresetSelector parent;
-    private final BindsEditor.TextField newNameField;
+    private final TextField newNameField;
 
-    private final PressableWidget editBtn;
-    private final PressableWidget saveBtn;
-    private static final Identifier EDIT = MainClass.idSprite("editpreset_normal");
-    private static final Identifier EDIT_HOVER = MainClass.idSprite("editpreset_hover");
-    private static final Identifier SAVE = MainClass.idSprite("savepreset_normal");
-    private static final Identifier SAVE_HOVER = MainClass.idSprite("savepreset_hover");
+    private final AbstractWidget editBtn;
+    private final AbstractWidget deleteBtn;
+    private final AbstractWidget saveBtn;
+    private final AbstractWidget deleteConfBtn;
+    private static final ResourceLocation EDIT = Main.idSprite("editpreset_normal");
+    private static final ResourceLocation EDIT_HOVER = Main.idSprite("editpreset_hover");
+    private static final ResourceLocation SAVE = Main.idSprite("savepreset_normal");
+    private static final ResourceLocation SAVE_HOVER = Main.idSprite("savepreset_hover");
+    private static final ResourceLocation DELETE = Main.idSprite("delete_small_normal");
+    private static final ResourceLocation DELETE_HOVER = Main.idSprite("delete_small_hover");
 
     private boolean isEditing = false;
     private String name;
@@ -38,18 +40,21 @@ public class PresetListItem extends ClickableWidget {
 
     private int x, y;
 
+    private long deleteConfirmationTime = 0;
+
     public PresetListItem(PresetSelector parent, String name, int x, int y, int width, int height, int index) {
-        super(x, y, width, height, Text.of(""));
+        super(x, y, width, height, Component.literal(""));
         this.parent = parent;
         this.name = name;
         this.index = index;
         this.x = x;
         this.y = y;
 
-        this.newNameField = new BindsEditor.TextField(MinecraftClient.getInstance().textRenderer, x + 3, y + 3, width - 20,height - 5, 40, name,"Preset name");
+        this.newNameField = new TextField(Minecraft.getInstance().font, x + 3, y + 3, width - 20,height - 5, 40, name,"Preset name");
         this.newNameField.setEnterEvent(this::savePreset);
         this.newNameField.setEscapeEvent(this::stopEditing);
-        this.editBtn = GUIUtils.createTexturedBtn(x + 111, y + 6, 9, 9, new Identifier[]{EDIT, EDIT_HOVER}, button -> {
+        this.newNameField.setAnimatedPlaceholder(false);
+        this.editBtn = GUIUtils.createTexturedBtn(x + 111, y + 6, 9, 9, new ResourceLocation[]{EDIT, EDIT_HOVER}, button -> {
             for (PresetListItem item : parent.getItems()) {
                 if (item.isEditing()) {
                     item.stopEditing();
@@ -58,13 +63,24 @@ public class PresetListItem extends ClickableWidget {
             isEditing = true;
             //? if >=1.19.4 {
             this.newNameField.setFocused(true);
-            //? } else {
+            //?} else {
             /*this.newNameField.changeFocus(true);*/
-            //? }
-            BindsEditor.TextField.setFocusedField(this.newNameField);
+            //?}
+            TextField.setFocusedField(this.newNameField);
         });
 
-        this.saveBtn = GUIUtils.createTexturedBtn(x + 111, y + 6, 9, 9, new Identifier[]{SAVE, SAVE_HOVER}, button -> {
+        this.deleteBtn = GUIUtils.createTexturedBtn(x + 101, y + 6, 9, 9, new ResourceLocation[]{DELETE, DELETE_HOVER}, button -> {
+            deleteConfirmationTime = System.currentTimeMillis();
+        });
+
+        this.deleteConfBtn = GUIUtils.createTexturedBtn(x + 91, y + 6, 9, 9, new ResourceLocation[]{SAVE, SAVE_HOVER}, button -> {
+            if (index > 0 && index == BindsStorage.presets.size() - 1) parent.screen.selectPreset(index - 1);
+            BindsStorage.removePreset(index);
+            if (index == 0) parent.screen.selectPreset(0);
+            parent.generatePresetsList();
+        });
+
+        this.saveBtn = GUIUtils.createTexturedBtn(x + 111, y + 6, 9, 9, new ResourceLocation[]{SAVE, SAVE_HOVER}, button -> {
             savePreset();
         });
     }
@@ -89,6 +105,11 @@ public class PresetListItem extends ClickableWidget {
         }
     }
 
+    public boolean isDeleteConfirmation() {
+        return System.currentTimeMillis() - deleteConfirmationTime < 5000;
+    }
+
+
     public boolean isEditing() {
         return isEditing;
     }
@@ -97,44 +118,46 @@ public class PresetListItem extends ClickableWidget {
         isEditing = false;
         String getName = this.newNameField.getText();
         String newName = (getName.isEmpty()) ? "Preset " +  (index + 1) : getName;
-        BindsConfig.setNewPresetName(this.index, newName);
+        BindsStorage.renamePreset(this.index, newName);
         this.newNameField.setText(newName);
         this.name = newName;
     }
 
     private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
         //? if >=1.20 {
-        DrawContext c = (DrawContext) ctx;
-        //? } else {
-        /*MatrixStack c = (MatrixStack) ctx;
-         *///? }
-        GUIUtils.drawFill(ctx, getX() + 3, getY(), getX() + getWidth() - 6, getY() + 1, 0xFF555555);
+        GuiGraphics c = (GuiGraphics) ctx;
+        //?} else {
+        /*PoseStack c = (PoseStack) ctx;
+         *///?}
+        if (index > 0) GUIUtils.drawFill(ctx, getX() + 3, getY(), getX() + getWidth() - 3, getY() + 1, 0xFF555555);
         if (isEditing) {
             this.newNameField.render(c, mouseX, mouseY, delta);
             this.saveBtn.render(c, mouseX, mouseY, delta);
         } else {
-            if (hovered && parent.isOpen()) GUIUtils.drawFill(c, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x0DFFFFFF);
-            GUIUtils.addText(c, Text.of(GUIUtils.truncateString(this.name, 15)), 0, getX() + 3, getY() + 7, "left", "top",0xFFFFFFFF, false);
+            if (this.isHoveredOrFocused() && parent.isOpen()) GUIUtils.drawFill(c, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x0DFFFFFF);
+            GUIUtils.addText(c, Component.literal(GUIUtils.truncateString(this.name, 15)), 0, getX() + 3, getY() + 7, "left", "top",0xFFFFFFFF, false);
             this.editBtn.render(c, mouseX, mouseY, delta);
+            this.deleteBtn.render(c, mouseX, mouseY, delta);
+            if (isDeleteConfirmation()) this.deleteConfBtn.render(c, mouseX, mouseY, delta);
         }
     }
 
     //? if >1.20.2 {
     @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    //? } else if >=1.20 {
+    //?} else if >=1.20 {
     /*@Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    *///? } else {
+    *///?} else {
     /*@Override
-    public void renderButton(MatrixStack context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    *///? }
+    *///?}
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -150,6 +173,12 @@ public class PresetListItem extends ClickableWidget {
         } else {
             if (editBtn.mouseClicked(mouseX, mouseY, button)) {
                 return true;
+            }
+            if (deleteBtn.mouseClicked(mouseX, mouseY, button)) {
+                return true;
+            }
+            if (isDeleteConfirmation()) {
+                if (deleteConfBtn.mouseClicked(mouseX, mouseY, button)) return true;
             }
         }
         return super.mouseClicked(mouseX, mouseY, button);
@@ -168,11 +197,11 @@ public class PresetListItem extends ClickableWidget {
 
     //? if >=1.19.3 {
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
     }
-    //? } else if >=1.17 {
+    //?} else if >=1.17 {
     /*@Override
-    public void appendNarrations(NarrationMessageBuilder builder) {
+    public void updateNarration(NarrationElementOutput builder) {
     }*/
-    //? }
+    //?}
 }

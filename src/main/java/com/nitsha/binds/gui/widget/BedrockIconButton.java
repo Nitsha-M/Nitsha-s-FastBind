@@ -1,19 +1,17 @@
 package com.nitsha.binds.gui.widget;
 
-import com.nitsha.binds.MainClass;
+import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 //? if >=1.20 {
-import net.minecraft.client.gui.DrawContext;
-//? } else {
-/*import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.util.math.MatrixStack;
- *///? }
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+//?} else {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+ *///?}
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 
 public class BedrockIconButton extends BedrockButton {
-    private final Identifier ICON;
+    private final ResourceLocation ICON;
     private boolean itemIcon = false;
     private ItemStack iI;
     private int xO = 0;
@@ -27,7 +25,7 @@ public class BedrockIconButton extends BedrockButton {
         this.yO = (height - 16) / 2;
 
         if (iconName != null) {
-            this.ICON = MainClass.id("textures/gui/sprites/" + iconName + ".png");
+            this.ICON = Main.id("textures/gui/sprites/" + iconName + ".png");
             this.itemIcon = false;
             this.iI = null;
         } else {
@@ -61,31 +59,34 @@ public class BedrockIconButton extends BedrockButton {
 
     //? if >1.20.2 {
     @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.renderWidget(context, mouseX, mouseY, delta);
         renderOverlay(context, mouseX, mouseY, delta);
     }
-    //? } else if >=1.20{
+    //?} else if >=1.20 {
     /*@Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.renderButton(context, mouseX, mouseY, delta);
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        super.renderWidget(context, mouseX, mouseY, delta);
         renderOverlay(context, mouseX, mouseY, delta);
     }
-    *///? } else {
+    *///?} else {
     /*@Override
-    public void renderButton(MatrixStack context, int mouseX, int mouseY, float delta) {
-        super.renderButton(context, mouseX, mouseY, delta);
+    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
+        super.renderWidget(context, mouseX, mouseY, delta);
         renderOverlay(context, mouseX, mouseY, delta);
     }
-    *///? }
+    *///?}
 
     protected void renderOverlay(Object ctx, int mouseX, int mouseY, float delta) {
-        if (!itemIcon) GUIUtils.adaptiveDrawTexture(ctx, ICON, this.getX() + xO, this.getY() + yO + Math.round(this.getOffsetY()), 0, 0, 16, 14, 16, 14, (this.isEnabled()) ? (hovered || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor() : 0x40FFFFFF);
+        if (!itemIcon) {
+            GUIUtils.adaptiveDrawTexture(ctx, ICON, this.getX() + xO, this.getY() + yO + Math.round(this.getOffsetY()), 0, 0, 16, 14, 16, 14,
+                    (this.isEnabled()) ? (isHovered() || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor() : 0x40FFFFFF);
+        }
         if (itemIcon) {
             float scale = 0.8f;
             GUIUtils.matricesScale(ctx, scale, () -> {
                 GUIUtils.matricesUtil(ctx, (this.getX() + (xO / scale)) / scale, (this.getY() + ((yO + Math.round(this.getOffsetY())) / scale)) / scale, 0, () -> {
-                        GUIUtils.drawItem(ctx, this.iI, 0, 0);
+                    GUIUtils.drawItem(ctx, this.iI, 0, 0);
                 });
             });
         }

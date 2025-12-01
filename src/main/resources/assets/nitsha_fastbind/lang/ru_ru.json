@@ -1,0 +1,52 @@
+{
+  "nitsha.localization.__credit" : "Nitsha",
+  "category.nitsha.binds" : "Nitsha's FastBind",
+  "key.nitsha.binds" : "Меню FastBind",
+  "key.nitsha.prev_page" : "Предыдущая страница",
+  "key.nitsha.next_page" : "Следующая страница",
+  "key.nitsha.editor" : "Окно настрооек",
+
+  "nitsha.binds.addNew" : "ноʙᴀя",
+  "nitsha.binds.delete" : "удᴀлиᴛь",
+  "nitsha.binds.configure" : "Настройки",
+
+  "nitsha.binds.name" : "Имя",
+  "nitsha.binds.untitled" : "Без имени",
+  "nitsha.binds.list" : "Список биндов",
+  "nitsha.binds.empty" : "Пусто",
+  "nitsha.binds.page" : "ᴄᴛᴘᴀницᴀ",
+
+
+  "nitsha.binds.advances.tab1" : "дᴇйᴄᴛʙия",
+  "nitsha.binds.advances.tab2" : "иᴋонᴋᴀ",
+  "nitsha.binds.advances.tab3" : "нᴀᴄᴛᴘойᴋи",
+
+  "nitsha.binds.advances.choose_icon" : "ʙыбᴘᴀᴛь иᴋонᴋу",
+
+  "nitsha.binds.advances.actions" : "нᴀбоᴘ дᴇйᴄᴛʙий",
+  "nitsha.binds.advances.actions.noActions" : "ᴄпиᴄоᴋ пуᴄᴛ",
+  "nitsha.binds.advances.actions.delay" : "ждᴀᴛь",
+  "nitsha.binds.advances.actions.delayDesс" : "ждᴀᴛь ʙ мᴄ",
+  "nitsha.binds.advances.actions.keybind" : "ᴋлᴀʙишᴀ",
+  "nitsha.binds.advances.actions.command" : "ᴋомᴀндᴀ",
+  "nitsha.binds.advances.actions.pressKey" : "ᴋлᴀʙишᴀ",
+  "nitsha.binds.advances.actions.showMessage" : "ᴄообщᴇниᴇ ʙ чᴀᴛ",
+  "nitsha.binds.advances.actions.showTitle" : "ᴛᴇᴋᴄᴛ нᴀ эᴋᴘᴀн",
+  "nitsha.binds.advances.actions.commandLine" : "команда (без /)",
+  "nitsha.binds.advances.actions.chatMessage" : "Сообщение в чат",
+  "nitsha.binds.advances.actions.titleLine" : "Заголовок",
+  "nitsha.binds.advances.actions.subtitleLine" : "Подзаголовок",
+  "nitsha.binds.advances.actions.delayLine" : "в мс.",
+  "nitsha.binds.advances.actions.addNew" : "добав.",
+
+  "nitsha.binds.advances.options.hold" : "Зажать %s для открытия",
+  "nitsha.binds.advances.options.openLastPage" : "Открыть на посл. странице",
+  "nitsha.binds.advances.options.openLastPreset" : "Открыть на посл. пресете",
+  "nitsha.binds.advances.options.keepMovement" : "Не блокировать движение",
+  "nitsha.binds.advances.options.closeOnAction" : "Закрывать при активации",
+  "nitsha.binds.advances.options.bindMsg" : "Уведомление активации",
+
+  "nitsha.binds.bindActivate" : "Бинд %s активирован",
+
+  "nitsha.binds.advances.noKeyBind" : "Не выбрано"
+}

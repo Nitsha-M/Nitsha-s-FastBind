@@ -63,24 +63,31 @@ public class BedrockIconButton extends BedrockButton {
         super.renderWidget(context, mouseX, mouseY, delta);
         renderOverlay(context, mouseX, mouseY, delta);
     }
-    //?} else if >=1.20 {
+    //? } else if >=1.20 {
     /*@Override
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.renderWidget(context, mouseX, mouseY, delta);
         renderOverlay(context, mouseX, mouseY, delta);
     }
-    *///?} else {
+    *///? } else if >=1.19.4 {
     /*@Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
         super.renderWidget(context, mouseX, mouseY, delta);
         renderOverlay(context, mouseX, mouseY, delta);
     }
-    *///?}
+    *///?} else {
+    /*@Override
+    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
+        super.renderButton(context, mouseX, mouseY, delta);
+        renderOverlay(context, mouseX, mouseY, delta);
+    }
+    */
+    //? }
 
     protected void renderOverlay(Object ctx, int mouseX, int mouseY, float delta) {
         if (!itemIcon) {
             GUIUtils.adaptiveDrawTexture(ctx, ICON, this.getX() + xO, this.getY() + yO + Math.round(this.getOffsetY()), 0, 0, 16, 14, 16, 14,
-                    (this.isEnabled()) ? (isHovered() || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor() : 0x40FFFFFF);
+                    (this.isEnabled()) ? (isHovered || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor() : 0x40FFFFFF);
         }
         if (itemIcon) {
             float scale = 0.8f;

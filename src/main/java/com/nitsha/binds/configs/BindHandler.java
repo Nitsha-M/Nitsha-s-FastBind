@@ -83,7 +83,11 @@ public class BindHandler {
     }
 
     private static boolean isKeyPressed(int keyCode) {
+        //? if <1.21.9 {
         long handle = client.getWindow().getWindow();
+        //? } else {
+        // long handle = client.getWindow().handle();
+        //? }
         return GLFW.glfwGetKey(handle, keyCode) == GLFW.GLFW_PRESS;
     }
 }

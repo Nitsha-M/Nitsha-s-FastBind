@@ -7,6 +7,7 @@ import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.ChatFormatting;
 //? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
 //?} else {
@@ -27,13 +28,21 @@ import org.lwjgl.glfw.GLFW;
 import java.util.*;
 import java.util.List;
 
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
+
 public class ActionItem extends AbstractButton {
-    private final AbstractWidget topBtn;
-    private final AbstractWidget bottomBtn;
-    private final AbstractWidget leftBtn;
-    private final AbstractWidget rightBtn;
-    private final AbstractWidget resetBtn;
-    private final AbstractWidget deleteBtn;
+    private final TexturedButton topBtn;
+    private final TexturedButton bottomBtn;
+    private final TexturedButton leftBtn;
+    private final TexturedButton rightBtn;
+    private final TexturedButton resetBtn;
+    private final TexturedButton deleteBtn;
     private static final ResourceLocation TOP = Main.idSprite("action_top_normal");
     private static final ResourceLocation TOP_HOVER = Main.idSprite("action_top_hover");
     private static final ResourceLocation BOTTOM = Main.idSprite("action_bottom_normal");
@@ -88,15 +97,20 @@ public class ActionItem extends AbstractButton {
             { 0xFF316d20, 20, TextUtils.literal("ʙ").setStyle(Style.EMPTY.withBold(true)) }, // bold
             { 0xFF316d20, 21, TextUtils.literal("ɪ").setStyle(Style.EMPTY.withItalic(true)) }, // italic
             { 0xFF316d20, 22, TextUtils.literal("ᴜ").setStyle(Style.EMPTY.withUnderlined(true)) }, // underline
+            //? if >=1.20 {
             { 0xFF316d20, 23, TextUtils.literal("s").setStyle(Style.EMPTY.withStrikethrough(true)) }, // strikethrough
             { 0xFF316d20, 24, TextUtils.literal("ᴏ").setStyle(Style.EMPTY.withObfuscated(true)) }, // obfuscated
+            //?} else {
+            /*{ 0xFF316d20, 23, TextUtils.literal("s").withStyle(s -> s.applyFormat(ChatFormatting.STRIKETHROUGH)) }, // strikethrough
+            { 0xFF316d20, 24, TextUtils.literal("ᴏ").withStyle(s -> s.applyFormat(ChatFormatting.OBFUSCATED)) }, // obfuscated
+            *///?}
             { 0xFF316d20, 99, TextUtils.literal("ʀ") }, // reset
     };
 
     private int x, y;
 
     public ActionItem(AdvancedOptions parent, int type, int x, int y, int width, int height, Object value, int index) {
-        super(x, y, width, height, Component.literal(""));
+        super(x, y, width, height, TextUtils.empty());
         this.index = index;
         this.type = type;
         this.x = x;
@@ -131,8 +145,13 @@ public class ActionItem extends AbstractButton {
             }
         }
 
-        if (this.type == 3)
-            this.keybind.setKeyCode(Integer.parseInt(String.valueOf(value)));
+        if (this.type == 3) {
+            int keyCode = 0;
+            if (value instanceof Number) {
+                keyCode = ((Number) value).intValue();
+            }
+            this.keybind.setKeyCode(keyCode);
+        }
 
         this.topBtn = GUIUtils.createTexturedBtn(x + width - 9, y + 3, 9, 9, new ResourceLocation[] { TOP, TOP_HOVER },
                 button -> {
@@ -282,33 +301,36 @@ public class ActionItem extends AbstractButton {
     }
 
 
-    // ? if >1.20.2 {
+    //? if >1.20.2 {
     @Override
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    // ?} else if >=1.20 {
-    /*
-     @Override
+    //? } else if >=1.20 {
+    /*@Override
      public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float
      delta) {
      rndr(context, mouseX, mouseY, delta);
      }
-     */// ?} else {
-    /*
-     @Override
-     public void renderWidget(PoseStack context, int mouseX, int mouseY, float
-     delta) {
-     rndr(context, mouseX, mouseY, delta);
-     }
-     */// ?}
+    *///? } else if >=1.19.4 {
+    /*@Override
+    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }
+    *///? } else {
+    /*@Override
+    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }
+    */
+    //? }
 
     private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
-        // ? if >=1.20 {
+        //? if >=1.20 {
         GuiGraphics c = (GuiGraphics) ctx;
-        // ?} else {
+        //? } else {
         /*PoseStack c = (PoseStack) ctx;*/
-        // ?}
+        //? }
         int lineColor = 0xFFFFFFFF;
 //        GUIUtils.drawFill(c, getX(), getY() + getHeight() - 1, getX() + getWidth(), getY() + getHeight(), 0x33FFFFFF);
         if(index % 2 == 1) GUIUtils.drawFill(c, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x4DFFFFFF);
@@ -383,10 +405,6 @@ public class ActionItem extends AbstractButton {
     public void playDownSound(SoundManager soundManager) {
     }
 
-    @Override
-    public void onPress() {
-    }
-
     public boolean isMouseOverColorButtons(double mouseX, double mouseY) {
         if (this.type != 4 && this.type != 5) return false;
 
@@ -412,10 +430,16 @@ public class ActionItem extends AbstractButton {
         colorControlsClickCounter = 1;
     }
 
+
+    //? if >=1.20.2 {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (isMouseOverColorButtons(mouseX, mouseY)) {
+            //? if >=1.21.9 {
+            // Window window = Minecraft.getInstance().getWindow();
+            //? } else {
             long window = Minecraft.getInstance().getWindow().getWindow();
+            //? }
             boolean shift = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT)
                     || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
             if (!shift) return false;
@@ -429,21 +453,51 @@ public class ActionItem extends AbstractButton {
 
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
+    //? } else {
+    /*
+     @Override
+     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+     if (isMouseOverColorButtons(mouseX, mouseY)) {
+            long window = Minecraft.getInstance().getWindow().getWindow();
+            boolean shift = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT)
+                    || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
+            if (!shift) return false;
+            if (amount > 0) {
+                colorOffset = (colorOffset - 1 + colorsData.length) % colorsData.length;
+            } else if (amount < 0) {
+                colorOffset = (colorOffset + 1) % colorsData.length;
+            }
+            return true;
+        }
+
+        return super.mouseScrolled(mouseX, mouseY, amount);
+     }
+     *///?}
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    //? if >=1.21.9 {
+    // public void onPress(InputWithModifiers inputWithModifiers) { }
+    //? } else {
+    public void onPress() { }
+    //? }
+
+    @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        double mouseX = event.x();
+        double mouseY = event.y();
         boolean clicked = false;
         switch (this.type) {
             case 1:
-                if (this.command.mouseClicked(mouseX, mouseY, button))
+                if (this.command.mouseClicked(event, bl))
                     clicked = true;
                 break;
             case 2:
-                if (this.delay.mouseClicked(mouseX, mouseY, button))
+                if (this.delay.mouseClicked(event, bl))
                     clicked = true;
                 break;
             case 3:
-                if (this.keybind.mouseClicked(mouseX, mouseY, button))
+                if (this.keybind.mouseClicked(event, bl))
                     clicked = true;
                 break;
             case 4:
@@ -453,11 +507,11 @@ public class ActionItem extends AbstractButton {
                         : new TextField[] { this.titleMessage, this.subtitleMessage };
 
                 for (TextField field : fields) {
-                    if (field.mouseClicked(mouseX, mouseY, button)) clicked = true;
+                    if (field.mouseClicked(event, bl)) clicked = true;
                 }
 
-                if (this.leftBtn.mouseClicked(mouseX, mouseY, button) ||
-                        this.rightBtn.mouseClicked(mouseX, mouseY, button)) {
+                if (this.leftBtn.mouseClicked(event, bl) ||
+                        this.rightBtn.mouseClicked(event, bl)) {
                     ActionItem.setColorControlsClicked();
                     clicked = true;
                 }
@@ -465,93 +519,208 @@ public class ActionItem extends AbstractButton {
                 for (int i = 0; i < VISIBLE_COLORS; i++) {
                     int actualIndex = (colorOffset + i) % colorsData.length;
                     SmallTextButton item = colorsItem.get(actualIndex);
-                    if (item.mouseClicked(mouseX, mouseY, button)) {
+                    if (item.mouseClicked(event, bl)) {
                         ActionItem.setColorControlsClicked();
                         clicked = true;
                     }
                 }
                 break;
         }
-        if (this.deleteBtn.mouseClicked(mouseX, mouseY, button) ||
-                this.bottomBtn.mouseClicked(mouseX, mouseY, button) ||
-                this.resetBtn.mouseClicked(mouseX, mouseY, button) ||
-                this.topBtn.mouseClicked(mouseX, mouseY, button)) {
+        if (this.deleteBtn.mouseClicked(event, bl) ||
+                this.bottomBtn.mouseClicked(event, bl) ||
+                this.resetBtn.mouseClicked(event, bl) ||
+                this.topBtn.mouseClicked(event, bl)) {
             clicked = true;
         }
         return clicked;
-    }
+    }*/
+    //? } else {
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            boolean clicked = false;
+            switch (this.type) {
+                case 1:
+                    if (this.command.mouseClicked(mouseX, mouseY, button))
+                        clicked = true;
+                    break;
+                case 2:
+                    if (this.delay.mouseClicked(mouseX, mouseY, button))
+                        clicked = true;
+                    break;
+                case 3:
+                    if (this.keybind.mouseClicked(mouseX, mouseY, button))
+                        clicked = true;
+                    break;
+                case 4:
+                case 5:
+                    TextField[] fields = (this.type == 4)
+                            ? new TextField[] { this.chatMessage }
+                            : new TextField[] { this.titleMessage, this.subtitleMessage };
 
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                    for (TextField field : fields) {
+                        if (field.mouseClicked(mouseX, mouseY, button)) clicked = true;
+                    }
+
+                    if (this.leftBtn.mouseClicked(mouseX, mouseY, button) ||
+                            this.rightBtn.mouseClicked(mouseX, mouseY, button)) {
+                        ActionItem.setColorControlsClicked();
+                        clicked = true;
+                    }
+
+                    for (int i = 0; i < VISIBLE_COLORS; i++) {
+                        int actualIndex = (colorOffset + i) % colorsData.length;
+                        SmallTextButton item = colorsItem.get(actualIndex);
+                        if (item.mouseClicked(mouseX, mouseY, button)) {
+                            ActionItem.setColorControlsClicked();
+                            clicked = true;
+                        }
+                    }
+                    break;
+            }
+            if (this.deleteBtn.mouseClicked(mouseX, mouseY, button) ||
+                    this.bottomBtn.mouseClicked(mouseX, mouseY, button) ||
+                    this.resetBtn.mouseClicked(mouseX, mouseY, button) ||
+                    this.topBtn.mouseClicked(mouseX, mouseY, button)) {
+                clicked = true;
+            }
+            return clicked;
+        }
+    //? }
+
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean keyPressed(KeyEvent event) {
         switch (this.type) {
             case 1:
-                if (this.command.keyPressed(keyCode, scanCode, modifiers)) {
+                if (this.command.keyPressed(event)) {
                     return true;
                 }
                 break;
             case 2:
-                if (this.delay.keyPressed(keyCode, scanCode, modifiers)) {
+                if (this.delay.keyPressed(event)) {
                     return true;
                 }
                 break;
             case 3:
-                if (keybind.keyPressed(keyCode, scanCode, modifiers)) {
+                if (keybind.keyPressed(event)) {
                     return true;
                 }
                 break;
             case 4:
-                if (chatMessage.keyPressed(keyCode, scanCode, modifiers)) {
+                if (chatMessage.keyPressed(event)) {
                     return true;
                 }
                 break;
             case 5:
-                if (titleMessage.keyPressed(keyCode, scanCode, modifiers) ||
-                        subtitleMessage.keyPressed(keyCode, scanCode, modifiers)) return true;
+                if (titleMessage.keyPressed(event) ||
+                        subtitleMessage.keyPressed(event)) return true;
                 break;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
+        return super.keyPressed(event);
+    }*/
+    //? } else {
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            switch (this.type) {
+                case 1:
+                    if (this.command.keyPressed(keyCode, scanCode, modifiers)) {
+                        return true;
+                    }
+                    break;
+                case 2:
+                    if (this.delay.keyPressed(keyCode, scanCode, modifiers)) {
+                        return true;
+                    }
+                    break;
+                case 3:
+                    if (keybind.keyPressed(keyCode, scanCode, modifiers)) {
+                        return true;
+                    }
+                    break;
+                case 4:
+                    if (chatMessage.keyPressed(keyCode, scanCode, modifiers)) {
+                        return true;
+                    }
+                    break;
+                case 5:
+                    if (titleMessage.keyPressed(keyCode, scanCode, modifiers) ||
+                            subtitleMessage.keyPressed(keyCode, scanCode, modifiers)) return true;
+                    break;
+            }
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
+    //? }
 
-    @Override
-    public boolean charTyped(char codePoint, int modifiers) {
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean charTyped(CharacterEvent event) {
         switch (this.type) {
             case 1:
-                if (this.command.charTyped(codePoint, modifiers)) {
+                if (this.command.charTyped(event)) {
                     return true;
                 }
                 break;
             case 2:
-                if (this.delay.charTyped(codePoint, modifiers)) {
+                if (this.delay.charTyped(event)) {
                     return true;
                 }
                 break;
             case 3:
-                if (keybind.charTyped(codePoint, modifiers)) {
+                if (keybind.charTyped(event)) {
                     return true;
                 }
                 break;
             case 4:
-                if (chatMessage.charTyped(codePoint, modifiers)) {
+                if (chatMessage.charTyped(event)) {
                     return true;
                 }
                 break;
             case 5:
-                if (titleMessage.charTyped(codePoint, modifiers) ||
-                        subtitleMessage.charTyped(codePoint, modifiers)) return true;
+                if (titleMessage.charTyped(event) ||
+                        subtitleMessage.charTyped(event)) return true;
                 break;
         }
-        return super.charTyped(codePoint, modifiers);
-    }
+        return super.charTyped(event);
+    }*/
+    //? } else {
+        public boolean charTyped(char codePoint, int modifiers) {
+            switch (this.type) {
+                case 1:
+                    if (this.command.charTyped(codePoint, modifiers)) {
+                        return true;
+                    }
+                    break;
+                case 2:
+                    if (this.delay.charTyped(codePoint, modifiers)) {
+                        return true;
+                    }
+                    break;
+                case 3:
+                    if (keybind.charTyped(codePoint, modifiers)) {
+                        return true;
+                    }
+                    break;
+                case 4:
+                    if (chatMessage.charTyped(codePoint, modifiers)) {
+                        return true;
+                    }
+                    break;
+                case 5:
+                    if (titleMessage.charTyped(codePoint, modifiers) ||
+                            subtitleMessage.charTyped(codePoint, modifiers)) return true;
+                    break;
+            }
+            return super.charTyped(codePoint, modifiers);
+        }
+    //? }
 
-    // ? if >=1.19.3 {
+    //? if >=1.19.3 {
     @Override
     protected void updateWidgetNarration(NarrationElementOutput builder) {
     }
-    // ?} else if >=1.17 {
+    //? } else if >=1.17 {
     /*
-     * @Override
-     * public void updateNarration(NarrationElementOutput builder) {
-     * }
+     @Override
+     public void updateNarration(NarrationElementOutput builder) {
+     }
      */
-    // ?}
+    //? }
 }

@@ -5,6 +5,7 @@ import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.gui.panels.PresetSelector;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 //? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,6 +19,13 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
 
 public class PresetListItem extends AbstractWidget {
     private final PresetSelector parent;
@@ -43,7 +51,7 @@ public class PresetListItem extends AbstractWidget {
     private long deleteConfirmationTime = 0;
 
     public PresetListItem(PresetSelector parent, String name, int x, int y, int width, int height, int index) {
-        super(x, y, width, height, Component.literal(""));
+        super(x, y, width, height, TextUtils.empty());
         this.parent = parent;
         this.name = name;
         this.index = index;
@@ -61,12 +69,7 @@ public class PresetListItem extends AbstractWidget {
                 }
             }
             isEditing = true;
-            //? if >=1.19.4 {
-            this.newNameField.setFocused(true);
-            //?} else {
-            /*this.newNameField.changeFocus(true);*/
-            //?}
-            TextField.setFocusedField(this.newNameField);
+            this.newNameField.setFocus();
         });
 
         this.deleteBtn = GUIUtils.createTexturedBtn(x + 101, y + 6, 9, 9, new ResourceLocation[]{DELETE, DELETE_HOVER}, button -> {
@@ -98,7 +101,12 @@ public class PresetListItem extends AbstractWidget {
         this.newNameField.setText(this.name);
     }
 
+    @Override
+    //? <1.21.9 {
     public void onClick(double mouseX, double mouseY) {
+    //? } else {
+    // public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl) {
+    //? }
         if (!isEditing) {
             parent.screen.selectPreset(index);
             parent.openSelector(false);
@@ -134,8 +142,8 @@ public class PresetListItem extends AbstractWidget {
             this.newNameField.render(c, mouseX, mouseY, delta);
             this.saveBtn.render(c, mouseX, mouseY, delta);
         } else {
-            if (this.isHoveredOrFocused() && parent.isOpen()) GUIUtils.drawFill(c, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x0DFFFFFF);
-            GUIUtils.addText(c, Component.literal(GUIUtils.truncateString(this.name, 15)), 0, getX() + 3, getY() + 7, "left", "top",0xFFFFFFFF, false);
+            if (this.isHovered && parent.isOpen()) GUIUtils.drawFill(c, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x0DFFFFFF);
+            GUIUtils.addText(c, TextUtils.literal(GUIUtils.truncateString(this.name, 15)), 0, getX() + 3, getY() + 7, "left", "top",0xFFFFFFFF, false);
             this.editBtn.render(c, mouseX, mouseY, delta);
             this.deleteBtn.render(c, mouseX, mouseY, delta);
             if (isDeleteConfirmation()) this.deleteConfBtn.render(c, mouseX, mouseY, delta);
@@ -152,48 +160,95 @@ public class PresetListItem extends AbstractWidget {
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    *///?} else {
+    *///?} else if >=1.19.4 {
     /*@Override
     public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    *///?}
+    *///?} else {
+    /*@Override
+    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }
+    */
+    //? }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         if (!parent.isOpen()) return false;
 
         if (isEditing) {
-            if (newNameField.mouseClicked(mouseX, mouseY, button)) {
+            if (newNameField.mouseClicked(event, bl)) {
                 return true;
             }
-            if (saveBtn.mouseClicked(mouseX, mouseY, button)) {
+            if (saveBtn.mouseClicked(event, bl)) {
                 return true;
             }
         } else {
-            if (editBtn.mouseClicked(mouseX, mouseY, button)) {
+            if (editBtn.mouseClicked(event, bl)) {
                 return true;
             }
-            if (deleteBtn.mouseClicked(mouseX, mouseY, button)) {
+            if (deleteBtn.mouseClicked(event, bl)) {
                 return true;
             }
             if (isDeleteConfirmation()) {
-                if (deleteConfBtn.mouseClicked(mouseX, mouseY, button)) return true;
+                if (deleteConfBtn.mouseClicked(event, bl)) return true;
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
-    }
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (!parent.isOpen() || !isEditing) return false;
-        return newNameField.keyPressed(keyCode, scanCode, modifiers);
-    }
+        return super.mouseClicked(event, bl);
+    }*/
+    //? } else {
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (!parent.isOpen()) return false;
 
-    @Override
-    public boolean charTyped(char codePoint, int modifiers) {
+            if (isEditing) {
+                if (newNameField.mouseClicked(mouseX, mouseY, button)) {
+                    return true;
+                }
+                if (saveBtn.mouseClicked(mouseX, mouseY, button)) {
+                    return true;
+                }
+            } else {
+                if (editBtn.mouseClicked(mouseX, mouseY, button)) {
+                    return true;
+                }
+                if (deleteBtn.mouseClicked(mouseX, mouseY, button)) {
+                    return true;
+                }
+                if (isDeleteConfirmation()) {
+                    if (deleteConfBtn.mouseClicked(mouseX, mouseY, button)) return true;
+                }
+            }
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+    //? }
+
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean keyPressed(KeyEvent event) {
         if (!parent.isOpen() || !isEditing) return false;
-        return newNameField.charTyped(codePoint, modifiers);
-    }
+        return newNameField.keyPressed(event);
+    }*/
+    //? } else {
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            if (!parent.isOpen() || !isEditing) return false;
+            return newNameField.keyPressed(keyCode, scanCode, modifiers);
+        }
+    //? }
+
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean charTyped(CharacterEvent event) {
+        if (!parent.isOpen() || !isEditing) return false;
+        return newNameField.charTyped(event);
+    }*/
+    //? } else {
+        public boolean charTyped(char codePoint, int modifiers) {
+            if (!parent.isOpen() || !isEditing) return false;
+            return newNameField.charTyped(codePoint, modifiers);
+        }
+    //? }
 
     //? if >=1.19.3 {
     @Override

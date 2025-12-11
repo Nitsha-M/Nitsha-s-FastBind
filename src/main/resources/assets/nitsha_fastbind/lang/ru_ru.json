@@ -6,7 +6,7 @@
   "key.nitsha.next_page" : "Следующая страница",
   "key.nitsha.editor" : "Окно настрооек",
 
-  "nitsha.binds.addNew" : "ноʙᴀя",
+  "nitsha.binds.addNew" : "ᴄоздᴀᴛь",
   "nitsha.binds.delete" : "удᴀлиᴛь",
   "nitsha.binds.configure" : "Настройки",
 
@@ -37,7 +37,7 @@
   "nitsha.binds.advances.actions.titleLine" : "Заголовок",
   "nitsha.binds.advances.actions.subtitleLine" : "Подзаголовок",
   "nitsha.binds.advances.actions.delayLine" : "в мс.",
-  "nitsha.binds.advances.actions.addNew" : "добав.",
+  "nitsha.binds.advances.actions.addNew" : "доб.",
 
   "nitsha.binds.advances.options.hold" : "Зажать %s для открытия",
   "nitsha.binds.advances.options.openLastPage" : "Открыть на посл. странице",

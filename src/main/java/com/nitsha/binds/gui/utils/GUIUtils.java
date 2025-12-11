@@ -3,6 +3,8 @@ package com.nitsha.binds.gui.utils;
 //? if <1.21.5 {
 import com.mojang.blaze3d.platform.GlStateManager;
 //?}
+import com.mojang.blaze3d.platform.Lighting;import com.mojang.blaze3d.platform.Window;
+import com.nitsha.binds.gui.widget.TexturedButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 //? if >=1.20 {
@@ -21,7 +23,7 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.renderer.texture.OverlayTexture;import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.resources.ResourceLocation;
@@ -35,9 +37,9 @@ import net.minecraft.client.resources.model.BakedModel;
 import com.mojang.blaze3d.systems.RenderSystem;
 //? if >=1.19.3 {
 import org.joml.Matrix4f;
-//?} else {
-/*import com.mojang.math.Matrix4f;
- *///? }
+//? } else {
+// import com.mojang.math.Matrix4f;
+//? }
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 
@@ -167,7 +169,7 @@ public class GUIUtils {
         RenderSystem.disableBlend();
         *///?} else {
         /*RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
         float red   = ((color >> 16) & 0xFF) / 255.0f;
         float green = ((color >> 8) & 0xFF) / 255.0f;
@@ -205,107 +207,9 @@ public class GUIUtils {
         adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, 256, 256, 0xFFFFFFFF);
     }
 
-    public static AbstractWidget createTexturedBtn(int x, int y, int width, int height,
+    public static TexturedButton createTexturedBtn(int x, int y, int width, int height,
                                                    ResourceLocation[] textures, Button.OnPress onClick) {
-        ResourceLocation defaultTexture = textures[0];
-        ResourceLocation hoverTexture   = textures[1];
-
-        //? if >1.21.1 {
-        return new ImageButton(x, y, width, height, new WidgetSprites(defaultTexture, hoverTexture), onClick) {
-            @Override
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                return false;
-            }
-        };
-        //?} else if >=1.20.3 {
-        /*return new ImageButton(x, y, width, height, new WidgetSprites(defaultTexture, hoverTexture), onClick) {
-            @Override
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
-            @Override
-            public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                super.renderWidget(context, mouseX, mouseY, delta);
-                RenderSystem.disableBlend();
-            }
-        };
-        *///?} else if >=1.20.2 {
-        /*return new ImageButton(x, y, width, height, new WidgetSprites(defaultTexture, hoverTexture), onClick) {
-            @Override
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
-            @Override
-            public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                super.renderWidget(context, mouseX, mouseY, delta);
-                RenderSystem.disableBlend();
-            }
-        };
-        *///?} else if >=1.20 {
-        /*return new ImageButton(x, y, width, height, 0, 0, defaultTexture, onClick) {
-            @Override
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
-            @Override
-            public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                ResourceLocation current = this.isHovered() ? hoverTexture : defaultTexture;
-                ctx.blit(current, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
-                RenderSystem.disableBlend();
-            }
-        };
-        *///?} else if >=1.19.3 {
-        /*return new ImageButton(x, y, width, height, 0, 0, defaultTexture, onClick) {
-            @Override
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
-            @Override
-            public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                ResourceLocation current = this.isHovered() ? hoverTexture : defaultTexture;
-                RenderSystem.setShaderTexture(0, current);
-                GuiComponent.blit(matrices, this.getX(), this.getY(),
-                        0, 0, this.width, this.height, this.width, this.height);
-                RenderSystem.disableBlend();
-            }
-        };
-        *///?} else if >=1.17 {
-        /*return new ImageButton(x, y, width, height, 0, 0, defaultTexture, onClick) {
-            @Override
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) { return false; }
-            @Override
-            public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                ResourceLocation current = this.isHovered() ? hoverTexture : defaultTexture;
-                RenderSystem.setShaderTexture(0, current);
-                GuiComponent.blit(matrices, this.x, this.y,
-                        0, 0, this.width, this.height, this.width, this.height);
-                RenderSystem.disableBlend();
-            }
-        };
-        *///?} else {
-        /*return new ImageButton(x, y, width, height, 0, 0, 0, defaultTexture, onClick) {
-            @Override
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                return false;
-            }
-
-            @Override
-            public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.enableAlphaTest();
-                RenderSystem.alphaFunc(GL11.GL_GREATER, 0.0F);
-                Minecraft minecraftClient = Minecraft.getInstance();
-                ResourceLocation current = this.isHovered() ? hoverTexture : defaultTexture;
-                minecraftClient.getTextureManager().bind(current);
-                blit(matrices, this.x, this.y, 0, 0, this.width, this.height, this.width, this.height);
-                RenderSystem.disableAlphaTest();
-                RenderSystem.disableBlend();
-            }
-        };
-        *///?}
+        return new TexturedButton(x, y, width, height, textures[0], textures[1], onClick);
     }
 
     // ------------------- RESIZABLE BOX -------------------
@@ -386,6 +290,15 @@ public class GUIUtils {
         action.run();
         graphics.disableScissor();
         graphics.pose().popMatrix();
+        graphics.disableScissor();*/
+        //? } else if >=1.21.4 {
+        /*GuiGraphics graphics = (GuiGraphics)ctx;
+        graphics.enableScissor(0, 0, 10000, 10000);
+        graphics.pose().pushPose();
+        graphics.enableScissor(x, y, x + width, y + height);
+        action.run();
+        graphics.disableScissor();
+        graphics.pose().popPose();
         graphics.disableScissor();
         *///?} else if >=1.20 {
         ((GuiGraphics)ctx).enableScissor(0, 0, 10000, 10000);
@@ -396,18 +309,23 @@ public class GUIUtils {
         ((GuiGraphics)ctx).pose().popPose();
         ((GuiGraphics)ctx).disableScissor();
         //?} else {
-        /*// Для версий <1.20 используем прямые вызовы GL
-        double scale = MC.getWindow().getGuiScale();
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor(
-            (int)(x * scale),
-            (int)(MC.getWindow().getHeight() - (y + height) * scale),
-            (int)(width * scale),
-            (int)(height * scale)
-        );
+        /*
+        Window window = Minecraft.getInstance().getWindow();
+        int i = window.getHeight();
+        double d = window.getGuiScale();
+        double e = (double)x * d;
+        double f = (double)i - ((double)y + (double)height) * d;  // ← ИСПРАВЛЕНО ЗДЕСЬ
+        double g = (double)width * d;
+        double h = (double)height * d;
+        RenderSystem.enableScissor(0, 0, 10000, 10000);
+        ((PoseStack)ctx).pushPose();
+        RenderSystem.enableScissor((int)e, (int)f, Math.max(0, (int)g), Math.max(0, (int)h));
         action.run();
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
-        *///?}
+        RenderSystem.disableScissor();
+        ((PoseStack)ctx).popPose();
+        RenderSystem.disableScissor();
+        */
+        //?}
     }
 
     public static void matricesScale(Object ctx, float scale, Runnable action) {
@@ -458,7 +376,7 @@ public class GUIUtils {
         matrices.translate((float)x, (float)y, 150.0F);
         matrices.translate(8.0F, 8.0F, 0.0F);
         //? if >=1.19.3 {
-        matrices.last().pose().multiply((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
+        matrices.last().pose().mul((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
         //? } else if >=1.18 {
         matrices.last().pose().multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
         //? } else {
@@ -501,7 +419,7 @@ public class GUIUtils {
         RenderSystem.enableAlphaTest();
         RenderSystem.defaultAlphaFunc();
         RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.multMatrix(matrices.last().pose());
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.translatef((float)x, (float)y, 150.0F);

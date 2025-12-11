@@ -13,11 +13,20 @@ import net.minecraft.client.gui.GuiGraphics;
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.AbstractButton;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
+
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
 
 public class KeybindSelector extends AbstractButton {
     private static KeybindSelector focusedKeybind = null;
@@ -31,7 +40,7 @@ public class KeybindSelector extends AbstractButton {
     private int x, y;
 
     public KeybindSelector(int x, int y, int width, int height) {
-        super(x, y, width, height, Component.literal(""));
+        super(x, y, width, height, TextUtils.empty());
         this.x = x;
         this.y = y;
     }
@@ -78,9 +87,15 @@ public class KeybindSelector extends AbstractButton {
         focusedKeybind = fK;
     }
 
+    //? <1.21.9 {
     @Override
     public void onPress() {
     }
+    //? } else {
+    /*@Override
+    public void onPress(InputWithModifiers inputWithModifiers) {
+    }*/
+    //? }
 
     //? if >1.20.2 {
     @Override
@@ -92,12 +107,18 @@ public class KeybindSelector extends AbstractButton {
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    *///?} else {
+    *///?} else if >=1.19.4 {
     /*@Override
     public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    *///?}
+    *///?} else {
+    /*@Override
+    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }
+    */
+    //? }
 
     private String calculateName(String insideName, String fullName, int max) {
         int textCut = Math.min(fullName.length(), max);
@@ -111,27 +132,31 @@ public class KeybindSelector extends AbstractButton {
         String fName = (isPressed) ? "> " + cName + " <" : cName;
         int textWidth = font.width(fName);
 
-        GUIUtils.drawResizableBox(ctx, (isPressed || isHovered()) ? PRESSED : NORMAL, getX(), getY(), getWidth(), getHeight(), 3, 7);
-        GUIUtils.addText(ctx, Component.literal(fName), 0,
+        GUIUtils.drawResizableBox(ctx, (isPressed || isHovered) ? PRESSED : NORMAL, getX(), getY(), getWidth(), getHeight(), 3, 7);
+        GUIUtils.addText(ctx, TextUtils.literal(fName), 0,
                 this.getX() + ((this.width / 2) - (textWidth / 2)),
                 this.getY() + ((this.height / 2) - (font.lineHeight / 2)),
                 "top", "left", 0xFFFFFFFF, false);
     }
 
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        controlFocus(mouseX, mouseY);
-        return super.mouseClicked(mouseX, mouseY, button);
+    private static GuiEventListener lastClickedWidget = null;
+
+    public static void setLastClickedWidget(GuiEventListener widget) {
+        lastClickedWidget = widget;
     }
 
-    public void controlFocus(double mouseX, double mouseY) {
-        if (isMouseOver(mouseX, mouseY)) {
-            setFocusedField(this);
-            this.setPressed(true);
-        } else {
-            setFocusedField(null);
+    public static void controlFocus() {
+        if (focusedKeybind == null) return;
+
+        if (lastClickedWidget == focusedKeybind) {
+            return;
         }
+
+        focusedKeybind.setFocused(false);
+        focusedKeybind.setPressed(false);
+        focusedKeybind = null;
     }
+
 
     //? if >=1.19.3 {
     @Override
@@ -144,14 +169,53 @@ public class KeybindSelector extends AbstractButton {
     //?}
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        if (isMouseOver(mouseX, mouseY)) {
+            setLastClickedWidget(this);
+            setFocusedField(this);
+            this.setPressed(true);
+            this.setFocused(true);
+        }
+        return super.mouseClicked(event, bl);
+    }*/
+    //? } else {
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (isMouseOver(mouseX, mouseY)) {
+                setLastClickedWidget(this);
+                setFocusedField(this);
+                this.setPressed(true);
+                this.setFocused(true);
+            }
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+    //? }
+
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean keyPressed(KeyEvent event) {
         if (focusedKeybind != null) {
+            int keyCode = event.key();
             int newKey = (keyCode == GLFW.GLFW_KEY_ESCAPE) ? 0 : keyCode;
             focusedKeybind.setPressed(false);
             focusedKeybind.setKeyCode(newKey);
             KeybindSelector.setFocusedField(null);
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
+        return super.keyPressed(event);
+    }*/
+    //? } else {
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            if (focusedKeybind != null) {
+                int newKey = (keyCode == GLFW.GLFW_KEY_ESCAPE) ? 0 : keyCode;
+                focusedKeybind.setPressed(false);
+                focusedKeybind.setKeyCode(newKey);
+                KeybindSelector.setFocusedField(null);
+                if (keyCode == GLFW.GLFW_KEY_ESCAPE) return true;
+            }
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
+    //? }
 }

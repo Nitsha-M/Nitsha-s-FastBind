@@ -12,7 +12,7 @@ public class RenderUtils {
             return (Renderable) element;
         }
 
-        //? if >=1.19.1 {
+        //? if >=1.19.3 {
         if (element instanceof net.minecraft.client.gui.components.Renderable vanilla) {
             return new Renderable() {
                 @Override

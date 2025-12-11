@@ -2,13 +2,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.HashMap
 
 plugins {
-    kotlin("jvm") version "2.1.20"
     id("dev.isxander.modstitch.base") version "0.7.1-unstable"
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
-    id("dev.kikugie.stonecutter") version "0.7.10"
 }
 
-// ===== КЛАСС ДЛЯ УПРАВЛЕНИЯ ВЕРСИЯМИ =====
+// Version controller
 class VersionDefinition(vararg pairs: Pair<String, String>) {
     private val versions = mapOf(*pairs)
 
@@ -16,11 +14,12 @@ class VersionDefinition(vararg pairs: Pair<String, String>) {
     fun getOrDefault(key: String, default: String): String = versions[key] ?: default
 }
 
-// ===== ЦЕНТРАЛИЗОВАННЫЕ ВЕРСИИ ВСЕХ ЗАВИСИМОСТЕЙ =====
+// Dependencies version
 
 // Fabric API
 val fabricApiVersion = VersionDefinition(
     // 1.21.x
+    "1.21.11" to "0.139.4+1.21.11",
     "1.21.10" to "0.135.0+1.21.10",
     "1.21.9" to "0.134.0+1.21.9",
     "1.21.8" to "0.134.0+1.21.8",
@@ -60,6 +59,7 @@ val fabricApiVersion = VersionDefinition(
 // Mod Menu
 val modMenuVersion = VersionDefinition(
     // 1.21.x
+    "1.21.11" to "17.0.0-alpha.1",
     "1.21.10" to "16.0.0-rc.1",
     "1.21.9" to "16.0.0-rc.1",
     "1.21.8" to "15.0.0",
@@ -99,7 +99,8 @@ val modMenuVersion = VersionDefinition(
 // NeoForge (только для 1.20.2+)
 val neoForgeVersion = VersionDefinition(
     // 1.21.x
-    "1.21.10" to "21.10.18-beta",
+    "1.21.11" to "21.11.3-beta",
+    "1.21.10" to "21.10.64",
     "1.21.9" to "21.9.16-beta",
     "1.21.8" to "21.8.47",
     "1.21.7" to "21.7.25-beta",
@@ -174,13 +175,14 @@ val parchmentVersion = VersionDefinition(
 
 val additionalVersions = mapOf(
     // 1.21.x
-    "1.21.9" to listOf("1.21.10"),
-    "1.21.8" to emptyList(),
+    "1.21.11" to emptyList(),
+    "1.21.10" to listOf("1.21.9"),
+    "1.21.8" to listOf("1.21.6", "1.21.7"),
     "1.21.7" to emptyList(),
     "1.21.6" to emptyList(),
     "1.21.5" to emptyList(),
     "1.21.4" to emptyList(),
-    "1.21.3" to emptyList(),
+    "1.21.3" to listOf("1.21.2"),
     "1.21.2" to emptyList(),
     "1.21.1" to listOf("1.21"),
 
@@ -193,12 +195,12 @@ val additionalVersions = mapOf(
     // 1.19.x
     "1.19.4" to emptyList(),
     "1.19.3" to emptyList(),
-    "1.19.2" to emptyList(),
+    "1.19.2" to listOf("1.19.1"),
     "1.19.1" to emptyList(),
     "1.19" to emptyList(),
 
     // 1.18.x
-    "1.18.2" to emptyList(),
+    "1.18.2" to listOf("1.18.1", "1.18"),
     "1.18.1" to emptyList(),
     "1.18" to emptyList(),
 
@@ -209,7 +211,7 @@ val additionalVersions = mapOf(
     "1.16.5" to emptyList(),
 )
 
-// ===== КОНФИГУРАЦИЯ ПРОЕКТА =====
+// Configs
 
 fun cfg(name: String): String {
     return try {
@@ -239,7 +241,6 @@ config["is_forge"] = is_forge.toString()
 val is_neoforge = modstitch_platform == "moddevgradle-regular"
 config["is_neoforge"] = is_neoforge.toString()
 
-// Информация о моде
 val minecraft_version = cfg("minecraft")
 config["minecraft_version"] = minecraft_version
 val mod_name = cfg("name")
@@ -259,8 +260,10 @@ config["mod_license"] = mod_license
 val loader: String = name.split("-")[1]
 config["loader"] = loader
 
-// Получаем версии из централизованного хранилища
-val fabric_loader = "0.16.14"
+val fabric_loader = when {
+    stonecutter.eval(minecraft_version, ">=1.21.9") -> "0.17.2"
+    else -> "0.16.14"
+}
 config["fabric_loader"] = fabric_loader
 val fabric_version = fabricApiVersion.getOrDefault(minecraft_version, "")
 config["fabric_version"] = fabric_version
@@ -281,25 +284,37 @@ val forgeVersionRange = when {
     else -> "[36,)"
 }
 
+fun parseVersion(version: String): List<Int> {
+    return version.split(".").map { it.toIntOrNull() ?: 0 }
+}
+
+fun compareVersions(v1: String, v2: String): Int {
+    val parts1 = parseVersion(v1)
+    val parts2 = parseVersion(v2)
+
+    for (i in 0 until maxOf(parts1.size, parts2.size)) {
+        val p1 = parts1.getOrNull(i) ?: 0
+        val p2 = parts2.getOrNull(i) ?: 0
+        if (p1 != p2) return p1.compareTo(p2)
+    }
+    return 0
+}
+
 val minecraftVersionRange = run {
     val current = minecraft_version
     val additional = additionalVersions[current] ?: emptyList()
 
-    // Находим минимальную и максимальную версии из текущей и дополнительных
-    val allVersions = listOf(current) + additional
-    val minVersion = allVersions.minOrNull() ?: current
+    if (additional.isEmpty()) {
+        // Только текущая версия
+        current
+    } else {
+        // Находим минимальную и максимальную версии
+        val allVersions = listOf(current) + additional
+        val minVersion = allVersions.minWithOrNull { v1, v2 -> compareVersions(v1, v2) } ?: current
+        val maxVersion = allVersions.maxWithOrNull { v1, v2 -> compareVersions(v1, v2) } ?: current
 
-    // Определяем следующую мажорную версию для верхней границы
-    val maxVersion = when {
-        current.startsWith("1.21") -> "1.22"
-        current.startsWith("1.20") -> "1.21"
-        current.startsWith("1.19") -> "1.20"
-        current.startsWith("1.18") -> "1.19"
-        current.startsWith("1.17") -> "1.18"
-        else -> "1.17"
+        ">=$minVersion <=$maxVersion"
     }
-
-    "[$minVersion,$maxVersion)"
 }
 
 config["mod_forgeRange"] = forgeVersionRange
@@ -307,9 +322,10 @@ config["mod_versionRange"] = minecraftVersionRange
 
 // Определяем Java версию
 val java_version = when {
-    stonecutter.eval(minecraft_version, ">=1.21.9") -> 24
+    // stonecutter.eval(minecraft_version, ">=1.21.9") -> 24
     stonecutter.eval(minecraft_version, ">=1.20.5") -> 21
-    else -> 17
+    stonecutter.eval(minecraft_version, ">=1.18") -> 17
+    else -> 16
 }
 config["java_version"] = java_version.toString()
 
@@ -334,10 +350,6 @@ repositories {
 tasks {
     named<ProcessResources>("generateModMetadata") {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
-        dependsOn("stonecutterGenerate")
-    }
-
-    named("compileKotlin") {
         dependsOn("stonecutterGenerate")
     }
 
@@ -422,7 +434,7 @@ modstitch {
     }
 
     if (is_fabric) loom {
-        fabricLoaderVersion = fabric_loader
+        fabricLoaderVersion.set(fabric_loader)
 
         configureLoom {
             runConfigs.configureEach {
@@ -460,11 +472,6 @@ modstitch {
         addMixinsToModManifest = true
         configs.register(mod_id)
     }
-
-    kotlin {
-        jvmToolchain(java_version)
-        compilerOptions.jvmTarget.set(JvmTarget.valueOf("JVM_${if (java_version > 21) 21 else java_version}"))
-    }
 }
 
 java {
@@ -497,7 +504,7 @@ dependencies {
     modstitch.loom {
         if (is_fabric) {
             modstitchModImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
-            modstitchModApi("com.terraformersmc:modmenu:${modmenu_version}")
+            modstitchModImplementation("com.terraformersmc:modmenu:${modmenu_version}")
         }
         if (is_neoforge)
             modstitchModImplementation("net.neoforged:neoforge:${neoforge_ver}")
@@ -556,9 +563,6 @@ publishMods {
         minecraftVersions.add(stonecutter.current.version)
         additional.forEach { minecraftVersions.add(it) }
 
-        if (is_fabric) {
-            requires("fabric-api")
-        }
     }
 
     curseforge {
@@ -567,8 +571,5 @@ publishMods {
         minecraftVersions.add(stonecutter.current.version)
         additional.forEach { minecraftVersions.add(it) }
 
-        if (is_fabric) {
-            requires("fabric-api")
-        }
     }
 }

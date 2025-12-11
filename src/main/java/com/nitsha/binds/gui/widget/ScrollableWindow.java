@@ -1,6 +1,7 @@
 package com.nitsha.binds.gui.widget;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.Window;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.DrawElement;
@@ -22,6 +23,13 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
 
 public class ScrollableWindow extends AbstractContainerEventHandler
         implements Renderable, GuiEventListener /* ? if >=1.17 { */ , NarratableEntry /* ?} */ {
@@ -138,11 +146,11 @@ public class ScrollableWindow extends AbstractContainerEventHandler
 
     @Override
     public void render(
-            // ? if >=1.20 {
+            //? if >=1.20 {
             GuiGraphics ctx
-            // ?} else {
+            //?} else {
             /*PoseStack ctx*/
-            // ?}
+            //?}
             , int mouseX, int mouseY, float delta) {
         int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
         int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
@@ -178,12 +186,12 @@ public class ScrollableWindow extends AbstractContainerEventHandler
         return drawElements;
     }
 
-    // ? if >=1.17 {
+    //? if >=1.17 {
     @Override
     public NarratableEntry.NarrationPriority narrationPriority() {
         return NarratableEntry.NarrationPriority.NONE;
     }
-    // ?}
+    //?}
 
     public boolean isMouseInside(double mouseX, double mouseY) {
         int w = 0;
@@ -216,7 +224,11 @@ public class ScrollableWindow extends AbstractContainerEventHandler
     private boolean scrollLogic(double mouseX, double mouseY, double amount) {
         if (!isMouseInside(mouseX, mouseY))
             return false;
+        //? if >=1.21.9 {
+        // Window window = Minecraft.getInstance().getWindow();
+        //? } else {
         long window = Minecraft.getInstance().getWindow().getWindow();
+        //? }
         boolean shift = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT)
                 || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
         int scrollSpeed = (shift) ? 10 : 5;
@@ -227,18 +239,18 @@ public class ScrollableWindow extends AbstractContainerEventHandler
         return true;
     }
 
-    // ? if >=1.20.2 {
+    //? if >=1.20.2 {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         return scrollLogic(mouseX, mouseY, verticalAmount);
     }
-    // ?} else {
+    //?} else {
     /*
      @Override
      public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
      return scrollLogic(mouseX, mouseY, amount);
      }
-     */// ?}
+     *///?}
 
     private boolean isInsideScrollbar(double mouseX, double mouseY) {
         int scrollbarX = this.getX() + this.width - 4;
@@ -248,9 +260,19 @@ public class ScrollableWindow extends AbstractContainerEventHandler
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.buttonInfo().button();
         int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
         int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
+
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            event.x() - aX,
+            event.y() - aY,
+            event.buttonInfo()
+        );
 
         boolean clicked = false;
 
@@ -263,7 +285,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
 
         if (isMouseInside(mouseX, mouseY)) {
             for (GuiEventListener element : new ArrayList<>(this.children())) {
-                if (element.mouseClicked(mouseX - aX, mouseY - aY, button)) {
+                if (element.mouseClicked(adjustedEvent, bl)) {
                     this.setFocused(element);
                     if (button == 0) {
                         this.setDragging(true);
@@ -274,20 +296,69 @@ public class ScrollableWindow extends AbstractContainerEventHandler
         }
 
         return clicked;
-    }
+    }*/
+    //? } else {
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
+            int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
+
+            boolean clicked = false;
+
+            if (button == 0 && isInsideScrollbar(mouseX, mouseY)) {
+                isDraggingScrollbar = true;
+                dragStartY = (int) mouseY;
+                dragStartScrollOffset = scrollOffset;
+                clicked = true;
+            }
+
+
+        if (isMouseInside(mouseX, mouseY)) {
+                for (GuiEventListener element : new ArrayList<>(this.children())) {
+                    if (element.mouseClicked(mouseX - aX, mouseY - aY, button)) {
+                        this.setFocused(element);
+                        if (button == 0) {
+                            this.setDragging(true);
+                        }
+                        clicked = true;
+                    }
+                }
+            }
+
+            return clicked;
+        }
+    //? }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    //? if >=1.21.9 {
+    /*public boolean mouseReleased(MouseButtonEvent event) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.buttonInfo().button();
         int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
         int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
         if (button == 0 && isDraggingScrollbar) {
             isDraggingScrollbar = false;
         }
-        return super.mouseReleased(mouseX - aX, mouseY - aY, button);
-    }
+        return super.mouseReleased(event);
+    }*/
+    //? } else {
+        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
+            int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
+            if (button == 0 && isDraggingScrollbar) {
+                isDraggingScrollbar = false;
+            }
+            return super.mouseReleased(mouseX - aX, mouseY - aY, button);
+        }
+    //? }
 
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.buttonInfo().button();
+
         if (isDraggingScrollbar && button == 0) {
             int trackHeight = height - 2;
             int scrollArea = trackHeight - barSize;
@@ -302,36 +373,80 @@ public class ScrollableWindow extends AbstractContainerEventHandler
         }
 
         for (GuiEventListener child : new ArrayList<>(children)) {
-            if (child.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
+            if (child.mouseDragged(event, deltaX, deltaY)) {
                 return true;
             }
         }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-    }
+        return super.mouseDragged(event, deltaX, deltaY);
+    }*/
+    //? } else {
+        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+            if (isDraggingScrollbar && button == 0) {
+                int trackHeight = height - 2;
+                int scrollArea = trackHeight - barSize;
 
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                int dy = (int) mouseY - dragStartY;
+
+                float scrollProgress = (float) dy / scrollArea;
+                scrollOffset = Mth.clamp(dragStartScrollOffset + Math.round(scrollProgress * maxScroll), 0, maxScroll);
+
+                float newProgress = maxScroll > 0 ? scrollOffset / (float) maxScroll : 0f;
+                scrollBarOffset = (int) (newProgress * scrollArea);
+            }
+
+            for (GuiEventListener child : new ArrayList<>(children)) {
+                if (child.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
+                    return true;
+                }
+            }
+            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        }
+    //? }
+
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean keyPressed(KeyEvent event) {
         for (GuiEventListener child : this.children) {
-            if (child.keyPressed(keyCode, scanCode, modifiers))
+            if (child.keyPressed(event))
                 return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
+        return super.keyPressed(event);
+    }*/
+    //? } else {
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            for (GuiEventListener child : this.children) {
+                if (child.keyPressed(keyCode, scanCode, modifiers))
+                    return true;
+            }
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
+    //? }
 
-    @Override
-    public boolean charTyped(char codePoint, int modifiers) {
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean charTyped(CharacterEvent event) {
         for (GuiEventListener child : new ArrayList<>(children)) {
-            if (child.charTyped(codePoint, modifiers)) {
+            if (child.charTyped(event)) {
                 return true;
             }
         }
-        return super.charTyped(codePoint, modifiers);
-    }
+        return super.charTyped(event);
+    }*/
+    //? } else {
+        public boolean charTyped(char codePoint, int modifiers) {
+            for (GuiEventListener child : new ArrayList<>(children)) {
+                if (child.charTyped(codePoint, modifiers)) {
+                    return true;
+                }
+            }
+            return super.charTyped(codePoint, modifiers);
+        }
+    //? }
 
-    // ? if >=1.17 {
+    //? if >=1.17 {
     @Override
     public void updateNarration(NarrationElementOutput builder) {
 
     }
-    // ?}
+    //?}
 }

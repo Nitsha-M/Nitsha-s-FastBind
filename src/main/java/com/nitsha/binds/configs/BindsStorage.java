@@ -1,8 +1,8 @@
 package com.nitsha.binds.configs;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -21,20 +21,61 @@ import java.util.stream.IntStream;
 public class BindsStorage {
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
-            .setObjectToNumberStrategy(com.google.gson.ToNumberPolicy.LONG_OR_DOUBLE)
+            .registerTypeAdapter(new TypeToken<Map<String, Object>>(){}.getType(), new JsonDeserializer<Map<String, Object>>() {
+                @Override
+                public Map<String, Object> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                    return (Map<String, Object>) parseJsonElement(json);
+                }
+
+                private Object parseJsonElement(JsonElement element) {
+                    if (element.isJsonObject()) {
+                        Map<String, Object> map = new HashMap<>();
+                        for (Map.Entry<String, JsonElement> entry : element.getAsJsonObject().entrySet()) {
+                            map.put(entry.getKey(), parseJsonElement(entry.getValue()));
+                        }
+                        return map;
+                    } else if (element.isJsonArray()) {
+                        List<Object> list = new ArrayList<>();
+                        for (JsonElement item : element.getAsJsonArray()) {
+                            list.add(parseJsonElement(item));
+                        }
+                        return list;
+                    } else if (element.isJsonPrimitive()) {
+                        JsonPrimitive primitive = element.getAsJsonPrimitive();
+                        if (primitive.isBoolean()) {
+                            return primitive.getAsBoolean();
+                        } else if (primitive.isNumber()) {
+                            Number num = primitive.getAsNumber();
+                            if (num.doubleValue() == num.longValue()) {
+                                return num.intValue();
+                            }
+                            return num.doubleValue();
+                        } else {
+                            return primitive.getAsString();
+                        }
+                    } else if (element.isJsonNull()) {
+                        return null;
+                    }
+                    return null;
+                }
+            })
+            .registerTypeAdapter(Double.class, new JsonSerializer<Double>() {
+                @Override
+                public JsonElement serialize(Double src, Type typeOfSrc, JsonSerializationContext context) {
+                    if (src == src.longValue()) {
+                        return new JsonPrimitive(src.longValue());
+                    }
+                    return new JsonPrimitive(src);
+                }
+            })
             .create();
-    // ? if fabric {
-    private static final Path CONFIG_DIR = net.fabricmc.loader.api.FabricLoader.getInstance().getGameDir()
-            .resolve("nitsha");
-    // ?} elif neoforge {
-    /*
-     * private static final Path CONFIG_DIR =
-     * net.neoforged.fml.loading.FMLPaths.GAMEDIR.get().resolve("nitsha");
-     */// ?} elif forge {
-    /*
-     * private static final Path CONFIG_DIR =
-     * net.minecraftforge.fml.loading.FMLPaths.GAMEDIR.get().resolve("nitsha");
-     */// ?}
+    //? if fabric {
+    private static final Path CONFIG_DIR = net.fabricmc.loader.api.FabricLoader.getInstance().getGameDir().resolve("nitsha");
+    //? } elif neoforge {
+    // private static final Path CONFIG_DIR = net.neoforged.fml.loading.FMLPaths.GAMEDIR.get().resolve("nitsha");
+    //? } elif forge {
+    // private static final Path CONFIG_DIR = net.minecraftforge.fml.loading.FMLPaths.GAMEDIR.get().resolve("nitsha");
+    //? }
 
     private static final File STORAGE_FILE = CONFIG_DIR.resolve("fastbind_presets.json").toFile();
 

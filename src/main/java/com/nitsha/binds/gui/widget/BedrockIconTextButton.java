@@ -2,6 +2,7 @@ package com.nitsha.binds.gui.widget;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 //? if >=1.20 {
@@ -48,18 +49,25 @@ public class BedrockIconTextButton extends BedrockButton {
         super.renderWidget(context, mouseX, mouseY, delta);
         renderOverlay(context, mouseX, mouseY, delta);
     }
-    *///?} else {
+    *///? } else if >=1.19.4 {
     /*@Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
         super.renderWidget(context, mouseX, mouseY, delta);
         renderOverlay(context, mouseX, mouseY, delta);
     }
-    *///?}
+    *///?} else {
+    /*@Override
+    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
+        super.renderButton(context, mouseX, mouseY, delta);
+        renderOverlay(context, mouseX, mouseY, delta);
+    }
+    */
+    //? }
 
     protected void renderOverlay(Object ctx, int mouseX, int mouseY, float delta) {
         GUIUtils.adaptiveDrawTexture(ctx, ICON, this.getX() + xO, this.getY() + yO + Math.round(this.getOffsetY()), 0, 0, 16, 14, 16, 14,
-                (this.isEnabled()) ? (isHovered() || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor() : 0x40FFFFFF);
-        GUIUtils.addText(ctx, Component.literal(this.text), getWidth(), this.getX() + xO + 18, this.getY() + yO + 7 + Math.round(this.getOffsetY()),
-                "left", "center", (this.isEnabled()) ? (isHovered() || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor() : this.getTextColor(), false);
+                (this.isEnabled()) ? (isHovered || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor() : 0x40FFFFFF);
+        GUIUtils.addText(ctx, TextUtils.literal(this.text), getWidth(), this.getX() + xO + 18, this.getY() + yO + 7 + Math.round(this.getOffsetY()),
+                "left", "center", (this.isEnabled()) ? (isHovered || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor() : this.getTextColor(), false);
     }
 }

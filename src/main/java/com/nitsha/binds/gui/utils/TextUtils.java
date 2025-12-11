@@ -25,4 +25,12 @@ public class TextUtils {
         /*return new net.minecraft.network.chat.TranslatableComponent(key, args);
          *///?}
     }
+
+    public static MutableComponent empty() {
+        //? if >=1.19 {
+        return Component.empty();
+        //?} else {
+        /*return new net.minecraft.network.chat.TextComponent("");*/
+        //?}
+    }
 }

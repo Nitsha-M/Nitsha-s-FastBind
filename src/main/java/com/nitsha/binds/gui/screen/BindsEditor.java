@@ -14,12 +14,11 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.gui.GuiGraphics;
 //?} else {
 /*import net.minecraft.client.gui.GuiComponent;
-import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
+import com.mojang.blaze3d.vertex.PoseStack;*/
+//? }
 import com.nitsha.binds.utils.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.resources.ResourceLocation;
@@ -28,6 +27,14 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
 
 public class BindsEditor extends Screen {
     private static final ResourceLocation BACKGROUND = Main.id("textures/gui/test/editor_bg.png");
@@ -61,7 +68,7 @@ public class BindsEditor extends Screen {
     private final Screen parent;
 
     public BindsEditor(Screen parent) {
-        super(Component.empty());
+        super(TextUtils.empty());
         this.parent = parent;
         currentPage = 0;
         activeBind = 0;
@@ -69,49 +76,48 @@ public class BindsEditor extends Screen {
 
     protected void init() {
         super.init();
-        // ? if >=1.17 {
+        //? if >=1.17 {
         this.clearWidgets();
-        // ?} else {
+        //?} else {
         /*this.children().clear();*/
-        // ?}
+        //? }
         this.centerX = (this.width / 2) - (TEXTURE_WIDTH / 2);
         this.centerY = (this.height - TEXTURE_HEIGHT) / 2;
 
         // Basic options (bind name, single-command, icon)
         window_BasicOptions = new BasicOptionsWindow(this, centerX - 100, centerY, TEXTURE_WIDTH, TEXTURE_HEIGHT,
                 BACKGROUND, BACKGROUND_FLAT, 0);
-        // ? if >=1.17 {
+        //? if >=1.17 {
         this.addRenderableWidget(window_BasicOptions);
-        // ?} else {
+        //?} else {
         // this.addWidget(window_BasicOptions);
-        // ?}
+        //?}
 
         // Binds list (gray window with all buttons)
         window_BindsList = new BindsList(this, centerX + 4 - 100, centerY - 1, 133, 122, BACKGROUND_DARK,
                 BACKGROUND_DARK_FLAT, 140);
-        // ? if >=1.17 {
+        //? if >=1.17 {
         this.addRenderableWidget(window_BindsList);
-        // ?} else {
+        //?} else {
         // this.addWidget(window_BindsList);
-        // ?}
+        //?}
 
         // Preset selector and editor
-        window_PresetSelector = new PresetSelector(this, centerX + 7 - 100, centerY - 24, 127, 19, BACKGROUND_DARK,
-                BACKGROUND_DARK_FLAT, 250);
-        // ? if >=1.17 {
+        window_PresetSelector = new PresetSelector(this, centerX + 7 - 100, centerY - 19, 127, 17,250);
+        //? if >=1.17 {
         this.addRenderableWidget(window_PresetSelector);
-        // ?} else {
+        //? } else {
         // this.addWidget(window_PresetSelector);
-        // ?}
+        //? }
 
         // Advanced options (icon, actions, mod options)
         window_AdvancedOptions = new AdvancedOptions(this, centerX + 61, centerY, 180, TEXTURE_HEIGHT,
-                BACKGROUND, BACKGROUND_FLAT, 0);
-        // ? if >=1.17 {
+                BACKGROUND, BACKGROUND_FLAT, 140);
+        //? if >=1.17 {
         this.addRenderableWidget(window_AdvancedOptions);
-        // ?} else {
+        //?} else {
         // this.addWidget(window_AdvancedOptions);
-        // ?}
+        //?}
 
         selectBind();
         window_BindsList.updateSelected(ItemsMapper.getItemStack(getCBind().icon));
@@ -147,6 +153,18 @@ public class BindsEditor extends Screen {
 
     public static void setActiveBind(int aB) {
         activeBind = aB;
+    }
+
+    public static int getPageOfActiveBind() {
+        return activeBind / 8;
+    }
+
+    public static boolean isActiveBindOnPage(int page) {
+        return getPageOfActiveBind() == page;
+    }
+
+    public static int getFirstBindOfPage(int page) {
+        return page * 8;
     }
 
     public void setNewPage(int dir) {
@@ -257,19 +275,19 @@ public class BindsEditor extends Screen {
     // Render
     @Override
     public void render(
-            // ? if >=1.20 {
+            //? if >=1.20 {
             GuiGraphics ctx
-            // ?} else {
+            //?} else {
             /*PoseStack ctx*/
-            // ?}
+            //?}
             , int mouseX, int mouseY, float delta) {
-        // ? if >=1.20.2 {
+        //? if >=1.20.2 {
         /* ? if <1.21.6 { */this.renderBackground(ctx, mouseX, mouseY, delta); /* ?} */
-        // ?} else if >=1.19.4 {
+        //?} else if >=1.19.4 {
         /* if (this.minecraft.level == null) this.renderBackground(ctx); */
-        // ?} else {
-        /* if (this.minecraft.level == null) this.renderBackground(0); */
-        // ?}
+        //?} else {
+        /* if (this.minecraft.level == null) this.renderBackground(ctx); */
+        //?}
         for (GuiEventListener element : children()) {
             Renderable dr = RenderUtils.wrapRenderable(element);
             if (dr != null) {
@@ -287,11 +305,11 @@ public class BindsEditor extends Screen {
         }
     }
 
-    // ? if >=1.20.2 {
+    //? if >=1.20.2 {
     @Override
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (this.minecraft.level == null) {
-            // ? if >=1.20.5 {
+            //? if >=1.20.5 {
             this.renderPanorama(context, delta);
             this.renderBlurredBackground(
                     //? if >=1.21.6 {
@@ -300,48 +318,48 @@ public class BindsEditor extends Screen {
                     // delta
                     //? }
             );
-            // ?} else {
-            /* this.renderBackground(context); */
-            // ?}
+            //?} else {
+            /* super.renderBackground(context, mouseX, mouseY, delta); */
+            //?}
         }
     }
-    // ?}
+    //?}
 
-    // ? if >=1.18.2 {
+    //? if >=1.18.2 {
     @Override
     public void onClose() {
         this.minecraft.setScreen(parent);
     }
-    // ?} else if >=1.17.1 {
+    //?} else if >=1.17.1 {
     /*@Override
      public void onClose() {
      this.minecraft.setScreen(parent);
      }*/
-    // ?} else {
+    //?} else {
     /*
      @Override
      public void onClose() {
      this.minecraft.setScreen(parent);
      }
      */
-    // ?}
+    //?}
 
     @Override
     public boolean shouldCloseOnEsc() {
         return true;
     }
 
-    // ? if >=1.18.1 {
+    //? if >=1.18.1 {
     @Override
     public boolean isPauseScreen() {
         return false;
     }
-    // ?} else {
+    //?} else {
     /*
     public boolean isPauseScreen() {
     return false;
     }
-     */// ?}
+     *///?}
 
     public void closeEditor() {
         TextField.setFocusedField(null);
@@ -353,33 +371,61 @@ public class BindsEditor extends Screen {
     // Click, scroll logic
 
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        TextField.setLastClickedWidget(null);
+        KeybindSelector.setLastClickedWidget(null);
+        if (window_PresetSelector.isMouseInside(mouseX, mouseY)) {
+            window_PresetSelector.mouseClicked(event, bl);
+            return true;
+        } else if (window_PresetSelector.isOpen()) {
+            window_PresetSelector.openSelector(false);
+        }
+        boolean clicked = false;
+        for (GuiEventListener element : children()) {
+            if (element != window_PresetSelector && element.mouseClicked(event, bl)) {
+                clicked = true;
+            }
+        }
+        TextField.controlFocus();
+        KeybindSelector.controlFocus();
+        return clicked;
+    }*/
+    //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         TextField.setLastClickedWidget(null);
+        KeybindSelector.setLastClickedWidget(null);
         if (window_PresetSelector.isMouseInside(mouseX, mouseY)) {
             window_PresetSelector.mouseClicked(mouseX, mouseY, button);
             return true;
         } else if (window_PresetSelector.isOpen()) {
             window_PresetSelector.openSelector(false);
         }
-
         boolean clicked = false;
-
-        if (KeybindSelector.getFocusedField() != null) {
-            KeybindSelector.getFocusedField().controlFocus(mouseX, mouseY);
-        }
-
-
         for (GuiEventListener element : children()) {
             if (element != window_PresetSelector && element.mouseClicked(mouseX, mouseY, button)) {
                 clicked = true;
             }
         }
         TextField.controlFocus();
-
+        KeybindSelector.controlFocus();
         return clicked;
     }
-
+    //? }
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseReleased(MouseButtonEvent event) {
+        boolean released = false;
+        for (GuiEventListener child : children()) {
+            if (child.mouseReleased(event)) {
+                released = true;
+            }
+        }
+        return released;
+    }*/
+    //? } else {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         boolean released = false;
         for (GuiEventListener child : children()) {
@@ -389,8 +435,19 @@ public class BindsEditor extends Screen {
         }
         return released;
     }
-
+    //? }
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        boolean dragged = false;
+        for (GuiEventListener child : children()) {
+            if (child.mouseDragged(event, deltaX, deltaY)) {
+                dragged = true;
+            }
+        }
+        return dragged;
+    }*/
+    //? } else {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         boolean dragged = false;
         for (GuiEventListener child : children()) {
@@ -400,8 +457,9 @@ public class BindsEditor extends Screen {
         }
         return dragged;
     }
+    //? }
 
-    // ? if >=1.20.2 {
+    //? if >=1.20.2 {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         for (GuiEventListener element : children()) {
@@ -411,7 +469,7 @@ public class BindsEditor extends Screen {
         }
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
-    // ?} else {
+    //?} else {
     /*
      @Override
      public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
@@ -422,9 +480,19 @@ public class BindsEditor extends Screen {
      }
      return super.mouseScrolled(mouseX, mouseY, amount);
      }
-     */// ?}
+     *///?}
 
     @Override
+    //? if >=1.21.9 {
+    /*public boolean charTyped(CharacterEvent event) {
+        for (GuiEventListener element : children()) {
+            if (element.charTyped(event)) {
+                return true;
+            }
+        }
+        return super.charTyped(event);
+    }*/
+    //? } else {
     public boolean charTyped(char codePoint, int modifiers) {
         for (GuiEventListener element : children()) {
             if (element.charTyped(codePoint, modifiers)) {
@@ -433,16 +501,25 @@ public class BindsEditor extends Screen {
         }
         return super.charTyped(codePoint, modifiers);
     }
+    //? }
 
     @Override
+    //? if >=1.21.9 {
+    /*public boolean keyPressed(KeyEvent event) {
+    int keyCode = event.key();
+    int scanCode = event.scancode();*/
+    //? } else {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    //? }
         TextField focusedField = TextField.getFocusedField();
         KeybindSelector focusedKeybind = KeybindSelector.getFocusedField();
 
         if (focusedField != null) {
-            if (focusedField.keyPressed(keyCode, scanCode, modifiers)) {
-                return true;
-            }
+            //? if >=1.21.9 {
+            // if (focusedField.keyPressed(event)) return true;
+            //? } else {
+            if (focusedField.keyPressed(keyCode, scanCode, modifiers)) return true;
+            //? }
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
                 if (focusedField.getEscapeEvent() != null) {
                     focusedField.getEscapeEvent().run();
@@ -461,9 +538,11 @@ public class BindsEditor extends Screen {
         }
 
         if (focusedKeybind != null) {
-            if (focusedKeybind.keyPressed(keyCode, scanCode, modifiers)) {
-                return true;
-            }
+            //? if >=1.21.9 {
+            // if (focusedKeybind.keyPressed(event)) return true;
+            //? } else {
+            if (focusedKeybind.keyPressed(keyCode, scanCode, modifiers)) return true;
+            //? }
 
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
                 KeybindSelector.setFocusedField(null);
@@ -475,26 +554,30 @@ public class BindsEditor extends Screen {
             closeEditor();
         }
 
-        // ? if fabric {
+        //? if fabric {
         if (keyCode == KeyBindingHelper.getBoundKeyOf(KeyBinds.PREV_PAGE).getValue()) {
-            // ?} else {
+            //?} else {
             /*
              if (keyCode == KeyBinds.PREV_PAGE.getKey().getValue()) {
-             */// ?}
+             *///?}
             setNewPage(-1);
             return true;
         }
 
-        // ? if fabric {
+        //? if fabric {
         if (keyCode == KeyBindingHelper.getBoundKeyOf(KeyBinds.NEXT_PAGE).getValue()) {
-            // ?} else {
+            //?} else {
             /*
              if (keyCode == KeyBinds.NEXT_PAGE.getKey().getValue()) {
-             */// ?}
+             *///?}
             setNewPage(1);
             return true;
         }
 
+        //? if >=1.21.9 {
+        // return super.keyPressed(event);
+        //? } else {
         return super.keyPressed(keyCode, scanCode, modifiers);
+        //? }
     }
 }

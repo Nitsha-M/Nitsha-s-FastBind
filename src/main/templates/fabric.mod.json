@@ -27,6 +27,10 @@
     }
   },
   "depends": {
-    "fabric-api": "*"
+    "fabricloader" : ">=${fabric_loader}",
+    "minecraft": "${mod_versionRange}"
+  },
+  "recommends": {
+    "modmenu": "*"
   }
 }

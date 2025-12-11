@@ -20,6 +20,12 @@ import net.minecraft.util.Mth;
 import java.util.ArrayList;
 import java.util.List;
 
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
+
 public class AnimatedWindow extends AbstractContainerEventHandler implements Renderable, GuiEventListener /*? if >=1.17 {*/ , NarratableEntry /*?}*/ {
     private ResourceLocation T_1, T_2;
 
@@ -327,69 +333,148 @@ public class AnimatedWindow extends AbstractContainerEventHandler implements Ren
     }
 
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        if (!visible) return false;
+        double mouseX = event.x();
+        double mouseY = event.y();
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getYOffset();
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjustedX,
+            adjustedY,
+            event.buttonInfo()
+        );
+
+        for (GuiEventListener child : children) {
+            if (child.mouseClicked(adjustedEvent, bl)) {
+                return true;
+            }
+        }
+        return false;
+    }*/
+    //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!visible) return false;
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
-
         for (GuiEventListener child : children) {
             if (child.mouseClicked(adjustedX, adjustedY, button)) {
                 return true;
             }
         }
-
         return false;
     }
-
+    //? }
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseReleased(MouseButtonEvent event) {
+        if (!visible) return false;
+        boolean released = false;
+        double mouseX = event.x();
+        double mouseY = event.y();
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getYOffset();
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjustedX,
+            adjustedY,
+            event.buttonInfo()
+        );
+
+        for (GuiEventListener child : children) {
+            if (child.mouseReleased(adjustedEvent)) {
+                released = true;
+            }
+        }
+        return released;
+    }*/
+    //? } else {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (!visible) return false;
         boolean released = false;
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
-
         for (GuiEventListener child : children) {
             if (child.mouseReleased(adjustedX, adjustedY, button)) {
                 released = true;
             }
         }
-
         return released;
     }
-
+    //? }
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (!visible) return false;
+        boolean dragged = false;
+        double mouseX = event.x();
+        double mouseY = event.y();
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getYOffset();
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjustedX,
+            adjustedY,
+            event.buttonInfo()
+        );
+        for (GuiEventListener child : children) {
+            if (child.mouseDragged(adjustedEvent, deltaX, deltaY)) {
+                dragged = true;
+            }
+        }
+        return dragged;
+    }*/
+    //? } else {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (!visible) return false;
         boolean dragged = false;
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
-
         for (GuiEventListener child : children) {
             if (child.mouseDragged(adjustedX, adjustedY, button, deltaX, deltaY)) {
                 dragged = true;
             }
         }
-
         return dragged;
     }
+    //? }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    //? if >=1.21.9 {
+    /*public boolean keyPressed(KeyEvent event) {
         for (GuiEventListener child : children()) {
-            if (child.keyPressed(keyCode, scanCode, modifiers)) return true;
+            if (child.keyPressed(event)) return true;
         }
         return false;
-    }
+    }*/
+    //? } else {
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            for (GuiEventListener child : children()) {
+                if (child.keyPressed(keyCode, scanCode, modifiers)) return true;
+            }
+            return false;
+        }
+    //? }
 
     @Override
-    public boolean charTyped(char codePoint, int modifiers) {
+    //? if >=1.21.9 {
+    /*public boolean charTyped(CharacterEvent event) {
         for (GuiEventListener child : children()) {
-            if (child.charTyped(codePoint, modifiers)) {
+            if (child.charTyped(event)) {
                 return true;
             }
         }
         return false;
-    }
+    }*/
+    //? } else {
+        public boolean charTyped(char codePoint, int modifiers) {
+            for (GuiEventListener child : children()) {
+                if (child.charTyped(codePoint, modifiers)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    //? }
 
     //? if >=1.20.2 {
     @Override

@@ -1,31 +1,35 @@
 package com.nitsha.binds;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.core.Holder;
+import net.minecraft.nbt.CompoundTag;
 //? if >=1.20.5 {
+import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.core.Holder;
-//?} else if >=1.19.3 {
-/*import net.minecraft.nbt.CompoundTag;
+//? }
+//? if >=1.19.3 {
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.core.registries.BuiltInRegistries;
-*///?} else {
-/*import net.minecraft.world.item.alchemy.PotionUtils;
- *///?}
+//? } else {
+// import net.minecraft.world.item.alchemy.PotionUtils;
+//?}
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.Potions;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-
 import java.util.*;
+
+//? if <1.19.3 {
+// import net.minecraft.core.Registry;
+//?}
 
 public class ItemsMapper {
     public static final Map<String, ItemStack> itemStackMap = new LinkedHashMap<>();
@@ -44,6 +48,8 @@ public class ItemsMapper {
 
     public static void getAllItems() {
         Minecraft mc = Minecraft.getInstance();
+
+        //? if >=1.19.4 {
         HolderLookup.Provider registryAccess;
 
         if (mc.level != null) {
@@ -59,8 +65,9 @@ public class ItemsMapper {
                 true,
                 registryAccess
         );
+        //?}
 
-        // --- Ванильные вкладки ---
+        //? if >=1.20 {
         List<ResourceKey<CreativeModeTab>> orderedTabs = List.of(
                 CreativeModeTabs.NATURAL_BLOCKS,
                 CreativeModeTabs.BUILDING_BLOCKS,
@@ -76,18 +83,16 @@ public class ItemsMapper {
         );
 
         for (ResourceKey<CreativeModeTab> tabKey : orderedTabs) {
-            //? if >=1.21 {
+            //? if >=1.21.2 {
             Optional<Holder.Reference<CreativeModeTab>> holder = BuiltInRegistries.CREATIVE_MODE_TAB.get(tabKey);
             if (holder.isEmpty()) continue;
-
             CreativeModeTab tab = holder.get().value();
-            //? } else {
+            //?} else {
             /*Holder<CreativeModeTab> holder = BuiltInRegistries.CREATIVE_MODE_TAB.getHolderOrThrow(tabKey);
             CreativeModeTab tab = holder.value();*/
-            //? }
+            //?}
 
             if (tab == null) continue;
-
             if (tabKey == null || tab.getType() != CreativeModeTab.Type.CATEGORY) continue;
 
             try {
@@ -101,15 +106,13 @@ public class ItemsMapper {
             if (tab.getDisplayItems().isEmpty()) continue;
             Map<String, ItemStack> categoryMap = new LinkedHashMap<>();
 
-            int itemCount = 0;
             for (ItemStack stack : tab.getDisplayItems()) {
-                itemCount++;
                 ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
                 if (id != null) {
                     String key = id.toString();
                     String path = id.getPath();
                     String namespace = id.getNamespace();
-                    if (!namespace.equals("minecraft") || path.equals("air") || path.equals("structure_void") || path.equals("structure_block") || path.equals("barrier"))
+                    if (!namespace.equals("minecraft") || path.equals("air") || path.equals("structure_void") || path.equals("structure_block") || path.equals("barrier") || path.equals("light"))
                         continue;
                     categoryMap.put(key, stack.copy());
                 }
@@ -121,14 +124,127 @@ public class ItemsMapper {
                 addCategory(ourCategory, categoryMap);
             }
         }
+        //?} else if >=1.19.3 {
+        /*List<CreativeModeTab> orderedTabs = List.of(
+                CreativeModeTabs.NATURAL_BLOCKS,
+                CreativeModeTabs.BUILDING_BLOCKS,
+                CreativeModeTabs.FUNCTIONAL_BLOCKS,
+                CreativeModeTabs.REDSTONE_BLOCKS,
+                CreativeModeTabs.COLORED_BLOCKS,
+                CreativeModeTabs.SPAWN_EGGS,
+                CreativeModeTabs.TOOLS_AND_UTILITIES,
+                CreativeModeTabs.COMBAT,
+                CreativeModeTabs.FOOD_AND_DRINKS,
+                CreativeModeTabs.INGREDIENTS,
+                CreativeModeTabs.OP_BLOCKS
+        );
+
+        for (CreativeModeTab tab : orderedTabs) {
+            if (tab == null) continue;
+            if (tab.getType() != CreativeModeTab.Type.CATEGORY) continue;
+            Collection<ItemStack> items = tab.getDisplayItems();
+            if (items.isEmpty()) {
+                try {
+                    tab.buildContents(FeatureFlags.VANILLA_SET, true);
+                    items = tab.getDisplayItems();
+                } catch (Exception e) {
+                    continue;
+                }
+            }
+            if (items.isEmpty()) continue;
+            Map<String, ItemStack> categoryMap = new LinkedHashMap<>();
+            for (ItemStack stack : items) {
+                ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                if (id != null) {
+                    String key = id.toString();
+                    String path = id.getPath();
+                    String namespace = id.getNamespace();
+                    if (!namespace.equals("minecraft") || path.equals("air") || path.equals("structure_void") ||
+                            path.equals("structure_block") || path.equals("barrier"))
+                        continue;
+                    categoryMap.put(key, stack.copy());
+                }
+            }
+            String ourCategory = mapCreativeTabToOurCategory_1_19_3(tab);
+            if (!categoryMap.isEmpty()) {
+                addCategory(ourCategory, categoryMap);
+            }
+        }*/
+        //? } else {
+        /*List<CreativeModeTab> orderedTabs = List.of(
+                CreativeModeTab.TAB_BUILDING_BLOCKS,
+                CreativeModeTab.TAB_DECORATIONS,
+                CreativeModeTab.TAB_REDSTONE,
+                CreativeModeTab.TAB_TRANSPORTATION,
+                CreativeModeTab.TAB_MISC,
+                CreativeModeTab.TAB_TOOLS,
+                CreativeModeTab.TAB_COMBAT,
+                CreativeModeTab.TAB_BREWING,
+                CreativeModeTab.TAB_FOOD,
+                CreativeModeTab.TAB_MATERIALS
+        );
+        for (CreativeModeTab tab : orderedTabs) {
+            if (tab == null) continue;
+
+            NonNullList<ItemStack> items = NonNullList.create();
+            tab.fillItemList(items);
+
+            if (items.isEmpty()) continue;
+
+            Map<String, ItemStack> categoryMap = new LinkedHashMap<>();
+
+            for (ItemStack stack : items) {
+                ResourceLocation id = Registry.ITEM.getKey(stack.getItem());
+                if (id != null) {
+                    String key = id.toString();
+                    String path = id.getPath();
+                    String namespace = id.getNamespace();
+                    if (!namespace.equals("minecraft") || path.equals("air") || path.equals("structure_void") ||
+                            path.equals("structure_block") || path.equals("barrier"))
+                        continue;
+                    categoryMap.put(key, stack.copy());
+                }
+            }
+
+            String ourCategory = mapCreativeTabToOurCategory_1_19_2(tab);
+
+            if (!categoryMap.isEmpty()) {
+                addCategory(ourCategory, categoryMap);
+            }
+        }*/
+        //? }
 
         Map<String, ItemStack> moddedItems = new LinkedHashMap<>();
+        //? if >=1.18 {
+        for (int level = 0; level <= 15; level++) {
+            moddedItems.put("minecraft:light_" + level, getLightBlock(level));
+        }
+        //? }
 
+        //? if >=1.17 {
+        /*moddedItems.put("minecraft:light_0", getLightBlock(0));*/
+        //? }
+        //? if >=1.19.3 {
         for (Item item : BuiltInRegistries.ITEM) {
             ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        //?} else {
+        /*for (Item item : Registry.ITEM) {
+            ResourceLocation id = Registry.ITEM.getKey(item);*/
+        //? }
             if (id != null && !id.getNamespace().equals("minecraft")) {
                 moddedItems.put(id.toString(), new ItemStack(item));
             }
+            //? if <1.19.3 {
+            /*if (id != null && id.getNamespace().equals("minecraft")) {
+                String path = id.getPath();
+                if (path.equals("command_block") || path.equals("chain_command_block") ||
+                    path.equals("repeating_command_block") || path.equals("jigsaw") ||
+                    path.equals("structure_block") ||
+                    path.equals("debug_stick") || path.equals("knowledge_book")) {
+                    moddedItems.put(id.toString(), new ItemStack(item));
+                }
+            }*/
+            //?}
         }
 
         if (!moddedItems.isEmpty()) {
@@ -136,6 +252,7 @@ public class ItemsMapper {
         }
     }
 
+    //? if >=1.19.3 {
     private static String mapCreativeTabToOurCategory(ResourceKey<CreativeModeTab> tabKey) {
         if (tabKey.equals(CreativeModeTabs.NATURAL_BLOCKS) ||
                 tabKey.equals(CreativeModeTabs.BUILDING_BLOCKS) ||
@@ -168,6 +285,87 @@ public class ItemsMapper {
 
         return "mods";
     }
+
+    //? }
+
+    //? if >=1.19.3 && <1.20 {
+    /*private static String mapCreativeTabToOurCategory_1_19_3(CreativeModeTab tabKey) {
+        if (tabKey.equals(CreativeModeTabs.NATURAL_BLOCKS) ||
+                tabKey.equals(CreativeModeTabs.BUILDING_BLOCKS) ||
+                tabKey.equals(CreativeModeTabs.FUNCTIONAL_BLOCKS) ||
+                tabKey.equals(CreativeModeTabs.REDSTONE_BLOCKS)) {
+            return "blocks";
+        }
+
+        if (tabKey.equals(CreativeModeTabs.COLORED_BLOCKS) ||
+            tabKey.equals(CreativeModeTabs.SPAWN_EGGS)) {
+            return "colored";
+        }
+
+        if (tabKey.equals(CreativeModeTabs.TOOLS_AND_UTILITIES) ||
+                tabKey.equals(CreativeModeTabs.COMBAT)) {
+            return "tools";
+        }
+
+        if (tabKey.equals(CreativeModeTabs.FOOD_AND_DRINKS)) {
+            return "foods";
+        }
+
+        if (tabKey.equals(CreativeModeTabs.INGREDIENTS)) {
+            return "gold";
+        }
+
+        if (tabKey.equals(CreativeModeTabs.OP_BLOCKS)) {
+            return "mods";
+        }
+
+        return "mods";
+    }
+    *///?}
+
+    //? if <1.19.3 {
+    /*private static String mapCreativeTabToOurCategory_1_19_2(CreativeModeTab tab) {
+        if (tab.equals(CreativeModeTab.TAB_BUILDING_BLOCKS) ||
+                tab.equals(CreativeModeTab.TAB_REDSTONE)) {
+            return "blocks";
+        }
+        if (tab.equals(CreativeModeTab.TAB_DECORATIONS)) {
+            return "colored";
+        }
+        if (tab.equals(CreativeModeTab.TAB_TOOLS) ||
+                tab.equals(CreativeModeTab.TAB_COMBAT) ||
+                tab.equals(CreativeModeTab.TAB_TRANSPORTATION)) {
+            return "tools";
+        }
+        if (tab.equals(CreativeModeTab.TAB_FOOD) ||
+                tab.equals(CreativeModeTab.TAB_BREWING)) {
+            return "foods";
+        }
+        if (tab.equals(CreativeModeTab.TAB_MISC)) {
+            return "gold";
+        }
+        return "mods";
+    }
+    *///?}
+
+    //? if >=1.20.5 {
+    public static ItemStack getLightBlock(int level) {
+        ItemStack stack = new ItemStack(Items.LIGHT);
+        Map<String, String> properties = new HashMap<>();
+        properties.put("level", String.valueOf(level));
+        stack.set(DataComponents.BLOCK_STATE, new BlockItemStateProperties(properties));
+        return stack;
+    }
+    //?} else if >=1.17 {
+    /*public static ItemStack getLightBlock(int level) {
+        ItemStack stack = new ItemStack(Items.LIGHT);
+        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag blockStateTag = new CompoundTag();
+        blockStateTag.putString("level", String.valueOf(level));
+        tag.put("BlockStateTag", blockStateTag);
+        return stack;
+    }*/
+    //?}
 
     private static Map<String, ItemStack> cat_POTIONS() {
         Map<String, ItemStack> map = new LinkedHashMap<>();

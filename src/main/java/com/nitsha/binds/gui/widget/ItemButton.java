@@ -2,6 +2,7 @@ package com.nitsha.binds.gui.widget;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.utils.TextUtils;
 //? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
 //?} else {
@@ -20,6 +21,10 @@ import net.minecraft.world.level.block.Blocks;
 import org.lwjgl.opengl.GL11;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;*/
+//? }
+
 import java.util.Objects;
 
 public class ItemButton extends AbstractWidget {
@@ -35,7 +40,7 @@ public class ItemButton extends AbstractWidget {
     private int x, y;
 
     public ItemButton(int x, int y, int size, ItemStack icon, Runnable onClick, ResourceLocation texture, String key) {
-        super(x, y, size, size, Component.literal(""));
+        super(x, y, size, size, TextUtils.empty());
         this.icon = icon;
         this.onClick = onClick;
         this.selected = false;
@@ -72,7 +77,11 @@ public class ItemButton extends AbstractWidget {
     }
 
     @Override
+    //? <1.21.9 {
     public void onClick(double mouseX, double mouseY) {
+    //? } else {
+    // public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl) {
+    //? }
         this.onClick.run();
     }
 
@@ -86,12 +95,18 @@ public class ItemButton extends AbstractWidget {
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         rndr(ctx);
     }
+    *///?} else if >=1.19.4 {
+    /*@Override
+    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context);
+    }
     *///?} else {
     /*@Override
-    public void renderWidget(PoseStack ctx, int mouseX, int mouseY, float delta) {
-        rndr(ctx);
+    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context);
     }
-    *///?}
+    */
+    //? }
 
     private void rndr(Object ctx) {
         //? if >=1.20 {
@@ -105,7 +120,11 @@ public class ItemButton extends AbstractWidget {
         GUIUtils.matricesUtil(c, 0, 0, 1, () -> {
             GUIUtils.adaptiveDrawTexture(c, TEXTURE, this.getXPos(), this.getYPos(), 0, 0, this.size, this.size, this.size * 3, this.size);
             try {
+                //? >=1.20 {
                 if (ItemStack.isSameItem(this.icon, new ItemStack(Items.BARRIER))) {
+                //? } else {
+                // if (ItemStack.isSame(this.icon, new ItemStack(Items.BARRIER))) {
+                //? }
                     GUIUtils.adaptiveDrawTexture(c, NOT_FOUND_TEXTURE, this.getXPos() + iconOffset, this.getYPos() + iconOffset, 0, 0, 16, 16, 16, 16);
                 } else {
                     GUIUtils.drawItem(c, this.icon, this.getXPos() + iconOffset, this.getYPos() + iconOffset);
@@ -116,7 +135,7 @@ public class ItemButton extends AbstractWidget {
         });
 
         GUIUtils.matricesUtil(c, 0, 0, 200, () -> {
-            if (this.isHovered()) GUIUtils.adaptiveDrawTexture(c, TEXTURE, this.getXPos(), this.getYPos(), this.size * 2, 0, this.size, this.size, this.size * 3, this.size);
+            if (this.isHovered) GUIUtils.adaptiveDrawTexture(c, TEXTURE, this.getXPos(), this.getYPos(), this.size * 2, 0, this.size, this.size, this.size * 3, this.size);
             if (this.selected) GUIUtils.adaptiveDrawTexture(c, TEXTURE, this.getXPos(), this.getYPos(), this.size, 0, this.size, this.size, this.size * 3, this.size);
         });
     }

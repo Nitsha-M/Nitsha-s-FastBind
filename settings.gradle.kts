@@ -22,7 +22,7 @@ pluginManagement {
 }
 
 plugins {
-    id("dev.kikugie.stonecutter") version "0.7.10"
+    id("dev.kikugie.stonecutter") version "0.7.11"
 }
 
 stonecutter {
@@ -37,14 +37,15 @@ stonecutter {
         val loaders_1_1 = listOf("fabric")
         val loaders_2 = listOf("fabric", "neoforge")
         // 1.21
-        mc("1.21.9", loaders = loaders_2)
+//        mc("1.21.11", loaders = loaders_2)
+        mc("1.21.10", loaders = loaders_2)
         mc("1.21.8", loaders = loaders_2)
-        mc("1.21.7", loaders = loaders_2)
-        mc("1.21.6", loaders = loaders_2)
+//        mc("1.21.7", loaders = loaders_2)
+//        mc("1.21.6", loaders = loaders_2)
         mc("1.21.5", loaders = loaders_2)
         mc("1.21.4", loaders = loaders_2)
         mc("1.21.3", loaders = loaders_2)
-        mc("1.21.2", loaders = loaders_2)
+//        mc("1.21.2", loaders = loaders_2)
         mc("1.21.1", loaders = loaders_2)
 
         // 1.20
@@ -57,13 +58,13 @@ stonecutter {
         mc("1.19.4", loaders = loaders_1)
         mc("1.19.3", loaders = loaders_1)
         mc("1.19.2", loaders = loaders_1)
-        mc("1.19.1", loaders = loaders_1)
+//        mc("1.19.1", loaders = loaders_1)
         mc("1.19", loaders = loaders_1)
 
         // 1.18
         mc("1.18.2", loaders = loaders_1)
-        mc("1.18.1", loaders = loaders_1)
-        mc("1.18", loaders = loaders_1)
+//        mc("1.18.1", loaders = loaders_1)
+//        mc("1.18", loaders = loaders_1)
 
         // 1.17
         mc("1.17.1", loaders = loaders_1)

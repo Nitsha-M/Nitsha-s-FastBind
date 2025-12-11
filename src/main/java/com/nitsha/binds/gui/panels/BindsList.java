@@ -71,7 +71,7 @@ public class BindsList extends AnimatedWindow {
             //? if >=1.17.1 {
             Minecraft.getInstance().setScreen((Screen)null);
             //?} else {
-            /*MinecraftClient.getInstance().openScreen((Screen)null);*/
+            /*Minecraft.getInstance().setScreen((Screen)null);*/
             //?}
         });
 
@@ -114,14 +114,28 @@ public class BindsList extends AnimatedWindow {
         this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.delete"), 4, 107, 0xFF790e06, 61,"left", DELETE_SMALL, ()-> {
             int currentPage = BindsEditor.getCurrentPage();
             int currentPreset = BindsEditor.getCurrentPreset();
-            int totalPages = BindsStorage.presets.get(currentPreset).pages.size();
+            int activeBind = screen.getActiveBind();
+
+            boolean activeBindOnDeletedPage = screen.isActiveBindOnPage(currentPage);
 
             BindsStorage.removePage(currentPreset, currentPage);
 
             int newTotalPages = BindsStorage.presets.get(currentPreset).pages.size();
+
             if (currentPage >= newTotalPages) {
-                screen.selectPage(newTotalPages - 1);
+                currentPage = newTotalPages - 1;
             }
+
+            if (activeBindOnDeletedPage) {
+                screen.setActiveBind(screen.getFirstBindOfPage(currentPage));
+                screen.selectBind();
+            }
+            else if (activeBind > screen.getFirstBindOfPage(currentPage)) {
+                screen.setActiveBind(activeBind - 8);
+                screen.selectBind();
+            }
+
+            screen.selectPage(currentPage);
             screen.getBindsListWindow().generateButtons(7, 31);
         }));
 

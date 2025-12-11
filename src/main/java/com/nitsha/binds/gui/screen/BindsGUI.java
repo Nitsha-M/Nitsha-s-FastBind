@@ -1,5 +1,6 @@
 package com.nitsha.binds.gui.screen;
 
+import com.mojang.blaze3d.platform.Window;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.configs.Bind;
 import com.nitsha.binds.configs.BindsStorage;
@@ -11,9 +12,8 @@ import com.nitsha.binds.gui.utils.AnimatedSprite;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.ItemButton;
 import com.nitsha.binds.gui.utils.TextUtils;
-
-//? if fabric {
 import com.nitsha.binds.utils.BindExecutor;
+//? if fabric {
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 //?}
 
@@ -24,7 +24,7 @@ import net.minecraft.client.gui.GuiGraphics;
 /*import com.mojang.blaze3d.vertex.PoseStack;
  *///?}
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.events.GuiEventListener;import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -38,6 +38,14 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
+
 public class BindsGUI extends Screen {
     // Textures
     private static final ResourceLocation EDIT_BTN = Main.idSprite("edit");
@@ -46,7 +54,7 @@ public class BindsGUI extends Screen {
     private static final ResourceLocation MENU_BG = Main.id("textures/gui/test/menu_bg.png");
     private static final ResourceLocation MENU_HEADER = Main.id("textures/gui/test/menu_header.png");
 
-    private final List<ItemButton> buttons = new ArrayList<>();
+    private final List<ItemButton> itemButtons = new ArrayList<>();
     private String displayText = TextUtils.translatable("nitsha.binds.list").getString();
     private int centerX;
     private int centerY;
@@ -68,13 +76,17 @@ public class BindsGUI extends Screen {
     public static boolean ignoreHoldToOpenOnce = false;
 
     public BindsGUI() {
-        super(Component.empty());
+        super(TextUtils.empty());
     }
 
     protected void init() {
         super.init();
         if (BindsStorage.getBooleanConfig("keepMovement", false)) {
+            //? if >=1.21.9 {
+            // Window handle = this.minecraft.getWindow();
+            //? } else {
             long handle = this.minecraft.getWindow().getWindow();
+            //? }
             for (KeyMapping key : /* ? if >=1.18.2 { */ this.minecraft.options.keyMappings /* ?} else { */ /*this.minecraft.options.keyMappings*/ /* ?} */ ) {
                 InputConstants.Key bound = key.getDefaultKey();
                 int code = bound.getValue();
@@ -86,7 +98,7 @@ public class BindsGUI extends Screen {
             }
         }
 
-        buttons.clear();
+        itemButtons.clear();
         currentPage = (BindsStorage.getBooleanConfig("openLastPage", true) ? BindsStorage.getIntConfig("lastPage", 0)
                 : 0);
         currentPreset = (BindsStorage.getBooleanConfig("openLastPreset", true)
@@ -101,11 +113,11 @@ public class BindsGUI extends Screen {
 
         this.textLEFT = "[ "
                 + GUIUtils.truncateString(
-                        Component.translatable(KeyBinds.PREV_PAGE.getTranslatedKeyMessage().getString()).getString(), 4)
+                    TextUtils.translatable(KeyBinds.PREV_PAGE.getTranslatedKeyMessage().getString()).getString(), 4)
                 + " ]";
         this.textRIGHT = "[ "
                 + GUIUtils.truncateString(
-                        Component.translatable(KeyBinds.NEXT_PAGE.getTranslatedKeyMessage().getString()).getString(), 4)
+                    TextUtils.translatable(KeyBinds.NEXT_PAGE.getTranslatedKeyMessage().getString()).getString(), 4)
                 + " ]";
         this.leftArrow = TextUtils.literal(textLEFT).withStyle(ChatFormatting.AQUA);
         this.rightArrow = TextUtils.literal(textRIGHT).withStyle(ChatFormatting.AQUA);
@@ -117,11 +129,11 @@ public class BindsGUI extends Screen {
                     minecraft.setScreen(new BindsEditor(null));
                 });
 
-        // ? if >=1.17 {
+        //? if >=1.17 {
         this.addRenderableWidget(configBtn);
-        // ?} else {
+        //?} else {
         /*this.addButton(configBtn);*/
-        // ?}
+        //?}
 
         this.catTail = new AnimatedSprite(14, 12, CAT_SPRITE, 0, false, 0, 0, 490, 14, 60, 504, 12);
         if (BindsStorage.getBooleanConfig("easterEgg", false)) {
@@ -135,17 +147,17 @@ public class BindsGUI extends Screen {
 
     @Override
     public void render(
-            // ? if >=1.20 {
+            //? if >=1.20 {
             GuiGraphics ctx
-            // ?} else {
+            //?} else {
             /*PoseStack ctx*/
-            // ?}
+            //?}
             , int mouseX, int mouseY, float delta) {
         if (!this.checkForClose()) {
             GUIUtils.drawResizableBox(ctx, MENU_BG, centerX, centerY, MENU_WIDTH, 106, 3, 7);
             GUIUtils.drawResizableBox(ctx, MENU_HEADER, centerX, centerY, MENU_WIDTH, 22, 4, 9);
 
-            GUIUtils.addText(ctx, Component.literal(displayText), 0, centerX + 5, centerY + 7);
+            GUIUtils.addText(ctx, TextUtils.literal(displayText), 0, centerX + 5, centerY + 7);
 
             int totalPages = BindsStorage.presets.get(currentPreset).pages.size();
             GUIUtils.addText(ctx,
@@ -162,9 +174,9 @@ public class BindsGUI extends Screen {
             GUIUtils.addText(ctx, leftArrow, 125, centerX + 52, centerY + 94, "right", "top");
             GUIUtils.addText(ctx, rightArrow, 125, centerX + 72, centerY + 94, "left", "top");
 
-            GUIUtils.addText(ctx, Component.literal("⏴"), 125, centerX + 48 - font.width(textLEFT), centerY + 94,
+            GUIUtils.addText(ctx, TextUtils.literal("⏴"), 125, centerX + 48 - font.width(textLEFT), centerY + 94,
                     "right", "top", lAC);
-            GUIUtils.addText(ctx, Component.literal("⏵"), 125, centerX + 76 + font.width(textRIGHT), centerY + 94,
+            GUIUtils.addText(ctx, TextUtils.literal("⏵"), 125, centerX + 76 + font.width(textRIGHT), centerY + 94,
                     "left", "top", rAC);
 
             // Пресеты
@@ -176,8 +188,8 @@ public class BindsGUI extends Screen {
                 rC = 0xFFE7BC1C;
 
             GUIUtils.drawResizableBox(ctx, MENU_BG, centerX, centerY - 20, MENU_WIDTH, 18, 3, 7);
-            GUIUtils.addText(ctx, Component.literal("⏴"), 0, centerX + 5, centerY - 15, lC);
-            GUIUtils.addText(ctx, Component.literal("⏵"), MENU_WIDTH, centerX + MENU_WIDTH - 5, centerY - 15, "right",
+            GUIUtils.addText(ctx, TextUtils.literal("⏴"), 0, centerX + 5, centerY - 15, lC);
+            GUIUtils.addText(ctx, TextUtils.literal("⏵"), MENU_WIDTH, centerX + MENU_WIDTH - 5, centerY - 15, "right",
                     "top", rC);
 
             String full = BindsStorage.presets.get(currentPreset).name;
@@ -222,27 +234,28 @@ public class BindsGUI extends Screen {
         }
     }
 
-    // ? if >=1.20 {
-    // ? if >=1.21 {
+    //? if >=1.20 {
+    //? if >=1.21 {
     @Override
-    // ? }
+    //? }
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
-    // ?}
+    //?}
 
     public static int getCurrentPreset() {
         return currentPreset;
     }
 
     public void generateButtons(int startX, int startY) {
-        for (ItemButton button : buttons) {
-            // ? if >=1.17 {
+        for (ItemButton button : itemButtons) {
+            //? if >=1.17 {
             this.removeWidget(button);
-            // ?} else {
-            /*this.children().remove(button);*/
-            // ?}
+            //?} else {
+            /*this.children().remove(button);
+            this.buttons.remove(button);*/
+            //?}
         }
-        buttons.clear();
+        itemButtons.clear();
         int currentX = startX;
         int currentY = startY;
 
@@ -254,12 +267,12 @@ public class BindsGUI extends Screen {
                     Bind currentBind = page.binds.get(row);
                     ItemButton button = createBtn(GUIUtils.truncateString(currentBind.name, 12),
                             ItemsMapper.getItemStack(currentBind.icon), currentX, currentY, currentBind);
-                    buttons.add(button);
-                    // ? if >=1.17 {
+                    itemButtons.add(button);
+                    //? if >=1.17 {
                     this.addRenderableWidget(button);
-                    // ?} else {
+                    //?} else {
                     /*this.addButton(button);*/
-                    // ?}
+                    //?}
                     currentX += 31;
                     if (row == 3) {
                         currentX = startX;
@@ -278,54 +291,54 @@ public class BindsGUI extends Screen {
                 minecraft.setScreen(null);
             }
         }, ITEMS_SELECTOR, "") {
-            // ? if >1.20.2 {
+            //? if >1.20.2 {
             @Override
             public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
                 super.renderWidget(ctx, mouseX, mouseY, delta);
-                if (this.isHovered()) {
+                if (this.isHovered) {
                     displayText = text;
                     if (text.isEmpty())
                         displayText = TextUtils.translatable("nitsha.binds.empty").getString();
                 }
             }
-            // ?} else if >=1.20 {
+            //?} else if >=1.20 {
             /*
              @Override
              public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float
              delta) {
              super.renderWidget(ctx, mouseX, mouseY, delta);
-             if (this.isHovered()) {
+             if (this.isHovered) {
              displayText = text;
              if (text.isEmpty()) displayText =
              TextUtils.translatable("nitsha.binds.empty").getString();
              }
              }
              */
-            // ?} else if >=1.19 {
+            //?} else if >=1.19.4 {
             /*
              @Override
              public void renderWidget(PoseStack ctx, int mouseX, int mouseY, float delta)
              {
              super.renderWidget(ctx, mouseX, mouseY, delta);
-             if (this.isHovered()) {
+             if (this.isHovered) {
              displayText = text;
              if (text.isEmpty()) displayText =
              TextUtils.translatable("nitsha.binds.empty").getString();
              }
              }
-             */// ?} else {
+             *///?} else {
             /*
              @Override
              public void renderButton(PoseStack ctx, int mouseX, int mouseY, float delta)
              {
              super.renderButton(ctx, mouseX, mouseY, delta);
-             if (this.isHovered()) {
+             if (this.isHovered) {
              displayText = text;
              if (text.isEmpty()) displayText =
              TextUtils.translatable("nitsha.binds.empty").getString();
              }
              }
-             */// ?}
+             *///?}
         };
     }
 
@@ -334,17 +347,17 @@ public class BindsGUI extends Screen {
         return true;
     }
 
-    // ? if >=1.18.1 {
+    //? if >=1.18.1 {
     @Override
     public boolean isPauseScreen() {
         return false;
     }
-    // ?} else {
+    //?} else {
     /*
      public boolean isPauseScreen() {
      return false;
      }
-     */// ?}
+     *///?}
 
     @Override
     public void onClose() {
@@ -359,14 +372,20 @@ public class BindsGUI extends Screen {
             return false;
         }
 
-        // ? if fabric {
-        if (!InputConstants.isKeyDown(this.minecraft.getWindow().getWindow(),
+        //? if >=1.21.9 {
+        // Window handle = this.minecraft.getWindow();
+        //? } else {
+        long handle = this.minecraft.getWindow().getWindow();
+        //? }
+
+        //? if fabric {
+        if (!InputConstants.isKeyDown(handle,
                 KeyBindingHelper.getBoundKeyOf(KeyBinds.BINDS).getValue())) {
-            // ?} else {
+            //?} else {
             /*
-            if (!InputConstants.isKeyDown(this.minecraft.getWindow().getWindow(),
+            if (!InputConstants.isKeyDown(handle,
             KeyBinds.BINDS.getDefaultKey().getValue())) {
-             */// ?}
+             *///?}
             minecraft.setScreen(null);
             return true;
         }
@@ -423,7 +442,10 @@ public class BindsGUI extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        double mouseX = event.x();
+        double mouseY = event.y();
         if (handleClick(mouseX, mouseY, centerX + 3, centerY + 92, 51, 12, () -> updatePage(-1)))
             return true;
         if (handleClick(mouseX, mouseY, centerX + 70, centerY + 92, 51, 12, () -> updatePage(1)))
@@ -433,17 +455,77 @@ public class BindsGUI extends Screen {
         if (handleClick(mouseX, mouseY, centerX + MENU_WIDTH - 22, centerY - 20, 22, 18, () -> updatePreset(1)))
             return true;
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, bl);
+    }*/
+    //? } else {
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (handleClick(mouseX, mouseY, centerX + 3, centerY + 92, 51, 12, () -> updatePage(-1)))
+                return true;
+            if (handleClick(mouseX, mouseY, centerX + 70, centerY + 92, 51, 12, () -> updatePage(1)))
+                return true;
+            if (handleClick(mouseX, mouseY, centerX, centerY - 20, 22, 18, () -> updatePreset(-1)))
+                return true;
+            if (handleClick(mouseX, mouseY, centerX + MENU_WIDTH - 22, centerY - 20, 22, 18, () -> updatePreset(1)))
+                return true;
+
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+    //? }
+
+    //? if >=1.20.2 {
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (isInside(mouseX, mouseY, centerX, centerY - 20, 125, 18)) {
+            int direction = verticalAmount > 0 ? -1 : 1;
+            updatePreset(direction);
+            Minecraft.getInstance().getSoundManager().play(
+                    SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
+            return true;
+        }
+        if (isInside(mouseX, mouseY, centerX + 3, centerY + 92, 119, 12)) {
+            int direction = verticalAmount > 0 ? -1 : 1;
+            updatePage(direction);
+            Minecraft.getInstance().getSoundManager().play(
+                    SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
+    //?} else {
+    /*@Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (isInside(mouseX, mouseY, centerX, centerY - 20, 125, 18)) {
+            int direction = amount > 0 ? -1 : 1;
+            updatePreset(direction);
+            Minecraft.getInstance().getSoundManager().play(
+                    SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
+            return true;
+        }
+        if (isInside(mouseX, mouseY, centerX + 3, centerY + 92, 119, 12)) {
+            int direction = amount > 0 ? -1 : 1;
+            updatePage(direction);
+            Minecraft.getInstance().getSoundManager().play(
+                    SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, amount);
+    }
+    *///?}
 
     @Override
+    //? if >=1.21.9 {
+    /*public boolean keyPressed(KeyEvent event) {
+    int keyCode = event.key();
+    int scanCode = event.scancode();*/
+    //? } else {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // ? if fabric {
+    //? }
+        //? if fabric {
         int bindKey = KeyBindingHelper.getBoundKeyOf(KeyBinds.BINDS).getValue();
-        // ?} else {
+        //?} else {
         /*
          int bindKey = KeyBinds.BINDS.getDefaultKey().getValue();
-         */// ?}
+         *///?}
 
         if ((keyCode == bindKey && !BindsStorage.getBooleanConfig("holdToOpen", true) && !ignoreHoldToOpenOnce) ||
                 keyCode == GLFW.GLFW_KEY_ESCAPE) {
@@ -452,22 +534,22 @@ public class BindsGUI extends Screen {
             return true;
         }
 
-        // ? if fabric {
+        //? if fabric {
         if (keyCode == KeyBindingHelper.getBoundKeyOf(KeyBinds.PREV_PAGE).getValue()) {
-            // ?} else {
+            //?} else {
             /*
              if (keyCode == KeyBinds.PREV_PAGE.getDefaultKey().getValue()) {
-             */// ?}
+             *///?}
             updatePage(-1);
             return true;
         }
 
-        // ? if fabric {
+        //? if fabric {
         if (keyCode == KeyBindingHelper.getBoundKeyOf(KeyBinds.NEXT_PAGE).getValue()) {
-            // ?} else {
+            //?} else {
             /*
              if (keyCode == KeyBinds.NEXT_PAGE.getDefaultKey().getValue()) {
-             */// ?}
+             *///?}
             updatePage(1);
             return true;
         }
@@ -479,6 +561,21 @@ public class BindsGUI extends Screen {
         }
 
         if (BindsStorage.getBooleanConfig("keepMovement", false)) {
+            //? if >=1.21.9 {
+            /*if (this.minecraft.options != null && this.minecraft.getWindow() != null) {
+                if (this.minecraft.options.keyUp.matches(event)
+                        || this.minecraft.options.keyDown.matches(event)
+                        || this.minecraft.options.keyLeft.matches(event)
+                        || this.minecraft.options.keyRight.matches(event)
+                        || this.minecraft.options.keyJump.matches(event)
+                        || this.minecraft.options.keySprint.matches(event)
+                        || this.minecraft.options.keyShift.matches(event)) {
+                    InputConstants.Key key = InputConstants.getKey(event);
+                    KeyMapping.set(key, true);
+                    return true;
+                }
+            }*/
+            //? } else {
             if (this.minecraft.options != null && this.minecraft.getWindow() != null) {
                 if (this.minecraft.options.keyUp.matches(keyCode, scanCode)
                         || this.minecraft.options.keyDown.matches(keyCode, scanCode)
@@ -492,16 +589,31 @@ public class BindsGUI extends Screen {
                     return true;
                 }
             }
+            //? }
         }
+        //? if >=1.21.9 {
+        // return super.keyPressed(event);
+        //? } else {
         return super.keyPressed(keyCode, scanCode, modifiers);
+        //? }
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    //? if >=1.21.9 {
+    /*public boolean keyReleased(KeyEvent event) {
         if (BindsStorage.getBooleanConfig("keepMovement", false)) {
-            InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
+            InputConstants.Key key = InputConstants.getKey(event);
             KeyMapping.set(key, false);
         }
-        return super.keyReleased(keyCode, scanCode, modifiers);
-    }
+        return super.keyReleased(event);
+    }*/
+    //? } else {
+        public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+            if (BindsStorage.getBooleanConfig("keepMovement", false)) {
+                InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
+                KeyMapping.set(key, false);
+            }
+            return super.keyReleased(keyCode, scanCode, modifiers);
+        }
+    //? }
 }

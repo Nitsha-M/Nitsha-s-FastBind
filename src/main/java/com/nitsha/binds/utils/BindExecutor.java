@@ -1,10 +1,13 @@
 package com.nitsha.binds.utils;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.configs.Bind;
 import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.gui.screen.BindsGUI;
 import com.nitsha.binds.gui.utils.TextUtils;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.ChatFormatting;
 //? if <1.19.3 {
 /*import net.minecraft.network.protocol.game.ServerboundChatPacket;*/
 //?}
@@ -61,23 +64,21 @@ public class BindExecutor {
                 String type = (String) action.get("type");
                 Object value = action.get("value");
 
-                actions.add(() -> {
-                    waitUntil = Util.getMillis() + 10;
-                });
-
                 switch (type) {
                     case "command":
                         String cmd = String.valueOf(value);
                         if (cmd.isEmpty())
                             break;
                         if (client.player != null && client.getConnection() != null) {
-                            // ? if >=1.19.3 {
+                            //? if >=1.19.3 {
                             actions.add(() -> client.player.connection.sendCommand(cmd));
-                            // ?} else if >=1.19 {
-                            /*actions.add(() -> client.player.chat("/" + cmd));*/
-                            // ?} else {
+                            //? } else if >=1.19.1 {
+                            /*actions.add(() -> client.player.commandUnsigned(cmd));*/
+                            //? } else if >=1.19 {
+                            /*actions.add(() -> client.player.command(cmd));*/
+                            //? } else {
                             /*actions.add(() -> client.player.connection.send(new ServerboundChatPacket("/" + cmd)));*/
-                            // ?}
+                            //? }
                         }
                     break;
                     case "delay":
@@ -108,18 +109,32 @@ public class BindExecutor {
                             }
                             if (keyCode == 0)
                                 break;
-                            long handle = Minecraft.getInstance().getWindow().getWindow();
-                            int scancode = GLFW.glfwGetKeyScancode(keyCode);
 
+                            //? if >=1.21.9 {
+                            /*int scancode = GLFW.glfwGetKeyScancode(keyCode);
                             actions.add(() -> {
-                                client.keyboardHandler.keyPress(handle, keyCode, scancode, GLFW.GLFW_PRESS, 0);
+                                InputConstants.Key key = InputConstants.Type.KEYSYM.getOrCreate(keyCode);
+                                KeyMapping.set(key, true);
+                                KeyMapping.click(key);
                             });
-
                             actions.add(() -> waitUntil = 100);
-
                             actions.add(() -> {
-                                client.keyboardHandler.keyPress(handle, keyCode, scancode, GLFW.GLFW_RELEASE, 0);
+                                InputConstants.Key key = InputConstants.Type.KEYSYM.getOrCreate(keyCode);
+                                KeyMapping.set(key, false);
+                            });*/
+                            //? } else {
+                            int scancode = GLFW.glfwGetKeyScancode(keyCode);
+                            actions.add(() -> {
+                                InputConstants.Key key = InputConstants.getKey(keyCode, scancode);
+                                KeyMapping.set(key, true);
+                                KeyMapping.click(key);
                             });
+                            actions.add(() -> waitUntil = 100);
+                            actions.add(() -> {
+                                InputConstants.Key key = InputConstants.getKey(keyCode, scancode);
+                                KeyMapping.set(key, false);
+                            });
+                            //? }
                         } catch (NumberFormatException ignored) {
                         }
                     break;
@@ -128,11 +143,10 @@ public class BindExecutor {
                         if (value instanceof Map) {
                             Map<String, Object> formattedText = (Map<String, Object>) value;
                             String text = (String) formattedText.get("text");
-                            message = Component.empty();
+                            message = TextUtils.empty();
 
                             if (formattedText.containsKey("marks")) {
-                                List<Map<String, Object>> marks = (List<Map<String, Object>>) formattedText
-                                        .get("marks");
+                                List<Map<String, Object>> marks = (List<Map<String, Object>>) formattedText.get("marks");
                                 Style currentStyle = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
                                 int lastPos = 0;
 
@@ -142,7 +156,7 @@ public class BindExecutor {
 
                                     if (pos > lastPos) {
                                         message = message.append(
-                                                Component.literal(text.substring(lastPos, pos)).setStyle(currentStyle));
+                                                TextUtils.literal(text.substring(lastPos, pos)).setStyle(currentStyle));
                                     }
 
                                     currentStyle = applyStyleCode(styleCode, currentStyle);
@@ -151,29 +165,34 @@ public class BindExecutor {
 
                                 if (lastPos < text.length()) {
                                     message = message
-                                            .append(Component.literal(text.substring(lastPos)).setStyle(currentStyle));
+                                            .append(TextUtils.literal(text.substring(lastPos)).setStyle(currentStyle));
                                 }
                             } else {
-                                message = Component.literal(text);
+                                message = TextUtils.literal(text);
                             }
                         } else {
-                            message = Component.literal(String.valueOf(value));
+                            message = TextUtils.literal(String.valueOf(value));
                         }
 
-                        assert client.player != null;
-                        client.player.displayClientMessage(message, false);
-                    break;
+                        final MutableComponent finalMessage = message;
+
+                        actions.add(() -> {
+                            if (client.player != null) {
+                                client.player.displayClientMessage(finalMessage, false);
+                            }
+                        });
+                        break;
                     case "titleMessage":
                         if (value instanceof Map) {
                             Map<String, Object> titleData = (Map<String, Object>) value;
 
-                            MutableComponent titleComponent = Component.empty();
+                            MutableComponent titleComponent = TextUtils.empty();
                             if (titleData.containsKey("title") && titleData.get("title") instanceof Map) {
                                 Map<String, Object> titleFormatted = (Map<String, Object>) titleData.get("title");
                                 titleComponent = buildFormattedComponent(titleFormatted);
                             }
 
-                            MutableComponent subtitleComponent = Component.empty();
+                            MutableComponent subtitleComponent = TextUtils.empty();
                             if (titleData.containsKey("subtitle") && titleData.get("subtitle") instanceof Map) {
                                 Map<String, Object> subtitleFormatted = (Map<String, Object>) titleData.get("subtitle");
                                 subtitleComponent = buildFormattedComponent(subtitleFormatted);
@@ -183,20 +202,28 @@ public class BindExecutor {
                             final MutableComponent finalSubtitle = subtitleComponent;
 
                             if (!finalTitle.getString().isEmpty() || !finalSubtitle.getString().isEmpty()) {
+                                //? if >=1.17 {
                                 actions.add(() -> {
                                     if (client.gui != null) {
-                                        //? if >=1.21.6 {
+                                        //? if >=1.21.4 {
                                         // client.gui.clearTitles();
-                                        //? } else {
+                                        //?} else {
                                         client.gui.clear();
-                                        //? }
-
+                                        //?}
                                         client.gui.setTitle(finalTitle);
                                         client.gui.setSubtitle(finalSubtitle);
-
                                         client.gui.setTimes(10, 70, 20);
                                     }
                                 });
+                                //? } else {
+                                /*actions.add(() -> {
+                                    if (client.gui != null) {
+                                        client.gui.setTitles(null, null, 10, 70, 20);
+                                        client.gui.setTitles(finalTitle, null, -1, -1, -1);
+                                        client.gui.setTitles(null, finalSubtitle, -1, -1, -1);
+                                    }
+                                });*/
+                                //? }
                             }
                         }
                     break;
@@ -242,10 +269,17 @@ public class BindExecutor {
                     newStyle = newStyle.withItalic(true);
                 if (baseStyle.isUnderlined())
                     newStyle = newStyle.withUnderlined(true);
+                //? if >=1.17 {
                 if (baseStyle.isStrikethrough())
                     newStyle = newStyle.withStrikethrough(true);
                 if (baseStyle.isObfuscated())
                     newStyle = newStyle.withObfuscated(true);
+                //?} else {
+                /*if (baseStyle.isStrikethrough())
+                    newStyle = newStyle.applyFormat(ChatFormatting.STRIKETHROUGH);
+                if (baseStyle.isObfuscated())
+                    newStyle = newStyle.applyFormat(ChatFormatting.OBFUSCATED);*/
+                    //?}
                 return newStyle;
             }
 
@@ -257,9 +291,17 @@ public class BindExecutor {
                 case 22:
                     return baseStyle.withUnderlined(true);
                 case 23:
+                    //? if >=1.17 {
                     return baseStyle.withStrikethrough(true);
+                    //?} else {
+                    /*return baseStyle.applyFormat(ChatFormatting.STRIKETHROUGH);*/
+                    //?}
                 case 24:
+                    //? if >=1.17 {
                     return baseStyle.withObfuscated(true);
+                    //?} else {
+                    /*return baseStyle.applyFormat(ChatFormatting.OBFUSCATED);*/
+                    //?}
                 case 99:
                     return Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
                 default:
@@ -269,19 +311,19 @@ public class BindExecutor {
 
         private static MutableComponent buildFormattedComponent(Map<String, Object> formattedText) {
             String text = (String) formattedText.get("text");
-            MutableComponent message = Component.empty();
+            MutableComponent message = TextUtils.empty();
 
             if (text.isEmpty()) {
                 return message;
             }
 
             if (!formattedText.containsKey("marks")) {
-                return Component.literal(text);
+                return TextUtils.literal(text);
             }
 
             List<Map<String, Object>> marks = (List<Map<String, Object>>) formattedText.get("marks");
             if (marks.isEmpty()) {
-                return Component.literal(text);
+                return TextUtils.literal(text);
             }
 
             marks.sort((a, b) -> {
@@ -298,7 +340,7 @@ public class BindExecutor {
                 int styleCode = ((Number) markData.get("style")).intValue();
 
                 if (pos > lastPos && pos <= text.length()) {
-                    message = message.append(Component.literal(text.substring(lastPos, pos)).setStyle(currentStyle));
+                    message = message.append(TextUtils.literal(text.substring(lastPos, pos)).setStyle(currentStyle));
                 }
 
                 currentStyle = applyStyleCode(styleCode, currentStyle);
@@ -306,7 +348,7 @@ public class BindExecutor {
             }
 
             if (lastPos < text.length()) {
-                message = message.append(Component.literal(text.substring(lastPos)).setStyle(currentStyle));
+                message = message.append(TextUtils.literal(text.substring(lastPos)).setStyle(currentStyle));
             }
 
             return message;

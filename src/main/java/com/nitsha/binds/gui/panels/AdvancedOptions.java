@@ -19,6 +19,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;*/
+//? }
+
 public class AdvancedOptions extends AnimatedWindow {
     private static final ResourceLocation RANDOM = Main.idSprite("random");
     private static final ResourceLocation RANDOM_HOVER = Main.idSprite("random_hover");
@@ -287,11 +291,11 @@ public class AdvancedOptions extends AnimatedWindow {
 
     @Override
     public void render(
-            // ? if >=1.20 {
+            //? if >=1.20 {
             GuiGraphics ctx
-            // ?} else {
+            //? } else {
             /*PoseStack ctx*/
-            // ?}
+            //? }
             , int mouseX, int mouseY, float delta) {
         int adjX = mouseX - this.getX();
         int adjY = mouseY - this.getYOffset();
@@ -323,11 +327,21 @@ public class AdvancedOptions extends AnimatedWindow {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         if (!isVisible())
             return false;
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.buttonInfo().button();
         double adjX = mouseX - this.getX();
         double adjY = mouseY - this.getYOffset();
+
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjX,
+            adjY,
+            event.buttonInfo()
+        );
 
         boolean clicked = false;
 
@@ -336,7 +350,7 @@ public class AdvancedOptions extends AnimatedWindow {
 
         if (currentTab == 0) {
             if (insidePanel) {
-                if (addNewAction.mouseClicked(adjX, adjY, button))
+                if (addNewAction.mouseClicked(adjustedEvent, bl))
                     clicked = true;
                 if (wasOpen)
                     return true;
@@ -361,49 +375,150 @@ public class AdvancedOptions extends AnimatedWindow {
         }
 
         for (TabButton btn : tabsBtn) {
-            if (btn.mouseClicked(adjX, adjY, button)) {
+            if (btn.mouseClicked(adjustedEvent, bl)) {
                 clicked = true;
             }
         }
 
         if (!wasOpen || !insidePanel) {
-            if (super.mouseClicked(mouseX, mouseY, button)) {
+            if (super.mouseClicked(event, bl)) {
                 clicked = true;
             }
         }
 
         return clicked;
-    }
+    }*/
+    //? } else {
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (!isVisible())
+                return false;
+            double adjX = mouseX - this.getX();
+            double adjY = mouseY - this.getYOffset();
 
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            boolean clicked = false;
+
+            boolean wasOpen = addNewAction.isOpen();
+            boolean insidePanel = addNewAction.isMouseInside(mouseX, mouseY);
+
+            if (currentTab == 0) {
+                if (insidePanel) {
+                    if (addNewAction.mouseClicked(adjX, adjY, button))
+                        clicked = true;
+                    if (wasOpen)
+                        return true;
+                } else {
+                    int scrollOffset = this.firstTab.getScrollOffset();
+                    int aX = this.firstTab.getX();
+                    int aY = this.firstTab.getY() - scrollOffset;
+
+                    for (GuiEventListener child : this.firstTab.children()) {
+                        if (child instanceof ActionItem) {
+                            ActionItem actionItem = (ActionItem) child;
+                            double itemMouseX = adjX - aX;
+                            double itemMouseY = adjY - aY;
+
+                            if (actionItem.isMouseOverColorButtons(itemMouseX, itemMouseY)) {
+                                TextField.setBlockFocus();
+                            }
+                        }
+                    }
+                    addNewAction.openSelector(false);
+                }
+            }
+
+            for (TabButton btn : tabsBtn) {
+                if (btn.mouseClicked(adjX, adjY, button)) {
+                    clicked = true;
+                }
+            }
+
+            if (!wasOpen || !insidePanel) {
+                if (super.mouseClicked(mouseX, mouseY, button)) {
+                    clicked = true;
+                }
+            }
+
+            return clicked;
+        }
+    //? }
+
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseReleased(MouseButtonEvent event) {
         boolean released = false;
+        double mouseX = event.x();
+        double mouseY = event.y();
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
 
-        if (addNewAction.mouseReleased(adjustedX, adjustedY, button))
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjustedX,
+            adjustedY,
+            event.buttonInfo()
+        );
+
+        if (addNewAction.mouseReleased(adjustedEvent))
             released = true;
 
-        if (super.mouseReleased(mouseX, mouseY, button))
+        if (super.mouseReleased(event))
             released = true;
 
         return released;
-    }
+    }*/
+    //? } else {
+        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            boolean released = false;
+            double adjustedX = mouseX - getX();
+            double adjustedY = mouseY - getYOffset();
 
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+            if (addNewAction.mouseReleased(adjustedX, adjustedY, button))
+                released = true;
+
+            if (super.mouseReleased(mouseX, mouseY, button))
+                released = true;
+
+            return released;
+        }
+    //? }
+
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         boolean dragged = false;
+        double mouseX = event.x();
+        double mouseY = event.y();
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
 
-        if (addNewAction.mouseDragged(adjustedX, adjustedY, button, deltaX, deltaY))
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjustedX,
+            adjustedY,
+            event.buttonInfo()
+        );
+
+        if (addNewAction.mouseDragged(adjustedEvent, deltaX, deltaY))
             dragged = true;
 
-        if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+        if (super.mouseDragged(event, deltaX, deltaY))
             dragged = true;
 
         return dragged;
-    }
+    }*/
+    //? } else {
+        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+            boolean dragged = false;
+            double adjustedX = mouseX - getX();
+            double adjustedY = mouseY - getYOffset();
+
+            if (addNewAction.mouseDragged(adjustedX, adjustedY, button, deltaX, deltaY))
+                dragged = true;
+
+            if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+                dragged = true;
+
+            return dragged;
+        }
+    //? }
 
     private boolean scrollLogic(double mouseX, double mouseY, double amount) {
         if (!isVisible())
@@ -417,12 +532,12 @@ public class AdvancedOptions extends AnimatedWindow {
             if (addNewAction.isMouseInside(mouseX, mouseY)) {
                 //? if >=1.20.2 {
                 if (addNewAction.mouseScrolled(adjX, adjY, 0, amount))
-                    //?} else {
-                    /*if (addNewAction.mouseScrolled(adjX, adjY, amount))
-                     *///?}
+                //? } else {
+                /*if (addNewAction.mouseScrolled(adjX, adjY, amount))*/
+                //? }
                     result = true;
                 if (addNewAction.isOpen())
-                    result = true;
+                    return true;
             } else {
                 addNewAction.openSelector(false);
             }
@@ -438,9 +553,9 @@ public class AdvancedOptions extends AnimatedWindow {
 
                     //? if >=1.20.2 {
                     if (actionItem.mouseScrolled(itemMouseX, itemMouseY, 0, amount)) {
-                        //?} else {
-                        /*if (actionItem.mouseScrolled(itemMouseX, itemMouseY, amount)) {
-                         *///?}
+                    //? } else {
+                    /*if (actionItem.mouseScrolled(itemMouseX, itemMouseY, amount)) {*/
+                    //? }
                         return true;
                     }
                 }
@@ -449,25 +564,24 @@ public class AdvancedOptions extends AnimatedWindow {
 
         //? if >=1.20.2 {
         if (super.mouseScrolled(mouseX, mouseY, 0, amount)) {
-            //?} else {
-            /*if (super.mouseScrolled(mouseX, mouseY, amount)) {
-             *///?}
+        //? } else {
+        /*if (super.mouseScrolled(mouseX, mouseY, amount)) {*/
+        //?}
             result = true;
         }
 
         return result;
     }
 
-    // ? if >=1.20.2 {
+    //? if >=1.20.2 {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         return scrollLogic(mouseX, mouseY, verticalAmount);
     }
-    // ?} else {
-    /*
-     @Override
-     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-     return scrollLogic(mouseX, mouseY, amount);
-     }
-     */// ?}
+    //? } else {
+    /*@Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    return scrollLogic(mouseX, mouseY, amount);
+    }*/
+    //? }
 }

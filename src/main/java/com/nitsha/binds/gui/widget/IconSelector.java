@@ -30,6 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;*/
+//? }
+
 public class IconSelector extends AbstractContainerEventHandler implements Renderable, GuiEventListener /*? if >=1.17 {*/, NarratableEntry /*?}*/ {
     private final List<GuiEventListener> children = new ArrayList<>();
     private final List<BedrockIconButton> catBtns = new ArrayList<>();
@@ -58,7 +62,7 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
     *///?} else {
     private ItemStack maceIcon = new ItemStack(Items.MACE);
     //?}
-    private ItemStack[] categories = {new ItemStack(Items.GRASS_BLOCK), maceIcon, new ItemStack(Items.ORANGE_WOOL),
+    private ItemStack[] categories = {new ItemStack(Items.GRASS_BLOCK), maceIcon, new ItemStack(Items.RED_BED),
                                       ItemsMapper.getPotionItem(Potions.SWIFTNESS, Items.POTION), new ItemStack(Items.GOLD_INGOT), new ItemStack(Items.COMMAND_BLOCK)};
     private final String[] categoriesList = {"blocks", "tools", "colored", "foods", "gold", "mods"};
 
@@ -294,11 +298,29 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
     private int dragStartScrollOffset = 0;
 
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.buttonInfo().button();
+
+        if (button == 0) {
+            int barX = this.x + this.width + 1;
+            int barY = this.y + 1 + scrollBarOffset;
+            if (mouseX >= barX && mouseX <= barX + 8 && mouseY >= barY && mouseY <= barY + barSize) {
+                isDraggingScrollbar = true;
+                dragStartY = (int) mouseY;
+                dragStartScrollOffset = scrollOffset;
+                return true;
+            }
+        }
+        return super.mouseClicked(event, bl);
+    }*/
+    //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) {
             int barX = this.x + this.width + 1;
             int barY = this.y + 1 + scrollBarOffset;
-
             if (mouseX >= barX && mouseX <= barX + 8 && mouseY >= barY && mouseY <= barY + barSize) {
                 isDraggingScrollbar = true;
                 dragStartY = (int) mouseY;
@@ -308,8 +330,18 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
-
+    //? }
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseReleased(MouseButtonEvent event) {
+        int button = event.buttonInfo().button();
+        if (button == 0 && isDraggingScrollbar) {
+            isDraggingScrollbar = false;
+            return true;
+        }
+        return super.mouseReleased(event);
+    }*/
+    //? } else {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (button == 0 && isDraggingScrollbar) {
             isDraggingScrollbar = false;
@@ -317,25 +349,41 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
-
+    //? }
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.buttonInfo().button();
+
+        if (isDraggingScrollbar && button == 0) {
+            int trackHeight = height - 2;
+            int scrollArea = trackHeight - barSize;
+            int dy = (int) mouseY - dragStartY;
+            float scrollProgress = (float) dy / scrollArea;
+            scrollOffset = Mth.clamp(dragStartScrollOffset + Math.round(scrollProgress * maxScroll), 0, maxScroll);
+            float newProgress = maxScroll > 0 ? scrollOffset / (float) maxScroll : 0;
+            scrollBarOffset = (int)(newProgress * scrollArea);
+            createButtons();
+            return true;
+        }
+        return super.mouseDragged(event, deltaX, deltaY);
+    }*/
+    //? } else {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (isDraggingScrollbar && button == 0) {
             int trackHeight = height - 2;
             int scrollArea = trackHeight - barSize;
-
             int dy = (int) mouseY - dragStartY;
-
             float scrollProgress = (float) dy / scrollArea;
             scrollOffset = Mth.clamp(dragStartScrollOffset + Math.round(scrollProgress * maxScroll), 0, maxScroll);
-
             float newProgress = maxScroll > 0 ? scrollOffset / (float) maxScroll : 0;
             scrollBarOffset = (int)(newProgress * scrollArea);
-
             createButtons();
             return true;
         }
-
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
+    //? }
 }

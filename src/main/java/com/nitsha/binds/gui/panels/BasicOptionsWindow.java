@@ -1,5 +1,6 @@
 package com.nitsha.binds.gui.panels;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.configs.BindsStorage;
@@ -14,11 +15,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 //? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//? } else {
-//import net.minecraft.client.gui.GuiComponent;
 //? }
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
+//? if >=1.21.9 {
+// import net.minecraft.client.input.MouseButtonEvent;
+//? }
 
 public class BasicOptionsWindow extends AnimatedWindow {
     private TextField bindNameField;
@@ -159,6 +161,32 @@ public class BasicOptionsWindow extends AnimatedWindow {
     }
 
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        if (!this.isVisible()) return false;
+
+        double mouseX = event.x();
+        double mouseY = event.y();
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getYOffset();
+
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+                adjustedX,
+                adjustedY,
+                event.buttonInfo()
+        );
+
+        for (GuiEventListener child : children()) {
+            if (child.mouseClicked(adjustedEvent, bl)) return true;
+        }
+
+        if (catEasterEgg.handleClick(isInsideCat(mouseX, mouseY, 94, 171, 45, 16))) {
+            return true;
+        }
+
+        return super.mouseClicked(event, bl);
+    }*/
+    //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!this.isVisible()) return false;
 
@@ -168,9 +196,12 @@ public class BasicOptionsWindow extends AnimatedWindow {
         for (GuiEventListener child : children()) {
             if (child.mouseClicked(adjustedX, adjustedY, button)) return true;
         }
+
         if (catEasterEgg.handleClick(isInsideCat(mouseX, mouseY, 94, 171, 45, 16))) {
             return true;
-        };
+        }
+
         return super.mouseClicked(mouseX, mouseY, button);
     }
+    //? }
 }

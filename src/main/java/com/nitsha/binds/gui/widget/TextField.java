@@ -2,8 +2,10 @@ package com.nitsha.binds.gui.widget;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.ChatFormatting;
 //? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
 //?} else {
@@ -26,6 +28,15 @@ import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
+
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
 
 import java.util.*;
 
@@ -60,6 +71,8 @@ public class TextField extends AbstractButton {
 
     private boolean isAnimatedPlaceholder = true;
 
+    private int x, y, width, height;
+
     // Система форматирования
     public static class FormatMark implements Comparable<FormatMark> {
         public int position;
@@ -91,10 +104,14 @@ public class TextField extends AbstractButton {
 
     public TextField(Font font, int x, int y, int width, int height, int length, String text, String placeholder,
             boolean isNumerical) {
-        super(x, y, width, height, Component.literal(text));
+        super(x, y, width, height, TextUtils.literal(text));
+        this.width = width;
+        this.height = height;
+        this.x = x;
+        this.y = y;
         this.font = font;
         this.text = String.valueOf(text);
-        this.placeholder = Component.literal(placeholder);
+        this.placeholder = TextUtils.literal(placeholder);
         this.isNumerical = isNumerical;
         this.maxLength = length;
     }
@@ -103,9 +120,76 @@ public class TextField extends AbstractButton {
         this(font, x, y, width, height, length, text, placeholder, false);
     }
 
+    public int getX() { return x; }
+    public int getY() { return y; }
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
+
     public void setAnimatedPlaceholder(boolean animated) {
         isAnimatedPlaceholder = animated;
     }
+    
+    // Misc
+    //? if >=1.21.9 {
+    /* public static boolean hasControlDown() {
+        Window handle = Minecraft.getInstance().getWindow();
+        if (Util.getPlatform() == Util.OS.OSX) {
+            return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_SUPER) ||
+                   InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_SUPER);
+        } else {
+            return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_CONTROL) ||
+                   InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_CONTROL);
+        }
+    }
+    public static boolean hasShiftDown() {
+        Window handle = Minecraft.getInstance().getWindow();
+        return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_SHIFT) ||
+               InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
+    }
+    public static boolean hasAltDown() {
+        Window handle = Minecraft.getInstance().getWindow();
+        return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_ALT) || 
+               InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_ALT);
+    }*/
+    //? } else {
+        public static boolean hasControlDown() {
+            return Screen.hasControlDown();
+        }
+        public static boolean hasShiftDown() {
+            return Screen.hasShiftDown();
+        }
+        public static boolean hasAltDown() {
+            return Screen.hasAltDown();
+        }
+    //? }
+
+    //? if >=1.21.9 {
+    /*public static boolean isCut(int i) {
+        return i == 88 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+    }
+    public static boolean isPaste(int i) {
+        return i == 86 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+    }
+    public static boolean isCopy(int i) {
+        return i == 67 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+    }
+    public static boolean isSelectAll(int i) {
+        return i == 65 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+    }*/
+    //? } else {
+        public static boolean isCut(int i) {
+            return Screen.isCut(i);
+        }
+        public static boolean isPaste(int i) {
+            return Screen.isPaste(i);
+        }
+        public static boolean isCopy(int i) {
+            return Screen.isCopy(i);
+        }
+        public static boolean isSelectAll(int i) {
+            return Screen.isSelectAll(i);
+        }
+    //? }
 
     // ===== ФОРМАТИРОВАНИЕ =====
 
@@ -317,24 +401,27 @@ public class TextField extends AbstractButton {
                     0x555555, 0x5555FF, 0x55FF55, 0x55FFFF,
                     0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF
             };
-            // При установке цвета сбрасываем все стили форматирования, но сохраняем текущие
-            // стили текста
             Style newStyle = baseStyle.withColor(TextColor.fromRgb(colors[code]));
-            // Копируем форматирование из baseStyle
             if (baseStyle.isBold())
                 newStyle = newStyle.withBold(true);
             if (baseStyle.isItalic())
                 newStyle = newStyle.withItalic(true);
             if (baseStyle.isUnderlined())
                 newStyle = newStyle.withUnderlined(true);
+            //? if >=1.17 {
             if (baseStyle.isStrikethrough())
                 newStyle = newStyle.withStrikethrough(true);
             if (baseStyle.isObfuscated())
                 newStyle = newStyle.withObfuscated(true);
+            //?} else {
+            /*if (baseStyle.isStrikethrough())
+                newStyle = newStyle.applyFormat(ChatFormatting.STRIKETHROUGH);
+            if (baseStyle.isObfuscated())
+                newStyle = newStyle.applyFormat(ChatFormatting.OBFUSCATED);*/
+            //?}
             return newStyle;
         }
 
-        // Стили (20-24) - добавляются к существующему
         switch (code) {
             case 20:
                 return baseStyle.withBold(true);
@@ -343,9 +430,17 @@ public class TextField extends AbstractButton {
             case 22:
                 return baseStyle.withUnderlined(true);
             case 23:
+                //? if >=1.17 {
                 return baseStyle.withStrikethrough(true);
+                //?} else {
+                /*return baseStyle.applyFormat(ChatFormatting.STRIKETHROUGH);*/
+                //?}
             case 24:
+                //? if >=1.17 {
                 return baseStyle.withObfuscated(true);
+                //?} else {
+                /*return baseStyle.applyFormat(ChatFormatting.OBFUSCATED);*/
+                //?}
             case 99:
                 return Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
             default:
@@ -367,7 +462,6 @@ public class TextField extends AbstractButton {
 
         for (FormatMark mark : formatMarks) {
             if (mark.position < startFrom) {
-                // Применяем стили до начала видимого текста
                 currentStyle = applyStyleCode(mark.styleCode, currentStyle);
                 continue;
             }
@@ -375,18 +469,15 @@ public class TextField extends AbstractButton {
             if (mark.position >= endAt)
                 break;
 
-            // Добавляем сегмент до этой метки
             if (mark.position > lastPos) {
                 String segText = text.substring(lastPos, mark.position);
                 segments.add(new StyledSegment(segText, currentStyle));
             }
 
-            // Применяем новый стиль
             currentStyle = applyStyleCode(mark.styleCode, currentStyle);
             lastPos = mark.position;
         }
 
-        // Добавляем оставшийся текст
         if (lastPos < endAt) {
             String segText = text.substring(lastPos, endAt);
             segments.add(new StyledSegment(segText, currentStyle));
@@ -552,7 +643,6 @@ public class TextField extends AbstractButton {
             int lengthChange = len - (j - i);
             this.text = newText;
 
-            // Обновляем метки форматирования
             updateFormatMarksAfterEdit(i, lengthChange);
 
             this.setCursor(i + len, false);
@@ -560,7 +650,7 @@ public class TextField extends AbstractButton {
     }
 
     private void erase(int offset) {
-        if (Screen.hasControlDown()) {
+        if (hasControlDown()) {
             this.eraseWords(offset);
         } else {
             this.eraseCharacters(offset);
@@ -624,30 +714,37 @@ public class TextField extends AbstractButton {
         }
     }
 
+    //? if >=1.21.9 {
+    // public void onPress(InputWithModifiers inputWithModifiers) {}
+    //? } else {
     @Override
-    public void onPress() {
-    }
+    public void onPress() { }
+    //? }
 
-    // ? if >1.20.2 {
+    //? if >1.20.2 {
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         rndr(ctx, mouseX, mouseY, delta);
     }
-    // ?} else if >=1.20 {
+    //? } else if >=1.20 {
     /*
      @Override
      public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float
      delta) {
      rndr(ctx, mouseX, mouseY, delta);
      }
-     */// ?} else {
-    /*
-     @Override
-     public void renderWidget(PoseStack ctx, int mouseX, int mouseY, float delta)
-     {
-     rndr(ctx, mouseX, mouseY, delta);
-     }
-     */// ?}
+     *///?} else if >=1.19.4 {
+    /*@Override
+    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }
+    *///?} else {
+    /*@Override
+    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }
+    */
+    //? }
 
     private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
         GUIUtils.drawResizableBox(
@@ -689,12 +786,12 @@ public class TextField extends AbstractButton {
                 if (segment.text.isEmpty())
                     continue;
 
-                Component styledText = Component.literal(segment.text).setStyle(segment.style);
+                Component styledText = TextUtils.literal(segment.text).setStyle(segment.style);
                 // ? if >=1.20 {
-                ((GuiGraphics) ctx).drawString(this.font, styledText, renderX, renderY, 0xFFFFFF, true);
+                ((GuiGraphics) ctx).drawString(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
                 // ?} else {
                 /*((PoseStack)ctx).pushPose();
-                 this.font.drawShadow((PoseStack)ctx, styledText, renderX, renderY, 0xFFFFFF);
+                 this.font.drawShadow((PoseStack)ctx, styledText, renderX, renderY, 0xFFFFFFFF);
                  ((PoseStack)ctx).popPose();
                  */
                 // ?}
@@ -721,7 +818,7 @@ public class TextField extends AbstractButton {
             if (!isFocused() && getText().isEmpty()) {
                 GUIUtils.addText(
                         ctx,
-                        Component.literal(this.placeholder.getString()),
+                        TextUtils.literal(this.placeholder.getString()),
                         0,
                         getX() + 4,
                         getY() + (getHeight() - 8) / 2,
@@ -785,7 +882,7 @@ public class TextField extends AbstractButton {
         GUIUtils.matricesScale(ctx, phScale, () -> {
             GUIUtils.addText(
                     ctx,
-                    Component.literal(this.placeholder.getString()),
+                    TextUtils.literal(this.placeholder.getString()),
                     0,
                     Math.round(phTextX / phScale),
                     Math.round(phTextY / phScale),
@@ -819,6 +916,13 @@ public class TextField extends AbstractButton {
         focusedField = ff;
     }
 
+    public void setFocus() {
+        setLastClickedWidget(this);
+        setFocusedField(this);
+        super.setFocused(true);
+        this.setCursorToEnd(false);
+    }
+
     private static boolean blockFocus = false;
     private static GuiEventListener lastClickedWidget = null;
 
@@ -833,7 +937,6 @@ public class TextField extends AbstractButton {
     public static void controlFocus() {
         if (focusedField == null) return;
 
-        // Если кликнули на сам TextField - не сбрасываем
         if (lastClickedWidget == focusedField) {
             return;
         }
@@ -848,7 +951,10 @@ public class TextField extends AbstractButton {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        double mouseX = event.x();
+        double mouseY = event.y();
         if (isMouseOver(mouseX, mouseY)) {
             setLastClickedWidget(this);
             setFocusedField(this);
@@ -858,12 +964,30 @@ public class TextField extends AbstractButton {
             String visibleText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex),
                     this.width - 8);
             int clickedPos = this.font.plainSubstrByWidth(visibleText, relativeX).length() + this.firstCharacterIndex;
-            this.setCursor(clickedPos, Screen.hasShiftDown());
+            this.setCursor(clickedPos, hasShiftDown());
 
             return true;
         }
         return false;
-    }
+    }*/
+    //? } else {
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (isMouseOver(mouseX, mouseY)) {
+                setLastClickedWidget(this);
+                setFocusedField(this);
+                this.setFocused(true);
+
+                int relativeX = Mth.floor(mouseX) - this.getX() - 4;
+                String visibleText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex),
+                        this.width - 8);
+                int clickedPos = this.font.plainSubstrByWidth(visibleText, relativeX).length() + this.firstCharacterIndex;
+                this.setCursor(clickedPos, hasShiftDown());
+
+                return true;
+            }
+            return false;
+        }
+    //? }
 
     @Override
     public void playDownSound(SoundManager soundManager) {
@@ -875,40 +999,46 @@ public class TextField extends AbstractButton {
     }
     // ?} else if >=1.17 {
     /*
-     * @Override
-     * public void updateNarration(NarrationElementOutput builder) {
-     * }
+    @Override
+    public void updateNarration(NarrationElementOutput builder) {
+    }
      */
     // ?}
 
     @Override
+            //? if >=1.21.9 {
+    /*public boolean keyPressed(KeyEvent event) {
+    int keyCode = event.key();
+    int scanCode = event.scancode();*/
+            //? } else {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        //? }
         if (!isFocused())
             return false;
 
         switch (keyCode) {
             case GLFW.GLFW_KEY_LEFT:
-                if (Screen.hasControlDown()) {
-                    this.setCursor(this.getWordSkipPosition(-1), Screen.hasShiftDown());
+                if (hasControlDown()) {
+                    this.setCursor(this.getWordSkipPosition(-1), hasShiftDown());
                 } else {
-                    this.moveCursor(-1, Screen.hasShiftDown());
+                    this.moveCursor(-1, hasShiftDown());
                 }
                 return true;
 
             case GLFW.GLFW_KEY_RIGHT:
-                if (Screen.hasControlDown()) {
-                    this.setCursor(this.getWordSkipPosition(1), Screen.hasShiftDown());
+                if (hasControlDown()) {
+                    this.setCursor(this.getWordSkipPosition(1), hasShiftDown());
                 } else {
-                    this.moveCursor(1, Screen.hasShiftDown());
+                    this.moveCursor(1, hasShiftDown());
                 }
                 return true;
 
             case GLFW.GLFW_KEY_HOME:
-                this.setCursorToStart(Screen.hasShiftDown());
+                this.setCursorToStart(hasShiftDown());
                 return true;
 
             case GLFW.GLFW_KEY_END:
-                this.setCursorToEnd(Screen.hasShiftDown());
+                this.setCursorToEnd(hasShiftDown());
                 return true;
 
             case GLFW.GLFW_KEY_BACKSPACE:
@@ -937,17 +1067,17 @@ public class TextField extends AbstractButton {
                 return true;
 
             default:
-                if (Screen.isSelectAll(keyCode)) {
+                if (isSelectAll(keyCode)) {
                     this.setCursorToEnd(false);
                     this.selectionEnd = 0;
                     return true;
-                } else if (Screen.isCopy(keyCode)) {
+                } else if (isCopy(keyCode)) {
                     Minecraft.getInstance().keyboardHandler.setClipboard(this.getSelectedText());
                     return true;
-                } else if (Screen.isPaste(keyCode)) {
+                } else if (isPaste(keyCode)) {
                     this.write(Minecraft.getInstance().keyboardHandler.getClipboard());
                     return true;
-                } else if (Screen.isCut(keyCode)) {
+                } else if (isCut(keyCode)) {
                     Minecraft.getInstance().keyboardHandler.setClipboard(this.getSelectedText());
                     this.write("");
                     return true;
@@ -957,15 +1087,26 @@ public class TextField extends AbstractButton {
     }
 
     @Override
-    public boolean charTyped(char c, int modifiers) {
+    //? if >=1.21.9 {
+    /*public boolean charTyped(CharacterEvent event) {
         if (!isFocused())
             return false;
-
+        char c = (char) event.codepoint();
         if (Character.isISOControl(c)) {
             return false;
         }
-
+        this.write(Character.toString(c));
+        return true;
+    }*/
+    //? } else {
+    public boolean charTyped(char c, int modifiers) {
+        if (!isFocused())
+            return false;
+        if (Character.isISOControl(c)) {
+            return false;
+        }
         this.write(Character.toString(c));
         return true;
     }
+    //? }
 }

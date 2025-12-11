@@ -2,6 +2,7 @@ package com.nitsha.binds.gui.widget;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.utils.TextUtils;
 //? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
 //?} else {
@@ -15,6 +16,15 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import com.mojang.blaze3d.systems.RenderSystem;
+import org.lwjgl.opengl.GL11;
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
 
 public class ToggleButton extends AbstractWidget {
     private static ResourceLocation TEXTURE;
@@ -29,7 +39,7 @@ public class ToggleButton extends AbstractWidget {
     private int x, y;
 
     public ToggleButton(Component name, int x, int y, int width, int height, boolean border, boolean toggled, Runnable onClick) {
-        super(x, y, width, height, Component.literal(""));
+        super(x, y, width, height, TextUtils.empty());
         this.name = name;
         this.onClick = onClick;
         this.toggled = toggled;
@@ -46,7 +56,12 @@ public class ToggleButton extends AbstractWidget {
         this.pointX = this.toggled ? tX + 11 : tX;
     }
 
+    @Override
+    //? <1.21.9 {
     public void onClick(double mouseX, double mouseY) {
+    //? } else {
+    // public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl) {
+    //? }
         this.onClick.run();
         this.toggled = !this.toggled;
     }
@@ -73,12 +88,18 @@ public class ToggleButton extends AbstractWidget {
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    *///?} else {
+    *///?} else if >=1.19.4 {
     /*@Override
     public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    *///?}
+    *///?} else {
+    /*@Override
+    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }
+    */
+    //? }
 
     private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
         //? if >=1.20 {
@@ -100,7 +121,7 @@ public class ToggleButton extends AbstractWidget {
         // RenderSystem.alphaFunc(GL11.GL_GREATER, 0.0F);
         //?}
 
-        if (this.isHoveredOrFocused()) GUIUtils.drawFill(c, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0x0D000000);
+        if (this.isHovered) GUIUtils.drawFill(c, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0x0D000000);
 
         GUIUtils.addText(c, name, 0, this.getX() + 4, this.getY() + (this.height / 2), "left", "center", 0xFF212121, false);
 

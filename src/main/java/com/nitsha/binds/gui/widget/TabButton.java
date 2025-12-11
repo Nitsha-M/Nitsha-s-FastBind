@@ -2,6 +2,7 @@ package com.nitsha.binds.gui.widget;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.vertex.PoseStack;
 //? if >=1.20 {
@@ -19,6 +20,10 @@ import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
 
+//? if >=1.21.9 {
+// import net.minecraft.client.input.MouseButtonEvent;
+//? }
+
 public class TabButton extends AbstractWidget {
     private static final ResourceLocation BACKGROUND = Main.id("textures/gui/test/editor_bg_dark_flat.png");
     private final Consumer<TabButton> onClick;
@@ -30,7 +35,7 @@ public class TabButton extends AbstractWidget {
     private int x, y;
 
     public TabButton(int x, int y, boolean selected, Component name, Consumer<TabButton> onClick) {
-        super(x, y, 0, 16, Component.literal(""));
+        super(x, y, 0, 16, TextUtils.empty());
         this.onClick = onClick;
         this.selected = selected;
         this.name = name;
@@ -44,7 +49,11 @@ public class TabButton extends AbstractWidget {
     public void setSelected(boolean selected) { this.selected = selected; }
 
     @Override
+    //? <1.21.9 {
     public void onClick(double mouseX, double mouseY) {
+    //? } else {
+    // public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl) {
+    //? }
         if (onClick != null) {
             onClick.accept(this);
         }
@@ -63,17 +72,22 @@ public class TabButton extends AbstractWidget {
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    //?} else if >=1.20 {
+    //? } else if >=1.20 {
     /*@Override
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
-    }
-    *///?} else {
+    }*/
+    //? } else if >=1.19.4 {
     /*@Override
     public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
-    }
-    *///?}
+    }*/
+    //? } else {
+    /*@Override
+    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }*/
+    //? }
 
     private void rndr(Object context, int mouseX, int mouseY, float delta) {
         float targetPointX = (this.selected) ? this.getY() : this.getY() + 2;
@@ -86,9 +100,9 @@ public class TabButton extends AbstractWidget {
     @Override
     protected void updateWidgetNarration(NarrationElementOutput builder) {
     }
-    //?} else if >=1.17 {
+    //? } else if >=1.17 {
     /*@Override
     public void updateNarration(NarrationElementOutput builder) {
     }*/
-    //?}
+    //? }
 }

@@ -11,8 +11,8 @@ import com.nitsha.binds.gui.widget.NewActionItem;
 import com.nitsha.binds.gui.widget.ScrollableWindow;
 import com.nitsha.binds.gui.widget.SmallTextButton;
 import com.nitsha.binds.utils.RenderUtils;
-//? if >=1.20 {
 import net.minecraft.client.Minecraft;
+//? if >=1.20 {
 import net.minecraft.client.gui.*;
 //?}
 //? if >=1.17 {
@@ -32,6 +32,13 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
+
 public class NewAction extends AbstractContainerEventHandler implements Renderable /*? if >=1.17 {*/ , NarratableEntry /*?}*/ {
     private static final ResourceLocation TOP = Main.idSprite("top_normal");
     private static final ResourceLocation TOP_HOVER = Main.idSprite("top_hover");
@@ -46,8 +53,6 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
     private final List<GuiEventListener> children = Lists.<GuiEventListener>newArrayList();
     private final List<Renderable> renderables = Lists.<Renderable>newArrayList();
     private final List<DrawElement> drawElements = Lists.<DrawElement>newArrayList();
-
-    private final List<NewActionItem> items = new ArrayList<>();
 
     private ScrollableWindow actionList;
 
@@ -85,7 +90,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
     private void initUI() {
         this.addDrawElement((ctx, mouseX, mouseY) -> {
             GUIUtils.drawFill(ctx, 5, 5, 7, 12, currentActionColor);
-            GUIUtils.addText(ctx, Component.literal(currentActionName), 0, 9, 4, "top", "left", 0xFFFFFFFF, false);
+            GUIUtils.addText(ctx, TextUtils.literal(currentActionName), 0, 9, 4, "top", "left", 0xFFFFFFFF, false);
         });
 
         this.addElement(GUIUtils.createTexturedBtn(this.getWidth() - 14, 4, 9, 9, new ResourceLocation[]{SPRESET, SPRESET_HOVER}, button -> {
@@ -101,7 +106,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
             addAction(currentActionName, (int) actionsEntry[currentAction][1], (String) actionsEntry[currentAction][2]);
         }));
 
-        this.actionList = new ScrollableWindow(2, this.getHeight() - 2, this.getX(), this.getY(), getWidth() - 2, 100, false);
+        this.actionList = new ScrollableWindow(2, this.getHeight() - 2, this.getX(), this.getY(), getWidth() - 4, 98, false);
         this.addElement(this.actionList);
 
         int tY = 0;
@@ -200,6 +205,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
         });
 
 
+        //? if <1.21.4 {
         renderables.forEach(element -> {
             Runnable render = () -> {
                 GUIUtils.matricesUtil(ctx, xO, yO, 4, () -> {
@@ -213,15 +219,26 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
                 render.run();
             }
         });
+        //? } else {
+        renderables.forEach(element -> {
+            Runnable render = () -> {
+                GUIUtils.matricesUtil(ctx, xO, yO, 4, () -> {
+                    element.render(ctx, mouseX - xO, mouseY - yO, delta);
+                });
+            };
+            if (element instanceof ScrollableWindow) {
+                ScrollableWindow sw = (ScrollableWindow) element;
+                if (isOpen)
+                    GUIUtils.matricesUtil(ctx, xO, yO, 4, () -> {
+                        sw.render(ctx, mouseX, mouseY , delta);
+                    });
+            } else {
+                render.run();
+            }
+        });
+        //? }
 
         animateValues();
-
-//
-//        GUIUtils.customScissor(ctx, parent.getX() + this.getX(), parent.getY() + this.getY(), getWidth(), getHeight() - 2, () -> {
-//            GUIUtils.matricesUtil(ctx, 0, 0, 500, () -> {
-//                super.render(ctx, mouseX, mouseY, delta);
-//            });
-//        });
     }
 
     //? if >=1.17 {
@@ -253,10 +270,10 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
     }
 
     public boolean isMouseInside(double mouseX, double mouseY) {
-        float windowX = this.parent.getX() + this.x;
-        float windowY = this.parent.getY() + this.y;
-        float windowWidth = this.width;
-        float windowHeight = this.height;
+        float windowX = this.parent.getX() + this.getX();
+        float windowY = this.parent.getY() + this.getY();
+        float windowWidth = this.getWidth();
+        float windowHeight = this.getHeight();
 
         return mouseX >= windowX &&
                 mouseX <= windowX + windowWidth &&
@@ -268,68 +285,155 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
         return mouseX >= this.x && mouseX <= this.x + this.width && mouseY >= this.y && mouseY <= this.y + 17;
     }
 
-    private boolean scrollLogic(double mouseX, double mouseY, double amount) {
-        if (!isMouseInsideArea(mouseX, mouseY)) return false;
-        int direction = amount > 0 ? -1 : 1;
-        selectActiveAction(direction);
-        Minecraft.getInstance().getSoundManager().play(
-                SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
-        return true;
-    }
-
     //? if >=1.20.2 {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        return scrollLogic(mouseX, mouseY, verticalAmount);
+        if (isMouseInsideArea(mouseX, mouseY)) {
+            int direction = verticalAmount > 0 ? -1 : 1;
+            selectActiveAction(direction);
+            Minecraft.getInstance().getSoundManager().play(
+                    SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
+            return true;
+        }
+        for (GuiEventListener child : children) {
+            if (child.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
+                return true;
+            }
+        }
+        return false;
     }
     //?} else {
     /*@Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        return scrollLogic(mouseX, mouseY, amount);
+        if (isMouseInsideArea(mouseX, mouseY)) {
+            int direction = amount > 0 ? -1 : 1;
+            selectActiveAction(direction);
+            Minecraft.getInstance().getSoundManager().play(
+                    SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
+            return true;
+        }
+        for (GuiEventListener child : children) {
+            if (child.mouseScrolled(mouseX, mouseY, amount)) {
+                return true;
+            }
+        }
+        return false;
     }
     *///?}
 
+
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        double mouseX = event.x();
+        double mouseY = event.y();
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getY();
 
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjustedX,
+            adjustedY,
+            event.buttonInfo()
+        );
+
         for (GuiEventListener child : children) {
-            if (child.mouseClicked(adjustedX, adjustedY, button)) {
+            if (child.mouseClicked(adjustedEvent, bl)) {
                 return true;
             }
         }
 
         return false;
-    }
+    }*/
+    //? } else {
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            double adjustedX = mouseX - getX();
+            double adjustedY = mouseY - getY();
 
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            for (GuiEventListener child : children) {
+                if (child.mouseClicked(adjustedX, adjustedY, button)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    //? }
+
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseReleased(MouseButtonEvent event) {
         boolean released = false;
+        double mouseX = event.x();
+        double mouseY = event.y();
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getY();
 
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjustedX,
+            adjustedY,
+            event.buttonInfo()
+        );
+
         for (GuiEventListener child : children) {
-            if (child.mouseReleased(adjustedX, adjustedY, button)) {
+            if (child.mouseReleased(adjustedEvent)) {
                 released = true;
             }
         }
 
         return released;
-    }
+    }*/
+    //? } else {
+        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            boolean released = false;
+            double adjustedX = mouseX - getX();
+            double adjustedY = mouseY - getY();
 
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+            for (GuiEventListener child : children) {
+                if (child.mouseReleased(adjustedX, adjustedY, button)) {
+                    released = true;
+                }
+            }
+
+            return released;
+        }
+    //? }
+
+        @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         boolean dragged = false;
+        double mouseX = event.x();
+        double mouseY = event.y();
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getY();
 
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjustedX,
+            adjustedY,
+            event.buttonInfo()
+        );
+
         for (GuiEventListener child : children) {
-            if (child.mouseDragged(adjustedX, adjustedY, button, deltaX, deltaY)) {
+            if (child.mouseDragged(adjustedEvent, deltaX, deltaY)) {
                 dragged = true;
             }
         }
 
         return dragged;
-    }
+    }*/
+    //? } else {
+        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+            boolean dragged = false;
+            double adjustedX = mouseX - getX();
+            double adjustedY = mouseY - getY();
+
+            for (GuiEventListener child : children) {
+                if (child.mouseDragged(adjustedX, adjustedY, button, deltaX, deltaY)) {
+                    dragged = true;
+                }
+            }
+
+            return dragged;
+        }
+    //? }
 }

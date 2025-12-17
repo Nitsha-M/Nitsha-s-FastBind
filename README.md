@@ -1,5 +1,8 @@
-![Nitsha's FastBind](https://cdn.modrinth.com/data/cached_images/5ac1e39b62a367bd2cdcaab4e089e849f3729af1.png)
+![Nitsha's FastBind](https://cdn.modrinth.com/data/cached_images/bcd66014298b5485e0ed3bb0399cb25216aa48be_0.webp)
 
+<p align="center">
+Adds a menu where you can activate pre-programmed actions. Configure command execution or key press emulation the way you want
+ </p>
 <p align="center">
     <a href="https://discord.gg/zuwPkg5MHs">
         <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v2.0-1.21.3/assets/discord.png" width="200">
@@ -15,43 +18,54 @@
     </a>
 </p>
 <hr class="solid">
-<p align="center">
-   <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v3.0.0/assets/update3.gif">
-</p>
+
+## Update 3.1 — Lights! Camera! Action!
+### New
+  * **Icon selector update!** Now you can choose ANY item or block from the game, and even more — it also supports items from your installed mods!
+* Now you can create as many pages and presets as you want! By default, there are 9 presets with 5 pages each.
+* **New actions!** You can send a local chat message or show a title on screen. Actions support formatting, so you can make them look as beautiful as they should be! :3
+* Full support for **Forge** and **NeoForge**.
+* Support for Minecraft `1.21.9`/`1.21.10`
+* Some redesign of the configuration menu
+
+### Fixes & tech updates
+* New UI components, such as a custom Text Field and a new action selection menu. These features are still new, so there may be bugs — feel free to report them
+* Added Japanese translation. Thanks to `elinka47(PExPE3)`!
+* Switched from Yarn mappings to MojMap (that’s why this update took a bit longer than I expected)
+* Deleted the `/nitsha::welcome` command
+* I fully rewrote the way the mod stores your binds. All your binds will migrate from v3.0 to v3.1, but if you're updating from v2.0 to v3.1, a new config will be created.
+* New logo :3
+
+If you have any ideas for a new type of action, I’ll be happy to hear them! You can share your ideas [here](https://discord.com/channels/773736638579998730/1349234377648771197)
+
 <hr class="solid">
-
-Adds a menu where you can activate pre-programmed actions. Configure command execution or key press emulation the way you want
-
-## Update 3.0 — Lights! Camera! Action!
-* Now supports all versions from 1.16.5 to 1.21.8!
-* Multi-action system: add command execution, key press emulation, or delays
-* Bind activation via key: assign a key in the configuration menu!
-* New settings window: accessible through the in-game config menu or via ModMenu
-* New presets settings window
-* Various bug fixes and optimizations
-
-_All your existing binds are automatically converted to the new version, so you won’t lose them!_
-
-If you find any bugs or have suggestions, please write on my Discord server or open an issue on GitHub <3
 
 ## How to use
 By default, the **FastBind** menu opens while you are pressing the `F8` key. You can switch pages using the `F7` and `F9` keys. (each key bind can be changed in the options)
 
-The mod includes a preset system for convenient grouping, with each preset holding up to 40 binds. There are 9 presets in total, and you can switch between them using the number keys (1–9).
+The mod features an advanced preset system for convenient grouping. You can create unlimited presets, each with an unlimited number of bind pages.
 
-![How to use](https://cdn.modrinth.com/data/cached_images/3ffc88f1764119d954c8fa96bc95c16899fb58bb.png)
+![How to use](https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v3.1.0/assets/image_use.png)
 
 ## Presets
-For convenient grouping and plenty of active buttons, the mod includes a preset system. Each preset can hold up to 40 binds
+Group your binds into presets for easier organization. You can create as many presets as you need. By default, the mod generates 9 presets, each containing 40 bind slots.
+
 <p align="center">
-   <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v3.0.0/assets/presets.gif">
+   <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v3.1.0/assets/presets_v31.gif" width="100%">
 </p>
 
 ## Configuration
-Each button can run actions: game command, key press emulation, and delay. You can also choose the key that triggers the action.
+Each button can run various actions:
+* In-game command
+* Key press emulation
+* Delay (in milliseconds)
+* Local chat message
+* Show a title on screen
 
-![Customize each button](https://cdn.modrinth.com/data/cached_images/97db29fbda44426d5805d2fb7808dea07029914f.png)
+You can also choose the key that triggers the action.
 
-A large variety of icons based on in-game items. Choose whatever you like — all items are grouped into categories for your convenience.
+![Customize each button](https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v3.1.0/assets/image_actions.png)
 
-![A large variety of icons](https://cdn.modrinth.com/data/cached_images/192dffcd304e6b3a6267c9eaf7d8b659f69a8906.png)
+A large variety of icons based on in-game items. Choose whatever you like — all items are grouped into categories for your convenience. Starting with update 3.1, icons can even be items from your installed mods!
+
+![A large variety of icons](https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v3.1.0/assets/image_icons.png)

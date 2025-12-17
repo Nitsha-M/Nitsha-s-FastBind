@@ -1,8 +1,9 @@
 package com.nitsha.binds.gui.panels;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.nitsha.binds.ItemsMapper;
-import com.nitsha.binds.MainClass;
-import com.nitsha.binds.configs.BindsConfig;
+import com.nitsha.binds.Main;
+import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.screen.BindsGUI;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
@@ -10,29 +11,31 @@ import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.utils.EasterEgg;
 import com.nitsha.binds.gui.utils.TextUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 //? if >=1.20 {
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphics;
 //? }
-import net.minecraft.client.gui.Element;
-import net.minecraft.util.Identifier;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.resources.ResourceLocation;
+//? if >=1.21.9 {
+// import net.minecraft.client.input.MouseButtonEvent;
+//? }
 
 public class BasicOptionsWindow extends AnimatedWindow {
-    private BindsEditor.TextField bindNameField;
+    private TextField bindNameField;
     private ItemButton editIconBtn;
     private BedrockIconButton pasteBtn;
     private BedrockIconTextButton editAction;
 
-    private static final Identifier ITEMS_EDIT = MainClass.id("textures/gui/test/items_1.png");
-    private static final Identifier CAT_MENU = MainClass.id("textures/gui/cat_menu.png");
-    private static final Identifier CAT_SPRITE = MainClass.id("textures/gui/cat_sprite.png");
-    private static final Identifier CAT_EYES = MainClass.id("textures/gui/cat_eyes.png");
-    private static final Identifier CAT_MEOW1 = MainClass.id("textures/gui/cat_meow_0.png");
-    private static final Identifier CAT_MEOW2 = MainClass.id("textures/gui/cat_meow_1.png");
+    private static final ResourceLocation ITEMS_EDIT = Main.id("textures/gui/test/items_1.png");
+    private static final ResourceLocation CAT_MENU = Main.id("textures/gui/cat_menu.png");
+    private static final ResourceLocation CAT_SPRITE = Main.id("textures/gui/cat_sprite.png");
+    private static final ResourceLocation CAT_EYES = Main.id("textures/gui/cat_eyes.png");
+    private static final ResourceLocation CAT_MEOW1 = Main.id("textures/gui/cat_meow_0.png");
+    private static final ResourceLocation CAT_MEOW2 = Main.id("textures/gui/cat_meow_1.png");
 
-    public BasicOptionsWindow(BindsEditor screen, float x, int y, float width, int height, Identifier t1, Identifier t2, int delay) {
+    public BasicOptionsWindow(BindsEditor screen, float x, int y, float width, int height, ResourceLocation t1, ResourceLocation t2, int delay) {
         super(x, y, width, height, t1, t2, delay);
         initUI(screen);
     }
@@ -49,7 +52,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
     }
 
     private void initUI(BindsEditor screen) {
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+        Font textRenderer = Minecraft.getInstance().font;
         meowStates = CatMeowStates.NOTHING;
         AnimatedSprite catTail = new AnimatedSprite(14, 12, CAT_SPRITE, 0, false, 0, 0, 490, 14, 60, 504, 12);
         AnimatedSprite catMeow1 = new AnimatedSprite(35, 14, CAT_MEOW1, 0, false, 0, 0, 420, 35, 40, 455, 14);
@@ -61,13 +64,13 @@ public class BasicOptionsWindow extends AnimatedWindow {
                 10,
                 500,
                 () -> {
-                    if (!BindsConfig.getBooleanConfig("easterEgg", false)) {
-                        BindsConfig.setConfig("easterEgg", true);
+                    if (!BindsStorage.getBooleanConfig("easterEgg", false)) {
+                        BindsStorage.setConfig("easterEgg", true);
                         meowStates = CatMeowStates.HAPPY;
                         catMeow2.stopAnimation();
                         catMeow1.startAnimation(true);
                     } else {
-                        BindsConfig.setConfig("easterEgg", false);
+                        BindsStorage.setConfig("easterEgg", false);
                         meowStates = CatMeowStates.SAD;
                         catMeow1.stopAnimation();
                         catMeow2.startAnimation(true);
@@ -80,10 +83,10 @@ public class BasicOptionsWindow extends AnimatedWindow {
         this.addDrawElement((ctx, mouseX, mouseY) -> {
             GUIUtils.matricesUtil(ctx, 0, 0, 50, () -> {
                 //? if >=1.20 {
-                DrawContext c = (DrawContext) ctx;
-                //? } else {
-                /*MatrixStack c = (MatrixStack) ctx;
-                 *///? }
+                GuiGraphics c = (GuiGraphics) ctx;
+                //?} else {
+                /*PoseStack c = (PoseStack) ctx;
+                 *///?}
                 GUIUtils.adaptiveDrawTexture(ctx, CAT_MENU, 4, 165, 0, 0, 126, 26, 126, 26);
                 int eyeCenterX = 105;
                 int eyeCenterY = 175;
@@ -112,16 +115,16 @@ public class BasicOptionsWindow extends AnimatedWindow {
             });
         }, 1);
 
-        this.bindNameField = new BindsEditor.TextField(textRenderer, 4, 104, 105, 20, 20, "", TextUtils.translatable("nitsha.binds.name").getString());
-        this.editIconBtn = new ItemButton(111, 101, ItemsMapper.getItemStack(BindsConfig.getBind(BindsGUI.getCurrentPreset(), BindsEditor.getActiveBind()).icon), () -> {
-            screen.openAdvancedOptions();
-            screen.getAdvancedOptionsWindow().selectTab(0);
+        this.bindNameField = new TextField(textRenderer, 4, 126, 105, 20, 20, "", TextUtils.translatable("nitsha.binds.name").getString());
+        this.editIconBtn = new ItemButton(111, 123, ItemsMapper.getItemStack(BindsStorage.getBind(BindsGUI.getCurrentPreset(), BindsEditor.getActiveBind()).icon), () -> {
+//            screen.openAdvancedOptions();
+            screen.getAdvancedOptionsWindow().selectTab(1);
         }, ITEMS_EDIT, "");
 
-        this.editAction = new BedrockIconTextButton(4, 129, 133, 20, "edit_action", TextUtils.translatable("nitsha.binds.openEditor").getString(), true, ()-> {
-            screen.openAdvancedOptions();
-            screen.getAdvancedOptionsWindow().selectTab(1);
-        });
+//        this.editAction = new BedrockIconTextButton(4, 129, 133, 20, "edit_action", TextUtils.translatable("nitsha.binds.openEditor").getString(), true, ()-> {
+//            screen.openAdvancedOptions();
+//            screen.getAdvancedOptionsWindow().selectTab(1);
+//        });
 
         this.pasteBtn = new BedrockIconButton(49, 151, 43, 20, "paste", false, screen::pasteBind, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
         if (screen.copied.name.isEmpty()) pasteBtn.setEnabled(false);
@@ -131,12 +134,12 @@ public class BasicOptionsWindow extends AnimatedWindow {
         this.addElement(bindNameField);
         this.addElement(editIconBtn);
         this.addElement(pasteBtn);
-        this.addElement(editAction);
+//        this.addElement(editAction);
 
         this.open(() -> {});
     }
 
-    public BindsEditor.TextField getBindName() {
+    public TextField getBindName() {
         return this.bindNameField;
     }
 
@@ -158,18 +161,47 @@ public class BasicOptionsWindow extends AnimatedWindow {
     }
 
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        if (!this.isVisible()) return false;
+
+        double mouseX = event.x();
+        double mouseY = event.y();
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getYOffset();
+
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+                adjustedX,
+                adjustedY,
+                event.buttonInfo()
+        );
+
+        for (GuiEventListener child : children()) {
+            if (child.mouseClicked(adjustedEvent, bl)) return true;
+        }
+
+        if (catEasterEgg.handleClick(isInsideCat(mouseX, mouseY, 94, 171, 45, 16))) {
+            return true;
+        }
+
+        return super.mouseClicked(event, bl);
+    }*/
+    //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!this.isVisible()) return false;
 
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
 
-        for (Element child : children()) {
+        for (GuiEventListener child : children()) {
             if (child.mouseClicked(adjustedX, adjustedY, button)) return true;
         }
+
         if (catEasterEgg.handleClick(isInsideCat(mouseX, mouseY, 94, 171, 45, 16))) {
             return true;
-        };
+        }
+
         return super.mouseClicked(mouseX, mouseY, button);
     }
+    //? }
 }

@@ -1,0 +1,49 @@
+{
+  "nitsha.localization.__credit" : "PExPE3/elinka47",
+  "nitsha.localization.__credit_2" : "I used ChatGPT for some new entries",
+  "category.nitsha.binds" : "Nitsha's FastBind",
+  "key.nitsha.binds" : "ファストバインドメニュー",
+  "key.nitsha.prev_page" : "前のページ",
+  "key.nitsha.next_page" : "次のページ",
+  "key.nitsha.editor" : "設定メニュー",
+
+  "nitsha.binds.addNew" : "作成",
+  "nitsha.binds.delete" : "削除",
+  "nitsha.binds.configure" : "設定",
+
+  "nitsha.binds.name" : "名前",
+  "nitsha.binds.untitled" : "無題",
+  "nitsha.binds.list" : "バインド一覧",
+  "nitsha.binds.empty" : "空",
+  "nitsha.binds.page" : "ページ",
+
+  "nitsha.binds.advances.tab1" : "アクション",
+  "nitsha.binds.advances.tab2" : "アイコン",
+  "nitsha.binds.advances.tab3" : "MODオプション",
+
+  "nitsha.binds.advances.choose_icon" : "アイコンを選択",
+
+  "nitsha.binds.advances.actions" : "複数アクション",
+  "nitsha.binds.advances.actions.noActions" : "アクションがありません",
+  "nitsha.binds.advances.actions.delay" : "ディレイ",
+  "nitsha.binds.advances.actions.delayDesс" : "ディレイ（ミリ秒）",
+  "nitsha.binds.advances.actions.keybind" : "キー設定",
+  "nitsha.binds.advances.actions.command" : "コマンド",
+  "nitsha.binds.advances.actions.pressKey" : "キーを押す",
+  "nitsha.binds.advances.actions.showMessage" : "チャットにメッセージを表示",
+  "nitsha.binds.advances.actions.showTitle" : "画面にタイトルを表示",
+  "nitsha.binds.advances.actions.commandLine" : "コマンド（/を含まない）",
+  "nitsha.binds.advances.actions.delayLine" : "ミリ秒単位",
+  "nitsha.binds.advances.actions.addNew" : "追加",
+
+  "nitsha.binds.advances.options.hold" : "%s を長押しでメニューを表示",
+  "nitsha.binds.advances.options.openLastPage" : "前回のページを再表示",
+  "nitsha.binds.advances.options.openLastPreset" : "前回のプリセットを再表示",
+  "nitsha.binds.advances.options.keepMovement" : "開いている間も移動を維持",
+  "nitsha.binds.advances.options.closeOnAction" : "アクション実行時に閉じる",
+  "nitsha.binds.advances.options.bindMsg" : "バインド起動メッセージ",
+
+  "nitsha.binds.bindActivate" : "バインド %s を起動しました",
+
+  "nitsha.binds.advances.noKeyBind" : "未割り当て"
+}

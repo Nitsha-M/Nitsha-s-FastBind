@@ -1,0 +1,51 @@
+{
+  "nitsha.localization.__credit" : "I used ChatGPT",
+  "category.nitsha.binds" : "Nitsha's FastBind",
+  "key.nitsha.binds" : "Меню FastBind",
+  "key.nitsha.prev_page" : "Попередня сторінка",
+  "key.nitsha.next_page" : "Наступна сторінка",
+  "key.nitsha.editor" : "Меню конфігурації",
+
+  "nitsha.binds.addNew" : "Створити",
+  "nitsha.binds.delete" : "Видалити",
+  "nitsha.binds.configure" : "Налаштувати",
+
+  "nitsha.binds.name" : "Назва",
+  "nitsha.binds.untitled" : "Без назви",
+  "nitsha.binds.list" : "Список біндів",
+  "nitsha.binds.empty" : "Порожньо",
+  "nitsha.binds.page" : "Сторінка",
+
+  "nitsha.binds.advances.tab1" : "Дії",
+  "nitsha.binds.advances.tab2" : "Іконка",
+  "nitsha.binds.advances.tab3" : "Налаштування моду",
+
+  "nitsha.binds.advances.choose_icon" : "Обрати іконку",
+
+  "nitsha.binds.advances.actions" : "Кілька дій",
+  "nitsha.binds.advances.actions.noActions" : "Немає дій",
+  "nitsha.binds.advances.actions.delay" : "Затримка",
+  "nitsha.binds.advances.actions.delayDesс" : "Затримка в мс",
+  "nitsha.binds.advances.actions.keybind" : "Клавіша",
+  "nitsha.binds.advances.actions.command" : "Команда",
+  "nitsha.binds.advances.actions.pressKey" : "Натиснути клавішу",
+  "nitsha.binds.advances.actions.showMessage" : "Повідомлення в чаті",
+  "nitsha.binds.advances.actions.showTitle" : "Заголовок на екрані",
+  "nitsha.binds.advances.actions.commandLine" : "Команда (без /)",
+  "nitsha.binds.advances.actions.chatMessage" : "Повідомлення в чаті",
+  "nitsha.binds.advances.actions.titleLine" : "Текст заголовка",
+  "nitsha.binds.advances.actions.subtitleLine" : "Текст підзаголовка",
+  "nitsha.binds.advances.actions.delayLine" : "у мс",
+  "nitsha.binds.advances.actions.addNew" : "Додати",
+
+  "nitsha.binds.advances.options.hold" : "Утримуйте %s, щоб відкрити меню",
+  "nitsha.binds.advances.options.openLastPage" : "Відкрити останню сторінку",
+  "nitsha.binds.advances.options.openLastPreset" : "Відкрити останній пресет",
+  "nitsha.binds.advances.options.keepMovement" : "Дозволити рух під час відкриття",
+  "nitsha.binds.advances.options.closeOnAction" : "Закривати при дії",
+  "nitsha.binds.advances.options.bindMsg" : "Повідомлення про активацію бінду",
+
+  "nitsha.binds.bindActivate" : "Бінд %s активовано",
+
+  "nitsha.binds.advances.noKeyBind" : "Не призначено"
+}

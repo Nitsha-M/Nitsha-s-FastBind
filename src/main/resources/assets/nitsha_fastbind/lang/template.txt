@@ -1,0 +1,51 @@
+{
+  "nitsha.localization.__credit" : "Nitsha", // не трогай
+  "category.nitsha.binds" : "Nitsha's FastBind", // не трогай
+  "key.nitsha.binds" : "FastBind Menu",
+  "key.nitsha.prev_page" : "Previous page",
+  "key.nitsha.next_page" : "Next page",
+  "key.nitsha.editor" : "Configuration menu",
+
+  "nitsha.binds.addNew" : "ɴᴇᴡ", // везде, где такой шрифт, переведи используя small text. в данном контексте "new" это скорее "создать"
+  "nitsha.binds.delete" : "ᴅᴇʟᴇᴛᴇ",
+  "nitsha.binds.configure" : "Configure",
+
+  "nitsha.binds.name" : "Name",
+  "nitsha.binds.untitled" : "Untitled",
+  "nitsha.binds.list" : "List of binds",
+  "nitsha.binds.empty" : "Empty",
+  "nitsha.binds.page" : "ᴘᴀɢᴇ",
+
+  "nitsha.binds.advances.tab1" : "ᴀᴄᴛɪᴏɴs",
+  "nitsha.binds.advances.tab2" : "ɪᴄᴏɴ",
+  "nitsha.binds.advances.tab3" : "ᴍᴏᴅ ᴏᴘᴛɪᴏɴs",
+
+  "nitsha.binds.advances.choose_icon" : "ᴄʜᴏᴏsᴇ ɪᴄᴏɴ",
+
+  "nitsha.binds.advances.actions" : "ᴍᴜʟᴛɪᴘʟᴇ ᴀᴄᴛɪᴏɴs",
+  "nitsha.binds.advances.actions.noActions" : "ᴛʜᴇʀᴇ ᴀʀᴇ ɴᴏ ᴀᴄᴛɪᴏɴs",
+  "nitsha.binds.advances.actions.delay" : "ᴅᴇʟᴀʏ",
+  "nitsha.binds.advances.actions.delayDesс" : "ᴅᴇʟᴀʏ ɪɴ ᴍs",
+  "nitsha.binds.advances.actions.keybind" : "ᴋᴇʏʙɪɴᴅ",
+  "nitsha.binds.advances.actions.command" : "ᴄᴏᴍᴍᴀɴᴅ",
+  "nitsha.binds.advances.actions.pressKey" : "ᴘʀᴇss ᴋᴇʏ",
+  "nitsha.binds.advances.actions.showMessage" : "ᴍᴇssᴀɢᴇ ɪɴ ᴄʜᴀᴛ",
+  "nitsha.binds.advances.actions.showTitle" : "sᴄʀᴇᴇɴ ᴛɪᴛʟᴇ",
+  "nitsha.binds.advances.actions.commandLine" : "command (without /)",
+  "nitsha.binds.advances.actions.chatMessage" : "Message in chat",
+  "nitsha.binds.advances.actions.titleLine" : "Title text", // заголовок
+  "nitsha.binds.advances.actions.subtitleLine" : "Subtitle text", // подзаголовок
+  "nitsha.binds.advances.actions.delayLine" : "in ms", // в миллисекундах
+  "nitsha.binds.advances.actions.addNew" : "ᴀᴅᴅ", // добавить
+
+  "nitsha.binds.advances.options.hold" : "Hold %s to show menu", // тут указана клавиша, которую надо удерживать для открытия меню
+  "nitsha.binds.advances.options.openLastPage" : "Reopen last page", // открыть на последней странице
+  "nitsha.binds.advances.options.openLastPreset" : "Reopen last preset", // открыть на последнем пресете
+  "nitsha.binds.advances.options.keepMovement" : "Keep moving while open",
+  "nitsha.binds.advances.options.closeOnAction" : "Close on action", // закрывать меню при активации экшена, используй короткую формулировку
+  "nitsha.binds.advances.options.bindMsg" : "Bind activation message",
+
+  "nitsha.binds.bindActivate" : "Bind %s activated",
+
+  "nitsha.binds.advances.noKeyBind" : "Not bound" // клавиша не назначена
+}

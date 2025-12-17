@@ -1,13 +1,12 @@
 package com.nitsha.binds.gui.utils;
 
 //? if >=1.20 {
-import net.minecraft.client.gui.DrawContext;
-//? } else {
-import net.minecraft.client.util.math.MatrixStack;
-//? }
+import net.minecraft.client.gui.GuiGraphics;
+//?} else {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+ *///?}
 
 public class DrawElement {
-
     @FunctionalInterface
     public interface Drawer {
         void draw(Object ctx, float mouseX, float mouseY);
@@ -20,12 +19,12 @@ public class DrawElement {
     }
 
     //? if >=1.20 {
-    public void render(DrawContext ctx, float mouseX, float mouseY) {
+    public void render(GuiGraphics ctx, float mouseX, float mouseY) {
         drawer.draw(ctx, mouseX, mouseY);
     }
-    //? } else {
-    /*public void render(MatrixStack ctx, float mouseX, float mouseY) {
+    //?} else {
+    /*public void render(PoseStack ctx, float mouseX, float mouseY) {
         drawer.draw(ctx, mouseX, mouseY);
     }
-    *///? }
+    *///?}
 }

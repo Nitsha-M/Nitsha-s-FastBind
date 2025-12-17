@@ -1,12 +1,12 @@
 package com.nitsha.binds.gui.utils;
 
 //? if >=1.20 {
-import net.minecraft.client.gui.DrawContext;
-//? } else {
-/*import net.minecraft.client.gui.DrawableHelper;
- *///? }
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+//?} else {
+/*import net.minecraft.client.gui.GuiComponent;
+ *///?}
+import net.minecraft.resources.ResourceLocation;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 public class AnimatedSprite {
     protected int x, y, width, height;
@@ -17,7 +17,7 @@ public class AnimatedSprite {
     private final int frameDelayMs;
     private int color = 0xFFFFFFFF;
     private final int texV;
-    private final Identifier texture;
+    private final ResourceLocation texture;
     private boolean animating = false;
     private boolean isOpen;
     private final int textureW;
@@ -27,7 +27,7 @@ public class AnimatedSprite {
     private long lastUpdateTime;
     private float timeAccumulator;
 
-    public AnimatedSprite(int width, int height, Identifier texture, int texV, boolean isOpen, int textureU, int minU, int maxU, int step, int frameDelayMs, int textureW, int textureH) {
+    public AnimatedSprite(int width, int height, ResourceLocation texture, int texV, boolean isOpen, int textureU, int minU, int maxU, int step, int frameDelayMs, int textureW, int textureH) {
         this.width = width;
         this.height = height;
         this.textureU = textureU;
@@ -47,10 +47,10 @@ public class AnimatedSprite {
 
     public void render(
             //? if >=1.20 {
-            DrawContext ctx
-            //? } else {
-            /*MatrixStack ctx
-             *///? }
+            GuiGraphics ctx
+            //?} else {
+            /*PoseStack ctx
+             *///?}
             ) {
         GUIUtils.adaptiveDrawTexture(ctx, texture, this.x, y, textureU, texV, width, height, textureW, textureH, color);
         tick();

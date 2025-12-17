@@ -1,25 +1,36 @@
 package com.nitsha.binds.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.nitsha.binds.MainClass;
-import com.nitsha.binds.gui.screen.BindsEditor;
+import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.DrawElement;
+import com.nitsha.binds.utils.RenderUtils;
 import net.minecraft.client.gui.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.nitsha.binds.utils.Renderable;
+import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 //? if >=1.17 {
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 //? }
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class AnimatedWindow extends AbstractParentElement implements Drawable, Element /*? if >=1.17 {*/ , Selectable /*? }*/ {
-    private Identifier T_1, T_2;
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
 
-    private final List<Element> children = Lists.<Element>newArrayList();
-    private final List<Drawable> drawables = Lists.<Drawable>newArrayList();
+public class AnimatedWindow extends AbstractContainerEventHandler implements Renderable, GuiEventListener /*? if >=1.17 {*/ , NarratableEntry /*?}*/ {
+    private ResourceLocation T_1, T_2;
+
+    private final List<GuiEventListener> children = Lists.<GuiEventListener>newArrayList();
+    private final List<Renderable> renderables = Lists.<Renderable>newArrayList();
     private final List<DrawElement> drawElementsTop = Lists.<DrawElement>newArrayList();
     private final List<DrawElement> drawElementsBottom = Lists.<DrawElement>newArrayList();
 
@@ -40,14 +51,15 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
     }
 
     private AnimationState animState;
-    private final float speed = MainClass.GLOBAL_ANIMATION_SPEED - 0.1f;
+    private final float speed = Main.GLOBAL_ANIMATION_SPEED - 0.1f;
     private float baseYOffset, topYOffset, alpha;
     private Runnable onFinish = null;
 
     private long lastUpdateTime;
 
-    public AnimatedWindow(float x, float y, float width, float height, Identifier t1, Identifier t2, int delayMs) {
+    public AnimatedWindow(float x, float y, float width, float height, ResourceLocation t1, ResourceLocation t2, int delayMs) {
         children.clear();
+        drawElementsTop.clear();
         drawElementsBottom.clear();
         this.x = this.targetX = x;
         this.y = this.targetY = y;
@@ -74,9 +86,13 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
         this.addDrawElement(drawer, 0);
     }
 
-    public <T extends Element & Drawable> void addElement(T drawableElement) {
-        this.children.add(drawableElement);
-        this.drawables.add(drawableElement);
+    public void addElement(GuiEventListener element) {
+        this.children.add(element);
+
+        Renderable r = RenderUtils.wrapRenderable(element);
+        if (r != null) {
+            this.renderables.add(r);
+        }
     }
 
     // Basic parameters: get/set coords or size
@@ -115,9 +131,9 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
 
     private void updateAnimationState(float lerpFactor) {
         switch (animState) {
-            case DROPPING_ALL -> {
-                this.alpha = MathHelper.lerp(lerpFactor, this.alpha, 1.0f);
-                baseYOffset = MathHelper.lerp(lerpFactor, baseYOffset, this.y + 2);
+            case DROPPING_ALL:
+                this.alpha = Mth.lerp(lerpFactor, this.alpha, 1.0f);
+                baseYOffset = Mth.lerp(lerpFactor, baseYOffset, this.y + 2);
                 if (Math.abs(baseYOffset - (this.y + 2)) < 0.001f) {
                     baseYOffset = this.y + 2;
                     alpha = 1.0f;
@@ -127,17 +143,17 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
                         onFinish = null;
                     }
                 }
-            }
-            case LIFTING_TOP -> {
-                topYOffset = MathHelper.lerp(lerpFactor, topYOffset, 2);
+            break;
+            case LIFTING_TOP:
+                topYOffset = Mth.lerp(lerpFactor, topYOffset, 2);
                 if (Math.abs(topYOffset - 2) < 0.001f) {
                     topYOffset = 2;
                     animState = AnimationState.FINISHED;
                 }
-            }
-            case HIDING_TOP -> {
-                alpha = MathHelper.lerp(lerpFactor, alpha, 0.0f);
-                baseYOffset = MathHelper.lerp(lerpFactor, baseYOffset, y - 100);
+            break;
+            case HIDING_TOP:
+                alpha = Mth.lerp(lerpFactor, alpha, 0.0f);
+                baseYOffset = Mth.lerp(lerpFactor, baseYOffset, y - 100);
 
                 if (onFinish != null && baseYOffset < y - 49) {
                     this.visible = false;
@@ -149,15 +165,17 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
                     alpha = 0.0f;
                     animState = AnimationState.LIFTING_ALL;
                 }
-            }
-            case LIFTING_ALL -> {
-                topYOffset = MathHelper.lerp(lerpFactor, topYOffset, 0);
+            break;
+            case LIFTING_ALL:
+                topYOffset = Mth.lerp(lerpFactor, topYOffset, 0);
                 if (Math.abs(topYOffset) < 0.001f) {
                     topYOffset = 0;
                     animState = AnimationState.HIDDEN;
                 }
-            }
-            case FINISHED, HIDDEN -> {}
+            break;
+            case FINISHED:
+            case HIDDEN:
+                break;
         }
     }
 
@@ -199,10 +217,10 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
     }
 
     private void animateValues(float lerpFactor) {
-        this.width = MathHelper.lerp(lerpFactor, this.width, targetWidth);
-        this.height = MathHelper.lerp(lerpFactor, this.height, targetHeight);
-        this.x = MathHelper.lerp(lerpFactor, this.x, targetX);
-        this.y = MathHelper.lerp(lerpFactor, this.y, targetY);
+        this.width = Mth.lerp(lerpFactor, this.width, targetWidth);
+        this.height = Mth.lerp(lerpFactor, this.height, targetHeight);
+        this.x = Mth.lerp(lerpFactor, this.x, targetX);
+        this.y = Mth.lerp(lerpFactor, this.y, targetY);
 
         if (Math.abs(this.width - targetWidth) < 0.1f) this.width = targetWidth;
         if (Math.abs(this.height - targetHeight) < 0.1f) this.height = targetHeight;
@@ -213,10 +231,10 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
     @Override
     public void render(
             //? if >=1.20 {
-            DrawContext ctx
-            //? } else {
-            /*MatrixStack ctx
-             *///? }
+            GuiGraphics ctx
+            //?} else {
+            /*PoseStack ctx*/
+            //?}
             , int mouseX, int mouseY, float delta) {
         int alphaByte = (int)(alpha * 255.0f) & 0xFF;
         globalColor = (alphaByte << 24) | 0xFFFFFFFF;
@@ -234,13 +252,14 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
                 drawElementsBottom.forEach(element -> element.render(ctx, mouseX - xO, mouseY - yO));
             });
 
-            drawables.forEach(element -> {
+            renderables.forEach(element -> {
                 Runnable render = () -> {
                     GUIUtils.matricesUtil(ctx, xO, yO, 2, () -> {
                         element.render(ctx, mouseX - xO, mouseY - yO, delta);
                     });
                 };
-                if (element instanceof ScrollableWindow sw) {
+                if (element instanceof ScrollableWindow) {
+                    ScrollableWindow sw = (ScrollableWindow) element;
                     GUIUtils.customScissor(ctx,xO + sw.getX(), yO + sw.getY(), sw.getWidth(), sw.getHeight(), render);
                 } else {
                     render.run();
@@ -250,43 +269,55 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
             GUIUtils.matricesUtil(ctx, xO, yO, 2, () -> {
                 drawElementsTop.forEach(element -> element.render(ctx, mouseX - xO, mouseY - yO));
             });
+
         }
         tick();
     }
 
     //? if >=1.17 {
     @Override
-    public void appendNarrations(NarrationMessageBuilder builder) { }
-    //? }
+    public void updateNarration(NarrationElementOutput builder) { }
+    //?}
 
     @Override
-    public void mouseMoved(double mouseX, double mouseY) {
-        super.mouseMoved(mouseX, mouseY);
-    }
-
-    @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return children;
     }
 
     public void clearChildren() {
         children.clear();
-        drawables.clear();
+        renderables.clear();
         drawElementsTop.clear();
         drawElementsBottom.clear();
     }
 
     public void removeElementsOfType(Class<?> type) {
-        children.removeIf(type::isInstance);
-        drawables.removeIf(type::isInstance);
+        List<GuiEventListener> toKeep = new ArrayList<>();
+        for (GuiEventListener child : children) {
+            if (!type.isInstance(child)) {
+                toKeep.add(child);
+            }
+        }
+
+        children.clear();
+        renderables.clear();
+
+        for (GuiEventListener child : toKeep) {
+            children.add(child);
+            Renderable r = RenderUtils.wrapRenderable(child);
+            if (r != null) {
+                renderables.add(r);
+            }
+        }
     }
+
 
     //? if >=1.17 {
     @Override
-    public SelectionType getType() {
-        return SelectionType.NONE;
+    public NarratableEntry.NarrationPriority narrationPriority() {
+        return NarrationPriority.NONE;
     }
-    //? }
+    //?}
 
     public boolean isMouseInside(double mouseX, double mouseY) {
         if (!visible) return false;
@@ -301,71 +332,149 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
                 mouseY <= windowY + windowHeight;
     }
 
-
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        if (!visible) return false;
+        double mouseX = event.x();
+        double mouseY = event.y();
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getYOffset();
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjustedX,
+            adjustedY,
+            event.buttonInfo()
+        );
+
+        for (GuiEventListener child : children) {
+            if (child.mouseClicked(adjustedEvent, bl)) {
+                return true;
+            }
+        }
+        return false;
+    }*/
+    //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!visible) return false;
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
-
-        for (Element child : children) {
+        for (GuiEventListener child : children) {
             if (child.mouseClicked(adjustedX, adjustedY, button)) {
                 return true;
             }
         }
-
         return false;
     }
-
+    //? }
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseReleased(MouseButtonEvent event) {
+        if (!visible) return false;
+        boolean released = false;
+        double mouseX = event.x();
+        double mouseY = event.y();
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getYOffset();
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjustedX,
+            adjustedY,
+            event.buttonInfo()
+        );
+
+        for (GuiEventListener child : children) {
+            if (child.mouseReleased(adjustedEvent)) {
+                released = true;
+            }
+        }
+        return released;
+    }*/
+    //? } else {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (!visible) return false;
         boolean released = false;
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
-
-        for (Element child : children) {
+        for (GuiEventListener child : children) {
             if (child.mouseReleased(adjustedX, adjustedY, button)) {
                 released = true;
             }
         }
-
         return released;
     }
-
+    //? }
     @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (!visible) return false;
+        boolean dragged = false;
+        double mouseX = event.x();
+        double mouseY = event.y();
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getYOffset();
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            adjustedX,
+            adjustedY,
+            event.buttonInfo()
+        );
+        for (GuiEventListener child : children) {
+            if (child.mouseDragged(adjustedEvent, deltaX, deltaY)) {
+                dragged = true;
+            }
+        }
+        return dragged;
+    }*/
+    //? } else {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (!visible) return false;
         boolean dragged = false;
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
-
-        for (Element child : children) {
+        for (GuiEventListener child : children) {
             if (child.mouseDragged(adjustedX, adjustedY, button, deltaX, deltaY)) {
                 dragged = true;
             }
         }
-
         return dragged;
     }
+    //? }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        for (Element child : children()) {
-            if (child.keyPressed(keyCode, scanCode, modifiers)) return true;
+    //? if >=1.21.9 {
+    /*public boolean keyPressed(KeyEvent event) {
+        for (GuiEventListener child : children()) {
+            if (child.keyPressed(event)) return true;
         }
         return false;
-    }
+    }*/
+    //? } else {
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            for (GuiEventListener child : children()) {
+                if (child.keyPressed(keyCode, scanCode, modifiers)) return true;
+            }
+            return false;
+        }
+    //? }
 
     @Override
-    public boolean charTyped(char codePoint, int modifiers) {
-        for (Element child : children()) {
-            if (child.charTyped(codePoint, modifiers)) {
+    //? if >=1.21.9 {
+    /*public boolean charTyped(CharacterEvent event) {
+        for (GuiEventListener child : children()) {
+            if (child.charTyped(event)) {
                 return true;
             }
         }
         return false;
-    }
+    }*/
+    //? } else {
+        public boolean charTyped(char codePoint, int modifiers) {
+            for (GuiEventListener child : children()) {
+                if (child.charTyped(codePoint, modifiers)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    //? }
 
     //? if >=1.20.2 {
     @Override
@@ -375,7 +484,7 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
         double adjX = mouseX - this.getX();
         double adjY = mouseY - this.getYOffset();
 
-        for (Element child : children()) {
+        for (GuiEventListener child : children()) {
             if (child.mouseScrolled(adjX, adjY, horizontalAmount, verticalAmount)) {
                 return true;
             }
@@ -383,7 +492,7 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
 
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
-    //? } else {
+    //?} else {
     /*@Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (!isVisible() || !isMouseInside(mouseX, mouseY)) return false;
@@ -391,7 +500,7 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
         double adjX = mouseX - this.getX();
         double adjY = mouseY - this.getYOffset();
 
-        for (Element child : children()) {
+        for (GuiEventListener child : children()) {
             if (child.mouseScrolled(adjX, adjY, amount)) {
                 return true;
             }
@@ -399,5 +508,5 @@ public class AnimatedWindow extends AbstractParentElement implements Drawable, E
 
         return super.mouseScrolled(mouseX, mouseY, amount);
     }
-    *///? }
+    *///?}
 }

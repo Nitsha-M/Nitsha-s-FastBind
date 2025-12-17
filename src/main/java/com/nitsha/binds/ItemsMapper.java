@@ -145,7 +145,11 @@ public class ItemsMapper {
             Collection<ItemStack> items = tab.getDisplayItems();
             if (items.isEmpty()) {
                 try {
+                    //? if >=1.19.4 {
+                    tab.buildContents(displayParams);
+                    //? } else {
                     tab.buildContents(FeatureFlags.VANILLA_SET, true);
+                    //? }
                     items = tab.getDisplayItems();
                 } catch (Exception e) {
                     continue;

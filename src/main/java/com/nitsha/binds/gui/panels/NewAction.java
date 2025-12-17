@@ -214,7 +214,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
             };
             if (element instanceof ScrollableWindow) {
                 ScrollableWindow sw = (ScrollableWindow) element;
-                if (isOpen) GUIUtils.customScissor(ctx, parent.getX() + xO, parent.getY() + yO + 15, sw.getWidth(), (isOpen) ? sw.getHeight() : 0, render);
+                if (isOpen) GUIUtils.customScissor(ctx, parent.getX() + xO, parent.getY() + yO + 15, xO + sw.getWidth(), (isOpen) ? sw.getHeight() : 0, render);
             } else {
                 render.run();
             }
@@ -230,7 +230,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
                 ScrollableWindow sw = (ScrollableWindow) element;
                 if (isOpen)
                     GUIUtils.matricesUtil(ctx, xO, yO, 4, () -> {
-                        sw.render(ctx, mouseX, mouseY , delta);
+                        sw.render(ctx, mouseX - xO, mouseY - yO, delta);
                     });
             } else {
                 render.run();

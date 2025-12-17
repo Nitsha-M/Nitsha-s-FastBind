@@ -34,26 +34,26 @@ public class BindExecutor {
         activeTasks.add(task);
     }
 
-    // ? if fabric {
+    //? if fabric {
     public static void onTick(Minecraft client) {
         activeTasks.removeIf(BindTask::tick);
     }
-    // ?} elif neoforge {
-    /*
-     public static void
-     onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event)
-     {
-     activeTasks.removeIf(BindTask::tick);
-     }
-     */
-    // ?} else {
-    /*
-     public static void
-     onClientTick(net.minecraftforge.event.TickEvent.ClientTickEvent event) {
-     if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
-     activeTasks.removeIf(BindTask::tick);
-     }
-     */// ?}
+    //? } elif neoforge {
+    //? if >1.20.4 {
+    /*public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        activeTasks.removeIf(BindTask::tick);
+    }*/
+    //? } else {
+    /*public static void onClientTick(net.neoforged.neoforge.event.TickEvent.ClientTickEvent event) {
+        activeTasks.removeIf(BindTask::tick);
+    }*/
+    //? }
+    //? } else {
+    /*public static void onClientTick(net.minecraftforge.event.TickEvent.ClientTickEvent event) {
+        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
+        activeTasks.removeIf(BindTask::tick);
+    }*/
+    //? }
 
     private static class BindTask {
         private final Queue<Runnable> actions = new LinkedList<>();

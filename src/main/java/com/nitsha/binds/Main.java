@@ -2,6 +2,7 @@ package com.nitsha.binds;
 
 import com.nitsha.binds.configs.*;
 import com.nitsha.binds.utils.BindExecutor;
+import com.nitsha.binds.utils.KeepMovementHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 
@@ -9,7 +10,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 //? } elif neoforge {
 /*import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.client.event.ClientTickEvent;*/
+//? if >1.20.4 {
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+//? } else {
+import net.neoforged.neoforge.event.TickEvent;
+//? }*/
 //? } elif forge {
 /*import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -42,14 +47,13 @@ public class Main {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             KeyBinds.tick(client);
             BindExecutor.onTick(client);
+            KeepMovementHandler.tick();
         });
-        //?} elif neoforge {
-        /*NeoForge.EVENT_BUS.addListener(Main::onClientTick);
-        NeoForge.EVENT_BUS.addListener(BindExecutor::onClientTick);
-        *///?} elif forge {
-        /*MinecraftForge.EVENT_BUS.register(new Main());
-        MinecraftForge.EVENT_BUS.addListener(BindExecutor::onClientTick);
-        *///?}
+        //? } elif neoforge {
+        /*NeoForge.EVENT_BUS.addListener(Main::onClientTick);*/
+        //? } elif forge {
+        /*MinecraftForge.EVENT_BUS.addListener(Main::onClientTick);*/
+        //? }
 
         BindsStorage.loadConfigs();
         BindsStorage.load();
@@ -61,14 +65,26 @@ public class Main {
         KeyBinds.tick(client);
     }
     //?} elif neoforge {
+    //? if >1.20.4 {
     /*private static void onClientTick(ClientTickEvent.Post event) {
         KeyBinds.tick(Minecraft.getInstance());
-    }
-    *///?} elif forge {
+        BindExecutor.onClientTick(event);
+        KeepMovementHandler.tick();
+    }*/
+    //? } else {
+    /*private static void onClientTick(TickEvent.ClientTickEvent event) {
+        KeyBinds.tick(Minecraft.getInstance());
+        KeepMovementHandler.tick();
+        BindExecutor.onClientTick(event);
+    }*/
+    //? }
+    //?} elif forge {
     /*@SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         KeyBinds.tick(Minecraft.getInstance());
+        KeepMovementHandler.tick();
+        BindExecutor.onClientTick(event);
     }
     *///?}
 

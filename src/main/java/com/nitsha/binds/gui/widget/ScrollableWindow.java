@@ -98,6 +98,10 @@ public class ScrollableWindow extends AbstractContainerEventHandler
         return scrollOffset;
     }
 
+    public void setScrollOffset(int offset) {
+        this.scrollOffset = offset;
+    }
+
     // Add new children
     public void addDrawElement(DrawElement.Drawer drawer) {
         drawElements.add(new DrawElement(drawer));

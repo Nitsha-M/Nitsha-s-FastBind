@@ -1,6 +1,6 @@
 package com.nitsha.binds.gui.widget;
 
-import com.nitsha.binds.gui.panels.NewAction;
+import com.nitsha.binds.Main;import com.nitsha.binds.gui.panels.NewAction;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.nitsha.binds.gui.utils.TextUtils;
@@ -13,7 +13,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Component;import net.minecraft.resources.ResourceLocation;
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.InputWithModifiers;
@@ -32,6 +32,7 @@ public class NewActionItem extends AbstractWidget {
     private int type;
     private String value;
     private int color = 0xFFFFFFFF;
+    private static final ResourceLocation ADD_NEW = Main.id("textures/gui/test/add_new_icon.png");
 
     public NewActionItem(NewAction parent, String name, int x, int y, int width, int height, int type, String value, int color) {
         super(x, y, width, height, TextUtils.empty());
@@ -61,6 +62,7 @@ public class NewActionItem extends AbstractWidget {
         GUIUtils.drawFill(ctx, getXPos() + 3, getYPos() + 5, getXPos() + 5, getYPos() + 12, this.color);
         GUIUtils.drawFill(ctx, getXPos() + 2, getYPos(), getXPos() + getWidth() - 2, getYPos() + 1, 0xFF555555);
         GUIUtils.addText(c, TextUtils.literal(GUIUtils.truncateString(this.name, 25)), 0, getXPos() + 7, getYPos() + 4, "left", "top", 0xFFFFFFFF, false);
+        GUIUtils.adaptiveDrawTexture(ctx, ADD_NEW, this.getXPos() + this.getWidth() - 10, this.getYPos() + 6, 0, 0, 5, 5, 5, 5);
         if (this.isHovered && parent.isOpen())
             GUIUtils.drawFill(c, getXPos(), getYPos(), getXPos() + getWidth(), getYPos() + getHeight(), 0x0DFFFFFF);
     }

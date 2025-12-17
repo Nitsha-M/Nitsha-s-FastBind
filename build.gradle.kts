@@ -100,7 +100,7 @@ val modMenuVersion = VersionDefinition(
 val neoForgeVersion = VersionDefinition(
     // 1.21.x
     "1.21.11" to "21.11.3-beta",
-    "1.21.10" to "21.10.64",
+    "1.21.10" to "21.10.63",
     "1.21.9" to "21.9.16-beta",
     "1.21.8" to "21.8.47",
     "1.21.7" to "21.7.25-beta",
@@ -117,9 +117,64 @@ val neoForgeVersion = VersionDefinition(
     "1.20.4" to "20.4.250",
 )
 
+val forgeDependenciesVersion = mapOf(
+    // 1.21.x
+    "1.21.10" to "59.0.0",
+    "1.21.8" to "56.0.0",
+    "1.21.5" to "55.0.0",
+    "1.21.4" to "54.0.0",
+    "1.21.3" to "53.0.0",
+    "1.21.1" to "51.0.0",
+
+    // 1.20.x
+    "1.20.6" to "50.0.0",
+    "1.20.4" to "49.0.1",
+    "1.20.2" to "48.0.0",
+    "1.20.1" to "46.0.14",
+
+    // 1.19.x
+    "1.19.4" to "45.4.0",
+    "1.19.3" to "44.1.0",
+    "1.19.2" to "42.0.9",
+    "1.19" to "41.1.0",
+
+    // 1.18.x
+    "1.18.2" to "38.0.17",
+
+    // 1.17.x
+    "1.17.1" to "37.1.1",
+
+    // 1.16.x
+    "1.16.5" to "36.2.34",
+)
+
+val neoforgeDependenciesVersion = mapOf(
+    "1.21.10" to "21.9.0-beta",
+    "1.21.8" to "21.6.0-beta",
+    "1.21.5" to "21.5.0-beta",
+    "1.21.4" to "21.3.0-beta",
+    "1.21.3" to "21.2.0-beta",
+    "1.21.1" to "21.0.0-beta",
+    "1.20.6" to "20.5.0-beta",
+    "1.20.4" to "20.3.1-beta",
+)
+
 // Forge
 val forgeVersion = VersionDefinition(
     // 1.20.x
+    "1.21.10" to "60.1.0",
+    "1.21.9" to "59.0.5",
+    "1.21.8" to "58.1.0",
+    "1.21.7" to "57.0.3",
+    "1.21.6" to "56.0.9",
+    "1.21.5" to "55.1.0",
+    "1.21.4" to " 54.1.0",
+    "1.21.3" to "53.1.0",
+    "1.21.1" to "52.1.0",
+    "1.21"   to "51.0.33",
+    // 1.20.x
+    "1.20.6" to "50.2.0",
+    "1.20.4" to "49.2.0",
     "1.20.3" to "49.0.2",
     "1.20.2" to "48.1.0",
     "1.20.1" to "47.4.10",
@@ -276,6 +331,9 @@ config["neoforge_version"] = neoforge_ver
 val parchment_ver = parchmentVersion[minecraft_version] ?: ""
 config["parchment_version"] = parchment_ver
 
+val forge_dep_ver = forgeDependenciesVersion[minecraft_version] ?: ""
+val neoforge_dep_ver = neoforgeDependenciesVersion[minecraft_version] ?: ""
+
 val forgeVersionRange = when {
     stonecutter.eval(minecraft_version, ">=1.20.2") -> "[48,)"
     stonecutter.eval(minecraft_version, ">=1.20") -> "[46,)"
@@ -305,10 +363,8 @@ val minecraftVersionRange = run {
     val additional = additionalVersions[current] ?: emptyList()
 
     if (additional.isEmpty()) {
-        // Только текущая версия
         current
     } else {
-        // Находим минимальную и максимальную версии
         val allVersions = listOf(current) + additional
         val minVersion = allVersions.minWithOrNull { v1, v2 -> compareVersions(v1, v2) } ?: current
         val maxVersion = allVersions.maxWithOrNull { v1, v2 -> compareVersions(v1, v2) } ?: current
@@ -317,10 +373,41 @@ val minecraftVersionRange = run {
     }
 }
 
+val minecraftVersionRangeForge = run {
+    val current = minecraft_version
+    val additional = additionalVersions[current] ?: emptyList()
+
+    if (additional.isEmpty()) {
+        "[$current]"
+    } else {
+        val allVersions = listOf(current) + additional
+        val minVersion = allVersions.minWithOrNull { v1, v2 -> compareVersions(v1, v2) } ?: current
+        val maxVersion = current
+
+        val parts = maxVersion.split(".")
+        val nextPatch = when {
+            parts.size == 3 -> {
+                val patch = parts[2].toIntOrNull() ?: 0
+                "${parts[0]}.${parts[1]}.${patch + 1}"
+            }
+            parts.size == 2 -> {
+                "${parts[0]}.${parts[1]}.1"
+            }
+            else -> maxVersion
+        }
+
+        "[$minVersion,$nextPatch)"
+    }
+}
+
 config["mod_forgeRange"] = forgeVersionRange
 config["mod_versionRange"] = minecraftVersionRange
+config["mod_versionRangeForge"] = minecraftVersionRangeForge
+config["mod_icon"] = "icon.png"
+config["mod_issue_tracker"] = "https://github.com/Nitsha-M/Nitsha-s-FastBind/issues"
+config["mnd"] = if (loader == "neoforge") "" else "mandatory = true"
+config["mfd"] = if (loader == "neoforge") neoforge_dep_ver else forge_dep_ver
 
-// Определяем Java версию
 val java_version = when {
     // stonecutter.eval(minecraft_version, ">=1.21.9") -> 24
     stonecutter.eval(minecraft_version, ">=1.20.5") -> 21
@@ -345,38 +432,6 @@ repositories {
     maven("https://maven.fabricmc.net/")
     maven("https://maven.parchmentmc.org")
     maven("https://maven.neoforged.net/releases")
-}
-
-tasks {
-    named<ProcessResources>("generateModMetadata") {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-        dependsOn("stonecutterGenerate")
-    }
-
-    processResources {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-        val props = buildMap {
-            put("id", mod_id)
-            put("version", mod_version)
-            put("minecraft", minecraft_version)
-            put("fabricloader", fabric_loader)
-            put("fabricapi", fabric_version)
-            put("compatibility_level", "JAVA_${java_version}")
-            put("mod_name", mod_name)
-            put("mod_author", mod_author)
-            put("mod_description", mod_description)
-            put("mod_license", mod_license)
-            put("mod_versionRange", minecraftVersionRange)
-            put("mod_forgeRange", forgeVersionRange)
-        }
-        filteringCharset = "UTF-8"
-
-        filesMatching(listOf("fabric.mod.json", "*.mixins.json", "META-INF/neoforge.mods.toml", "META-INF/mods.toml")) {
-            expand(props)
-        }
-        inputs.properties(props)
-    }
 }
 
 if (stonecutter.current.isActive) {
@@ -410,7 +465,6 @@ modstitch {
         }
 
         replacementProperties.populate {
-            put("mod_issue_tracker", "https://github.com/Nitsha-M/Nitsha-s-FastBind/issues")
             put("pack_format", when {
                     stonecutter.eval(minecraft_version, ">=1.21.8") -> 64
                     stonecutter.eval(minecraft_version, ">=1.21.4") -> 46
@@ -476,11 +530,18 @@ modstitch {
 
 java {
     withSourcesJar()
-    targetCompatibility = JavaVersion.valueOf("VERSION_$java_version")
-    sourceCompatibility = JavaVersion.valueOf("VERSION_$java_version")
+    targetCompatibility = JavaVersion.toVersion(java_version)
+    sourceCompatibility = JavaVersion.toVersion(java_version)
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(java_version))
     }
+}
+
+sourceSets.main {
+    java.srcDir("../src/main/java")
+    resources.srcDir("../src/main/resources")
+
+    modstitch.templatesSourceDirectorySet.srcDir("../src/main/templates")
 }
 
 stonecutter {
@@ -498,6 +559,7 @@ stonecutter {
 
     for (entry in config.entries)
         swap(entry.key, entry.value)
+
 }
 
 dependencies {
@@ -514,10 +576,18 @@ dependencies {
 tasks {
     processResources {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        outputs.upToDateWhen { false } // work around modstitch mixin cache issue
+        outputs.upToDateWhen { false }
+    }
+
+    withType<JavaCompile> {
+        dependsOn("stonecutterGenerate")
+    }
+
+    withType<JavaCompile>().configureEach {
+        options.encoding = "UTF-8"
+        options.release.set(java_version)
     }
 }
-
 
 modstitch.onEnable {
     modstitch.moddevgradle {
@@ -529,6 +599,23 @@ modstitch.onEnable {
     val finalJarTasks = listOf(
         modstitch.finalJarTask
     )
+
+    if (stonecutter.eval(minecraft_version, "<=1.19.2") && is_forge) {
+        tasks.register("createDummyMixinMappings") {
+            doLast {
+                val mixinDir = file("build/mixin")
+                mixinDir.mkdirs()
+                val mappingsFile = file("build/mixin/${mod_id}.refmap.json.mappings.tsrg")
+                if (!mappingsFile.exists()) {
+                    mappingsFile.writeText("")
+                }
+            }
+        }
+
+        tasks.named("reobfJar") {
+            dependsOn("createDummyMixinMappings")
+        }
+    }
 
     tasks.register<Copy>("buildAndCollect") {
         group = "build"
@@ -543,7 +630,6 @@ modstitch.onEnable {
     }
 }
 
-tasks.withType<JavaCompile> { dependsOn("stonecutterGenerate") }
 
 val additional = additionalVersions[stonecutter.current.version] ?: emptyList()
 

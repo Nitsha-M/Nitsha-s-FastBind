@@ -87,7 +87,7 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
         this.height = this.targetHeight = height;
         this.screen = screen;
 
-        this.yOffset = y - 80;
+        this.yOffset = 80;
         this.delayMs = delay;
         this.alpha = 0.0f;
         this.lastUpdateTime = 0;
@@ -97,8 +97,7 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
 
     private void initUI(BindsEditor screen) {
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(BindsEditor.getPresetName(), 15)), 0, 5, 5, "top", "left", 0xFFFFFFFF, false);
-            if (this.isOpen()) GUIUtils.drawFill(ctx, 5, 15, getWidth() - 5, 16, 0xFF555555);
+            GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(BindsEditor.getPresetName(), 13)), 0, 5, 5, "top", "left", 0xFFFFFFFF, false);
         });
 
         this.addElement(GUIUtils.createTexturedBtn(113, 4, 9, 9, new ResourceLocation[]{SPRESET, SPRESET_HOVER}, button -> {
@@ -111,12 +110,12 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
             screen.setNewPreset(1);
         }));
 
-        this.presetsList = new ScrollableWindow(2, 17, 2, 17, getWidth() - 4, 130, false);
+        this.presetsList = new ScrollableWindow(2, 15, 2, 17, getWidth() - 4, 130, false);
         this.addElement(this.presetsList);
 
         generatePresetsList();
 
-        this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.addNew"), 4, 149, 0xFF4d9109, getWidth() - 8, "left", ADD_NEW, ()-> {
+        this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.addNew"), 4, 147, 0xFF4d9109, getWidth() - 8, "left", ADD_NEW, ()-> {
             BindsStorage.addPreset("Preset " + (items.size() + 1));
             generatePresetsList();
         }));
@@ -131,8 +130,8 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
         items.clear();
         int tY = 0;
         for (int i = 0; i < BindsStorage.presets.size(); i++) {
-            int h = 20;
-            PresetListItem item = new PresetListItem(this, BindsStorage.presets.get(i).name, 0, tY, this.getWidth() - 4, h, i);
+            int h = 22;
+            PresetListItem item = new PresetListItem(this, this.presetsList, BindsStorage.presets.get(i).name, 0, tY, this.getWidth() - 4, h, i);
             this.presetsList.addElement(item);
             this.presetsList.addScrollableArea(h);
             items.add(item);
@@ -179,7 +178,7 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
 
     public void openSelector(boolean status) {
         isOpen = status;
-        this.setHeight(isOpen ? 162 : 17);
+        this.setHeight(isOpen ? 160 : 17);
     }
 
     public void open() {
@@ -245,7 +244,7 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
         globalColor = (alphaByte << 24) | 0xFFFFFFFF;
 
         int xO = getX();
-        int yO = getY() + Math.round(yOffset);
+        int yO = getY() - Math.round(yOffset);
 
         GUIUtils.matricesUtil(ctx, xO, yO, 499, () -> {
             GUIUtils.drawResizableBox(ctx, BACKGROUND, 0, 0, getWidth(), getHeight(), 3, 7, globalColor);
@@ -260,11 +259,13 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
             };
             if (element instanceof ScrollableWindow) {
                 ScrollableWindow sw = (ScrollableWindow) element;
-                if (isOpen) GUIUtils.customScissor(ctx, xO, yO + 17, xO + sw.getWidth(), (isOpen) ? sw.getHeight() : 0, render);
+                if (isOpen) GUIUtils.customScissor(ctx, xO, yO + 15, xO + sw.getWidth(), (isOpen) ? sw.getHeight() : 0, render);
             } else {
                 GUIUtils.customScissor(ctx, xO, yO, xO + this.getWidth(), this.getHeight(), render);
             }
         });
+
+        if (this.isOpen()) GUIUtils.drawFill(ctx, xO + 5, yO + 15, xO + getWidth() - 5, yO + 16, 0xFF555555);
 
         tick();
     }

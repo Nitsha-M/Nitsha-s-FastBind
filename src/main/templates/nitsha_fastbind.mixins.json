@@ -3,9 +3,10 @@
   "minVersion": "0.8",
   "package": "com.nitsha.binds.mixin",
   "compatibilityLevel": "JAVA_${java_version}",
-  "mixins": [
-  ],
+  "mixins": [],
   "client": [
+    "KeyMappingAccessor",
+    "KeyMappingIsDownMixin"
   ],
   "injectors": {
     "defaultRequire": 1

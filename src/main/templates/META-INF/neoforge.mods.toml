@@ -2,7 +2,6 @@ modLoader = "javafml"
 loaderVersion = "[2,)"
 issueTrackerURL = "${mod_issue_tracker}"
 license = "${mod_license}"
-logoFile = "assets/nitsha_fastbind/icon.png"
 
 [[mods]]
 modId = "${mod_id}"
@@ -10,13 +9,18 @@ version = "${mod_version}"
 displayName = "${mod_name}"
 description = '''${mod_description}'''
 authors = "${mod_author}"
+logoFile = "${mod_icon}"
 
 [[dependencies.${mod_id}]]
-modId = "neoforge"
-type = "required"
+modId = "${loader}"
+${mnd}
+versionRange="[${mfd},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${mod_id}]]
 modId = "minecraft"
-type = "required"
+${mnd}
+versionRange="${mod_versionRangeForge}"
+ordering="NONE"
+side="BOTH"

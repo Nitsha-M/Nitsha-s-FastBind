@@ -33,6 +33,9 @@
   "nitsha.binds.advances.actions.showMessage" : "チャットにメッセージを表示",
   "nitsha.binds.advances.actions.showTitle" : "画面にタイトルを表示",
   "nitsha.binds.advances.actions.commandLine" : "コマンド（/を含まない）",
+  "nitsha.binds.advances.actions.chatMessage" : "チャットにメッセージを表示",
+  "nitsha.binds.advances.actions.titleLine" : "タイトルのテキスト",
+  "nitsha.binds.advances.actions.subtitleLine" : "サブタイトルのテキスト",
   "nitsha.binds.advances.actions.delayLine" : "ミリ秒単位",
   "nitsha.binds.advances.actions.addNew" : "追加",
 

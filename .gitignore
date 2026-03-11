@@ -36,6 +36,7 @@ bin/
 *.tar.gz
 *.rar
 .env
+.ideaold
 
 
 !gradle-wrapper.jar

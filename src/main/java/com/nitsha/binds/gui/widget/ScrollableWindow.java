@@ -32,7 +32,7 @@ import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
 public class ScrollableWindow extends AbstractContainerEventHandler
-        implements Renderable, GuiEventListener /* ? if >=1.17 { */ , NarratableEntry /* ?} */ {
+        implements Renderable, GuiEventListener /*? if >=1.17 { */ , NarratableEntry /*? } */ {
     private final List<GuiEventListener> children = Lists.<GuiEventListener>newArrayList();
     private final List<Renderable> renderables = Lists.<Renderable>newArrayList();
     private final List<DrawElement> drawElements = Lists.<DrawElement>newArrayList();
@@ -450,7 +450,6 @@ public class ScrollableWindow extends AbstractContainerEventHandler
     //? if >=1.17 {
     @Override
     public void updateNarration(NarrationElementOutput builder) {
-
     }
     //?}
 }

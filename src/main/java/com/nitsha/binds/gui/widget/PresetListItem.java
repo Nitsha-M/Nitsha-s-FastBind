@@ -170,7 +170,6 @@ public class PresetListItem extends AbstractWidget {
         return System.currentTimeMillis() - deleteConfirmationTime < 5000;
     }
 
-
     public boolean isEditing() {
         return isEditing;
     }

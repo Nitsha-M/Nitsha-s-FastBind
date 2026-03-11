@@ -1,4 +1,4 @@
-![Nitsha's FastBind](https://cdn.modrinth.com/data/cached_images/bcd66014298b5485e0ed3bb0399cb25216aa48be_0.webp)
+![Nitsha's FastBind](https://cdn.modrinth.com/data/cached_images/7d8ac2e638b8fc78f3524b16c872a28dfe2e554b.png)
 
 <p align="center">
 Adds a menu where you can activate pre-programmed actions. Configure command execution or key press emulation the way you want
@@ -19,22 +19,22 @@ Adds a menu where you can activate pre-programmed actions. Configure command exe
 </p>
 <hr class="solid">
 
-## Update 3.1 — Lights! Camera! Action!
-### New
-  * **Icon selector update!** Now you can choose ANY item or block from the game, and even more — it also supports items from your installed mods!
-* Now you can create as many pages and presets as you want! By default, there are 9 presets with 5 pages each.
-* **New actions!** You can send a local chat message or show a title on screen. Actions support formatting, so you can make them look as beautiful as they should be! :3
-* Full support for **Forge** and **NeoForge**.
-* Support for Minecraft `1.21.9`/`1.21.10`
-* Some redesign of the configuration menu
+## Update 4.0 — Lights! Camera! Action!
+## New
+* Added 4 new actions:
+* * **Key Down** – allows holding any key. Unlike the existing **Press Key** action, it keeps the key held until a **Key Up** action is executed or the key is pressed manually.
+* * **Key Up** – releases a held key.
+* * **Simulate Keybind Event** – allows triggering any event that can be assigned to a key in the game settings. Works even if no key is assigned to that event.
+* * **Repeat Following** – allows repeating the following actions multiple times. Has two parameters: how many actions to repeat and how many times to repeat them. Limited to 10 actions and 10 repetitions.
+* Added a confirmation prompt before deleting a page or bind.
+* Updated the key press bind activation system. Now you can choose between `Press` and `Hold` modes, and set an activation threshold for `Hold` mode. This also applies to the **Simulate Keybind Event** action.
 
-### Fixes & tech updates
-* New UI components, such as a custom Text Field and a new action selection menu. These features are still new, so there may be bugs — feel free to report them
-* Added Japanese translation. Thanks to `elinka47(PExPE3)`!
-* Switched from Yarn mappings to MojMap (that’s why this update took a bit longer than I expected)
-* Deleted the `/nitsha::welcome` command
-* I fully rewrote the way the mod stores your binds. All your binds will migrate from v3.0 to v3.1, but if you're updating from v2.0 to v3.1, a new config will be created.
-* New logo :3
+## Fixes & tech updates
+* Updated button design.
+* Updated the **Press Key** action design.
+* Fixed visual issues in the Ukrainian translation.
+* Fixed animation issues in editor windows.
+* Other bug fixes.
 
 If you have any ideas for a new type of action, I’ll be happy to hear them! You can share your ideas [here](https://discord.com/channels/773736638579998730/1349234377648771197)
 

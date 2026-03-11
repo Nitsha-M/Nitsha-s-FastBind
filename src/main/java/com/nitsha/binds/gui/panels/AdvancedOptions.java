@@ -1,6 +1,7 @@
 package com.nitsha.binds.gui.panels;
 
 import com.nitsha.binds.Main;
+import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.configs.KeyBinds;
 import com.nitsha.binds.gui.screen.BindsEditor;
@@ -20,15 +21,17 @@ import java.util.List;
 import java.util.Map;
 
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;*/
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;*/
 //? }
 
 public class AdvancedOptions extends AnimatedWindow {
     private static final ResourceLocation RANDOM = Main.idSprite("random");
     private static final ResourceLocation RANDOM_HOVER = Main.idSprite("random_hover");
-    private static final ResourceLocation RESET = Main.idSprite("keybind_reset_normal");
-    private static final ResourceLocation RESET_HOVER = Main.idSprite("keybind_reset_hover");
     private static final ResourceLocation TAB2_BG = Main.id("textures/gui/test/scroller.png");
+
+    private static final ResourceLocation NORMAL = Main.id("textures/gui/btns/bedrock_normal_bottom_right.png");
+    private static final ResourceLocation PRESSED_NORMAL = Main.id("textures/gui/btns/bedrock_normal_top_right.png");
     private final List<TabButton> tabsBtn = new ArrayList<>();
 
     private int currentTab = 0;
@@ -38,7 +41,8 @@ public class AdvancedOptions extends AnimatedWindow {
 
     // second tab
     private ScrollableWindow firstTab;
-    public KeybindSelector keybind;
+    public MainKeybindSelector keybind;
+    private BedrockIconButton resetKeybind;
 
     // third tab
     private ScrollableWindow thirdTab;
@@ -47,8 +51,11 @@ public class AdvancedOptions extends AnimatedWindow {
 
     private final NewAction addNewAction;
 
+    private BedrockIconOptionButton triggerModeBtn;
+    private TextField holdMsField;
+
     public AdvancedOptions(BindsEditor screen, int x, int y, int width, int height, ResourceLocation t1,
-            ResourceLocation t2, int delay) {
+                           ResourceLocation t2, int delay) {
         super(x, y + 16, width, height - 16, t1, t2, delay);
         tabsBtn.clear();
         this.screen = screen;
@@ -66,15 +73,43 @@ public class AdvancedOptions extends AnimatedWindow {
 
         this.firstTab = new ScrollableWindow(5, 25, this.getX(), this.getY(), getWidth() - 10, getHeight() - 54, false);
         this.secondTab = new IconSelector(screen, 4, 20, 162, 126);
-        this.keybind = new KeybindSelector(this.getWidth() - 84, this.getHeight() - 26, 80, 20);
         this.thirdTab = new ScrollableWindow(2, 4, this.getX(), this.getY(), getWidth() - 4, getHeight() - 11, false);
+
+        this.keybind = new MainKeybindSelector(4, this.getHeight() - 26, 80, 20);
+        this.resetKeybind = new BedrockIconButton(84, this.getHeight() - 26, 13, 20, "reset_keybind", true, ()-> {
+            this.keybind.setKeyCode(0);
+            this.keybind.setPressed(false);
+        }, 0xFFFFFFFF, 0xFFEF4747, 0xFF262626, 0xFFFFFFFF);
+        this.resetKeybind.setNormalTextures(NORMAL, PRESSED_NORMAL);
+
+        this.triggerModeBtn = new BedrockIconOptionButton(getWidth() - 22, getHeight() - 26, 18, 20) {
+            //? <1.21.9 {
+            @Override
+            public void onPress() {
+                super.onPress();
+                rebuildTriggerWidgets();
+            }
+            //? } else {
+        /*@Override
+        public void onPress(InputWithModifiers i) {
+            super.onPress(i);
+            rebuildTriggerWidgets();
+        }*/
+            //? }
+        };
+
+        this.holdMsField = new TextField(
+                net.minecraft.client.Minecraft.getInstance().font,
+                getWidth() - 60, getHeight() - 26, 36, 20,
+                6, "500", TextUtils.translatable("nitsha.binds.advances.actions.delayLine").getString(), true
+        );
+        this.holdMsField.setAnimatedPlaceholder(false);
 
         this.addNewAction = new NewAction(this, 4, actionY + 4, getWidth() - 8, 17);
 
         openTab(0);
 
-        this.open(() -> {
-        });
+        this.open(() -> {});
     }
 
     private void openTab(int i) {
@@ -85,15 +120,9 @@ public class AdvancedOptions extends AnimatedWindow {
         this.clearChildren();
 
         switch (currentTab) {
-            case 0:
-                fillFirstTab();
-                break;
-            case 1:
-                fillSecondTab();
-                break;
-            case 2:
-                fillThirdTab();
-                break;
+            case 0: fillFirstTab();  break;
+            case 1: fillSecondTab(); break;
+            case 2: fillThirdTab();  break;
         }
     }
 
@@ -106,24 +135,34 @@ public class AdvancedOptions extends AnimatedWindow {
     private void fillFirstTab() {
         firstTab.clearChildren();
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keybind"), 0, 5,
-                    getHeight() - 20, "top", "left", 0xFF212121, false);
+            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.triggerMode"), 0, 5,
+                    getHeight() - 44, "top", "left", 0xFF212121, false);
             GUIUtils.drawResizableBox(ctx, TAB2_BG, 4, 24, this.getWidth() - 8, this.getHeight() - 52, 1, 3);
 
             if (BindsEditor.getCBind().actions.isEmpty()) {
-                GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.noActions"), this.getWidth() - 8, 4,
-                        (this.getHeight() - 52) / 2 + 23, "center", "center", 0xFFAEAEAE, false);
+                GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.noActions"),
+                        this.getWidth() - 8, 4, (this.getHeight() - 52) / 2 + 23, "center", "center", 0xFFAEAEAE, false);
             }
         });
-        this.addElement(GUIUtils.createTexturedBtn(this.getWidth() - 106, this.getHeight() - 26, 20, 20,
-                new ResourceLocation[] { RESET, RESET_HOVER }, button -> {
-                    this.keybind.setKeyCode(0);
-                    this.keybind.setPressed(false);
-                }));
-        this.addElement(keybind);
-        this.addElement(firstTab);
 
+        rebuildTriggerWidgets();
+        this.addElement(firstTab);
         generateActionList(BindsEditor.getCBind().actions);
+        this.addElement(holdMsField);
+        this.addElement(resetKeybind);
+        this.addElement(keybind);
+        this.addElement(triggerModeBtn);
+    }
+
+    private void rebuildTriggerWidgets() {
+        boolean isHold = triggerModeBtn.getSelectedIndex() == 1;
+        holdMsField.visible = isHold;
+    }
+
+    public void loadTriggerMode(String mode, int holdMs) {
+        if (triggerModeBtn != null) triggerModeBtn.setSelected(mode != null ? mode : "press");
+        if (holdMsField != null) holdMsField.setText(String.valueOf(holdMs > 0 ? holdMs : 500));
+        rebuildTriggerWidgets();
     }
 
     private void fillSecondTab() {
@@ -132,7 +171,7 @@ public class AdvancedOptions extends AnimatedWindow {
                     0xFF212121, false);
         });
         this.addElement(GUIUtils.createTexturedBtn(getWidth() - 53, 6, 49, 9,
-                new ResourceLocation[] { RANDOM, RANDOM_HOVER }, button -> {
+                new ResourceLocation[]{ RANDOM, RANDOM_HOVER }, button -> {
                     this.secondTab.pickRandom();
                 }));
         this.addElement(this.secondTab);
@@ -140,57 +179,68 @@ public class AdvancedOptions extends AnimatedWindow {
 
     private void fillThirdTab() {
         thirdTab.clearChildren();
-        final boolean[] options = { BindsStorage.getBooleanConfig("holdToOpen", true),
+        final boolean[] options = {
+                BindsStorage.getBooleanConfig("holdToOpen", true),
                 BindsStorage.getBooleanConfig("openLastPage", true),
                 BindsStorage.getBooleanConfig("openLastPreset", true),
                 BindsStorage.getBooleanConfig("keepMovement", false),
                 BindsStorage.getBooleanConfig("closeOnAction", false),
-                BindsStorage.getBooleanConfig("bindMsg", true) };
+                BindsStorage.getBooleanConfig("bindMsg", true)
+        };
 
         this.thirdTab.addElement(new ToggleButton(
                 TextUtils.translatable("nitsha.binds.advances.options.hold",
                         GUIUtils.truncateString(TextUtils
                                 .translatable(KeyBinds.BINDS.getTranslatedKeyMessage().getString()).getString(), 6)),
                 0, 0, getWidth() - 4, 20, false, options[0], () -> {
-                BindsStorage.setConfig("holdToOpen", !options[0]);
-                    options[0] = BindsStorage.getBooleanConfig("holdToOpen", true);
-                }));
+            BindsStorage.setConfig("holdToOpen", !options[0]);
+            options[0] = BindsStorage.getBooleanConfig("holdToOpen", true);
+        }));
         this.thirdTab.addElement(new ToggleButton(
                 TextUtils.translatable("nitsha.binds.advances.options.openLastPage"),
                 0, 20, getWidth() - 4, 20, false, options[1], () -> {
-                BindsStorage.setConfig("openLastPage", !options[1]);
-                    options[1] = BindsStorage.getBooleanConfig("openLastPage", true);
-                }));
+            BindsStorage.setConfig("openLastPage", !options[1]);
+            options[1] = BindsStorage.getBooleanConfig("openLastPage", true);
+        }));
         this.thirdTab.addElement(new ToggleButton(
                 TextUtils.translatable("nitsha.binds.advances.options.openLastPreset"),
                 0, 40, getWidth() - 4, 20, false, options[2], () -> {
-                BindsStorage.setConfig("openLastPreset", !options[2]);
-                    options[2] = BindsStorage.getBooleanConfig("openLastPreset", true);
-                }));
+            BindsStorage.setConfig("openLastPreset", !options[2]);
+            options[2] = BindsStorage.getBooleanConfig("openLastPreset", true);
+        }));
         this.thirdTab.addElement(new ToggleButton(
                 TextUtils.translatable("nitsha.binds.advances.options.keepMovement"),
                 0, 60, getWidth() - 4, 20, false, options[3], () -> {
-                BindsStorage.setConfig("keepMovement", !options[3]);
-                    options[3] = BindsStorage.getBooleanConfig("keepMovement", false);
-                }));
+            BindsStorage.setConfig("keepMovement", !options[3]);
+            options[3] = BindsStorage.getBooleanConfig("keepMovement", false);
+        }));
         this.thirdTab.addElement(new ToggleButton(
                 TextUtils.translatable("nitsha.binds.advances.options.closeOnAction"),
                 0, 80, getWidth() - 4, 20, false, options[4], () -> {
-                BindsStorage.setConfig("closeOnAction", !options[4]);
-                    options[4] = BindsStorage.getBooleanConfig("closeOnAction", false);
-                }));
+            BindsStorage.setConfig("closeOnAction", !options[4]);
+            options[4] = BindsStorage.getBooleanConfig("closeOnAction", false);
+        }));
         this.thirdTab.addElement(new ToggleButton(
                 TextUtils.translatable("nitsha.binds.advances.options.bindMsg"),
                 0, 100, getWidth() - 4, 20, false, options[5], () -> {
-                BindsStorage.setConfig("bindMsg", !options[5]);
-                    options[5] = BindsStorage.getBooleanConfig("bindMsg", true);
-                }));
+            BindsStorage.setConfig("bindMsg", !options[5]);
+            options[5] = BindsStorage.getBooleanConfig("bindMsg", true);
+        }));
         this.thirdTab.setScrollableArea(120);
         addElement(this.thirdTab);
     }
 
     public IconSelector getSecondTab() {
         return this.secondTab;
+    }
+
+    public String getTriggerMode() {
+        return triggerModeBtn != null ? triggerModeBtn.getSelected() : "press";
+    }
+
+    public int getHoldMs() {
+        if (holdMsField == null) return 500;
+        try { return Integer.parseInt(holdMsField.getText()); } catch (NumberFormatException e) { return 500; }
     }
 
     private int actionIndex = 0;
@@ -200,13 +250,14 @@ public class AdvancedOptions extends AnimatedWindow {
         actionIndex = 0;
         actionY = 0;
         this.firstTab.clearChildren();
-        for (Map<String, Object> action : actions) {
-            String typeStr = (String) action.get("type");
-            Object value = action.get("value");
-            int type = getActionType(typeStr);
-            int h = (type == 4) ? 36 : (type == 5) ? 57 : 26;
 
-            ActionItem item = new ActionItem(this, type, 4, actionY, getWidth() - 18, h, value, actionIndex);
+        for (Map<String, Object> action : actions) {
+            String typeId = (String) action.get("type");
+            Object value = action.get("value");
+
+            int h = ActionRegistry.heightById(typeId);
+
+            ActionItem item = new ActionItem(this, typeId, 4, actionY, getWidth() - 18, h, value, actionIndex);
 
             this.firstTab.addElement(item);
             this.firstTab.addScrollableArea(h);
@@ -216,46 +267,14 @@ public class AdvancedOptions extends AnimatedWindow {
         this.firstTab.setScrollableArea(actionY);
     }
 
-    private int getActionType(String typeStr) {
-        switch (typeStr) {
-            case "command":
-                return 1;
-            case "delay":
-                return 2;
-            case "keybind":
-                return 3;
-            case "chatMessage":
-                return 4;
-            case "titleMessage":
-                return 5;
-            default:
-                return 1;
-        }
-    }
-
-    private String getTypeString(int type) {
-        switch (type) {
-            case 1:
-                return "command";
-            case 2:
-                return "delay";
-            case 3:
-                return "keybind";
-            case 4:
-                return "chatMessage";
-            case 5:
-                return "titleMessage";
-            default:
-                return "command";
-        }
-    }
-
-    public void addAction(int type, String value) {
+    public void addAction(String typeId, String value) {
         if (!BindsEditor.getCBind().actions.isEmpty())
             screen.saveBind();
+
         Map<String, Object> action = new HashMap<>();
-        action.put("type", getTypeString(type));
-        action.put("value", type == 2 ? Integer.parseInt(value) : value);
+        action.put("type", typeId);
+        action.put("value", typeId.equals("delay") ? Integer.parseInt(value) : value);
+
         BindsStorage.addBindAction(BindsEditor.getCurrentPreset(), BindsEditor.getActiveBind(), actionIndex, action);
         generateActionList(BindsEditor.getCBind().actions);
         screen.saveBind();
@@ -322,49 +341,38 @@ public class AdvancedOptions extends AnimatedWindow {
     }
 
     public boolean isMouseInside(double mouseX, double mouseY) {
-        return mouseX >= this.getX() && mouseX < this.getX() + this.getWidth() && mouseY >= this.getY() - 16
-                && mouseY < this.getY() + this.getHeight();
+        return mouseX >= this.getX() && mouseX < this.getX() + this.getWidth()
+                && mouseY >= this.getY() - 16 && mouseY < this.getY() + this.getHeight();
     }
 
     @Override
-    //? if >=1.21.9 {
+            //? if >=1.21.9 {
     /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        if (!isVisible())
-            return false;
+        if (!isVisible()) return false;
         double mouseX = event.x();
         double mouseY = event.y();
-        int button = event.buttonInfo().button();
         double adjX = mouseX - this.getX();
         double adjY = mouseY - this.getYOffset();
 
-        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
-            adjX,
-            adjY,
-            event.buttonInfo()
-        );
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(adjX, adjY, event.buttonInfo());
 
         boolean clicked = false;
-
         boolean wasOpen = addNewAction.isOpen();
         boolean insidePanel = addNewAction.isMouseInside(mouseX, mouseY);
 
         if (currentTab == 0) {
             if (insidePanel) {
-                if (addNewAction.mouseClicked(adjustedEvent, bl))
-                    clicked = true;
-                if (wasOpen)
-                    return true;
+                if (addNewAction.mouseClicked(adjustedEvent, bl)) clicked = true;
+                if (wasOpen) return true;
             } else {
                 int scrollOffset = this.firstTab.getScrollOffset();
                 int aX = this.firstTab.getX();
                 int aY = this.firstTab.getY() - scrollOffset;
-
                 for (GuiEventListener child : this.firstTab.children()) {
                     if (child instanceof ActionItem) {
                         ActionItem actionItem = (ActionItem) child;
                         double itemMouseX = adjX - aX;
                         double itemMouseY = adjY - aY;
-
                         if (actionItem.isMouseOverColorButtons(itemMouseX, itemMouseY)) {
                             TextField.setBlockFocus();
                         }
@@ -375,75 +383,61 @@ public class AdvancedOptions extends AnimatedWindow {
         }
 
         for (TabButton btn : tabsBtn) {
-            if (btn.mouseClicked(adjustedEvent, bl)) {
-                clicked = true;
-            }
+            if (btn.mouseClicked(adjustedEvent, bl)) clicked = true;
         }
 
         if (!wasOpen || !insidePanel) {
-            if (super.mouseClicked(event, bl)) {
-                clicked = true;
-            }
+            if (super.mouseClicked(event, bl)) clicked = true;
         }
 
         return clicked;
     }*/
-    //? } else {
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (!isVisible())
-                return false;
-            double adjX = mouseX - this.getX();
-            double adjY = mouseY - this.getYOffset();
+            //? } else {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (!isVisible()) return false;
+        double adjX = mouseX - this.getX();
+        double adjY = mouseY - this.getYOffset();
 
-            boolean clicked = false;
+        boolean clicked = false;
+        boolean wasOpen = addNewAction.isOpen();
+        boolean insidePanel = addNewAction.isMouseInside(mouseX, mouseY);
 
-            boolean wasOpen = addNewAction.isOpen();
-            boolean insidePanel = addNewAction.isMouseInside(mouseX, mouseY);
-
-            if (currentTab == 0) {
-                if (insidePanel) {
-                    if (addNewAction.mouseClicked(adjX, adjY, button))
-                        clicked = true;
-                    if (wasOpen)
-                        return true;
-                } else {
-                    int scrollOffset = this.firstTab.getScrollOffset();
-                    int aX = this.firstTab.getX();
-                    int aY = this.firstTab.getY() - scrollOffset;
-
-                    for (GuiEventListener child : this.firstTab.children()) {
-                        if (child instanceof ActionItem) {
-                            ActionItem actionItem = (ActionItem) child;
-                            double itemMouseX = adjX - aX;
-                            double itemMouseY = adjY - aY;
-
-                            if (actionItem.isMouseOverColorButtons(itemMouseX, itemMouseY)) {
-                                TextField.setBlockFocus();
-                            }
+        if (currentTab == 0) {
+            if (insidePanel) {
+                if (addNewAction.mouseClicked(adjX, adjY, button)) clicked = true;
+                if (wasOpen) return true;
+            } else {
+                int scrollOffset = this.firstTab.getScrollOffset();
+                int aX = this.firstTab.getX();
+                int aY = this.firstTab.getY() - scrollOffset;
+                for (GuiEventListener child : this.firstTab.children()) {
+                    if (child instanceof ActionItem) {
+                        ActionItem actionItem = (ActionItem) child;
+                        double itemMouseX = adjX - aX;
+                        double itemMouseY = adjY - aY;
+                        if (actionItem.isMouseOverColorButtons(itemMouseX, itemMouseY)) {
+                            TextField.setBlockFocus();
                         }
                     }
-                    addNewAction.openSelector(false);
                 }
+                addNewAction.openSelector(false);
             }
-
-            for (TabButton btn : tabsBtn) {
-                if (btn.mouseClicked(adjX, adjY, button)) {
-                    clicked = true;
-                }
-            }
-
-            if (!wasOpen || !insidePanel) {
-                if (super.mouseClicked(mouseX, mouseY, button)) {
-                    clicked = true;
-                }
-            }
-
-            return clicked;
         }
+
+        for (TabButton btn : tabsBtn) {
+            if (btn.mouseClicked(adjX, adjY, button)) clicked = true;
+        }
+
+        if (!wasOpen || !insidePanel) {
+            if (super.mouseClicked(mouseX, mouseY, button)) clicked = true;
+        }
+
+        return clicked;
+    }
     //? }
 
-        @Override
-    //? if >=1.21.9 {
+    @Override
+            //? if >=1.21.9 {
     /*public boolean mouseReleased(MouseButtonEvent event) {
         boolean released = false;
         double mouseX = event.x();
@@ -451,38 +445,28 @@ public class AdvancedOptions extends AnimatedWindow {
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
 
-        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
-            adjustedX,
-            adjustedY,
-            event.buttonInfo()
-        );
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(adjustedX, adjustedY, event.buttonInfo());
 
-        if (addNewAction.mouseReleased(adjustedEvent))
-            released = true;
-
-        if (super.mouseReleased(event))
-            released = true;
+        if (addNewAction.mouseReleased(adjustedEvent)) released = true;
+        if (super.mouseReleased(event)) released = true;
 
         return released;
     }*/
-    //? } else {
-        public boolean mouseReleased(double mouseX, double mouseY, int button) {
-            boolean released = false;
-            double adjustedX = mouseX - getX();
-            double adjustedY = mouseY - getYOffset();
+            //? } else {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        boolean released = false;
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getYOffset();
 
-            if (addNewAction.mouseReleased(adjustedX, adjustedY, button))
-                released = true;
+        if (addNewAction.mouseReleased(adjustedX, adjustedY, button)) released = true;
+        if (super.mouseReleased(mouseX, mouseY, button)) released = true;
 
-            if (super.mouseReleased(mouseX, mouseY, button))
-                released = true;
-
-            return released;
-        }
+        return released;
+    }
     //? }
 
-        @Override
-    //? if >=1.21.9 {
+    @Override
+            //? if >=1.21.9 {
     /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         boolean dragged = false;
         double mouseX = event.x();
@@ -490,39 +474,28 @@ public class AdvancedOptions extends AnimatedWindow {
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
 
-        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
-            adjustedX,
-            adjustedY,
-            event.buttonInfo()
-        );
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(adjustedX, adjustedY, event.buttonInfo());
 
-        if (addNewAction.mouseDragged(adjustedEvent, deltaX, deltaY))
-            dragged = true;
-
-        if (super.mouseDragged(event, deltaX, deltaY))
-            dragged = true;
+        if (addNewAction.mouseDragged(adjustedEvent, deltaX, deltaY)) dragged = true;
+        if (super.mouseDragged(event, deltaX, deltaY)) dragged = true;
 
         return dragged;
     }*/
-    //? } else {
-        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-            boolean dragged = false;
-            double adjustedX = mouseX - getX();
-            double adjustedY = mouseY - getYOffset();
+            //? } else {
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        boolean dragged = false;
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getYOffset();
 
-            if (addNewAction.mouseDragged(adjustedX, adjustedY, button, deltaX, deltaY))
-                dragged = true;
+        if (addNewAction.mouseDragged(adjustedX, adjustedY, button, deltaX, deltaY)) dragged = true;
+        if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) dragged = true;
 
-            if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
-                dragged = true;
-
-            return dragged;
-        }
+        return dragged;
+    }
     //? }
 
     private boolean scrollLogic(double mouseX, double mouseY, double amount) {
-        if (!isVisible())
-            return false;
+        if (!isVisible()) return false;
         double adjX = mouseX - this.getX();
         double adjY = mouseY - this.getYOffset();
 
@@ -532,15 +505,15 @@ public class AdvancedOptions extends AnimatedWindow {
             if (addNewAction.isMouseInside(mouseX, mouseY)) {
                 //? if >=1.20.2 {
                 if (addNewAction.mouseScrolled(adjX, adjY, 0, amount))
-                //? } else {
-                /*if (addNewAction.mouseScrolled(adjX, adjY, amount))*/
-                //? }
+                    //? } else {
+                    /*if (addNewAction.mouseScrolled(adjX, adjY, amount))*/
+                    //? }
                     result = true;
-                if (addNewAction.isOpen())
-                    return true;
+                if (addNewAction.isOpen()) return true;
             } else {
                 addNewAction.openSelector(false);
             }
+
             int scrollOffset = this.firstTab.getScrollOffset();
             int aX = this.firstTab.getX();
             int aY = this.firstTab.getY() - scrollOffset;
@@ -550,12 +523,11 @@ public class AdvancedOptions extends AnimatedWindow {
                     ActionItem actionItem = (ActionItem) child;
                     double itemMouseX = adjX - aX;
                     double itemMouseY = adjY - aY;
-
                     //? if >=1.20.2 {
                     if (actionItem.mouseScrolled(itemMouseX, itemMouseY, 0, amount)) {
-                    //? } else {
-                    /*if (actionItem.mouseScrolled(itemMouseX, itemMouseY, amount)) {*/
-                    //? }
+                        //? } else {
+                        /*if (actionItem.mouseScrolled(itemMouseX, itemMouseY, amount)) {*/
+                        //? }
                         return true;
                     }
                 }
@@ -564,9 +536,9 @@ public class AdvancedOptions extends AnimatedWindow {
 
         //? if >=1.20.2 {
         if (super.mouseScrolled(mouseX, mouseY, 0, amount)) {
-        //? } else {
-        /*if (super.mouseScrolled(mouseX, mouseY, amount)) {*/
-        //?}
+            //? } else {
+            /*if (super.mouseScrolled(mouseX, mouseY, amount)) {*/
+            //?}
             result = true;
         }
 
@@ -581,7 +553,7 @@ public class AdvancedOptions extends AnimatedWindow {
     //? } else {
     /*@Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-    return scrollLogic(mouseX, mouseY, amount);
+        return scrollLogic(mouseX, mouseY, amount);
     }*/
     //? }
 }

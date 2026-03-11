@@ -1,6 +1,7 @@
 {
   "nitsha.localization.__credit" : "Nitsha",
   "category.nitsha.binds" : "Nitsha's FastBind",
+  "key.category.nitsha_fastbind.keys" : "Nitsha's FastBind",
   "key.nitsha.binds" : "Меню FastBind",
   "key.nitsha.prev_page" : "Предыдущая страница",
   "key.nitsha.next_page" : "Следующая страница",
@@ -48,5 +49,16 @@
 
   "nitsha.binds.bindActivate" : "Бинд %s активирован",
 
-  "nitsha.binds.advances.noKeyBind" : "Не выбрано"
+  "nitsha.binds.advances.noKeyBind" : "Не выбрано",
+
+  "nitsha.binds.advances.actions.keyDown" : "нᴀжᴀᴛь ᴋлᴀʙишу",
+  "nitsha.binds.advances.actions.keyUp" : "оᴛпуᴄᴛиᴛь ᴋлᴀʙишу",
+  "nitsha.binds.advances.actions.keyEvent" : "бинд-ᴄобыᴛиᴇ",
+  "nitsha.binds.advances.actions.loop" : "поʙᴛоᴘиᴛь ᴄлᴇдующᴇᴇ",
+  "nitsha.binds.advances.actions.loop.actions" : "Кол-во действий (10 макс.)",
+  "nitsha.binds.advances.actions.loop.count" : "Повторений (10 макс.)",
+  "nitsha.binds.advances.noSelectedKeyItem" : "Выберите событие",
+  "nitsha.binds.advances.modals.selectKeyEvent" : "ʙыбᴇᴘиᴛᴇ ᴄобыᴛиᴇ",
+  "nitsha.binds.advances.actions.option.hold" : "Зажать",
+  "nitsha.binds.advances.actions.option.press" : "Нажать"
 }

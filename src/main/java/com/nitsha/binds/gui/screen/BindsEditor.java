@@ -2,10 +2,13 @@ package com.nitsha.binds.gui.screen;
 
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
+import com.nitsha.binds.bind.Bind;
 import com.nitsha.binds.configs.*;
+import com.nitsha.binds.gui.modals.SelectKeyEvent;
 import com.nitsha.binds.gui.panels.*;
 import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.RenderUtils;
 //? if fabric {
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -25,7 +28,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 //? if >=1.21.9 {
@@ -52,16 +54,13 @@ public class BindsEditor extends Screen {
     private static int activeBind = 0;
     public static String editIconBtnString = "minecraft:structure_void";
 
-    public Bind copied = new Bind(
-            "",
-            "minecraft:structure_void",
-            0,
-            new ArrayList<>());
+    public Bind copied = new Bind("", "minecraft:structure_void", 0, "press", 500, new ArrayList<>());
 
     private BasicOptionsWindow window_BasicOptions;
     private BindsList window_BindsList;
     private AdvancedOptions window_AdvancedOptions;
     private PresetSelector window_PresetSelector;
+    private SelectKeyEvent window_SelectKeyEvent;
 
     public static int currentPreset = BindsGUI.getCurrentPreset();
 
@@ -119,8 +118,21 @@ public class BindsEditor extends Screen {
         // this.addWidget(window_AdvancedOptions);
         //?}
 
+        // Select key event
+        window_SelectKeyEvent = new SelectKeyEvent(this, centerX, centerY, 180, TEXTURE_HEIGHT,
+                BACKGROUND, BACKGROUND_FLAT);
+        //? if >=1.17 {
+        this.addRenderableWidget(window_SelectKeyEvent);
+        //?} else {
+        // this.addWidget(window_SelectKeyEvent);
+        //?}
+
         selectBind();
         window_BindsList.updateSelected(ItemsMapper.getItemStack(getCBind().icon));
+
+        EventBus.on("selectKeyEvent.open", (Void v) -> {
+            window_SelectKeyEvent.open(() -> {});
+        });
     }
 
     public BasicOptionsWindow getBasicOptionsWindow() {
@@ -224,7 +236,11 @@ public class BindsEditor extends Screen {
             BindsStorage.setBind(
                     getCurrentPreset(),
                     getActiveBind(),
-                    new Bind(bindName, editIconBtnString, keyCode, window_AdvancedOptions.getAllActions()));
+                    new Bind(bindName, editIconBtnString, keyCode,
+                            window_AdvancedOptions.getTriggerMode(),
+                            window_AdvancedOptions.getHoldMs(),
+                            window_AdvancedOptions.getAllActions()));
+
             BindsStorage.setBindKeyBind(getCurrentPreset(), getActiveBind(), keyCode);
             selectBind();
             window_BindsList.updateSelected(ItemsMapper.getItemStack(
@@ -236,10 +252,7 @@ public class BindsEditor extends Screen {
 
     public void deleteBind() {
         BindsStorage.setBind(getCurrentPreset(), getActiveBind(), new Bind(
-                "",
-                "minecraft:structure_void",
-                0,
-                new ArrayList<>()));
+                "", "minecraft:structure_void", 0, "press", 500, new ArrayList<>()));
         selectBind();
         window_BindsList.updateSelected(new ItemStack(Items.STRUCTURE_VOID));
     }
@@ -251,6 +264,8 @@ public class BindsEditor extends Screen {
             copied.name = currentBind.name;
             copied.icon = currentBind.icon;
             copied.keyCode = currentBind.keyCode;
+            copied.keyMode = currentBind.keyMode;
+            copied.holdMs = currentBind.holdMs;
             copied.actions = currentBind.actions;
             window_BasicOptions.getPasteIcon().setEnabled(true);
         }
@@ -270,6 +285,8 @@ public class BindsEditor extends Screen {
         window_AdvancedOptions.keybind.setKeyCode(currentBind.keyCode);
         window_AdvancedOptions.generateActionList(currentBind.actions);
         window_AdvancedOptions.getSecondTab().updateButtons(currentBind.icon);
+        window_AdvancedOptions.loadTriggerMode(currentBind.keyMode, currentBind.holdMs);
+        window_BasicOptions.confirm(false);
     }
 
     // Render
@@ -282,20 +299,25 @@ public class BindsEditor extends Screen {
             //?}
             , int mouseX, int mouseY, float delta) {
         //? if >=1.20.2 {
-        /* ? if <1.21.6 { */this.renderBackground(ctx, mouseX, mouseY, delta); /* ?} */
-        //?} else if >=1.19.4 {
+        /*? if <1.21.6 { */this.renderBackground(ctx, mouseX, mouseY, delta); /*? } */
+        //? } else if >=1.19.4 {
         /* if (this.minecraft.level == null) this.renderBackground(ctx); */
-        //?} else {
+        //? } else {
         /* if (this.minecraft.level == null) this.renderBackground(ctx); */
-        //?}
+        //? }
         for (GuiEventListener element : children()) {
             Renderable dr = RenderUtils.wrapRenderable(element);
             if (dr != null) {
                 if (element instanceof PresetSelector) {
                     PresetSelector pS = (PresetSelector) element;
                     pS.render(ctx, mouseX, mouseY, delta);
+                } else if (element instanceof SelectKeyEvent) {
+                    if (window_SelectKeyEvent.isVisible()) {
+                        SelectKeyEvent sK = (SelectKeyEvent) element;
+                        sK.render(ctx, mouseX, mouseY, delta);
+                    }
                 } else {
-                    if (window_PresetSelector.isMouseInside(mouseX, mouseY) && window_PresetSelector.isOpen()) {
+                    if (window_PresetSelector.isMouseInside(mouseX, mouseY) && window_PresetSelector.isOpen() || window_SelectKeyEvent.isVisible()) {
                         dr.render(ctx, -10000, -10000, delta);
                     } else {
                         dr.render(ctx, mouseX, mouseY, delta);
@@ -320,29 +342,29 @@ public class BindsEditor extends Screen {
             );
             //?} else {
             /* super.renderBackground(context, mouseX, mouseY, delta); */
-            //?}
+            //? }
         }
     }
-    //?}
+    //? }
 
     //? if >=1.18.2 {
     @Override
     public void onClose() {
         this.minecraft.setScreen(parent);
     }
-    //?} else if >=1.17.1 {
+    //? } else if >=1.17.1 {
     /*@Override
      public void onClose() {
      this.minecraft.setScreen(parent);
      }*/
-    //?} else {
+    //? } else {
     /*
      @Override
      public void onClose() {
      this.minecraft.setScreen(parent);
      }
      */
-    //?}
+    //? }
 
     @Override
     public boolean shouldCloseOnEsc() {
@@ -354,21 +376,20 @@ public class BindsEditor extends Screen {
     public boolean isPauseScreen() {
         return false;
     }
-    //?} else {
+    //? } else {
     /*
     public boolean isPauseScreen() {
     return false;
     }
-     *///?}
+     *///? }
 
     public void closeEditor() {
         TextField.setFocusedField(null);
         KeybindSelector.setFocusedField(null);
+        MainKeybindSelector.setFocusedField(null);
         this.saveBind();
         window_PresetSelector.saveAll();
     }
-
-    // Click, scroll logic
 
     @Override
     //? if >=1.21.9 {
@@ -377,12 +398,21 @@ public class BindsEditor extends Screen {
         double mouseY = event.y();
         TextField.setLastClickedWidget(null);
         KeybindSelector.setLastClickedWidget(null);
+        MainKeybindSelector.setLastClickedWidget(null);
+        if (window_SelectKeyEvent.isVisible()) {
+            window_SelectKeyEvent.mouseClicked(event, bl);
+            if (!window_SelectKeyEvent.isMouseInside(mouseX, mouseY)) {
+                window_SelectKeyEvent.close(() -> {});
+            }
+            return true;
+        }
         if (window_PresetSelector.isMouseInside(mouseX, mouseY)) {
             window_PresetSelector.mouseClicked(event, bl);
             return true;
         } else if (window_PresetSelector.isOpen()) {
             window_PresetSelector.openSelector(false);
         }
+
         boolean clicked = false;
         for (GuiEventListener element : children()) {
             if (element != window_PresetSelector && element.mouseClicked(event, bl)) {
@@ -391,12 +421,21 @@ public class BindsEditor extends Screen {
         }
         TextField.controlFocus();
         KeybindSelector.controlFocus();
+        MainKeybindSelector.controlFocus();
         return clicked;
     }*/
     //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         TextField.setLastClickedWidget(null);
         KeybindSelector.setLastClickedWidget(null);
+        MainKeybindSelector.setLastClickedWidget(null);
+        if (window_SelectKeyEvent.isVisible()) {
+            window_SelectKeyEvent.mouseClicked(mouseX, mouseY, button);
+            if (!window_SelectKeyEvent.isMouseInside(mouseX, mouseY)) {
+                window_SelectKeyEvent.close(() -> {});
+            }
+            return true;
+        }
         if (window_PresetSelector.isMouseInside(mouseX, mouseY)) {
             window_PresetSelector.mouseClicked(mouseX, mouseY, button);
             return true;
@@ -411,6 +450,7 @@ public class BindsEditor extends Screen {
         }
         TextField.controlFocus();
         KeybindSelector.controlFocus();
+        MainKeybindSelector.controlFocus();
         return clicked;
     }
     //? }
@@ -462,6 +502,10 @@ public class BindsEditor extends Screen {
     //? if >=1.20.2 {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (window_SelectKeyEvent.isVisible()) {
+            window_SelectKeyEvent.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+            return true;
+        }
         for (GuiEventListener element : children()) {
             if (element.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
                 return true;
@@ -473,12 +517,16 @@ public class BindsEditor extends Screen {
     /*
      @Override
      public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-     for (GuiEventListener element : children()) {
-     if (element.mouseScrolled(mouseX, mouseY, amount)) {
-     return true;
-     }
-     }
-     return super.mouseScrolled(mouseX, mouseY, amount);
+        if (window_SelectKeyEvent.isVisible()) {
+            window_SelectKeyEvent.mouseScrolled(mouseX, mouseY, amount);
+            return true;
+        }
+         for (GuiEventListener element : children()) {
+             if (element.mouseScrolled(mouseX, mouseY, amount)) {
+                return true;
+             }
+         }
+        return super.mouseScrolled(mouseX, mouseY, amount);
      }
      *///?}
 
@@ -513,6 +561,7 @@ public class BindsEditor extends Screen {
     //? }
         TextField focusedField = TextField.getFocusedField();
         KeybindSelector focusedKeybind = KeybindSelector.getFocusedField();
+        MainKeybindSelector focusedMainKeybind = MainKeybindSelector.getFocusedField();
 
         if (focusedField != null) {
             //? if >=1.21.9 {
@@ -546,6 +595,19 @@ public class BindsEditor extends Screen {
 
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
                 KeybindSelector.setFocusedField(null);
+                return true;
+            }
+        }
+
+        if (focusedMainKeybind != null) {
+            //? if >=1.21.9 {
+            // if (focusedMainKeybind.keyPressed(event)) return true;
+            //? } else {
+            if (focusedMainKeybind.keyPressed(keyCode, scanCode, modifiers)) return true;
+            //? }
+
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                MainKeybindSelector.setFocusedField(null);
                 return true;
             }
         }

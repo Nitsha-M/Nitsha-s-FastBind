@@ -141,13 +141,11 @@ public class SmallTextButton extends AbstractWidget {
 
         int contentX = this.getX() + ((getWidth() / 2) - ((iconWidth + textWidth) / 2));
 
-        // Render icon if present
         if (icon != null) {
             GUIUtils.adaptiveDrawTexture(ctx, icon, contentX, this.getY() + 2, 0, 0, 5, 5, 5, 5);
             contentX += 6;
         }
 
-        // Render text
         GUIUtils.addText(
                 ctx, name, 0,
                 contentX,
@@ -187,15 +185,12 @@ public class SmallTextButton extends AbstractWidget {
         }
     //? }
 
-    // ? if >=1.19.3 {
+    //? if >=1.19.3 {
     @Override
     protected void updateWidgetNarration(NarrationElementOutput builder) {
     }
-    // ?} else if >=1.17 {
-    /*
-     @Override
-     public void updateNarration(NarrationElementOutput builder) {
-     }
-     */
-    // ?}
+    //? } else if >=1.17 {
+    /*@Override
+     public void updateNarration(NarrationElementOutput builder) { }*/
+    //? }
 }

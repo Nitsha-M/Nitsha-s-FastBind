@@ -18,7 +18,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -29,6 +31,7 @@ import net.minecraft.client.input.CharacterEvent;*/
 public class AnimatedWindow extends AbstractContainerEventHandler implements Renderable, GuiEventListener /*? if >=1.17 {*/ , NarratableEntry /*?}*/ {
     private ResourceLocation T_1, T_2;
 
+    private final Map<GuiEventListener, Renderable> elementToRenderable = new HashMap<>();
     private final List<GuiEventListener> children = Lists.<GuiEventListener>newArrayList();
     private final List<Renderable> renderables = Lists.<Renderable>newArrayList();
     private final List<DrawElement> drawElementsTop = Lists.<DrawElement>newArrayList();
@@ -88,11 +91,15 @@ public class AnimatedWindow extends AbstractContainerEventHandler implements Ren
 
     public void addElement(GuiEventListener element) {
         this.children.add(element);
-
         Renderable r = RenderUtils.wrapRenderable(element);
         if (r != null) {
             this.renderables.add(r);
+            this.elementToRenderable.put(element, r);
         }
+    }
+
+    public boolean isAnimationFinished() {
+        return animState == AnimationState.FINISHED;
     }
 
     // Basic parameters: get/set coords or size
@@ -119,6 +126,9 @@ public class AnimatedWindow extends AbstractContainerEventHandler implements Ren
         this.visible = true;
         this.onFinish = onFinish;
         this.animState = AnimationState.DROPPING_ALL;
+        this.alpha = 0.0f;
+        this.baseYOffset = y - 80;
+        this.topYOffset = 0;
         this.lastUpdateTime = System.currentTimeMillis();
     }
 
@@ -153,28 +163,30 @@ public class AnimatedWindow extends AbstractContainerEventHandler implements Ren
             break;
             case HIDING_TOP:
                 alpha = Mth.lerp(lerpFactor, alpha, 0.0f);
-                baseYOffset = Mth.lerp(lerpFactor, baseYOffset, y - 100);
-
+                topYOffset = Mth.lerp(lerpFactor, topYOffset, 0);
+                if (Math.abs(topYOffset) < 0.001f) {
+                    topYOffset = 0;
+                    animState = AnimationState.LIFTING_ALL;
+                }
+                break;
+            case LIFTING_ALL:
+                alpha = Mth.lerp(lerpFactor, alpha, 0.0f);
+                baseYOffset = Mth.lerp(lerpFactor, baseYOffset, y - 80);
                 if (onFinish != null && baseYOffset < y - 49) {
                     this.visible = false;
                     onFinish.run();
                     onFinish = null;
                 }
-                if (Math.abs(baseYOffset - (y - 100)) < 0.001f) {
-                    baseYOffset = y - 100;
+                if (Math.abs(baseYOffset - (y - 80)) < 0.001f) {
+                    baseYOffset = y - 80;
                     alpha = 0.0f;
-                    animState = AnimationState.LIFTING_ALL;
-                }
-            break;
-            case LIFTING_ALL:
-                topYOffset = Mth.lerp(lerpFactor, topYOffset, 0);
-                if (Math.abs(topYOffset) < 0.001f) {
-                    topYOffset = 0;
                     animState = AnimationState.HIDDEN;
                 }
-            break;
+                break;
             case FINISHED:
+                break;
             case HIDDEN:
+                System.out.println("i'm hidden");
                 break;
         }
     }
@@ -284,11 +296,20 @@ public class AnimatedWindow extends AbstractContainerEventHandler implements Ren
         return children;
     }
 
+    public void removeElement(GuiEventListener element) {
+        children.remove(element);
+        Renderable r = elementToRenderable.remove(element);
+        if (r != null) {
+            renderables.remove(r);
+        }
+    }
+
     public void clearChildren() {
         children.clear();
         renderables.clear();
         drawElementsTop.clear();
         drawElementsBottom.clear();
+        elementToRenderable.clear();
     }
 
     public void removeElementsOfType(Class<?> type) {
@@ -335,7 +356,7 @@ public class AnimatedWindow extends AbstractContainerEventHandler implements Ren
     @Override
     //? if >=1.21.9 {
     /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        if (!visible) return false;
+        if (!visible || animState != AnimationState.FINISHED) return false;
         double mouseX = event.x();
         double mouseY = event.y();
         double adjustedX = mouseX - getX();
@@ -355,7 +376,7 @@ public class AnimatedWindow extends AbstractContainerEventHandler implements Ren
     }*/
     //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (!visible) return false;
+        if (!visible || animState != AnimationState.FINISHED) return false;
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getYOffset();
         for (GuiEventListener child : children) {

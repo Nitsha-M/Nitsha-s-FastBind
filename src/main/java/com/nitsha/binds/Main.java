@@ -1,5 +1,6 @@
 package com.nitsha.binds;
 
+import com.nitsha.binds.bind.BindHandler;
 import com.nitsha.binds.configs.*;
 import com.nitsha.binds.utils.BindExecutor;
 import com.nitsha.binds.utils.KeepMovementHandler;

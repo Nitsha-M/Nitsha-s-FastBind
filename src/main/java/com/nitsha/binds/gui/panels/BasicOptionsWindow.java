@@ -51,6 +51,10 @@ public class BasicOptionsWindow extends AnimatedWindow {
         SAD
     }
 
+    private BedrockIconButton deleteBtn;
+    private BedrockIconButton deleteConfBtn;
+    private long deleteConfirmationTime = 0;
+
     private void initUI(BindsEditor screen) {
         Font textRenderer = Minecraft.getInstance().font;
         meowStates = CatMeowStates.NOTHING;
@@ -129,7 +133,18 @@ public class BasicOptionsWindow extends AnimatedWindow {
         this.pasteBtn = new BedrockIconButton(49, 151, 43, 20, "paste", false, screen::pasteBind, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
         if (screen.copied.name.isEmpty()) pasteBtn.setEnabled(false);
         this.addElement(new BedrockIconButton(4, 151, 43, 20, "copy", true, screen::copyBind));
-        this.addElement(new BedrockIconButton(94, 151, 43, 20, "delete", true, screen::deleteBind, 0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF));
+
+        this.deleteBtn = new BedrockIconButton(94, 151, 43, 20, "delete", true, ()-> {
+            deleteConfirmationTime = System.currentTimeMillis();
+            confirm(true);
+        }, 0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF);
+        this.deleteConfBtn = new BedrockIconButton(94, 151, 43, 20, "confirm", true, () -> {
+            screen.deleteBind();
+            confirm(false);
+        }, 0xFFfac70c, 0xFFfcd02f, 0xFFFFFFFF, 0xFFFFFFFF);
+
+        this.addElement(deleteBtn);
+        this.addElement(deleteConfBtn);
 
         this.addElement(bindNameField);
         this.addElement(editIconBtn);
@@ -158,6 +173,15 @@ public class BasicOptionsWindow extends AnimatedWindow {
         float catWidth = catX + width;
         float catHeight = catY + height;
         return mouseX >= catX && mouseX <= catWidth && mouseY >= catY && mouseY <= catHeight;
+    }
+
+    public void confirm(boolean status) {
+        this.deleteBtn.visible = !status;
+        this.deleteConfBtn.visible = status;
+    }
+
+    public boolean isDeleteConfirmation() {
+        return System.currentTimeMillis() - deleteConfirmationTime < 5000;
     }
 
     @Override
@@ -204,4 +228,12 @@ public class BasicOptionsWindow extends AnimatedWindow {
         return super.mouseClicked(mouseX, mouseY, button);
     }
     //? }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (deleteConfBtn.visible && !isDeleteConfirmation()) {
+            confirm(false);
+        }
+    }
 }

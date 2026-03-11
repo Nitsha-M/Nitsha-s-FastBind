@@ -1,4 +1,4 @@
-package com.nitsha.binds.configs;
+package com.nitsha.binds.bind;
 
 import java.util.ArrayList;
 import java.util.List;

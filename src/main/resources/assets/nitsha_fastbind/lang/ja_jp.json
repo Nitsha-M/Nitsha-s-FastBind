@@ -2,6 +2,7 @@
   "nitsha.localization.__credit" : "PExPE3/elinka47",
   "nitsha.localization.__credit_2" : "I used ChatGPT for some new entries",
   "category.nitsha.binds" : "Nitsha's FastBind",
+  "key.category.nitsha_fastbind.keys" : "Nitsha's FastBind",
   "key.nitsha.binds" : "ファストバインドメニュー",
   "key.nitsha.prev_page" : "前のページ",
   "key.nitsha.next_page" : "次のページ",
@@ -45,5 +46,16 @@
 
   "nitsha.binds.bindActivate" : "バインド %s を起動しました",
 
-  "nitsha.binds.advances.noKeyBind" : "未割り当て"
+  "nitsha.binds.advances.noKeyBind" : "未割り当て",
+
+  "nitsha.binds.advances.actions.keyDown" : "キーを押し続ける",
+  "nitsha.binds.advances.actions.keyUp" : "キーを離す",
+  "nitsha.binds.advances.actions.keyEvent" : "キーバインドイベントをシミュレート",
+  "nitsha.binds.advances.actions.loop" : "以下を繰り返す",
+  "nitsha.binds.advances.actions.loop.actions" : "アクション数 (最大10)",
+  "nitsha.binds.advances.actions.loop.count" : "繰り返し回数 (最大10)",
+  "nitsha.binds.advances.noSelectedKeyItem" : "選択してください",
+  "nitsha.binds.advances.modals.selectKeyEvent" : "キーイベントを選択",
+  "nitsha.binds.advances.actions.option.hold" : "長押し",
+  "nitsha.binds.advances.actions.option.press" : "押す"
 }

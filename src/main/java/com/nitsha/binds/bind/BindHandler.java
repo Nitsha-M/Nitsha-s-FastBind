@@ -1,5 +1,6 @@
-package com.nitsha.binds.configs;
+package com.nitsha.binds.bind;
 
+import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.utils.BindExecutor;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
@@ -24,6 +25,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class BindHandler {
     private static Minecraft client;
     private static final Set<Bind> activeBinds = new HashSet<>();
+    private static final Map<Integer, Long> keyPressStartTime = new HashMap<>();
+    private static final Set<Integer> activeKeys = new HashSet<>();
 
     public static void register() {
         //? if fabric {
@@ -66,18 +69,46 @@ public class BindHandler {
     //? }
 
     private static void tick() {
+        Map<Integer, List<Bind>> bindsByKey = new HashMap<>();
         for (Bind bind : getAllKeyBind()) {
-            int key = bind.keyCode;
-            if (key == 0)
-                continue;
+            if (bind.keyCode == 0) continue;
+            bindsByKey.computeIfAbsent(bind.keyCode, k -> new ArrayList<>()).add(bind);
+        }
+
+        for (Map.Entry<Integer, List<Bind>> entry : bindsByKey.entrySet()) {
+            int key = entry.getKey();
+            List<Bind> binds = entry.getValue();
 
             if (isKeyPressed(key)) {
-                if (!activeBinds.contains(bind)) {
-                    activeBinds.add(bind);
-                    BindExecutor.startBind(bind);
+                if (!activeKeys.contains(key)) {
+                    activeKeys.add(key);
+                    keyPressStartTime.put(key, System.currentTimeMillis());
                 }
             } else {
-                activeBinds.remove(bind);
+                if (activeKeys.contains(key)) {
+                    long held = System.currentTimeMillis() - keyPressStartTime.getOrDefault(key, 0L);
+                    activeKeys.remove(key);
+                    keyPressStartTime.remove(key);
+
+                    Bind best = null;
+                    for (Bind bind : binds) {
+                        int required = "hold".equals(bind.keyMode) ? bind.holdMs : 0;
+                        if (held >= required) {
+                            if (best == null) {
+                                best = bind;
+                            } else {
+                                int bestRequired = "hold".equals(best.keyMode) ? best.holdMs : 0;
+                                if (required > bestRequired) {
+                                    best = bind;
+                                }
+                            }
+                        }
+                    }
+
+                    if (best != null) {
+                        BindExecutor.startBind(best);
+                    }
+                }
             }
         }
     }
@@ -98,11 +129,11 @@ public class BindHandler {
 
     private static boolean isKeyPressed(int keyCode) {
         if (client == null) client = Minecraft.getInstance();
-        // ? if <1.21.9 {
+        //? if <1.21.9 {
         long handle = client.getWindow().getWindow();
-        // ? } else {
-        // long handle = client.getWindow().handle();
-        // ? }
+        //? } else {
+        //long handle = client.getWindow().handle();
+        //? }
         return GLFW.glfwGetKey(handle, keyCode) == GLFW.GLFW_PRESS;
     }
 }

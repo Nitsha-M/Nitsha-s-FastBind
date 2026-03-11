@@ -3,7 +3,7 @@
 <p align="center">
 Adds a menu where you can activate pre-programmed actions. Configure command execution or key press emulation the way you want
  </p>
-<p align="center">
+<p align="center" width="100%">
     <a href="https://discord.gg/zuwPkg5MHs">
         <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v2.0-1.21.3/assets/discord.png" width="200">
     </a>
@@ -51,7 +51,7 @@ The mod features an advanced preset system for convenient grouping. You can crea
 Group your binds into presets for easier organization. You can create as many presets as you need. By default, the mod generates 9 presets, each containing 40 bind slots.
 
 <p align="center">
-   <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v3.0.0/assets/presets.gif">
+   <img src="https://raw.githubusercontent.com/Nitsha-M/Nitsha-s-FastBind/refs/heads/v3.1.0/assets/presets_v31.gif" width="100%">
 </p>
 
 ## Configuration

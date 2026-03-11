@@ -37,7 +37,13 @@ public class BedrockIconTextButton extends BedrockButton {
                 0xFFFFFFFF, 0xFF3C8527, 0xFF212121, 0xFFFFFFFF);
     }
 
-    //? if >1.20.2 {
+    //? if >=1.21.11 {
+    /*@Override
+    public void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        super.renderContents(context, mouseX, mouseY, delta);
+        renderOverlay(context, mouseX, mouseY, delta);
+    }*/
+    //? } else if >1.20.2 {
     @Override
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.renderWidget(context, mouseX, mouseY, delta);

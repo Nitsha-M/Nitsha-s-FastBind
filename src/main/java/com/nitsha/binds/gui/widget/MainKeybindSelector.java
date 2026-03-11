@@ -1,0 +1,209 @@
+package com.nitsha.binds.gui.widget;
+
+import com.nitsha.binds.Main;
+import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.utils.TextUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+//? if >=1.20 {
+import net.minecraft.client.gui.GuiGraphics;
+//?} else {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+ *///?}
+//? if >=1.17 {
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+//?}
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.components.AbstractButton;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import org.lwjgl.glfw.GLFW;
+
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.KeyEvent;*/
+//? }
+
+public class MainKeybindSelector extends AbstractButton {
+    private static MainKeybindSelector focusedKeybind = null;
+    private static final ResourceLocation NORMAL = Main.id("textures/gui/btns/bedrock_normal_bottom_left.png");
+    private static final ResourceLocation PRESSED_NORMAL = Main.id("textures/gui/btns/bedrock_normal_top_left.png");
+
+    private String name = TextUtils.translatable("nitsha.binds.advances.noKeyBind").getString();
+    private int keyCode;
+    private boolean isPressed = false;
+
+    private float yOffset = 0;
+    private float targetOffset = 0;
+    private final float speed = Main.GLOBAL_ANIMATION_SPEED + 0.2f;
+
+    private int x, y;
+
+    public MainKeybindSelector(int x, int y, int width, int height) {
+        super(x, y, width, height, TextUtils.empty());
+        this.x = x;
+        this.y = y;
+    }
+
+    public void setPressed(boolean pressed) {
+        this.isPressed = pressed;
+    }
+
+    public void setKeyCode(int kC) {
+        this.keyCode = kC;
+        this.name = (kC == 0)
+                ? TextUtils.translatable("nitsha.binds.advances.noKeyBind").getString()
+                : InputConstants.Type.KEYSYM.getOrCreate(kC).getDisplayName().getString();
+    }
+
+    public int getX() { return this.x; }
+    public int getY() { return this.y; }
+    public int getKeyCode() { return this.keyCode; }
+    public int getHeight() { return this.height; }
+    public boolean isPressed() { return isPressed; }
+
+    public static MainKeybindSelector getFocusedField() { return focusedKeybind; }
+
+    public static void setFocusedField(MainKeybindSelector fK) {
+        if (focusedKeybind != null) focusedKeybind.setPressed(false);
+        focusedKeybind = fK;
+    }
+
+    //? <1.21.9 {
+    @Override
+    public void onPress() {}
+    //? } else {
+    /*@Override
+    public void onPress(InputWithModifiers inputWithModifiers) {}*/
+    //? }
+
+    //? if >=1.21.11 {
+    /*@Override
+    public void renderContents(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        rndr(ctx, mouseX, mouseY, delta);
+    }*/
+    //?} else if >1.20.2 {
+    @Override
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        rndr(ctx, mouseX, mouseY, delta);
+    }
+    //?} else if >=1.20 {
+    /*@Override
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }
+    *///?} else if >=1.19.4 {
+    /*@Override
+    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }
+    *///?} else {
+    /*@Override
+    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }
+    */
+    //? }
+
+    private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
+        Font font = Minecraft.getInstance().font;
+
+        targetOffset = isPressed ? 2 : 0;
+        yOffset = Mth.lerp(GUIUtils.clampSpeed(speed * delta), yOffset, targetOffset);
+        if (Math.abs(yOffset - targetOffset) < 0.001f) yOffset = targetOffset;
+
+        int maxSymbols = (this.width / 7) - (isPressed ? 4 : 0);
+        String displayName = (isPressed) ? "> " + GUIUtils.truncateString(name, maxSymbols) + " <" : GUIUtils.truncateString(name, maxSymbols);
+        int textWidth = font.width(displayName);
+
+        int btnColor = isPressed ? 0xFF07938d : 0xFFFFFFFF;
+        int btnHoverColor = 0xFF07938d;
+        int textColor = isPressed ? 0xFFFFFFFF : 0xFF212121;
+        int textHoverColor = 0xFFFFFFFF;
+
+        GUIUtils.drawResizableBox(ctx, NORMAL, getX(), getY() + 2, getWidth(), getHeight() - 2, 5, 11,
+                (isHovered || isPressed) ? btnHoverColor : btnColor);
+        GUIUtils.drawResizableBox(ctx, PRESSED_NORMAL, getX(), getY() + Math.round(yOffset), getWidth(), getHeight() - 2, 5, 11,
+                (isHovered || isPressed) ? btnHoverColor : btnColor);
+
+        GUIUtils.addText(ctx, TextUtils.literal(displayName), 0,
+                getX() + (width / 2) - (textWidth / 2),
+                getY() + Math.round(yOffset) + (height / 2) - (font.lineHeight / 2),
+                "top", "left", (isHovered || isPressed) ? textHoverColor : textColor, false);
+    }
+
+    //? if >=1.19.3 {
+    @Override
+    protected void updateWidgetNarration(NarrationElementOutput builder) {}
+    //?} else if >=1.17 {
+    /*@Override
+    public void updateNarration(NarrationElementOutput builder) {}*/
+    //?}
+
+    private static GuiEventListener lastClickedWidget = null;
+
+    public static void setLastClickedWidget(GuiEventListener widget) {
+        lastClickedWidget = widget;
+    }
+
+    public static void controlFocus() {
+        if (focusedKeybind == null) return;
+        if (lastClickedWidget == focusedKeybind) return;
+        focusedKeybind.setFocused(false);
+        focusedKeybind.setPressed(false);
+        focusedKeybind = null;
+    }
+
+    @Override
+            //? if >=1.21.9 {
+    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        if (isMouseOver(mouseX, mouseY)) {
+            setLastClickedWidget(this);
+            setFocusedField(this);
+            this.setPressed(true);
+            this.setFocused(true);
+        }
+        return super.mouseClicked(event, bl);
+    }*/
+            //? } else {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (isMouseOver(mouseX, mouseY)) {
+            setLastClickedWidget(this);
+            setFocusedField(this);
+            this.setPressed(true);
+            this.setFocused(true);
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+    //? }
+
+    @Override
+            //? if >=1.21.9 {
+    /*public boolean keyPressed(KeyEvent event) {
+        if (focusedKeybind != null) {
+            int keyCode = event.key();
+            int newKey = (keyCode == GLFW.GLFW_KEY_ESCAPE) ? 0 : keyCode;
+            focusedKeybind.setPressed(false);
+            focusedKeybind.setKeyCode(newKey);
+            MainKeybindSelector.setFocusedField(null);
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE) return true;
+        }
+        return super.keyPressed(event);
+    }*/
+            //? } else {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (focusedKeybind != null) {
+            int newKey = (keyCode == GLFW.GLFW_KEY_ESCAPE) ? 0 : keyCode;
+            focusedKeybind.setPressed(false);
+            focusedKeybind.setKeyCode(newKey);
+            MainKeybindSelector.setFocusedField(null);
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE) return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+    //? }
+}

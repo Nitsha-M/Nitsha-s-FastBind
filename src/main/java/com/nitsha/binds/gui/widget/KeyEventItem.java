@@ -1,0 +1,122 @@
+package com.nitsha.binds.gui.widget;
+
+import com.nitsha.binds.Main;
+import com.nitsha.binds.action.ActionRegistry;
+import com.nitsha.binds.action.ActionType;
+import com.nitsha.binds.gui.modals.SelectKeyEvent;import com.nitsha.binds.gui.panels.AdvancedOptions;
+import com.nitsha.binds.gui.screen.BindsEditor;
+import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.utils.TextUtils;
+import net.minecraft.client.Minecraft;
+//? if >=1.20 {
+import net.minecraft.client.gui.GuiGraphics;
+//?} else {
+/*import com.mojang.blaze3d.vertex.PoseStack;*/
+//?}
+//? if >=1.17 {
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+//?}
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
+//? }
+
+import java.util.Map;
+
+public class KeyEventItem extends AbstractWidget {
+
+    private final int index;
+    private final int x, y;
+
+    private String value;
+    private SelectKeyEvent parent;
+
+    public KeyEventItem(SelectKeyEvent parent, int x, int y, int width, int height, String value, int index) {
+        super(x, y, width, height, TextUtils.empty());
+        this.index = index;
+        this.value = value;
+        this.parent = parent;
+        this.x = x;
+        this.y = y;
+    }
+
+    public int getX() { return this.x; }
+    public int getY() { return this.y; }
+
+    public int getHeight() {
+        return this.height;
+    }
+
+    //? if >=1.21.11 {
+    /*@Override
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        rndr(ctx, mouseX, mouseY, delta);
+    }*/
+    //?} else if >1.20.2 {
+    @Override
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        rndr(ctx, mouseX, mouseY, delta);
+    }
+    //? } else if >=1.20 {
+    /*@Override
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }*/
+    //? } else if >=1.19.4 {
+    /*@Override
+    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }*/
+    //? } else {
+    /*@Override
+    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
+        rndr(context, mouseX, mouseY, delta);
+    }*/
+    //? }
+
+    private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
+        //? if >=1.20 {
+        GuiGraphics c = (GuiGraphics) ctx;
+        //? } else {
+        /*PoseStack c = (PoseStack) ctx;*/
+        //? }
+
+        if (index % 2 == 0)
+            GUIUtils.drawFill(c, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x4DFFFFFF);
+        if (isHovered)
+            GUIUtils.drawFill(c, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x1AFFFFFF);
+
+        GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(TextUtils.translatable(value).getString(), 26)), 0,
+                4, getY() + 3, "top", "left", 0xFF212121, false);
+    }
+
+    @Override
+    public void playDownSound(SoundManager soundManager) {}
+
+    @Override
+    //? <1.21.9 {
+    public void onClick(double mouseX, double mouseY) {
+    //? } else {
+    // public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl) {
+    //? }
+        Minecraft.getInstance().getSoundManager().play(
+                SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        this.parent.onSelect(value);
+    }
+
+    //? if >=1.19.3 {
+    @Override
+    protected void updateWidgetNarration(NarrationElementOutput builder) {}
+    //? } else if >=1.17 {
+    /*@Override
+    public void updateNarration(NarrationElementOutput builder) {}*/
+    //? }
+}

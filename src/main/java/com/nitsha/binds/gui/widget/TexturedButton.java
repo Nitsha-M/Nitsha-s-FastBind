@@ -93,7 +93,12 @@ public class TexturedButton extends ImageButton {
         }
     //? }
 
-    //? if >=1.21.5 {
+    //? if >=1.21.11 {
+    /*@Override
+    public void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        super.renderContents(context, mouseX, mouseY, delta);
+    }*/
+    //? } else if >=1.21.5 {
     /*@Override
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.renderWidget(context, mouseX, mouseY, delta);

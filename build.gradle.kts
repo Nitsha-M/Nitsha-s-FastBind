@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.HashMap
 
 plugins {
-    id("dev.isxander.modstitch.base") version "0.7.1-unstable"
+    id("dev.isxander.modstitch.base") version "0.8.4"
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
 }
 
@@ -19,7 +19,7 @@ class VersionDefinition(vararg pairs: Pair<String, String>) {
 // Fabric API
 val fabricApiVersion = VersionDefinition(
     // 1.21.x
-    "1.21.11" to "0.139.4+1.21.11",
+    "1.21.11" to "0.141.3+1.21.11",
     "1.21.10" to "0.135.0+1.21.10",
     "1.21.9" to "0.134.0+1.21.9",
     "1.21.8" to "0.134.0+1.21.8",
@@ -59,7 +59,7 @@ val fabricApiVersion = VersionDefinition(
 // Mod Menu
 val modMenuVersion = VersionDefinition(
     // 1.21.x
-    "1.21.11" to "17.0.0-alpha.1",
+    "1.21.11" to "17.0.0-beta.2",
     "1.21.10" to "16.0.0-rc.1",
     "1.21.9" to "16.0.0-rc.1",
     "1.21.8" to "15.0.0",
@@ -99,7 +99,7 @@ val modMenuVersion = VersionDefinition(
 // NeoForge (только для 1.20.2+)
 val neoForgeVersion = VersionDefinition(
     // 1.21.x
-    "1.21.11" to "21.11.3-beta",
+    "1.21.11" to "21.11.38-beta",
     "1.21.10" to "21.10.63",
     "1.21.9" to "21.9.16-beta",
     "1.21.8" to "21.8.47",
@@ -149,6 +149,7 @@ val forgeDependenciesVersion = mapOf(
 )
 
 val neoforgeDependenciesVersion = mapOf(
+    "1.21.11" to "21.11.0-beta",
     "1.21.10" to "21.9.0-beta",
     "1.21.8" to "21.6.0-beta",
     "1.21.5" to "21.5.0-beta",
@@ -282,14 +283,14 @@ val modstitch_platform = try {
     property("modstitch.platform") as String
 } catch (e: Exception) {
     when {
-        name.contains("fabric") -> "loom"
+        name.contains("fabric") -> "fabric-loom"
         name.contains("neoforge") -> "moddevgradle"
         name.contains("forge") -> "moddevgradle-legacy"
-        else -> "loom"
+        else -> "fabric-loom-remap"
     }
 }
 
-val is_fabric = modstitch_platform == "loom"
+val is_fabric = modstitch_platform.startsWith("fabric-loom")
 config["is_fabric"] = is_fabric.toString()
 val is_forge = modstitch_platform == "moddevgradle-legacy"
 config["is_forge"] = is_forge.toString()
@@ -316,6 +317,7 @@ val loader: String = name.split("-")[1]
 config["loader"] = loader
 
 val fabric_loader = when {
+    stonecutter.eval(minecraft_version, ">=1.21.11") -> "0.17.3"
     stonecutter.eval(minecraft_version, ">=1.21.9") -> "0.17.2"
     else -> "0.16.14"
 }
@@ -466,6 +468,7 @@ modstitch {
 
         replacementProperties.populate {
             put("pack_format", when {
+                    stonecutter.eval(minecraft_version, ">=1.21.11") -> 69
                     stonecutter.eval(minecraft_version, ">=1.21.8") -> 64
                     stonecutter.eval(minecraft_version, ">=1.21.4") -> 46
                     stonecutter.eval(minecraft_version, ">=1.21.2") -> 41
@@ -521,11 +524,11 @@ modstitch {
             }
         }
     }
-
     mixin {
         addMixinsToModManifest = true
         configs.register(mod_id)
     }
+
 }
 
 java {
@@ -559,6 +562,11 @@ stonecutter {
 
     for (entry in config.entries)
         swap(entry.key, entry.value)
+
+    replacements.string(current.parsed >= "1.21.11") {
+        replace("ResourceLocation", "Identifier")
+        replace("net.minecraft.Util", "net.minecraft.util.Util")
+    }
 
 }
 

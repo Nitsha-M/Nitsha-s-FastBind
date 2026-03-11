@@ -1,12 +1,11 @@
 package com.nitsha.binds.gui.screen;
 
-import com.mojang.blaze3d.platform.Window;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.configs.Bind;
+import com.nitsha.binds.bind.Bind;
 import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.configs.KeyBinds;
-import com.nitsha.binds.configs.Preset;
-import com.nitsha.binds.configs.Page;
+import com.nitsha.binds.bind.Preset;
+import com.nitsha.binds.bind.Page;
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
 import com.nitsha.binds.gui.utils.GUIUtils;
@@ -113,11 +112,11 @@ public class BindsGUI extends Screen {
                     minecraft.setScreen(new BindsEditor(null));
                 });
 
-        // ? if >=1.17 {
+        //? if >=1.17 {
         this.addRenderableWidget(configBtn);
-        // ?} else {
+        //? } else {
         /* this.addButton(configBtn); */
-        // ?}
+        //? }
 
         this.catTail = new AnimatedSprite(14, 12, CAT_SPRITE, 0, false, 0, 0, 490, 14, 60, 504, 12);
         if (BindsStorage.getBooleanConfig("easterEgg", false)) {
@@ -131,11 +130,11 @@ public class BindsGUI extends Screen {
 
     @Override
     public void render(
-            // ? if >=1.20 {
+            //? if >=1.20 {
             GuiGraphics ctx
-            // ?} else {
+            //? } else {
             /* PoseStack ctx */
-            // ?}
+            //? }
             , int mouseX, int mouseY, float delta) {
         if (!this.checkForClose()) {
             GUIUtils.drawResizableBox(ctx, MENU_BG, centerX, centerY, MENU_WIDTH, 106, 3, 7);
@@ -478,7 +477,7 @@ public class BindsGUI extends Screen {
         }
         return super.mouseScrolled(mouseX, mouseY, amount);
     }*/
-    // ?}
+    //? }
 
     @Override
     //? if >=1.21.9 {
@@ -503,18 +502,18 @@ public class BindsGUI extends Screen {
 
         //? if fabric {
         if (keyCode == KeyBindingHelper.getBoundKeyOf(KeyBinds.PREV_PAGE).getValue()) {
-            //? } else {
-            // if (keyCode == KeyBinds.PREV_PAGE.getDefaultKey().getValue()) {
-            //? }
+        //? } else {
+        // if (keyCode == KeyBinds.PREV_PAGE.getDefaultKey().getValue()) {
+        //? }
             updatePage(-1);
             return true;
         }
 
-        // ? if fabric {
+        //? if fabric {
         if (keyCode == KeyBindingHelper.getBoundKeyOf(KeyBinds.NEXT_PAGE).getValue()) {
-            //? } else {
-            // if (keyCode == KeyBinds.NEXT_PAGE.getDefaultKey().getValue()) {
-            //? }
+        //? } else {
+        // if (keyCode == KeyBinds.NEXT_PAGE.getDefaultKey().getValue()) {
+        //? }
             updatePage(1);
             return true;
         }

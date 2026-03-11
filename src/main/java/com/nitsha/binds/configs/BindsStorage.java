@@ -2,6 +2,10 @@ package com.nitsha.binds.configs;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
+import com.nitsha.binds.bind.Bind;
+import com.nitsha.binds.bind.BindHandler;
+import com.nitsha.binds.bind.Page;
+import com.nitsha.binds.bind.Preset;
 
 import java.io.File;
 import java.io.FileReader;
@@ -110,6 +114,8 @@ public class BindsStorage {
                 presets = GSON.fromJson(reader, listType);
                 if (presets == null || presets.isEmpty()) {
                     createDefault();
+                } else {
+                    migrateBindFields();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -203,7 +209,7 @@ public class BindsStorage {
                         }
                     }
 
-                    currentBinds.add(new Bind(ob.name, ob.icon, ob.keyCode, newActions));
+                    currentBinds.add(new Bind(ob.name, ob.icon, ob.keyCode, "press", 500, newActions));
 
                     if (currentBinds.size() == 8) {
                         pages.add(new Page(new ArrayList<>(currentBinds)));
@@ -236,6 +242,19 @@ public class BindsStorage {
                 oldFile.renameTo(CONFIG_DIR.resolve("fastbind_preset_" + i + ".json5.old").toFile());
             }
         }
+    }
+
+    private static void migrateBindFields() {
+        boolean changed = false;
+        for (Preset preset : presets) {
+            for (Page page : preset.pages) {
+                for (Bind bind : page.binds) {
+                    if (bind.keyMode == null) { bind.keyMode = "press"; changed = true; }
+                    if (bind.holdMs <= 0) { bind.holdMs = 500; changed = true; }
+                }
+            }
+        }
+        if (changed) save();
     }
 
     private static class OldBind {
@@ -272,7 +291,7 @@ public class BindsStorage {
     private static Page createDefaultPage() {
         List<Bind> binds = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
-            binds.add(new Bind("", "minecraft:structure_void", 0, new ArrayList<>()));
+            binds.add(new Bind("", "minecraft:structure_void", 0, "press", 500, new ArrayList<>()));
         }
         return new Page(binds);
     }
@@ -324,23 +343,21 @@ public class BindsStorage {
     }
 
     // Helper methods for compatibility with old BindsConfig API
+    private static Bind defaultBind() {
+        return new Bind("", "minecraft:structure_void", 0, "press", 500, new ArrayList<>());
+    }
+
     public static Bind getBind(int presetIndex, int bindIndex) {
-        if (presetIndex < 0 || presetIndex >= presets.size()) {
-            return new Bind("", "minecraft:structure_void", 0, new ArrayList<>());
-        }
+        if (presetIndex < 0 || presetIndex >= presets.size()) return defaultBind();
 
         Preset preset = presets.get(presetIndex);
         int pageIndex = bindIndex / 8;
         int bindInPage = bindIndex % 8;
 
-        if (pageIndex < 0 || pageIndex >= preset.pages.size()) {
-            return new Bind("", "minecraft:structure_void", 0, new ArrayList<>());
-        }
+        if (pageIndex < 0 || pageIndex >= preset.pages.size()) return defaultBind();
 
         Page page = preset.pages.get(pageIndex);
-        if (bindInPage < 0 || bindInPage >= page.binds.size()) {
-            return new Bind("", "minecraft:structure_void", 0, new ArrayList<>());
-        }
+        if (bindInPage < 0 || bindInPage >= page.binds.size()) return defaultBind();
 
         return page.binds.get(bindInPage);
     }

@@ -2,7 +2,7 @@ package com.nitsha.binds.gui.panels;
 
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.configs.Bind;
+import com.nitsha.binds.bind.Bind;
 import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
@@ -12,10 +12,11 @@ import com.nitsha.binds.gui.widget.ItemButton;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.SmallTextButton;
 import net.minecraft.client.Minecraft;
-import com.mojang.blaze3d.vertex.PoseStack;
 //? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//? }
+//?} else {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+ *///?}
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.MutableComponent;
@@ -45,6 +46,7 @@ public class BindsList extends AnimatedWindow {
     private static final ResourceLocation CLOSE_HOVER = Main.idSprite("close_hover");
     private static final ResourceLocation ITEMS_SELECTOR = Main.id("textures/gui/test/items_2.png");
     private static final ResourceLocation DELETE_SMALL = Main.id("textures/gui/test/delete_small_icon.png");
+    private static final ResourceLocation SURE_SMALL = Main.id("textures/gui/test/sure_small.png");
     private static final ResourceLocation ADD_NEW = Main.id("textures/gui/test/add_new_icon.png");
 
     private static final ResourceLocation SEPARATOR = Main.id("textures/gui/separator.png");
@@ -56,6 +58,11 @@ public class BindsList extends AnimatedWindow {
 
     private static final char[] SUPER = {'⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'};
 
+    private long deleteConfirmationTime = 0;
+
+    private SmallTextButton deleteBtn;
+    private SmallTextButton deleteConfBtn;
+
     public BindsList(BindsEditor screen, float x, int y, float width, int height, ResourceLocation t1, ResourceLocation t2, int delay) {
         super(x, y, width, height, t1, t2, delay);
         this.screen = screen;
@@ -63,8 +70,14 @@ public class BindsList extends AnimatedWindow {
     }
 
     private void initUI(BindsEditor screen) {
-        this.leftA = GUIUtils.createTexturedBtn(-19, 43, 11, 11, new ResourceLocation[]{ARROW_L, ARROW_L_HOVER}, button -> screen.setNewPage(-1));
-        this.rightA = GUIUtils.createTexturedBtn(141, 43, 11, 11, new ResourceLocation[]{ARROW_R, ARROW_R_HOVER}, button -> screen.setNewPage(1));
+        this.leftA = GUIUtils.createTexturedBtn(-19, 43, 11, 11, new ResourceLocation[]{ARROW_L, ARROW_L_HOVER}, button -> {
+            screen.setNewPage(-1);
+            confirm(false);
+        });
+        this.rightA = GUIUtils.createTexturedBtn(141, 43, 11, 11, new ResourceLocation[]{ARROW_R, ARROW_R_HOVER}, button -> {
+            screen.setNewPage(1);
+            confirm(false);
+        });
 
         this.closeBtn = GUIUtils.createTexturedBtn(110, 7, 16, 16, new ResourceLocation[]{CLOSE, CLOSE_HOVER}, button -> {
             screen.closeEditor();
@@ -111,7 +124,12 @@ public class BindsList extends AnimatedWindow {
             leftBtn.render(c);
         });
 
-        this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.delete"), 4, 107, 0xFF790e06, 61,"left", DELETE_SMALL, ()-> {
+        this.deleteBtn = new SmallTextButton(TextUtils.translatable("nitsha.binds.delete"), 4, 107, 0xFF790e06, 61,"left", DELETE_SMALL, ()-> {
+            deleteConfirmationTime = System.currentTimeMillis();
+            confirm(true);
+        });
+
+        this.deleteConfBtn = new SmallTextButton(TextUtils.empty(), 4, 107, 0xFFfac70c, 61,"left", SURE_SMALL, ()-> {
             int currentPage = BindsEditor.getCurrentPage();
             int currentPreset = BindsEditor.getCurrentPreset();
             int activeBind = screen.getActiveBind();
@@ -137,7 +155,8 @@ public class BindsList extends AnimatedWindow {
 
             screen.selectPage(currentPage);
             screen.getBindsListWindow().generateButtons(7, 31);
-        }));
+            confirm(false);
+        });
 
 
         this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.addNew"), 67, 107, 0xFF4d9109, 62, "left", ADD_NEW, ()-> {
@@ -152,6 +171,8 @@ public class BindsList extends AnimatedWindow {
         });
 
         this.addElement(closeBtn);
+        this.addElement(deleteBtn);
+        this.addElement(deleteConfBtn);
         generateButtons(7, 31);
     }
 
@@ -160,6 +181,15 @@ public class BindsList extends AnimatedWindow {
         for (char c : s.toCharArray())
             r.append(c >= '0' && c <= '9' ? SUPER[c - '0'] : c);
         return r.toString();
+    }
+
+    private void confirm(boolean status) {
+        this.deleteBtn.visible = !status;
+        this.deleteConfBtn.visible = status;
+    }
+
+    public boolean isDeleteConfirmation() {
+        return System.currentTimeMillis() - deleteConfirmationTime < 5000;
     }
 
     public void updateSelected(ItemStack icon) {
@@ -222,5 +252,13 @@ public class BindsList extends AnimatedWindow {
         GUIUtils.matricesUtil(ctx, 0, 0, 2, () -> {
             super.render(ctx, mouseX, mouseY, delta);
         });
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (deleteConfBtn.visible && !isDeleteConfirmation()) {
+            confirm(false);
+        }
     }
 }

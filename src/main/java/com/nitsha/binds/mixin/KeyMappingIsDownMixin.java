@@ -16,17 +16,21 @@ import org.spongepowered.asm.mixin.Mixin;
 //? } else if forge {
 // public abstract class KeyMappingIsDownMixin implements IForgeKeyMapping {
 //? }
+
     @Override
     public boolean isConflictContextAndModifierActive() {
-        if (KeepMovementHandler.shouldKeepMovement()) {
-            return true;
-        } else {
-            //? if neoforge {
-            // return IKeyMappingExtension.super.isConflictContextAndModifierActive();
-            //? } else if forge {
-            // return IForgeKeyMapping.super.isConflictContextAndModifierActive();
-            //? }
-        }
+        boolean originalResult;
+        //? if neoforge {
+        originalResult = IKeyMappingExtension.super.isConflictContextAndModifierActive();
+        //? } else if forge {
+        originalResult = IForgeKeyMapping.super.isConflictContextAndModifierActive();
+        //? } else {
+        originalResult = true;
+        //? }
+
+        if (!originalResult && KeepMovementHandler.shouldKeepMovement()) return true;
+
+        return originalResult;
     }
 }*/
 //? } else {

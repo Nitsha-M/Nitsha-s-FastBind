@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "com.nitsha.binds.mixin",
   "compatibilityLevel": "JAVA_${java_version}",
+  "priority": 1500,
   "mixins": [],
   "client": [
     "KeyMappingAccessor",

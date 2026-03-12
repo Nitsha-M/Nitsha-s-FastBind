@@ -1,5 +1,6 @@
 package com.nitsha.binds.configs;
 
+import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.screen.BindsGUI;
 import net.minecraft.client.Minecraft;
@@ -34,10 +35,11 @@ public class KeyBinds {
     //? if <1.21.9 {
     private static String category = "category.nitsha.binds";
     //? } else {
-    // private static KeyMapping.Category category = KeyMapping.Category.register(ResourceLocation.parse("category.nitsha.binds"));
+    // private static KeyMapping.Category category = KeyMapping.Category.register(Main.id("keys"));
     //? }
-
     public static void register() {
+
+
         //? if fabric {
         BINDS = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.nitsha.binds",
@@ -77,7 +79,6 @@ public class KeyBinds {
 
     //? if neoforge {
     /*public static void registerNeoForge(IEventBus modEventBus) {
-        // Регистрируем обработчик события на MOD event bus
         modEventBus.addListener(KeyBinds::onRegisterKeyMappings);
     }
     *///?}

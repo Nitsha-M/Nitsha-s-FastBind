@@ -24,13 +24,13 @@ import net.minecraft.client.input.InputWithModifiers;*/
 //? }
 
 public class BedrockButton extends AbstractButton {
-    private static final ResourceLocation NORMAL = Main.id("textures/gui/btns/button_normal.png");
-    private static final ResourceLocation DISABLE = Main.id("textures/gui/btns/button_disable.png");
-    private static final ResourceLocation PRESSED_NORMAL = Main.id("textures/gui/btns/button_pressed_normal.png");
-    private static final ResourceLocation PRESSED_DISABLE = Main.id("textures/gui/btns/button_pressed_disable.png");
+    private ResourceLocation NORMAL = Main.id("textures/gui/btns/bedrock_normal_bottom.png");
+    private final ResourceLocation DISABLE = Main.id("textures/gui/btns/bedrock_disabled_bottom.png");
+    private ResourceLocation PRESSED_NORMAL = Main.id("textures/gui/btns/bedrock_normal_top.png");
+    private final ResourceLocation PRESSED_DISABLE = Main.id("textures/gui/btns/bedrock_disabled_top.png");
     private final Runnable onClick;
 
-    private final String name;
+    private String name;
     private boolean isEnabled = false;
     private boolean isPressed = false;
     private boolean isToggle = false;
@@ -66,12 +66,32 @@ public class BedrockButton extends AbstractButton {
         this(name, x, y, width, height, isEnabled, onClick, 0xFFFFFFFF, 0xFF3C8527, 0xFF212121, 0xFFFFFFFF);
     }
 
+    public void setColors(int btnColor, int btnHoverColor, int textColor, int textHoverColor) {
+        this.btnColor = btnColor;
+        this.btnHoverColor = btnHoverColor;
+        this.textColor = textColor;
+        this.textHoverColor = textHoverColor;
+    }
+
+    public void setNormalTextures(ResourceLocation t1, ResourceLocation t2) {
+        NORMAL = t1;
+        PRESSED_NORMAL = t2;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public int getX() {
         return this.x;
     }
 
     public int getY() {
         return this.y;
+    }
+
+    public int getBtnColor() {
+        return btnColor;
     }
 
     public int getTextColor() {
@@ -126,10 +146,19 @@ public class BedrockButton extends AbstractButton {
         return yOffset;
     }
 
-    //? if >1.20.2 {
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    //? if >=1.21.11 {
+    /*@Override
+    public void renderContents(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        rndr(ctx, mouseX, mouseY, delta);
+    }*/
+    //?} else if >1.20.2 {
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        rndr(ctx, mouseX, mouseY, delta);
     }
     //?} else if >=1.20 {
     /*@Override
@@ -161,26 +190,16 @@ public class BedrockButton extends AbstractButton {
         yOffset = Mth.lerp(GUIUtils.clampSpeed(speed * delta), yOffset, targetOffset);
         if (Math.abs(yOffset - targetOffset) < 0.001f) yOffset = targetOffset;
 
-        int fX = this.getX() + 1;
-        int fY = this.getY() + 1;
-        int fW = this.getWidth() - 2;
-        int fH = this.getHeight() - 2;
-
-        // Border
-        GUIUtils.drawFill(c, this.getX(), this.getY() + Math.round(yOffset),
-                this.getX() + this.width, this.getY() + Math.round(yOffset) + 1, 0xFF000000);
-        GUIUtils.drawFill(c, this.getX(), this.getY() + this.height - 1,
-                this.getX() + this.width, this.getY() + this.height, 0xFF000000);
-        GUIUtils.drawFill(c, this.getX(), this.getY() + Math.round(yOffset),
-                this.getX() + 1, this.getY() + this.height, 0xFF000000);
-        GUIUtils.drawFill(c, this.getX() + this.width - 1, this.getY() + Math.round(yOffset),
-                this.getX() + this.width, this.getY() + this.height, 0xFF000000);
+        int fX = this.getX();
+        int fY = this.getY();
+        int fW = this.getWidth();
+        int fH = this.getHeight();
 
         // Bottom texture
-        GUIUtils.drawResizableBox(c, (!isEnabled) ? DISABLE : NORMAL, fX, fY + 2, fW, fH - 2, 3, 7, ((isHovered || isPressed) && isEnabled) ? btnHoverColor : btnColor);
+        GUIUtils.drawResizableBox(c, (!isEnabled) ? DISABLE : NORMAL, fX, fY + 2, fW, fH - 2, 5, 11, ((isHovered || isPressed) && isEnabled) ? btnHoverColor : btnColor);
 
         // Top texture
-        GUIUtils.drawResizableBox(c, (!isEnabled) ? PRESSED_DISABLE : PRESSED_NORMAL, fX, fY + Math.round(yOffset), fW, fH - 2, 3, 7, ((isHovered || isPressed) && isEnabled) ? btnHoverColor : btnColor);
+        GUIUtils.drawResizableBox(c, (!isEnabled) ? PRESSED_DISABLE : PRESSED_NORMAL, fX, fY + Math.round(yOffset), fW, fH - 2, 5, 11, ((isHovered || isPressed) && isEnabled) ? btnHoverColor : btnColor);
 
         GUIUtils.addText(c, TextUtils.literal(name), 0,
                 this.getX() + ((this.width / 2) - (textWidth / 2)),

@@ -73,7 +73,6 @@ public class TextField extends AbstractButton {
 
     private int x, y, width, height;
 
-    // Система форматирования
     public static class FormatMark implements Comparable<FormatMark> {
         public int position;
         public int styleCode;
@@ -191,14 +190,6 @@ public class TextField extends AbstractButton {
         }
     //? }
 
-    // ===== ФОРМАТИРОВАНИЕ =====
-
-    /**
-     * Устанавливает стиль в указанной позиции
-     *
-     * @param styleCode код стиля (0-15 цвета, 20-24 стили, 99 сброс)
-     * @param position  позиция в тексте
-     */
     public void setStyle(int styleCode, int position) {
         if (position < 0 || position > text.length())
             return;
@@ -217,32 +208,19 @@ public class TextField extends AbstractButton {
         Collections.sort(formatMarks);
     }
 
-    /**
-     * Устанавливает стиль на позиции курсора (форматирует текст после курсора)
-     *
-     * @param styleCode код стиля (0-15 цвета, 20-24 стили, 99 сброс)
-     */
     public void setStyle(int styleCode) {
         if (!isFocused())
             return;
 
         if (selectionStart != selectionEnd) {
-            // Если есть выделение, форматируем выделенный текст
             setStyleToSelection(styleCode);
         } else {
-            // Если нет выделения, ставим метку на позиции курсора
-            // (будет применяться ко всему тексту после курсора)
             setStyle(styleCode, selectionStart);
         }
     }
 
-    /**
-     * Устанавливает стиль на выделенный текст
-     * Ставит метку в начале выделения и восстанавливает предыдущий стиль в конце
-     */
     public void setStyleToSelection(int styleCode) {
         if (selectionStart == selectionEnd) {
-            // Если нет выделения, форматируем весь текст после курсора
             setStyle(styleCode, selectionStart);
             return;
         }
@@ -250,29 +228,21 @@ public class TextField extends AbstractButton {
         int start = Math.min(selectionStart, selectionEnd);
         int end = Math.max(selectionStart, selectionEnd);
 
-        // Ставим метку стиля в начале выделения
         setStyle(styleCode, start);
 
-        // Находим, какой стиль был до выделения, чтобы восстановить его после
         Style styleBefore = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
 
-        // Проходим по меткам до начала выделения, чтобы узнать текущий стиль
         for (FormatMark mark : formatMarks) {
             if (mark.position < start) {
                 styleBefore = applyStyleCode(mark.styleCode, styleBefore);
             } else if (mark.position == start) {
-                // Пропускаем метку, которую только что установили
                 continue;
             } else {
                 break;
             }
         }
 
-        // Если стиль - это цвет (0-15), ставим метку для восстановления в конце
-        // выделения
         if (styleCode >= 0 && styleCode <= 15) {
-            // Для цветов восстанавливаем белый цвет по умолчанию
-            // Находим предыдущий цвет
             Integer previousColor = null;
             for (FormatMark mark : formatMarks) {
                 if (mark.position < start && mark.styleCode >= 0 && mark.styleCode <= 15) {
@@ -280,14 +250,11 @@ public class TextField extends AbstractButton {
                 }
             }
 
-            // Восстанавливаем предыдущий цвет или белый
-            int restoreColor = (previousColor != null) ? previousColor : 15; // 15 = белый
+            int restoreColor = (previousColor != null) ? previousColor : 15;
 
-            // Удаляем существующую метку на позиции end
             formatMarks.removeIf(mark -> mark.position == end && mark.styleCode >= 0 && mark.styleCode <= 15);
             formatMarks.add(new FormatMark(end, restoreColor));
         } else if (styleCode >= 20 && styleCode <= 24) {
-            // Для стилей (жирный, курсив и т.д.) нужно проверить, был ли этот стиль активен
             boolean wasStyleActive = false;
             Style checkStyle = Style.EMPTY;
 
@@ -297,7 +264,6 @@ public class TextField extends AbstractButton {
                 }
             }
 
-            // Проверяем, был ли стиль активен
             switch (styleCode) {
                 case 20:
                     wasStyleActive = checkStyle.isBold();
@@ -316,53 +282,33 @@ public class TextField extends AbstractButton {
                     break;
             }
 
-            // Если стиль не был активен, то после выделения нужно его сбросить
             if (!wasStyleActive) {
-                // Восстанавливаем стиль, который был до выделения
                 formatMarks.removeIf(mark -> mark.position == end && mark.styleCode == styleCode);
-                // Можно либо ничего не делать (стиль останется), либо явно сбросить
-                // Для простоты оставляем как есть - стиль будет применяться до следующей метки
             }
         } else if (styleCode == 99) {
-            // Сброс - восстанавливаем стиль, который был до выделения
             formatMarks.removeIf(mark -> mark.position == end && mark.styleCode == 99);
         }
 
         Collections.sort(formatMarks);
     }
 
-    /**
-     * Удаляет стиль на указанной позиции
-     */
     public void removeStyle(int position) {
         formatMarks.removeIf(mark -> mark.position == position);
     }
 
-    /**
-     * Удаляет стиль на позиции курсора
-     */
     public void removeStyle() {
         int position = isFocused() ? selectionStart : text.length();
         removeStyle(position);
     }
 
-    /**
-     * Очищает все стили
-     */
     public void clearStyles() {
         formatMarks.clear();
     }
 
-    /**
-     * Получает все стили (для сохранения/восстановления)
-     */
     public List<FormatMark> getFormatMarks() {
         return new ArrayList<>(formatMarks);
     }
 
-    /**
-     * Устанавливает стили из сохраненного списка
-     */
     public void setFormatMarks(List<FormatMark> marks) {
         formatMarks.clear();
         formatMarks.addAll(marks);
@@ -390,9 +336,6 @@ public class TextField extends AbstractButton {
         Collections.sort(formatMarks);
     }
 
-    /**
-     * Применяет стиль к базовому Style
-     */
     private Style applyStyleCode(int code, Style baseStyle) {
         if (code >= 0 && code <= 15) {
             int[] colors = {
@@ -448,9 +391,6 @@ public class TextField extends AbstractButton {
         }
     }
 
-    /**
-     * Разбивает текст на сегменты с учётом форматирования
-     */
     private List<StyledSegment> buildStyledSegments(String text, int startFrom, int endAt) {
         List<StyledSegment> segments = new ArrayList<>();
 
@@ -496,9 +436,6 @@ public class TextField extends AbstractButton {
         }
     }
 
-    /**
-     * Обновляет позиции меток форматирования при изменении текста
-     */
     private void updateFormatMarksAfterEdit(int editPos, int lengthChange) {
         if (lengthChange == 0)
             return;
@@ -524,9 +461,6 @@ public class TextField extends AbstractButton {
         formatMarks.removeIf(mark -> mark.position < 0 || mark.position > text.length());
         Collections.sort(formatMarks);
     }
-
-
-    // ===== БАЗОВЫЕ МЕТОДЫ =====
 
     public void setEscapeEvent(Runnable event) {
         this.escapeEvent = event;
@@ -721,7 +655,12 @@ public class TextField extends AbstractButton {
     public void onPress() { }
     //? }
 
-    //? if >1.20.2 {
+    //? if >=1.21.11 {
+    /*@Override
+    public void renderContents(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        rndr(ctx, mouseX, mouseY, delta);
+    }*/
+    //?} else if >1.20.2 {
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         rndr(ctx, mouseX, mouseY, delta);
@@ -733,17 +672,16 @@ public class TextField extends AbstractButton {
      delta) {
      rndr(ctx, mouseX, mouseY, delta);
      }
-     *///?} else if >=1.19.4 {
+     *///? } else if >=1.19.4 {
     /*@Override
     public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
     }
-    *///?} else {
+    *///? } else {
     /*@Override
     public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
         rndr(context, mouseX, mouseY, delta);
-    }
-    */
+    }*/
     //? }
 
     private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
@@ -787,20 +725,18 @@ public class TextField extends AbstractButton {
                     continue;
 
                 Component styledText = TextUtils.literal(segment.text).setStyle(segment.style);
-                // ? if >=1.20 {
+                //? if >=1.20 {
                 ((GuiGraphics) ctx).drawString(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
-                // ?} else {
+                //? } else {
                 /*((PoseStack)ctx).pushPose();
                  this.font.drawShadow((PoseStack)ctx, styledText, renderX, renderY, 0xFFFFFFFF);
-                 ((PoseStack)ctx).popPose();
-                 */
-                // ?}
+                 ((PoseStack)ctx).popPose();*/
+                //? }
 
                 renderX += font.width(segment.text);
             }
         }
 
-        // Рисуем курсор
         int cursorPos = this.selectionStart - this.firstCharacterIndex;
         boolean cursorVisible = cursorPos >= 0 && cursorPos <= visibleLength;
         boolean shouldBlink = (Util.getMillis() - this.lastSwitchFocusTime) / 300L % 2L == 0L;
@@ -811,7 +747,6 @@ public class TextField extends AbstractButton {
             GUIUtils.drawFill(ctx, cursorX, renderY, cursorX + 1, renderY + 8, 0xFFFFFFFF);
         }
 
-        // Анимированный placeholder
         if (isAnimatedPlaceholder) {
             animatedPlaceholder(ctx);
         } else {
@@ -993,26 +928,23 @@ public class TextField extends AbstractButton {
     public void playDownSound(SoundManager soundManager) {
     }
 
-    // ? if >=1.19.3 {
+    //? if >=1.19.3 {
     @Override
     protected void updateWidgetNarration(NarrationElementOutput builder) {
     }
-    // ?} else if >=1.17 {
-    /*
-    @Override
-    public void updateNarration(NarrationElementOutput builder) {
-    }
-     */
-    // ?}
+    //? } else if >=1.17 {
+    /*@Override
+    public void updateNarration(NarrationElementOutput builder) { }*/
+    //? }
 
     @Override
-            //? if >=1.21.9 {
+    //? if >=1.21.9 {
     /*public boolean keyPressed(KeyEvent event) {
     int keyCode = event.key();
     int scanCode = event.scancode();*/
-            //? } else {
+    //? } else {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        //? }
+    //? }
         if (!isFocused())
             return false;
 

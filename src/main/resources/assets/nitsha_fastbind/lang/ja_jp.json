@@ -28,17 +28,23 @@
   "nitsha.binds.advances.actions.noActions" : "アクションがありません",
   "nitsha.binds.advances.actions.delay" : "ディレイ",
   "nitsha.binds.advances.actions.delayDesс" : "ディレイ（ミリ秒）",
-  "nitsha.binds.advances.actions.keybind" : "キー設定",
+  "nitsha.binds.advances.actions.keybind" : "キーバインド",
   "nitsha.binds.advances.actions.command" : "コマンド",
   "nitsha.binds.advances.actions.pressKey" : "キーを押す",
-  "nitsha.binds.advances.actions.showMessage" : "チャットにメッセージを表示",
+  "nitsha.binds.advances.actions.keyDown": "キーを押し下げる",
+  "nitsha.binds.advances.actions.keyUp": "キーを離す",
+  "nitsha.binds.advances.actions.showMessage" : "チャットメッセージ表示",
+  "nitsha.binds.advances.actions.keyEvent": "キーバインドイベントをシミュレート",
   "nitsha.binds.advances.actions.showTitle" : "画面にタイトルを表示",
   "nitsha.binds.advances.actions.commandLine" : "コマンド（/を含まない）",
-  "nitsha.binds.advances.actions.chatMessage" : "チャットにメッセージを表示",
+  "nitsha.binds.advances.actions.chatMessage" : "チャットメッセージ",
   "nitsha.binds.advances.actions.titleLine" : "タイトルのテキスト",
   "nitsha.binds.advances.actions.subtitleLine" : "サブタイトルのテキスト",
   "nitsha.binds.advances.actions.delayLine" : "ミリ秒単位",
   "nitsha.binds.advances.actions.addNew" : "追加",
+  "nitsha.binds.advances.actions.loop": "以下の操作を繰り返す",
+  "nitsha.binds.advances.actions.loop.actions": "アクション数 (最大10)",
+  "nitsha.binds.advances.actions.loop.count": "繰り返し回数 (最大10)",
 
   "nitsha.binds.advances.options.hold" : "%s を長押しでメニューを表示",
   "nitsha.binds.advances.options.openLastPage" : "前回のページを再表示",
@@ -50,15 +56,10 @@
   "nitsha.binds.bindActivate" : "バインド %s を起動しました",
 
   "nitsha.binds.advances.noKeyBind" : "未割り当て",
+  "nitsha.binds.advances.noSelectedKeyItem" : "アイテムを選択",
 
-  "nitsha.binds.advances.actions.keyDown" : "キーを押し続ける",
-  "nitsha.binds.advances.actions.keyUp" : "キーを離す",
-  "nitsha.binds.advances.actions.keyEvent" : "キーバインドイベントをシミュレート",
-  "nitsha.binds.advances.actions.loop" : "以下を繰り返す",
-  "nitsha.binds.advances.actions.loop.actions" : "アクション数 (最大10)",
-  "nitsha.binds.advances.actions.loop.count" : "繰り返し回数 (最大10)",
-  "nitsha.binds.advances.noSelectedKeyItem" : "選択してください",
   "nitsha.binds.advances.modals.selectKeyEvent" : "キーイベントを選択",
+
   "nitsha.binds.advances.actions.option.hold" : "長押し",
-  "nitsha.binds.advances.actions.option.press" : "押す"
+  "nitsha.binds.advances.actions.option.press" : "単押し"
 }

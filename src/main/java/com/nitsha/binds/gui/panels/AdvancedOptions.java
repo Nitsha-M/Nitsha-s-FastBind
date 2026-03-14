@@ -26,12 +26,10 @@ import net.minecraft.client.input.InputWithModifiers;*/
 //? }
 
 public class AdvancedOptions extends AnimatedWindow {
-    private static final ResourceLocation RANDOM = Main.idSprite("random");
-    private static final ResourceLocation RANDOM_HOVER = Main.idSprite("random_hover");
     private static final ResourceLocation TAB2_BG = Main.id("textures/gui/test/scroller.png");
-
     private static final ResourceLocation NORMAL = Main.id("textures/gui/btns/bedrock_normal_bottom_right.png");
     private static final ResourceLocation PRESSED_NORMAL = Main.id("textures/gui/btns/bedrock_normal_top_right.png");
+    private static final ResourceLocation RANDOM_SMALL = Main.id("textures/gui/test/random.png");
     private final List<TabButton> tabsBtn = new ArrayList<>();
 
     private int currentTab = 0;
@@ -167,13 +165,13 @@ public class AdvancedOptions extends AnimatedWindow {
 
     private void fillSecondTab() {
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.choose_icon"), 0, 5, 6, "top", "left",
+            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.choose_icon"), 0, 5, 10, "left", "center",
                     0xFF212121, false);
         });
-        this.addElement(GUIUtils.createTexturedBtn(getWidth() - 53, 6, 49, 9,
-                new ResourceLocation[]{ RANDOM, RANDOM_HOVER }, button -> {
-                    this.secondTab.pickRandom();
-                }));
+
+        this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.advances.random_icon"), getWidth() - 4, 6, 7, 0x33000000, 0xFF232425, 0xFF232425, 0xFFe7bc1c, 0, "right", RANDOM_SMALL, ()-> {
+            this.secondTab.pickRandom();
+        }));
         this.addElement(this.secondTab);
     }
 

@@ -146,8 +146,17 @@ public class KeyEventAction extends ActionType {
         //?} else {
         /*PoseStack c = (PoseStack) ctx;*/
         //?}
-        GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent"), 0,
-                x + 2, y + 8, "top", "left", 0xFF212121, false);
+
+        String userLanguage = GUIUtils.getUL();
+        if (userLanguage.equals("ja_jp") || userLanguage.equals("uk_ua")) {
+            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent_1"), 0,
+                    x + 2, y + 4, "top", "left", 0xFF212121, false);
+            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent_2"), 0,
+                    x + 2, y + 12, "top", "left", 0xFF212121, false);
+        } else {
+            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent"), 0,
+                    x + 2, y + 8, "top", "left", 0xFF212121, false);
+        }
         selector.render(c, mouseX, mouseY, delta);
         msField.render(c, mouseX, mouseY, delta);
         modeButton.render(c, mouseX, mouseY, delta);

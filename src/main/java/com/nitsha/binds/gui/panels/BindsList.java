@@ -58,10 +58,9 @@ public class BindsList extends AnimatedWindow {
 
     private static final char[] SUPER = {'⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'};
 
-    private long deleteConfirmationTime = 0;
-
     private SmallTextButton deleteBtn;
-    private SmallTextButton deleteConfBtn;
+    private long deleteConfirmationTime = 0;
+    private boolean deleteConfirmShown = false;
 
     public BindsList(BindsEditor screen, float x, int y, float width, int height, ResourceLocation t1, ResourceLocation t2, int delay) {
         super(x, y, width, height, t1, t2, delay);
@@ -124,43 +123,43 @@ public class BindsList extends AnimatedWindow {
             leftBtn.render(c);
         });
 
-        this.deleteBtn = new SmallTextButton(TextUtils.translatable("nitsha.binds.delete"), 4, 107, 0xFF790e06, 61,"left", DELETE_SMALL, ()-> {
-            deleteConfirmationTime = System.currentTimeMillis();
-            confirm(true);
+        this.deleteBtn = new SmallTextButton(TextUtils.translatable("nitsha.binds.delete"), 4, 107, 0xFF790e06, 61, "left", DELETE_SMALL, ()-> {
+            if (deleteConfirmShown) {
+                int currentPage = BindsEditor.getCurrentPage();
+                int currentPreset = BindsEditor.getCurrentPreset();
+                int activeBind = screen.getActiveBind();
+
+                boolean activeBindOnDeletedPage = screen.isActiveBindOnPage(currentPage);
+
+                BindsStorage.removePage(currentPreset, currentPage);
+
+                int newTotalPages = BindsStorage.presets.get(currentPreset).pages.size();
+
+                if (currentPage >= newTotalPages) {
+                    currentPage = newTotalPages - 1;
+                }
+
+                if (activeBindOnDeletedPage) {
+                    screen.setActiveBind(screen.getFirstBindOfPage(currentPage));
+                    screen.selectBind();
+                }
+                else if (activeBind > screen.getFirstBindOfPage(currentPage)) {
+                    screen.setActiveBind(activeBind - 8);
+                    screen.selectBind();
+                }
+
+                screen.selectPage(currentPage);
+                screen.getBindsListWindow().generateButtons(7, 31);
+                confirm(false);
+            } else {
+                deleteConfirmationTime = System.currentTimeMillis();
+                confirm(true);
+            }
         });
-
-        this.deleteConfBtn = new SmallTextButton(TextUtils.empty(), 4, 107, 0xFFfac70c, 61,"left", SURE_SMALL, ()-> {
-            int currentPage = BindsEditor.getCurrentPage();
-            int currentPreset = BindsEditor.getCurrentPreset();
-            int activeBind = screen.getActiveBind();
-
-            boolean activeBindOnDeletedPage = screen.isActiveBindOnPage(currentPage);
-
-            BindsStorage.removePage(currentPreset, currentPage);
-
-            int newTotalPages = BindsStorage.presets.get(currentPreset).pages.size();
-
-            if (currentPage >= newTotalPages) {
-                currentPage = newTotalPages - 1;
-            }
-
-            if (activeBindOnDeletedPage) {
-                screen.setActiveBind(screen.getFirstBindOfPage(currentPage));
-                screen.selectBind();
-            }
-            else if (activeBind > screen.getFirstBindOfPage(currentPage)) {
-                screen.setActiveBind(activeBind - 8);
-                screen.selectBind();
-            }
-
-            screen.selectPage(currentPage);
-            screen.getBindsListWindow().generateButtons(7, 31);
-            confirm(false);
-        });
-
 
         this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.addNew"), 67, 107, 0xFF4d9109, 62, "left", ADD_NEW, ()-> {
             BindsStorage.addPage(BindsEditor.getCurrentPreset());
+            deleteBtn.setEnabled(true);
         }));
 
         this.open(() -> {
@@ -172,7 +171,6 @@ public class BindsList extends AnimatedWindow {
 
         this.addElement(closeBtn);
         this.addElement(deleteBtn);
-        this.addElement(deleteConfBtn);
         generateButtons(7, 31);
     }
 
@@ -183,9 +181,15 @@ public class BindsList extends AnimatedWindow {
         return r.toString();
     }
 
-    private void confirm(boolean status) {
-        this.deleteBtn.visible = !status;
-        this.deleteConfBtn.visible = status;
+    public void confirm(boolean status) {
+        deleteConfirmShown = status;
+        if (status) {
+            deleteBtn.setColors(0xFFfac70c, 0xFFF5CC35, 0xFFFFFFFF, 0xFFFFFFFF);
+            deleteBtn.setIcon(SURE_SMALL);
+        } else {
+            deleteBtn.setColors(0xFF790e06, 0xFF8C150B, 0xFFFFFFFF, 0xFFFFFFFF);
+            deleteBtn.setIcon(DELETE_SMALL);
+        }
     }
 
     public boolean isDeleteConfirmation() {
@@ -239,6 +243,7 @@ public class BindsList extends AnimatedWindow {
         if (aB == currentPage) {
             buttons.get(activeBind - (8 * aB)).setSelected(true);
         }
+        deleteBtn.setEnabled(BindsStorage.presets.get(BindsEditor.getCurrentPreset()).pages.size() > 1);
     }
 
     @Override
@@ -257,7 +262,7 @@ public class BindsList extends AnimatedWindow {
     @Override
     public void tick() {
         super.tick();
-        if (deleteConfBtn.visible && !isDeleteConfirmation()) {
+        if (deleteConfirmShown && !isDeleteConfirmation()) {
             confirm(false);
         }
     }

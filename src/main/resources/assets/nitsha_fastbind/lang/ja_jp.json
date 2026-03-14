@@ -17,12 +17,14 @@
   "nitsha.binds.list" : "バインド一覧",
   "nitsha.binds.empty" : "空",
   "nitsha.binds.page" : "ページ",
+  "nitsha.binds.autosave" : "オートセーブ",
 
   "nitsha.binds.advances.tab1" : "アクション",
   "nitsha.binds.advances.tab2" : "アイコン",
   "nitsha.binds.advances.tab3" : "MODオプション",
 
   "nitsha.binds.advances.choose_icon" : "アイコンを選択",
+  "nitsha.binds.advances.random_icon" : "ランダム",
 
   "nitsha.binds.advances.actions" : "複数アクション",
   "nitsha.binds.advances.actions.noActions" : "アクションがありません",
@@ -35,6 +37,8 @@
   "nitsha.binds.advances.actions.keyUp": "キーを離す",
   "nitsha.binds.advances.actions.showMessage" : "チャットメッセージ表示",
   "nitsha.binds.advances.actions.keyEvent": "キーバインドイベントをシミュレート",
+  "nitsha.binds.advances.actions.keyEvent_1": "キーバインドイベント",
+  "nitsha.binds.advances.actions.keyEvent_2": "をシミュレート",
   "nitsha.binds.advances.actions.showTitle" : "画面にタイトルを表示",
   "nitsha.binds.advances.actions.commandLine" : "コマンド（/を含まない）",
   "nitsha.binds.advances.actions.chatMessage" : "チャットメッセージ",

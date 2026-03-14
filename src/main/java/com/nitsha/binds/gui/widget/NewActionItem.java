@@ -57,7 +57,7 @@ public class NewActionItem extends AbstractWidget {
         //?}
         GUIUtils.drawFill(ctx, getXPos() + 3, getYPos() + 5, getXPos() + 5, getYPos() + 12, this.color);
         GUIUtils.drawFill(ctx, getXPos() + 2, getYPos(), getXPos() + getWidth() - 2, getYPos() + 1, 0xFF555555);
-        GUIUtils.addText(c, TextUtils.literal(GUIUtils.truncateString(this.name, 25)), 0, getXPos() + 7, getYPos() + 4, "left", "top", 0xFFFFFFFF, false);
+        GUIUtils.addText(c, TextUtils.literal(GUIUtils.truncateString(this.name, 25)), 0, getXPos() + 7, getYPos() + 8, "left", "center", 0xFFFFFFFF, false);
         GUIUtils.adaptiveDrawTexture(ctx, ADD_NEW, this.getXPos() + this.getWidth() - 10, this.getYPos() + 6, 0, 0, 5, 5, 5, 5);
         if ((this.isMouseOver(mouseX, mouseY) || isHovered) && parent.isOpen())
             GUIUtils.drawFill(c, getXPos(), getYPos(), getXPos() + getWidth(), getYPos() + getHeight(), 0x0DFFFFFF);

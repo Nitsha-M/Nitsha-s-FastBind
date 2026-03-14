@@ -52,8 +52,8 @@ public class BasicOptionsWindow extends AnimatedWindow {
     }
 
     private BedrockIconButton deleteBtn;
-    private BedrockIconButton deleteConfBtn;
     private long deleteConfirmationTime = 0;
+    private boolean deleteConfirmShown = false;
 
     private void initUI(BindsEditor screen) {
         Font textRenderer = Minecraft.getInstance().font;
@@ -92,6 +92,11 @@ public class BasicOptionsWindow extends AnimatedWindow {
                 /*PoseStack c = (PoseStack) ctx;
                  *///?}
                 GUIUtils.adaptiveDrawTexture(ctx, CAT_MENU, 4, 165, 0, 0, 126, 26, 126, 26);
+                GUIUtils.addText(
+                        ctx, TextUtils.translatable("nitsha.binds.autosave"), 0,
+                        4,
+                        178,
+                        "left", "center", 0xFF7f7f7f, false);
                 int eyeCenterX = 105;
                 int eyeCenterY = 175;
                 float maxOffsetX = 1.4f;
@@ -135,16 +140,16 @@ public class BasicOptionsWindow extends AnimatedWindow {
         this.addElement(new BedrockIconButton(4, 151, 43, 20, "copy", true, screen::copyBind));
 
         this.deleteBtn = new BedrockIconButton(94, 151, 43, 20, "delete", true, ()-> {
-            deleteConfirmationTime = System.currentTimeMillis();
-            confirm(true);
+            if (deleteConfirmShown) {
+                screen.deleteBind();
+                confirm(false);
+            } else {
+                deleteConfirmationTime = System.currentTimeMillis();
+                confirm(true);
+            }
         }, 0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF);
-        this.deleteConfBtn = new BedrockIconButton(94, 151, 43, 20, "confirm", true, () -> {
-            screen.deleteBind();
-            confirm(false);
-        }, 0xFFfac70c, 0xFFfcd02f, 0xFFFFFFFF, 0xFFFFFFFF);
 
         this.addElement(deleteBtn);
-        this.addElement(deleteConfBtn);
 
         this.addElement(bindNameField);
         this.addElement(editIconBtn);
@@ -162,8 +167,12 @@ public class BasicOptionsWindow extends AnimatedWindow {
         return editIconBtn;
     }
 
-    public BedrockIconButton getPasteIcon() {
+    public BedrockIconButton getPasteBtn() {
         return pasteBtn;
+    }
+
+    public BedrockIconButton getDeleteBtn() {
+        return deleteBtn;
     }
 
     public boolean isInsideCat(double mouseX, double mouseY, int x, int y, int width, int height) {
@@ -176,8 +185,14 @@ public class BasicOptionsWindow extends AnimatedWindow {
     }
 
     public void confirm(boolean status) {
-        this.deleteBtn.visible = !status;
-        this.deleteConfBtn.visible = status;
+        deleteConfirmShown = status;
+        if (status) {
+            deleteBtn.setColors(0xFFfac70c, 0xFFfcd02f, 0xFFFFFFFF, 0xFFFFFFFF);
+            deleteBtn.setIcon("confirm");
+        } else {
+            deleteBtn.setColors(0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF);
+            deleteBtn.setIcon("delete");
+        }
     }
 
     public boolean isDeleteConfirmation() {
@@ -232,7 +247,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
     @Override
     public void tick() {
         super.tick();
-        if (deleteConfBtn.visible && !isDeleteConfirmation()) {
+        if (deleteConfirmShown && !isDeleteConfirmation()) {
             confirm(false);
         }
     }

@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 
 public class BedrockIconButton extends BedrockButton {
-    private final ResourceLocation ICON;
+    private ResourceLocation ICON;
     private boolean itemIcon = false;
     private ItemStack iI;
     private int xO = 0;
@@ -33,6 +33,10 @@ public class BedrockIconButton extends BedrockButton {
             this.itemIcon = true;
             this.iI = stack;
         }
+    }
+
+    public void setIcon(String iconName) {
+        this.ICON = Main.id("textures/gui/sprites/" + iconName + ".png");
     }
 
     public BedrockIconButton(int x, int y, int width, int height, String iconName, boolean isEnabled, Runnable onClick) {

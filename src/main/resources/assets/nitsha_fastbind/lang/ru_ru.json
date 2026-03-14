@@ -16,13 +16,14 @@
   "nitsha.binds.list" : "Список биндов",
   "nitsha.binds.empty" : "Пусто",
   "nitsha.binds.page" : "ᴄᴛᴘᴀницᴀ",
-
+  "nitsha.binds.autosave" : "ᴀʙᴛоᴄохᴘᴀнᴇниᴇ",
 
   "nitsha.binds.advances.tab1" : "дᴇйᴄᴛʙия",
   "nitsha.binds.advances.tab2" : "иᴋонᴋᴀ",
   "nitsha.binds.advances.tab3" : "нᴀᴄᴛᴘойᴋи",
 
   "nitsha.binds.advances.choose_icon" : "ʙыбᴘᴀᴛь иᴋонᴋу",
+  "nitsha.binds.advances.random_icon" : "ᴄлучᴀйнᴀя",
 
   "nitsha.binds.advances.actions" : "нᴀбоᴘ дᴇйᴄᴛʙий",
   "nitsha.binds.advances.actions.noActions" : "ᴄпиᴄоᴋ пуᴄᴛ",
@@ -30,7 +31,13 @@
   "nitsha.binds.advances.actions.delayDesс" : "ждᴀᴛь ʙ мᴄ",
   "nitsha.binds.advances.actions.keybind" : "ᴋлᴀʙишᴀ",
   "nitsha.binds.advances.actions.command" : "ᴋомᴀндᴀ",
-  "nitsha.binds.advances.actions.pressKey" : "ᴋлᴀʙишᴀ",
+  "nitsha.binds.advances.actions.pressKey" : "нᴀжᴀᴛь ᴋлᴀʙишу",
+  "nitsha.binds.advances.actions.keyDown" : "зᴀжᴀᴛь ᴋлᴀʙишу",
+  "nitsha.binds.advances.actions.keyUp" : "оᴛпуᴄᴛиᴛь ᴋлᴀʙишу",
+  "nitsha.binds.advances.actions.pressKey_1" : "нᴀжᴀᴛь",
+  "nitsha.binds.advances.actions.keyDown_1" : "зᴀжᴀᴛь",
+  "nitsha.binds.advances.actions.keyUp_1" : "оᴛпуᴄᴛиᴛь",
+  "nitsha.binds.advances.actions.key" : "ᴋлᴀʙишу",
   "nitsha.binds.advances.actions.showMessage" : "ᴄообщᴇниᴇ ʙ чᴀᴛ",
   "nitsha.binds.advances.actions.showTitle" : "ᴛᴇᴋᴄᴛ нᴀ эᴋᴘᴀн",
   "nitsha.binds.advances.actions.commandLine" : "команда (без /)",
@@ -51,8 +58,6 @@
 
   "nitsha.binds.advances.noKeyBind" : "Не выбрано",
 
-  "nitsha.binds.advances.actions.keyDown" : "нᴀжᴀᴛь ᴋлᴀʙишу",
-  "nitsha.binds.advances.actions.keyUp" : "оᴛпуᴄᴛиᴛь ᴋлᴀʙишу",
   "nitsha.binds.advances.actions.keyEvent" : "бинд-ᴄобыᴛиᴇ",
   "nitsha.binds.advances.actions.loop" : "поʙᴛоᴘиᴛь ᴄлᴇдующᴇᴇ",
   "nitsha.binds.advances.actions.loop.actions" : "Кол-во действий (10 макс.)",

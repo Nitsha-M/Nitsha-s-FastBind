@@ -68,6 +68,10 @@ public class GUIUtils {
         addText(ctx, text, width, offsetX, offsetY, "left", "top", color, true);
     }
 
+    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY, int color, String hAlign, String vAlign) {
+        addText(ctx, text, width, offsetX, offsetY, hAlign, vAlign, color, true);
+    }
+
     public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color) {
         addText(ctx, text, width, offsetX, offsetY, hAlign, vAlign, color, true);
     }
@@ -446,5 +450,13 @@ public class GUIUtils {
 
     public static void drawItem(Object ctx, ItemStack stack, int x, int y) {
         drawItem(ctx, stack, x, y, 1);
+    }
+
+    public static String getUL() {
+        //? if >=1.19.4 {
+        return Minecraft.getInstance().getLanguageManager().getSelected().toString();
+        //? } else {
+        // return Minecraft.getInstance().getLanguageManager().getSelected().getCode().toString();
+        //? }
     }
 }

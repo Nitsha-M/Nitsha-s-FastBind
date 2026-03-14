@@ -16,12 +16,14 @@
   "nitsha.binds.list" : "List of binds",
   "nitsha.binds.empty" : "Empty",
   "nitsha.binds.page" : "ᴘᴀɢᴇ",
+  "nitsha.binds.autosave" : "ᴀᴜᴛᴏsᴀᴠᴇ",
 
   "nitsha.binds.advances.tab1" : "ᴀᴄᴛɪᴏɴs",
   "nitsha.binds.advances.tab2" : "ɪᴄᴏɴ",
   "nitsha.binds.advances.tab3" : "ᴍᴏᴅ ᴏᴘᴛɪᴏɴs",
 
   "nitsha.binds.advances.choose_icon" : "ᴄʜᴏᴏsᴇ ɪᴄᴏɴ",
+  "nitsha.binds.advances.random_icon" : "ʀᴀɴᴅᴏᴍ",
 
   "nitsha.binds.advances.actions" : "ᴍᴜʟᴛɪᴘʟᴇ ᴀᴄᴛɪᴏɴs",
   "nitsha.binds.advances.actions.noActions" : "ᴛʜᴇʀᴇ ᴀʀᴇ ɴᴏ ᴀᴄᴛɪᴏɴs",

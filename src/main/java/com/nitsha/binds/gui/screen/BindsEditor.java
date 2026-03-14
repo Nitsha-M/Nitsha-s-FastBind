@@ -267,7 +267,7 @@ public class BindsEditor extends Screen {
             copied.keyMode = currentBind.keyMode;
             copied.holdMs = currentBind.holdMs;
             copied.actions = currentBind.actions;
-            window_BasicOptions.getPasteIcon().setEnabled(true);
+            window_BasicOptions.getPasteBtn().setEnabled(true);
         }
     }
 
@@ -287,6 +287,11 @@ public class BindsEditor extends Screen {
         window_AdvancedOptions.getSecondTab().updateButtons(currentBind.icon);
         window_AdvancedOptions.loadTriggerMode(currentBind.keyMode, currentBind.holdMs);
         window_BasicOptions.confirm(false);
+        if(currentBind.name.isEmpty()) {
+            window_BasicOptions.getDeleteBtn().setEnabled(false);
+        } else {
+            window_BasicOptions.getDeleteBtn().setEnabled(true);
+        }
     }
 
     // Render

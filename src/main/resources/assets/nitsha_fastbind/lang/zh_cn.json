@@ -16,12 +16,14 @@
   "nitsha.binds.list": "绑定列表",
   "nitsha.binds.empty": "暂无内容",
   "nitsha.binds.page": "页码",
+  "nitsha.binds.autosave" : "自动保存",
 
   "nitsha.binds.advances.tab1": "动作",
   "nitsha.binds.advances.tab2": "图标",
   "nitsha.binds.advances.tab3": "模式选项",
 
   "nitsha.binds.advances.choose_icon": "选择图标",
+  "nitsha.binds.advances.random_icon" : "随机",
 
   "nitsha.binds.advances.actions": "多重动作",
   "nitsha.binds.advances.actions.noActions": "尚无动作",

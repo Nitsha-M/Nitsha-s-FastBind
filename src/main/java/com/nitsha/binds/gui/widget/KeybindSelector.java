@@ -131,8 +131,8 @@ public class KeybindSelector extends AbstractButton {
 
         GUIUtils.addText(ctx, TextUtils.literal(fName), 0,
                 getX() + (width / 2) - (textWidth / 2),
-                getY() + Math.round(yOffset) + (height / 2) - (font.lineHeight / 2),
-                "top", "left", (isHovered || isPressed) ? 0xFFFFFFFF : 0xFF212121, false);
+                getY() + Math.round(yOffset) + (height / 2),
+                "left", "center", (isHovered || isPressed) ? 0xFFFFFFFF : 0xFF212121, false);
     }
 
     //? if >=1.19.3 {

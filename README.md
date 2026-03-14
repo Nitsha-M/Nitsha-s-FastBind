@@ -1,4 +1,4 @@
-![Nitsha's FastBind](https://cdn.modrinth.com/data/cached_images/7d8ac2e638b8fc78f3524b16c872a28dfe2e554b.png)
+![Nitsha's FastBind](https://cdn.modrinth.com/data/cached_images/274f8f49a2b8912b051cc675a39378ab69a1b4bf_0.webp)
 
 <p align="center">
 Adds a menu where you can activate pre-programmed actions. Configure command execution or key press emulation the way you want
@@ -39,6 +39,16 @@ Adds a menu where you can activate pre-programmed actions. Configure command exe
 If you have any ideas for a new type of action, I’ll be happy to hear them! You can share your ideas [here](https://discord.com/channels/773736638579998730/1349234377648771197)
 
 <hr class="solid">
+
+## Supported Languages
+| Language | Code | Author |
+|------|------|------|
+| English | en_us | Nitsha_M |
+| Russian | ru_ru | Nitsha_M |
+| Ukrainian | uk_ua | AI translation |
+| Japanese | ja_jp | PExPE3/elinka47 |
+| Simplified Chinese | zh_cn | GaoXinYang |
+| Turkish | tr_tr | AI translation |
 
 ## How to use
 By default, the **FastBind** menu opens while you are pressing the `F8` key. You can switch pages using the `F7` and `F9` keys. (each key bind can be changed in the options)

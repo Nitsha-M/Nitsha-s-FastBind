@@ -16,12 +16,14 @@
   "nitsha.binds.list" : "Список біндів",
   "nitsha.binds.empty" : "Порожньо",
   "nitsha.binds.page" : "ᴄᴛоᴘɪнᴋᴀ",
+  "nitsha.binds.autosave" : "ᴀʙᴛозбᴇᴘᴇжᴇння",
 
   "nitsha.binds.advances.tab1" : "дії",
   "nitsha.binds.advances.tab2" : "ɪᴋонᴋᴀ",
   "nitsha.binds.advances.tab3" : "опцɪї",
 
   "nitsha.binds.advances.choose_icon" : "обᴘᴀᴛи ɪᴋонᴋу",
+  "nitsha.binds.advances.random_icon" : "ʙипᴀдᴋоʙо",
 
   "nitsha.binds.advances.actions" : "ᴋɪльᴋᴀ дɪй",
   "nitsha.binds.advances.actions.noActions" : "нᴇмᴀє дɪй",
@@ -29,7 +31,13 @@
   "nitsha.binds.advances.actions.delayDesс" : "зᴀᴛᴘимᴋᴀ ʙ мᴄ",
   "nitsha.binds.advances.actions.keybind" : "ᴋлᴀʙɪшᴀ",
   "nitsha.binds.advances.actions.command" : "ᴋомᴀндᴀ",
-  "nitsha.binds.advances.actions.pressKey" : "нᴀᴛиᴄ. ᴋлᴀʙɪшу",
+  "nitsha.binds.advances.actions.pressKey" : "нᴀᴛиᴄнуᴛи ᴋлᴀʙɪшу",
+  "nitsha.binds.advances.actions.keyDown" : "затиснути ᴋлᴀʙɪшу",
+  "nitsha.binds.advances.actions.keyUp" : "ʙɪдпуᴄᴛиᴛи ᴋлᴀʙɪшу",
+  "nitsha.binds.advances.actions.pressKey_1" : "нᴀᴛиᴄнуᴛи",
+  "nitsha.binds.advances.actions.keyDown_1" : "затиснути",
+  "nitsha.binds.advances.actions.keyUp_1" : "ʙɪдпуᴄᴛиᴛи",
+  "nitsha.binds.advances.actions.key" : "ᴋлᴀʙɪшу",
   "nitsha.binds.advances.actions.showMessage" : "поʙɪдомлᴇння ʙ чᴀᴛɪ",
   "nitsha.binds.advances.actions.showTitle" : "зᴀголоʙоᴋ нᴀ ᴇᴋᴘᴀнɪ",
   "nitsha.binds.advances.actions.commandLine" : "Команда (без /)",
@@ -38,6 +46,12 @@
   "nitsha.binds.advances.actions.subtitleLine" : "Текст підзаголовка",
   "nitsha.binds.advances.actions.delayLine" : "у мс",
   "nitsha.binds.advances.actions.addNew" : "дод.",
+  "nitsha.binds.advances.actions.keyEvent" : "ᴄимулюʙᴀᴛи подɪю ᴋлᴀʙɪшɪ",
+  "nitsha.binds.advances.actions.keyEvent_1" : "ᴄимулюʙᴀᴛи",
+  "nitsha.binds.advances.actions.keyEvent_2" : "подɪю ᴋлᴀʙɪшɪ",
+  "nitsha.binds.advances.actions.loop" : "поʙᴛоᴘиᴛи нᴀᴄᴛупнᴇ",
+  "nitsha.binds.advances.actions.loop.actions" : "Кількість дій (макс. 10)",
+  "nitsha.binds.advances.actions.loop.count" : "Повторень (макс. 10)",
 
   "nitsha.binds.advances.options.hold" : "Затисніть %s для меню",
   "nitsha.binds.advances.options.openLastPage" : "Відкрити останню сторінку",
@@ -50,14 +64,10 @@
 
   "nitsha.binds.advances.noKeyBind" : "Не призначено",
 
-  "nitsha.binds.advances.actions.keyDown" : "зᴀᴛиᴄ. ᴋлᴀʙ.",
-  "nitsha.binds.advances.actions.keyUp" : "ʙɪдп. ᴋлᴀʙ.",
-  "nitsha.binds.advances.actions.keyEvent" : "ᴋлᴀʙ. ɪʙᴇнᴛ",
-  "nitsha.binds.advances.actions.loop" : "поʙᴛоᴘиᴛи нᴀᴄᴛупнᴇ",
-  "nitsha.binds.advances.actions.loop.actions" : "Кількість дій (макс. 10)",
-  "nitsha.binds.advances.actions.loop.count" : "Повторень (макс. 10)",
   "nitsha.binds.advances.noSelectedKeyItem" : "Оберіть елемент",
+
   "nitsha.binds.advances.modals.selectKeyEvent" : "обᴇᴘɪᴛь подɪю ᴋлᴀʙɪшɪ",
+
   "nitsha.binds.advances.actions.option.hold" : "Затиснути",
   "nitsha.binds.advances.actions.option.press" : "Натиснути"
 }

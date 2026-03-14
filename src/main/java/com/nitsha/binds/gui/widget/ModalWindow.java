@@ -40,7 +40,7 @@ public class ModalWindow extends AnimatedWindow {
 
         this.addDrawElement((ctx, mouseX, mouseY) -> {
             GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(TextUtils.translatable(title).getString(), 20)), 0,
-                    7, 6, "top", "left", 0xFF212121, false);
+                    7, 10, "left", "center", 0xFF212121, false);
 //            GUIUtils.drawFill(ctx, 4, 19, width - 4, 20, 0xFF212121);
         }, 1);
 

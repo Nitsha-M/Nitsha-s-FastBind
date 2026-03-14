@@ -42,7 +42,13 @@ public class TabButton extends AbstractWidget {
         this.x = x;
         this.y = y;
 
-        int width = Minecraft.getInstance().font.width(name) + 10;
+        String userLanguage = GUIUtils.getUL();
+        int widthOffset = 10;
+        if (userLanguage.equals("ja_jp") || userLanguage.equals("ru_ru")) {
+            widthOffset = 6;
+        }
+
+        int width = Minecraft.getInstance().font.width(name) + widthOffset;
         this.setWidth(width);
     }
 
@@ -93,7 +99,7 @@ public class TabButton extends AbstractWidget {
         float targetPointX = (this.selected) ? this.getY() : this.getY() + 2;
         pointY = Mth.lerp(GUIUtils.clampSpeed(speed * delta), pointY, targetPointX);
         GUIUtils.drawResizableBox(context, BACKGROUND, this.getX(), Math.round(pointY), this.getWidth(), this.getHeight() + 10, 7, 15);
-        GUIUtils.addText(context, name, 0, this.getX() + 5, Math.round(pointY) + 5, (this.selected) ? 0xFFFFFFFF : 0xFFA8A8A8);
+        GUIUtils.addText(context, name, this.width, this.getX(), Math.round(pointY) + 5, (this.selected) ? 0xFFFFFFFF : 0xFFA8A8A8, "center", "top");
     }
 
     //? if >=1.19.3 {

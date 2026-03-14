@@ -629,12 +629,11 @@ public class TextField extends AbstractButton {
             this.firstCharacterIndex = Math.min(this.firstCharacterIndex, this.text.length());
             int innerWidth = this.width - 8;
 
-            String visibleText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex),
-                    innerWidth);
-            int visibleEnd = visibleText.length() + this.firstCharacterIndex;
+            String visibleText = styledSubstrByWidth(this.firstCharacterIndex, innerWidth);
+            int visibleEnd = this.firstCharacterIndex + visibleText.length();
 
             if (cursor == this.firstCharacterIndex) {
-                String trimmed = this.font.plainSubstrByWidth(this.text, innerWidth, true);
+                String trimmed = styledSubstrByWidth(Math.max(0, this.selectionStart - innerWidth / 4), innerWidth);
                 this.firstCharacterIndex = Math.max(0, this.firstCharacterIndex - trimmed.length());
             }
 
@@ -646,6 +645,27 @@ public class TextField extends AbstractButton {
 
             this.firstCharacterIndex = Mth.clamp(this.firstCharacterIndex, 0, this.text.length());
         }
+    }
+
+    private int styledWidth(int from, int to) {
+        List<StyledSegment> segments = buildStyledSegments(this.text, from, to);
+        int w = 0;
+        for (StyledSegment seg : segments) {
+            w += font.width(TextUtils.literal(seg.text).setStyle(seg.style));
+        }
+        return w;
+    }
+
+    private String styledSubstrByWidth(int startIndex, int maxWidth) {
+        int w = 0;
+        int i = startIndex;
+        while (i < this.text.length()) {
+            int charW = styledWidth(i, i + 1);
+            if (w + charW > maxWidth) break;
+            w += charW;
+            i++;
+        }
+        return this.text.substring(startIndex, i);
     }
 
     //? if >=1.21.9 {
@@ -696,7 +716,7 @@ public class TextField extends AbstractButton {
 
         int innerWidth = this.width - 8;
         String fullText = this.text.substring(this.firstCharacterIndex);
-        String visibleText = this.font.plainSubstrByWidth(fullText, innerWidth);
+        String visibleText = styledSubstrByWidth(this.firstCharacterIndex, innerWidth);
         int visibleLength = visibleText.length();
         int visibleEnd = this.firstCharacterIndex + visibleLength;
 
@@ -711,8 +731,9 @@ public class TextField extends AbstractButton {
                 String beforeSel = visibleText.substring(0, relativeSelStart);
                 String selection = visibleText.substring(relativeSelStart, relativeSelEnd);
 
-                int selX1 = getX() + 4 + font.width(beforeSel);
-                int selX2 = selX1 + font.width(selection);
+                int selX1 = getX() + 4 + styledWidth(this.firstCharacterIndex, this.firstCharacterIndex + relativeSelStart);
+                int selX2 = getX() + 4 + styledWidth(this.firstCharacterIndex, this.firstCharacterIndex + relativeSelEnd);
+
                 GUIUtils.drawFill(ctx, selX1, renderY, selX2, renderY + 8, 0x8033AAFF);
             }
         }
@@ -733,7 +754,7 @@ public class TextField extends AbstractButton {
                  ((PoseStack)ctx).popPose();*/
                 //? }
 
-                renderX += font.width(segment.text);
+                renderX += font.width(TextUtils.literal(segment.text).setStyle(segment.style));
             }
         }
 
@@ -743,7 +764,7 @@ public class TextField extends AbstractButton {
 
         if (isFocused() && cursorVisible && shouldBlink) {
             String beforeCursor = visibleText.substring(0, cursorPos);
-            int cursorX = getX() + 4 + font.width(beforeCursor);
+            int cursorX = getX() + 4 + styledWidth(this.firstCharacterIndex, this.firstCharacterIndex + cursorPos);
             GUIUtils.drawFill(ctx, cursorX, renderY, cursorX + 1, renderY + 8, 0xFFFFFFFF);
         }
 

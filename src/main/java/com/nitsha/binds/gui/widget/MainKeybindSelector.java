@@ -130,8 +130,8 @@ public class MainKeybindSelector extends AbstractButton {
 
         GUIUtils.addText(ctx, TextUtils.literal(displayName), 0,
                 getX() + (width / 2) - (textWidth / 2),
-                getY() + Math.round(yOffset) + (height / 2) - (font.lineHeight / 2),
-                "top", "left", (isHovered || isPressed) ? textHoverColor : textColor, false);
+                getY() + Math.round(yOffset) + (height / 2),
+                "left", "center", (isHovered || isPressed) ? textHoverColor : textColor, false);
     }
 
     //? if >=1.19.3 {

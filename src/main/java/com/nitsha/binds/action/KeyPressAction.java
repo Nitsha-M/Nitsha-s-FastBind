@@ -105,8 +105,17 @@ public class KeyPressAction extends ActionType {
         /*PoseStack c = (PoseStack) ctx;*/
         //?}
         keybind.render(c, mouseX, mouseY, delta);
-        GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.pressKey"), 0,
-                x + 2, y + 8, "top", "left", 0xFF212121, false);
+
+        String userLanguage = GUIUtils.getUL();
+        if (userLanguage.equals("uk_ua") || userLanguage.equals("ru_ru")) {
+            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.pressKey_1"), 0,
+                    x + 2, y + 4, "top", "left", 0xFF212121, false);
+            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.key"), 0,
+                    x + 2, y + 12, "top", "left", 0xFF212121, false);
+        } else {
+            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.pressKey"), 0,
+                    x + 2, y + 8, "top", "left", 0xFF212121, false);
+        }
     }
 
     @Override

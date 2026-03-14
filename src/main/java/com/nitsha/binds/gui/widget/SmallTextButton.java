@@ -30,22 +30,32 @@ public class SmallTextButton extends AbstractWidget {
     private static final ResourceLocation HOVER = Main.id("textures/gui/btns/smallbtn_hover.png");
     private final Runnable onClick;
     private final MutableComponent name;
-    private final int color;
-    private final ResourceLocation icon;
+    private ResourceLocation icon;
+
+    private int color;
+    private int hoverColor;
+    private int textColor;
+    private int hoverTextColor;
+    private final int iconSize;
 
     private int x, y, width, height;
+    private boolean isEnabled = true;
 
-    public SmallTextButton(MutableComponent name, int x, int y, int color, int width, String align,
+    public SmallTextButton(MutableComponent name, int x, int y, int iconSize, int color, int hoverColor, int textColor, int hoverTextColor, int width, String align,
             ResourceLocation icon, Runnable onClick) {
         super(x, y, 0, 9, TextUtils.empty());
         this.name = name;
         this.onClick = onClick;
-        this.color = color;
         this.icon = icon;
         this.y = y;
+        this.color = color;
+        this.hoverColor = hoverColor;
+        this.textColor = textColor;
+        this.hoverTextColor = hoverTextColor;
+        this.iconSize = iconSize;
 
         Font font = Minecraft.getInstance().font;
-        int iconWidth = (icon != null) ? 5 + 1 : 0; // 5px icon + 1px spacing
+        int iconWidth = (icon != null) ? iconSize + 1 : 0;
         int newWidth = iconWidth + font.width(name) + 4;
         this.width = (width > 0) ? width : newWidth;
         this.height = 9;
@@ -61,15 +71,19 @@ public class SmallTextButton extends AbstractWidget {
     }
 
     public SmallTextButton(MutableComponent name, int x, int y, int color, int width, String align, Runnable onClick) {
-        this(name, x, y, color, width, align, null, onClick);
+        this(name, x, y, 5, color, color, 0xFFFFFFFF, 0xFFFFFFFF, width, align, null, onClick);
     }
 
     public SmallTextButton(MutableComponent name, int x, int y, int color, String align, Runnable onClick) {
-        this(name, x, y, color, 0, align, null, onClick);
+        this(name, x, y, 5, color, color, 0xFFFFFFFF, 0xFFFFFFFF, 0, align, null, onClick);
     }
 
     public SmallTextButton(MutableComponent name, int x, int y, int color, String align, ResourceLocation icon, Runnable onClick) {
-        this(name, x, y, color, 0, align, icon, onClick);
+        this(name, x, y, 5, color, color, 0xFFFFFFFF, 0xFFFFFFFF, 0, align, icon, onClick);
+    }
+
+    public SmallTextButton(MutableComponent name, int x, int y, int color, int width, String align, ResourceLocation icon, Runnable onClick) {
+        this(name, x, y, 5, color, color, 0xFFFFFFFF, 0xFFFFFFFF, width, align, icon, onClick);
     }
 
     public void setX(int newX) {
@@ -108,6 +122,25 @@ public class SmallTextButton extends AbstractWidget {
         return this.isHovered;
     }
 
+    public boolean isEnabled() {
+        return this.isEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.isEnabled = enabled;
+    }
+
+    public void setIcon(ResourceLocation icon) {
+        this.icon = icon;
+    }
+
+    public void setColors(int btnColor, int btnHoverColor, int textColor, int textHoverColor) {
+        this.color = btnColor;
+        this.hoverColor = btnHoverColor;
+        this.textColor = textColor;
+        this.hoverTextColor = textHoverColor;
+    }
+
     //? if >1.20.2 {
     @Override
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
@@ -134,23 +167,26 @@ public class SmallTextButton extends AbstractWidget {
     private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
         Font font = Minecraft.getInstance().font;
         int textWidth = font.width(name);
-        int iconWidth = (icon != null) ? 5 + 1 : 0;
+        int iconWidth = (icon != null) ? this.iconSize + 1 : 0;
 
-        GUIUtils.drawResizableBox(ctx, (isHovered) ? HOVER : NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5,
-                color);
+        GUIUtils.drawResizableBox(ctx, (isHovered && isEnabled) ? HOVER : NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5, (isHovered && isEnabled) ? hoverColor : color);
 
         int contentX = this.getX() + ((getWidth() / 2) - ((iconWidth + textWidth) / 2));
 
         if (icon != null) {
-            GUIUtils.adaptiveDrawTexture(ctx, icon, contentX, this.getY() + 2, 0, 0, 5, 5, 5, 5);
-            contentX += 6;
+            GUIUtils.adaptiveDrawTexture(ctx, icon, contentX, this.getY() + ((this.height / 2) - (iconSize / 2)), 0, 0, iconSize, iconSize, iconSize, iconSize, (isHovered && isEnabled) ? hoverTextColor : textColor);
+            contentX += iconWidth;
         }
 
         GUIUtils.addText(
                 ctx, name, 0,
                 contentX,
-                this.getY() + ((this.height / 2) - (font.lineHeight / 2)),
-                "top", "left", 0xFFFFFFFF, false);
+                this.getY() + (this.height / 2),
+                "left", "center", (isHovered && isEnabled) ? hoverTextColor : textColor, false);
+
+        if (!this.isEnabled) {
+            GUIUtils.drawResizableBox(ctx, NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5, 0x66000000);
+        }
     }
 
     @Override
@@ -167,7 +203,7 @@ public class SmallTextButton extends AbstractWidget {
         int button = event.buttonInfo().button();
         double mouseX = event.x();
         double mouseY = event.y();
-        if (button == 0 && isMouseOver(mouseX, mouseY)) {
+        if (button == 0 && isMouseOver(mouseX, mouseY) && this.isEnabled) {
             this.playDownSound(Minecraft.getInstance().getSoundManager());
             this.onClick.run();
             return true;
@@ -176,7 +212,7 @@ public class SmallTextButton extends AbstractWidget {
     }*/
     //? } else {
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (button == 0 && isMouseOver(mouseX, mouseY)) {
+            if (button == 0 && isMouseOver(mouseX, mouseY) && this.isEnabled) {
                 this.playDownSound(Minecraft.getInstance().getSoundManager());
                 this.onClick.run();
                 return true;

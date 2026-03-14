@@ -1,0 +1,66 @@
+{
+  "nitsha.localization.__credit" : "I used Claude",
+  "category.nitsha.binds" : "Nitsha's FastBind",
+  "key.category.nitsha_fastbind.keys" : "Nitsha's FastBind",
+  "key.nitsha.binds" : "FastBind Menüsü",
+  "key.nitsha.prev_page" : "Önceki sayfa",
+  "key.nitsha.next_page" : "Sonraki sayfa",
+  "key.nitsha.editor" : "Yapılandırma menüsü",
+
+  "nitsha.binds.addNew" : "ʏᴇɴɪ",
+  "nitsha.binds.delete" : "sɪʟ",
+  "nitsha.binds.configure" : "Yapılandır",
+
+  "nitsha.binds.name" : "İsim",
+  "nitsha.binds.untitled" : "İsimsiz",
+  "nitsha.binds.list" : "Bind listesi",
+  "nitsha.binds.empty" : "Boş",
+  "nitsha.binds.page" : "sᴀʏғᴀ",
+  "nitsha.binds.autosave" : "ᴏᴛᴏᴍᴀᴛɪᴋ ᴋᴀʏᴅᴇᴛᴍᴇ",
+
+  "nitsha.binds.advances.tab1" : "ᴇʏʟᴇᴍʟᴇʀ",
+  "nitsha.binds.advances.tab2" : "ɪᴋᴏɴ",
+  "nitsha.binds.advances.tab3" : "ᴀʏᴀʀʟᴀʀ",
+
+  "nitsha.binds.advances.choose_icon" : "ɪᴋᴏɴ sᴇᴄ",
+  "nitsha.binds.advances.random_icon" : "ʀᴀsɢᴇʟᴇ",
+
+  "nitsha.binds.advances.actions" : "ᴄᴏᴋʟᴜ ᴇʏʟᴇᴍ",
+  "nitsha.binds.advances.actions.noActions" : "ᴇʏʟᴇᴍ ʏᴏᴋ",
+  "nitsha.binds.advances.actions.delay" : "ɢᴇᴄɪᴋᴍᴇ",
+  "nitsha.binds.advances.actions.delayDesс" : "ɢᴇᴄɪᴋᴍᴇ (ᴍs)",
+  "nitsha.binds.advances.actions.keybind" : "ᴛᴜs ᴀᴛᴀᴍᴀ",
+  "nitsha.binds.advances.actions.command" : "ᴋᴏᴍᴜᴛ",
+  "nitsha.binds.advances.actions.pressKey" : "ᴛᴜsᴀ ʙᴀs",
+  "nitsha.binds.advances.actions.keyDown" : "ᴛᴜs ᴀsᴀɢɪ",
+  "nitsha.binds.advances.actions.keyUp" : "ᴛᴜs ʏᴜᴋᴀʀɪ",
+  "nitsha.binds.advances.actions.showMessage" : "sᴏʜʙᴇᴛ ᴍᴇsᴀᴊɪ",
+  "nitsha.binds.advances.actions.keyEvent" : "ᴛᴜs ᴏʟᴀʏɪɴɪ sɪᴍᴜʟᴇ ᴇᴛ",
+  "nitsha.binds.advances.actions.showTitle" : "ᴇᴋʀᴀɴ ʙᴀsʟɪɢɪ",
+  "nitsha.binds.advances.actions.commandLine" : "Komut (/ olmadan)",
+  "nitsha.binds.advances.actions.chatMessage" : "Sohbet mesajı",
+  "nitsha.binds.advances.actions.titleLine" : "Başlık metni",
+  "nitsha.binds.advances.actions.subtitleLine" : "Alt başlık metni",
+  "nitsha.binds.advances.actions.delayLine" : "ms cinsinden",
+  "nitsha.binds.advances.actions.addNew" : "ᴇᴋʟᴇ",
+  "nitsha.binds.advances.actions.loop" : "sᴏɴʀᴀᴋɪɴɪ ᴛᴇᴋʀᴀʀʟᴀ",
+  "nitsha.binds.advances.actions.loop.actions" : "Eylem sayısı (maks. 10)",
+  "nitsha.binds.advances.actions.loop.count" : "Tekrar sayısı (maks. 10)",
+
+  "nitsha.binds.advances.options.hold" : "%s basılı tut — menü açılır",
+  "nitsha.binds.advances.options.openLastPage" : "Son sayfayı yeniden aç",
+  "nitsha.binds.advances.options.openLastPreset" : "Son önayarı yeniden aç",
+  "nitsha.binds.advances.options.keepMovement" : "Açıkken hareket et",
+  "nitsha.binds.advances.options.closeOnAction" : "Eylemde kapat",
+  "nitsha.binds.advances.options.bindMsg" : "Bind etkinleşme mesajı",
+
+  "nitsha.binds.bindActivate" : "Bind %s etkinleştirildi",
+
+  "nitsha.binds.advances.noKeyBind" : "Atanmamış",
+  "nitsha.binds.advances.noSelectedKeyItem" : "Öğe seçin",
+
+  "nitsha.binds.advances.modals.selectKeyEvent" : "ᴛᴜs ᴏʟᴀʏɪ sᴇᴄ",
+
+  "nitsha.binds.advances.actions.option.hold" : "Basılı tut",
+  "nitsha.binds.advances.actions.option.press" : "Bas"
+}

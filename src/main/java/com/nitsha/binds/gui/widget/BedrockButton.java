@@ -203,8 +203,8 @@ public class BedrockButton extends AbstractButton {
 
         GUIUtils.addText(c, TextUtils.literal(name), 0,
                 this.getX() + ((this.width / 2) - (textWidth / 2)),
-                this.getY() + Math.round(yOffset) + ((this.height / 2) - (font.lineHeight / 2)),
-                "top", "left", (isEnabled && (isHovered || isPressed)) ? textHoverColor : textColor, false);
+                this.getY() + Math.round(yOffset) + ((this.height / 2)),
+                "left", "center", (isEnabled && (isHovered || isPressed)) ? textHoverColor : textColor, false);
     }
 
     //? if >=1.19.3 {

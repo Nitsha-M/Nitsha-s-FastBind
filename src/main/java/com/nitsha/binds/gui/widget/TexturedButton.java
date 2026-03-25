@@ -1,12 +1,7 @@
 package com.nitsha.binds.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiComponent;
-*///?}
 import net.minecraft.client.gui.components.ImageButton;
 //? if >=1.20.2 {
 import net.minecraft.client.gui.components.WidgetSprites;
@@ -93,23 +88,17 @@ public class TexturedButton extends ImageButton {
         }
     //? }
 
-    //? if >=1.21.11 {
-    /*@Override
-    public void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderContents(context, mouseX, mouseY, delta);
-    }*/
-    //? } else if >=1.21.5 {
-    /*@Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderWidget(context, mouseX, mouseY, delta);
-    }*/
-    //? } else if >=1.20.2 {
+    //? if >=1.20.2 {
     @Override
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        //? if <1.21.5 {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
+        //? }
         super.renderWidget(context, mouseX, mouseY, delta);
+        //? if <1.21.5 {
         RenderSystem.disableBlend();
+        //? }
     }
     //? } else if >=1.20 {
     /*@Override

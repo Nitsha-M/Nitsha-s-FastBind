@@ -4,11 +4,8 @@ import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.nitsha.binds.utils.RenderUtils;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?}
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 
 import com.nitsha.binds.utils.Renderable;
@@ -150,7 +147,6 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
         }
     }
 
-
     public void updateButtons(String key) {
         activeKey = key;
         for (GuiEventListener element : children) {
@@ -176,18 +172,23 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
         createButtons();
     }
 
-    @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //?} else {
-            /*PoseStack ctx
-            *///?}
-            , int mouseX, int mouseY, float delta) {
+    //? if >=26.1 {
+    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+    //? } else {
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    //? }
+        renderWindow(ctx, mouseX, mouseY, delta);
+    }
+
+    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         for (GuiEventListener element : this.children) {
             Renderable drawable = RenderUtils.wrapRenderable(element);
             if (drawable != null) {
+                //? if >=26.1 {
+                // drawable.extractRenderState(ctx, mouseX, mouseY, delta);
+                //? } else {
                 drawable.render(ctx, mouseX, mouseY, delta);
+                //? }
             }
         }
 

@@ -61,8 +61,6 @@ public class TextField extends AbstractButton {
 
     private long lastSwitchFocusTime = Util.getMillis();
 
-    private final List<Object> focusExceptions = new ArrayList<>();
-
     private float phScale = 1f;
     private float phTextX = 0f;
     private float phTextY = 0f;
@@ -668,43 +666,12 @@ public class TextField extends AbstractButton {
         return this.text.substring(startIndex, i);
     }
 
-    //? if >=1.21.9 {
-    // public void onPress(InputWithModifiers inputWithModifiers) {}
-    //? } else {
     @Override
-    public void onPress() { }
-    //? }
+    public void onPress() {}
 
-    //? if >=1.21.11 {
-    /*@Override
-    public void renderContents(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        rndr(ctx, mouseX, mouseY, delta);
-    }*/
-    //?} else if >1.20.2 {
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        rndr(ctx, mouseX, mouseY, delta);
-    }
-    //? } else if >=1.20 {
-    /*
-     @Override
-     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float
-     delta) {
-     rndr(ctx, mouseX, mouseY, delta);
-     }
-     *///? } else if >=1.19.4 {
-    /*@Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    *///? } else {
-    /*@Override
-    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? }
-
-    private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
+        if (!visible) return;
         GUIUtils.drawResizableBox(
                 ctx,
                 (this.isFocused()) ? FOCUS : NORMAL,
@@ -746,12 +713,14 @@ public class TextField extends AbstractButton {
                     continue;
 
                 Component styledText = TextUtils.literal(segment.text).setStyle(segment.style);
-                //? if >=1.20 {
-                ((GuiGraphics) ctx).drawString(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
+                //? if >=26.1 {
+                // ctx.text(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
+                //? } else if >=1.20 {
+                ctx.drawString(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
                 //? } else {
-                /*((PoseStack)ctx).pushPose();
+                /*ctx.pushPose();
                  this.font.drawShadow((PoseStack)ctx, styledText, renderX, renderY, 0xFFFFFFFF);
-                 ((PoseStack)ctx).popPose();*/
+                 ctx.popPose();*/
                 //? }
 
                 renderX += font.width(TextUtils.literal(segment.text).setStyle(segment.style));
@@ -786,7 +755,7 @@ public class TextField extends AbstractButton {
         }
     }
 
-    private void animatedPlaceholder(Object ctx) {
+    private void animatedPlaceholder(GuiGraphics ctx) {
         float scaleFocused = 0.5f;
         float scaleUnfocused = 1f;
 

@@ -296,13 +296,11 @@ public class BindsEditor extends Screen {
 
     // Render
     @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //?} else {
-            /*PoseStack ctx*/
-            //?}
-            , int mouseX, int mouseY, float delta) {
+    //? if >=26.1 {
+    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+    //? } else {
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    //? }
         //? if >=1.20.2 {
         /*? if <1.21.6 { */this.renderBackground(ctx, mouseX, mouseY, delta); /*? } */
         //? } else if >=1.19.4 {
@@ -310,6 +308,28 @@ public class BindsEditor extends Screen {
         //? } else {
         /* if (this.minecraft.level == null) this.renderBackground(ctx); */
         //? }
+        //? if >=26.1 {
+        /*for (GuiEventListener element : children()) {
+            Renderable dr = RenderUtils.wrapRenderable(element);
+            if (dr != null) {
+                if (element instanceof PresetSelector) {
+                    PresetSelector pS = (PresetSelector) element;
+                    pS.extractRenderState(ctx, mouseX, mouseY, delta);
+                } else if (element instanceof SelectKeyEvent) {
+                    if (window_SelectKeyEvent.isVisible()) {
+                        SelectKeyEvent sK = (SelectKeyEvent) element;
+                        sK.extractRenderState(ctx, mouseX, mouseY, delta);
+                    }
+                } else {
+                    if (window_PresetSelector.isMouseInside(mouseX, mouseY) && window_PresetSelector.isOpen() || window_SelectKeyEvent.isVisible()) {
+                        dr.extractRenderState(ctx, -10000, -10000, delta);
+                    } else {
+                        dr.extractRenderState(ctx, mouseX, mouseY, delta);
+                    }
+                }
+            }
+        }*/
+        //? } else {
         for (GuiEventListener element : children()) {
             Renderable dr = RenderUtils.wrapRenderable(element);
             if (dr != null) {
@@ -330,9 +350,28 @@ public class BindsEditor extends Screen {
                 }
             }
         }
+        //? }
     }
 
-    //? if >=1.20.2 {
+    //? if >=26.1 {
+    /*@Override
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        if (this.minecraft.level == null) {
+            //? if >=1.20.5 {
+            this.extractPanorama(context, delta);
+            this.extractBlurredBackground(
+                    //? if >=1.21.6 {
+                    context
+                    //? } else if <=1.21.1 {
+                    // delta
+                    //? }
+            );
+            //?} else {
+            *//* super.renderBackground(context, mouseX, mouseY, delta); *//*
+            //? }
+        }
+    }*/
+    //? } else >=1.20.2 {
     @Override
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (this.minecraft.level == null) {

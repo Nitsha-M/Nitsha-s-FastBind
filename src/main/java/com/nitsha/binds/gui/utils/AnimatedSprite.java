@@ -1,12 +1,7 @@
 package com.nitsha.binds.gui.utils;
 
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import net.minecraft.client.gui.GuiComponent;
- *///?}
 import net.minecraft.resources.ResourceLocation;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 public class AnimatedSprite {
     protected int x, y, width, height;
@@ -45,13 +40,7 @@ public class AnimatedSprite {
         this.timeAccumulator = 0;
     }
 
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //?} else {
-            /*PoseStack ctx
-             *///?}
-            ) {
+    public void render(GuiGraphics ctx) {
         GUIUtils.adaptiveDrawTexture(ctx, texture, this.x, y, textureU, texV, width, height, textureW, textureH, color);
         tick();
     }
@@ -61,6 +50,7 @@ public class AnimatedSprite {
         this.animating = true;
         this.lastUpdateTime = System.currentTimeMillis();
         this.timeAccumulator = 0;
+        this.textureU = 0;
     }
 
     public void stopAnimation() {

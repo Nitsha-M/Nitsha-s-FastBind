@@ -30,21 +30,18 @@ public class ActionRegistry {
         BY_INDEX.put(index, factory);
     }
 
-    /** Создаёт новый экземпляр по строковому id ("command", "delay" и т.д.) */
     public static ActionType createById(String id) {
         Supplier<ActionType> factory = BY_ID.get(id);
         if (factory == null) throw new IllegalArgumentException("Unknown action id: " + id);
         return factory.get();
     }
 
-    /** Создаёт новый экземпляр по числовому индексу (1, 2, 3 и т.д.) */
     public static ActionType createByIndex(int index) {
         Supplier<ActionType> factory = BY_INDEX.get(index);
         if (factory == null) throw new IllegalArgumentException("Unknown action index: " + index);
         return factory.get();
     }
 
-    /** Создаёт по одному экземпляру каждого типа — для меню выбора экшена */
     public static List<ActionType> allInstances() {
         List<ActionType> list = new ArrayList<>();
         for (Supplier<ActionType> factory : BY_ID.values()) {
@@ -53,12 +50,10 @@ public class ActionRegistry {
         return list;
     }
 
-    /** Высота виджета по id — используется в generateActionList */
     public static int heightById(String id) {
         return createById(id).getHeight();
     }
 
-    /** Все зарегистрированные id — например для меню добавления экшена */
     public static Collection<String> allIds() {
         return BY_ID.keySet();
     }

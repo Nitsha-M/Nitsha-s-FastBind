@@ -4,16 +4,11 @@ import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
-import com.mojang.blaze3d.vertex.PoseStack;
-//? if >=1.20 {
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import net.minecraft.client.gui.GuiComponent;
- *///?}
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -22,9 +17,10 @@ import java.util.function.Consumer;
 
 //? if >=1.21.9 {
 // import net.minecraft.client.input.MouseButtonEvent;
+// import net.minecraft.client.input.InputWithModifiers;
 //? }
 
-public class TabButton extends AbstractWidget {
+public class TabButton extends AbstractButton {
     private static final ResourceLocation BACKGROUND = Main.id("textures/gui/test/editor_bg_dark_flat.png");
     private final Consumer<TabButton> onClick;
     private final Component name;
@@ -55,11 +51,7 @@ public class TabButton extends AbstractWidget {
     public void setSelected(boolean selected) { this.selected = selected; }
 
     @Override
-    //? <1.21.9 {
     public void onClick(double mouseX, double mouseY) {
-    //? } else {
-    // public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl) {
-    //? }
         if (onClick != null) {
             onClick.accept(this);
         }
@@ -73,33 +65,15 @@ public class TabButton extends AbstractWidget {
         return this.y;
     }
 
-    //? if >1.20.2 {
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    //? } else if >=1.20 {
-    /*@Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? } else if >=1.19.4 {
-    /*@Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? } else {
-    /*@Override
-    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? }
+    public void onPress() {}
 
-    private void rndr(Object context, int mouseX, int mouseY, float delta) {
+    @Override
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         float targetPointX = (this.selected) ? this.getY() : this.getY() + 2;
         pointY = Mth.lerp(GUIUtils.clampSpeed(speed * delta), pointY, targetPointX);
-        GUIUtils.drawResizableBox(context, BACKGROUND, this.getX(), Math.round(pointY), this.getWidth(), this.getHeight() + 10, 7, 15);
-        GUIUtils.addText(context, name, this.width, this.getX(), Math.round(pointY) + 5, (this.selected) ? 0xFFFFFFFF : 0xFFA8A8A8, "center", "top");
+        GUIUtils.drawResizableBox(ctx, BACKGROUND, this.getX(), Math.round(pointY), this.getWidth(), this.getHeight() + 10, 7, 15);
+        GUIUtils.addText(ctx, name, this.width, this.getX(), Math.round(pointY) + 5, (this.selected) ? 0xFFFFFFFF : 0xFFA8A8A8, "center", "top");
     }
 
     //? if >=1.19.3 {

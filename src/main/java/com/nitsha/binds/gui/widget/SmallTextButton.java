@@ -5,27 +5,23 @@ import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import com.mojang.blaze3d.vertex.PoseStack;
-//? if >=1.20 {
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import net.minecraft.client.gui.GuiComponent;
- *///?}
-    //? if >=1.17 {
+//? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
-public class SmallTextButton extends AbstractWidget {
+public class SmallTextButton extends AbstractButton {
     private static final ResourceLocation NORMAL = Main.id("textures/gui/btns/smallbtn_normal.png");
     private static final ResourceLocation HOVER = Main.id("textures/gui/btns/smallbtn_hover.png");
     private final Runnable onClick;
@@ -141,30 +137,11 @@ public class SmallTextButton extends AbstractWidget {
         this.hoverTextColor = textHoverColor;
     }
 
-    //? if >1.20.2 {
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    //? } else if >=1.20 {
-    /*@Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float
-    delta) {
-    rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? } else if >=1.19.4 {
-    /*@Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? } else {
-    /*@Override
-    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? }
+    public void onPress() {}
 
-    private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
+    @Override
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         Font font = Minecraft.getInstance().font;
         int textWidth = font.width(name);
         int iconWidth = (icon != null) ? this.iconSize + 1 : 0;

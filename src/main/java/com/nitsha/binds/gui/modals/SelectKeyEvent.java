@@ -8,11 +8,7 @@ import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.utils.EventBus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -27,8 +23,6 @@ import java.util.Map;
 
 public class SelectKeyEvent extends ModalWindow {
     private static final ResourceLocation TAB2_BG = Main.id("textures/gui/test/scroller.png");
-
-    private final List<TabButton> tabsBtn = new ArrayList<>();
 
     private final BindsEditor screen;
     private ScrollableWindow eventsList;
@@ -48,18 +42,12 @@ public class SelectKeyEvent extends ModalWindow {
         generateList();
     }
     @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //? } else {
-            /*PoseStack ctx*/
-            //? }
-            , int mouseX, int mouseY, float delta) {
+    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         int adjX = mouseX - this.getX();
         int adjY = mouseY - this.getYOffset();
 
         GUIUtils.matricesUtil(ctx, 0, 0, 200, () -> {
-            super.render(ctx, mouseX, mouseY, delta);
+            super.renderWindow(ctx, mouseX, mouseY, delta);
         });
     }
 
@@ -86,8 +74,6 @@ public class SelectKeyEvent extends ModalWindow {
 
             final int capturedY = actionY;
             final String capturedCategory = category;
-
-            System.out.println(capturedCategory);
 
             this.eventsList.addDrawElement((ctx, mouseX, mouseY) -> {
                 GUIUtils.drawFill(ctx, 2, capturedY + 3, this.eventsList.getWidth() - 4, capturedY + 14, 0xFF212121);

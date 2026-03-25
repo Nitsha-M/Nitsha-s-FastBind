@@ -5,12 +5,7 @@ import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class BedrockIconTextButton extends BedrockButton {
@@ -37,40 +32,11 @@ public class BedrockIconTextButton extends BedrockButton {
                 0xFFFFFFFF, 0xFF3C8527, 0xFF212121, 0xFFFFFFFF);
     }
 
-    //? if >=1.21.11 {
-    /*@Override
-    public void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderContents(context, mouseX, mouseY, delta);
-        renderOverlay(context, mouseX, mouseY, delta);
-    }*/
-    //? } else if >1.20.2 {
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderWidget(context, mouseX, mouseY, delta);
-        renderOverlay(context, mouseX, mouseY, delta);
-    }
-    //?} else if >=1.20 {
-    /*@Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderWidget(context, mouseX, mouseY, delta);
-        renderOverlay(context, mouseX, mouseY, delta);
-    }
-    *///? } else if >=1.19.4 {
-    /*@Override
-    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
-        super.renderWidget(context, mouseX, mouseY, delta);
-        renderOverlay(context, mouseX, mouseY, delta);
-    }
-    *///?} else {
-    /*@Override
-    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
-        super.renderButton(context, mouseX, mouseY, delta);
-        renderOverlay(context, mouseX, mouseY, delta);
-    }
-    */
-    //? }
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        super.renderWidget(ctx, mouseX, mouseY, delta);
 
-    protected void renderOverlay(Object ctx, int mouseX, int mouseY, float delta) {
+        boolean isHovered = isMouseOver(mouseX, mouseY);
         GUIUtils.adaptiveDrawTexture(ctx, ICON, this.getX() + xO, this.getY() + yO + Math.round(this.getOffsetY()), 0, 0, 16, 14, 16, 14,
                 (this.isEnabled()) ? (isHovered || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor() : 0x40FFFFFF);
         GUIUtils.addText(ctx, TextUtils.literal(this.text), getWidth(), this.getX() + xO + 18, this.getY() + yO + 7 + Math.round(this.getOffsetY()),

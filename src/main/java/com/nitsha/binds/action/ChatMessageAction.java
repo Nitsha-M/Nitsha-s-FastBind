@@ -16,11 +16,8 @@ import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.CharacterEvent;*/
 //? }
-//? if >=1.20 {
+
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;*/
-//?}
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
@@ -133,7 +130,11 @@ public class ChatMessageAction extends ActionType {
         final MutableComponent finalMessage = message;
         actions.add(() -> {
             if (client.player != null) {
+                //? if <26.1 {
                 client.player.displayClientMessage(finalMessage, false);
+                //? } else {
+                // client.player.sendSystemMessage(finalMessage);
+                //? }
             }
         });
     }
@@ -192,13 +193,8 @@ public class ChatMessageAction extends ActionType {
     }
 
     @Override
-    public void render(Object ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20 {
-        GuiGraphics c = (GuiGraphics) ctx;
-        //?} else {
-        /*PoseStack c = (PoseStack) ctx;*/
-        //?}
-        field.render(c, mouseX, mouseY, delta);
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        field.renderWidget(ctx, mouseX, mouseY, delta);
 
         for (int i = 0; i < VISIBLE_COLORS; i++) {
             int actualIndex = (colorOffset + i) % COLORS_DATA.length;
@@ -212,13 +208,13 @@ public class ChatMessageAction extends ActionType {
             item.setWidth(itemWidth);
             item.setHeight(itemHeight);
 
-            GUIUtils.matricesUtil(c, itemOffset, itemOffset, 0, () -> item.render(c, mouseX, mouseY, delta));
+            GUIUtils.matricesUtil(ctx, itemOffset, itemOffset, 0, () -> item.renderWidget(ctx, mouseX, mouseY, delta));
         }
 
         leftBtn.setY(colorButtonsY);
         rightBtn.setY(colorButtonsY);
-        leftBtn.render(c, mouseX, mouseY, delta);
-        rightBtn.render(c, mouseX, mouseY, delta);
+        leftBtn.renderWidget(ctx, mouseX, mouseY, delta);
+        rightBtn.renderWidget(ctx, mouseX, mouseY, delta);
     }
 
     @Override

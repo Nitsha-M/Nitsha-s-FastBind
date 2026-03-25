@@ -1,5 +1,6 @@
 package com.nitsha.binds.configs;
 
+import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.screen.BindsGUI;
@@ -37,37 +38,15 @@ public class KeyBinds {
     //? } else {
     // private static KeyMapping.Category category = KeyMapping.Category.register(Main.id("keys"));
     //? }
-    public static void register() {
 
+    public static void register() {
+        createMappings();
 
         //? if fabric {
-        BINDS = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                "key.nitsha.binds",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F8,
-                category
-        ));
-
-        NEXT_PAGE = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                "key.nitsha.next_page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F9,
-                category
-        ));
-
-        PREV_PAGE = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                "key.nitsha.prev_page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F7,
-                category
-        ));
-
-        EDITOR = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                "key.nitsha.editor",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
-                category
-        ));
+        KeyBindingHelper.registerKeyBinding(BINDS);
+        KeyBindingHelper.registerKeyBinding(EDITOR);
+        KeyBindingHelper.registerKeyBinding(NEXT_PAGE);
+        KeyBindingHelper.registerKeyBinding(PREV_PAGE);
         //?} elif forge {
         //? if >=1.19 {
         /*FMLJavaModLoadingContext.get().getModEventBus().addListener(KeyBinds::onRegisterKeyMappings);*/
@@ -75,6 +54,38 @@ public class KeyBinds {
         /*registerKeyMappings();*/
         //? }
         //?}
+
+        FBLogger.info("Finished registering keybinds");
+    }
+
+    private static void createMappings() {
+        BINDS = new KeyMapping(
+                "key.nitsha.binds",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_F8,
+                category
+        );
+
+        NEXT_PAGE = new KeyMapping(
+                "key.nitsha.next_page",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_F9,
+                category
+        );
+
+        PREV_PAGE = new KeyMapping(
+                "key.nitsha.prev_page",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_F7,
+                category
+        );
+
+        EDITOR = new KeyMapping(
+                "key.nitsha.editor",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_UNKNOWN,
+                category
+        );
     }
 
     //? if neoforge {
@@ -86,76 +97,25 @@ public class KeyBinds {
     //? if neoforge || forge {
     //? if >=1.19 {
     /*private static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
-        BINDS = new KeyMapping(
-                "key.nitsha.binds",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F8,
-                category
-        );
         event.register(BINDS);
-
-        NEXT_PAGE = new KeyMapping(
-                "key.nitsha.next_page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F9,
-                category
-        );
         event.register(NEXT_PAGE);
-
-        PREV_PAGE = new KeyMapping(
-                "key.nitsha.prev_page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F7,
-                category
-        );
         event.register(PREV_PAGE);
-
-        EDITOR = new KeyMapping(
-                "key.nitsha.editor",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
-                category
-        );
         event.register(EDITOR);
     }*/
     //? } else {
     /*private static void registerKeyMappings() {
-        BINDS = new KeyMapping(
-                "key.nitsha.binds",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F8,
-                category
-        );
         ClientRegistry.registerKeyBinding(BINDS);
-
-        NEXT_PAGE = new KeyMapping(
-                "key.nitsha.next_page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F9,
-                category
-        );
         ClientRegistry.registerKeyBinding(NEXT_PAGE);
-
-        PREV_PAGE = new KeyMapping(
-                "key.nitsha.prev_page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F7,
-                category
-        );
         ClientRegistry.registerKeyBinding(PREV_PAGE);
-
-        EDITOR = new KeyMapping(
-                "key.nitsha.editor",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
-                category
-        );
         ClientRegistry.registerKeyBinding(EDITOR);
     }*/
     //? }
     //?}
 
     public static void tick(Minecraft client) {
+        if (BINDS == null || EDITOR == null) {
+            return;
+        }
         if (BINDS.consumeClick()) {
             if (BindsGUI.ignoreHoldToOpenOnce) return;
             if (!(client.screen instanceof BindsGUI)) {

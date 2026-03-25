@@ -5,16 +5,11 @@ import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
 import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
@@ -103,20 +98,17 @@ public class BedrockButton extends AbstractButton {
     }
 
     @Override
-    //? if >=1.21.9 {
-    // public void onPress(InputWithModifiers inputWithModifiers) {
-    //? } else {
     public void onPress() {
-    //? }
-        this.onClick.run();
         if (isEnabled) isPressed = true;
     }
 
     @Override
     //? if >=1.21.9 {
-    // public void onRelease(MouseButtonEvent mouseButtonEvent) {
+    // public void onRelease(MouseButtonEvent event) {
+    //  if (isMouseOver(event.x(), event.y())) this.onClick.run();
     //? } else {
     public void onRelease(double mouseX, double mouseY) {
+        if (isMouseOver(mouseX, mouseY) && isEnabled && isPressed) this.onClick.run();
     //? }
         if (!isToggle) isPressed = false;
     }
@@ -150,40 +142,9 @@ public class BedrockButton extends AbstractButton {
         this.width = width;
     }
 
-    //? if >=1.21.11 {
-    /*@Override
-    public void renderContents(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        rndr(ctx, mouseX, mouseY, delta);
-    }*/
-    //?} else if >1.20.2 {
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        rndr(ctx, mouseX, mouseY, delta);
-    }
-    //?} else if >=1.20 {
-    /*@Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    *///?} else if >=1.19.4 {
-    /*@Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    *///?} else {
-    /*@Override
-    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    */
-    //? }
-
-    private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20 {
-        GuiGraphics c = (GuiGraphics) ctx;
-        //?} else {
-        /*PoseStack c = (PoseStack) ctx;
-         *///?}
+        boolean isHovered = isMouseOver(mouseX, mouseY);
         Font font = Minecraft.getInstance().font;
         int textWidth = font.width(name);
         targetOffset = (isPressed) ? 2 : 0;
@@ -195,13 +156,14 @@ public class BedrockButton extends AbstractButton {
         int fW = this.getWidth();
         int fH = this.getHeight();
 
+
         // Bottom texture
-        GUIUtils.drawResizableBox(c, (!isEnabled) ? DISABLE : NORMAL, fX, fY + 2, fW, fH - 2, 5, 11, ((isHovered || isPressed) && isEnabled) ? btnHoverColor : btnColor);
+        GUIUtils.drawResizableBox(ctx, (!isEnabled) ? DISABLE : NORMAL, fX, fY + 2, fW, fH - 2, 5, 11, ((isHovered || isPressed) && isEnabled) ? btnHoverColor : btnColor);
 
         // Top texture
-        GUIUtils.drawResizableBox(c, (!isEnabled) ? PRESSED_DISABLE : PRESSED_NORMAL, fX, fY + Math.round(yOffset), fW, fH - 2, 5, 11, ((isHovered || isPressed) && isEnabled) ? btnHoverColor : btnColor);
+        GUIUtils.drawResizableBox(ctx, (!isEnabled) ? PRESSED_DISABLE : PRESSED_NORMAL, fX, fY + Math.round(yOffset), fW, fH - 2, 5, 11, ((isHovered || isPressed) && isEnabled) ? btnHoverColor : btnColor);
 
-        GUIUtils.addText(c, TextUtils.literal(name), 0,
+        GUIUtils.addText(ctx, TextUtils.literal(name), 0,
                 this.getX() + ((this.width / 2) - (textWidth / 2)),
                 this.getY() + Math.round(yOffset) + ((this.height / 2)),
                 "left", "center", (isEnabled && (isHovered || isPressed)) ? textHoverColor : textColor, false);
@@ -227,6 +189,25 @@ public class BedrockButton extends AbstractButton {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!this.isEnabled() || !this.visible) return false;
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+    //? }
+
+    @Override
+    //? if >=1.21.9 {
+    /*public boolean mouseReleased(MouseButtonEvent event) {
+        if (!this.isEnabled() || !this.visible) return false;
+        if (event.button() == 0 && isPressed) {
+            onRelease(event);
+        }
+        return super.mouseReleased(event);
+    }*/
+    //? } else {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (!this.isEnabled() || !this.visible) return false;
+        if (button == 0 && isPressed) {
+            onRelease(mouseX, mouseY);
+        }
+        return false;
     }
     //? }
 }

@@ -12,11 +12,7 @@ import com.nitsha.binds.gui.widget.ItemButton;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.SmallTextButton;
 import net.minecraft.client.Minecraft;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.MutableComponent;
@@ -247,15 +243,9 @@ public class BindsList extends AnimatedWindow {
     }
 
     @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //?} else {
-            /*PoseStack ctx
-             *///?}
-            , int mouseX, int mouseY, float delta) {
+    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         GUIUtils.matricesUtil(ctx, 0, 0, 2, () -> {
-            super.render(ctx, mouseX, mouseY, delta);
+            super.renderWindow(ctx, mouseX, mouseY, delta);
         });
     }
 

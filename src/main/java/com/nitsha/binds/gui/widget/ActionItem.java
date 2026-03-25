@@ -1,6 +1,5 @@
 package com.nitsha.binds.gui.widget;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.action.ActionType;
@@ -8,12 +7,7 @@ import com.nitsha.binds.gui.panels.AdvancedOptions;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import net.minecraft.client.Minecraft;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;*/
-//?}
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
@@ -90,53 +84,21 @@ public class ActionItem extends AbstractButton {
         return action.isMouseOverColorButtons(mouseX, mouseY);
     }
 
-    //? if >=1.21.11 {
-    /*@Override
-    public void renderContents(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        rndr(ctx, mouseX, mouseY, delta);
-    }*/
-    //?} else if >1.20.2 {
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        rndr(ctx, mouseX, mouseY, delta);
-    }
-    //? } else if >=1.20 {
-    /*@Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? } else if >=1.19.4 {
-    /*@Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? } else {
-    /*@Override
-    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? }
-
-    private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20 {
-        GuiGraphics c = (GuiGraphics) ctx;
-        //? } else {
-        /*PoseStack c = (PoseStack) ctx;*/
-        //? }
-
         if (index % 2 == 1)
-            GUIUtils.drawFill(c, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x4DFFFFFF);
+            GUIUtils.drawFill(ctx, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x4DFFFFFF);
 
-        this.resetBtn.render(c, mouseX, mouseY, delta);
-        this.deleteBtn.render(c, mouseX, mouseY, delta);
+        this.resetBtn.renderWidget(ctx, mouseX, mouseY, delta);
+        this.deleteBtn.renderWidget(ctx, mouseX, mouseY, delta);
         GUIUtils.adaptiveDrawTexture(ctx, ARROW_DISABLED, getX() + getWidth() - 9, getY() + 3, 0, 0, 9, 19, 9, 19);
 
         int aS = BindsEditor.getCBind().actions.size();
         if (aS > 0) {
             if (index > 0)
-                this.topBtn.render(c, mouseX, mouseY, delta);
+                this.topBtn.renderWidget(ctx, mouseX, mouseY, delta);
             if (index != (aS - 1))
-                this.bottomBtn.render(c, mouseX, mouseY, delta);
+                this.bottomBtn.renderWidget(ctx, mouseX, mouseY, delta);
         }
 
         action.render(ctx, mouseX, mouseY, delta);
@@ -226,11 +188,7 @@ public class ActionItem extends AbstractButton {
     public void playDownSound(SoundManager soundManager) {}
 
     @Override
-            //? if >=1.21.9 {
-    /*public void onPress(InputWithModifiers inputWithModifiers) {}*/
-            //? } else {
     public void onPress() {}
-    //? }
 
     //? if >=1.19.3 {
     @Override

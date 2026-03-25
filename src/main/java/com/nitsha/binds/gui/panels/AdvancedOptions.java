@@ -8,10 +8,7 @@ import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.gui.utils.TextUtils;
-import com.mojang.blaze3d.vertex.PoseStack;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?}
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
 
@@ -80,21 +77,7 @@ public class AdvancedOptions extends AnimatedWindow {
         }, 0xFFFFFFFF, 0xFFEF4747, 0xFF262626, 0xFFFFFFFF);
         this.resetKeybind.setNormalTextures(NORMAL, PRESSED_NORMAL);
 
-        this.triggerModeBtn = new BedrockIconOptionButton(getWidth() - 22, getHeight() - 26, 18, 20) {
-            //? <1.21.9 {
-            @Override
-            public void onPress() {
-                super.onPress();
-                rebuildTriggerWidgets();
-            }
-            //? } else {
-        /*@Override
-        public void onPress(InputWithModifiers i) {
-            super.onPress(i);
-            rebuildTriggerWidgets();
-        }*/
-            //? }
-        };
+        this.triggerModeBtn = new BedrockIconOptionButton(getWidth() - 22, getHeight() - 26, 18, 20, this::rebuildTriggerWidgets);
 
         this.holdMsField = new TextField(
                 net.minecraft.client.Minecraft.getInstance().font,
@@ -307,33 +290,31 @@ public class AdvancedOptions extends AnimatedWindow {
     }
 
     @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //? } else {
-            /*PoseStack ctx*/
-            //? }
-            , int mouseX, int mouseY, float delta) {
+    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         int adjX = mouseX - this.getX();
         int adjY = mouseY - this.getYOffset();
 
         GUIUtils.matricesUtil(ctx, this.getX(), this.getYOffset(), 0, () -> {
             if (getDelay() == 0 && isVisible()) {
                 for (TabButton btn : tabsBtn) {
-                    btn.render(ctx, adjX, adjY, delta);
+                    btn.renderWidget(ctx, adjX, adjY, delta);
                 }
             }
         });
 
         GUIUtils.matricesUtil(ctx, 0, 0, 2, () -> {
             if (addNewAction.isMouseInside(mouseX, mouseY) && addNewAction.isOpen()) {
-                super.render(ctx, -10000, -10000, delta);
+                super.renderWindow(ctx, -10000, -10000, delta);
             } else {
-                super.render(ctx, mouseX, mouseY, delta);
+                super.renderWindow(ctx, mouseX, mouseY, delta);
             }
             GUIUtils.matricesUtil(ctx, getX(), getYOffset(), 2, () -> {
                 if (isVisible() && currentTab == 0)
+                    //? if >=26.1 {
+                    // this.addNewAction.extractRenderState(ctx, mouseX - getX(), mouseY - getYOffset(), delta);
+                    //? } else {
                     this.addNewAction.render(ctx, mouseX - getX(), mouseY - getYOffset(), delta);
+                    //? }
             });
         });
     }
@@ -356,7 +337,7 @@ public class AdvancedOptions extends AnimatedWindow {
 
         boolean clicked = false;
         boolean wasOpen = addNewAction.isOpen();
-        boolean insidePanel = addNewAction.isMouseInside(mouseX, mouseY);
+        boolean insidePanel = addNewAction.isMouseInside(adjX, adjY);
 
         if (currentTab == 0) {
             if (insidePanel) {
@@ -398,7 +379,7 @@ public class AdvancedOptions extends AnimatedWindow {
 
         boolean clicked = false;
         boolean wasOpen = addNewAction.isOpen();
-        boolean insidePanel = addNewAction.isMouseInside(mouseX, mouseY);
+        boolean insidePanel = addNewAction.isMouseInside(adjX, adjY);
 
         if (currentTab == 0) {
             if (insidePanel) {
@@ -500,12 +481,12 @@ public class AdvancedOptions extends AnimatedWindow {
         boolean result = false;
 
         if (currentTab == 0) {
-            if (addNewAction.isMouseInside(mouseX, mouseY)) {
+            if (addNewAction.isMouseInside(adjX, adjY)) {
                 //? if >=1.20.2 {
                 if (addNewAction.mouseScrolled(adjX, adjY, 0, amount))
-                    //? } else {
-                    /*if (addNewAction.mouseScrolled(adjX, adjY, amount))*/
-                    //? }
+                //? } else {
+                /*if (addNewAction.mouseScrolled(adjX, adjY, amount))*/
+                //? }
                     result = true;
                 if (addNewAction.isOpen()) return true;
             } else {
@@ -523,9 +504,9 @@ public class AdvancedOptions extends AnimatedWindow {
                     double itemMouseY = adjY - aY;
                     //? if >=1.20.2 {
                     if (actionItem.mouseScrolled(itemMouseX, itemMouseY, 0, amount)) {
-                        //? } else {
-                        /*if (actionItem.mouseScrolled(itemMouseX, itemMouseY, amount)) {*/
-                        //? }
+                    //? } else {
+                    /*if (actionItem.mouseScrolled(itemMouseX, itemMouseY, amount)) {*/
+                    //? }
                         return true;
                     }
                 }
@@ -534,9 +515,9 @@ public class AdvancedOptions extends AnimatedWindow {
 
         //? if >=1.20.2 {
         if (super.mouseScrolled(mouseX, mouseY, 0, amount)) {
-            //? } else {
-            /*if (super.mouseScrolled(mouseX, mouseY, amount)) {*/
-            //?}
+        //? } else {
+        /*if (super.mouseScrolled(mouseX, mouseY, amount)) {*/
+        //? }
             result = true;
         }
 

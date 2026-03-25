@@ -3,12 +3,7 @@ package com.nitsha.binds.action;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.TextField;
 import net.minecraft.client.Minecraft;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;*/
-//?}
-
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
@@ -16,8 +11,6 @@ import java.util.function.LongConsumer;
 public class CommandAction extends ActionType {
 
     private TextField field;
-
-    // --- Мета ---
 
     @Override
     public String getId() { return "command"; }
@@ -36,8 +29,6 @@ public class CommandAction extends ActionType {
     @Override
     public int getHeight() { return 25; }
 
-    // --- Логика исполнения ---
-
     @Override
     public void buildTasks(Map<String, Object> data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
         String cmd = String.valueOf(data.get("value"));
@@ -55,8 +46,6 @@ public class CommandAction extends ActionType {
         //? }
     }
 
-    // --- UI ---
-
     @Override
     public void init(int x, int y, int width, Object value) {
         this.field = new TextField(
@@ -69,12 +58,8 @@ public class CommandAction extends ActionType {
     }
 
     @Override
-    public void render(Object ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20 {
-        field.render((GuiGraphics) ctx, mouseX, mouseY, delta);
-        //? } else {
-        /*field.render((com.mojang.blaze3d.vertex.PoseStack) ctx, mouseX, mouseY, delta);*/
-        //? }
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        field.renderWidget(ctx, mouseX, mouseY, delta);
     }
 
     @Override

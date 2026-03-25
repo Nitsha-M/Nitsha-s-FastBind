@@ -1,19 +1,10 @@
 package com.nitsha.binds.action;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.KeybindSelector;
 import com.nitsha.binds.gui.widget.TextField;
-import net.minecraft.Util;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
-import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,16 +63,11 @@ public class LoopAction extends ActionType {
     }
 
     @Override
-    public void render(Object ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20 {
-        GuiGraphics c = (GuiGraphics) ctx;
-        //?} else {
-        /*PoseStack c = (PoseStack) ctx;*/
-        //?}
-        GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.loop"), 0,
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.loop"), 0,
                 x + 2, y + 8, "top", "left", 0xFF212121, false);
-        actionsField.render(c, mouseX, mouseY, delta);
-        countField.render(c, mouseX, mouseY, delta);
+        actionsField.renderWidget(ctx, mouseX, mouseY, delta);
+        countField.renderWidget(ctx, mouseX, mouseY, delta);
     }
 
     @Override

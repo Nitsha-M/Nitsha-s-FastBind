@@ -7,11 +7,7 @@ import com.nitsha.binds.gui.widget.KeybindSelector;
 import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Map;
@@ -80,22 +76,17 @@ public class KeyDownAction extends ActionType {
     }
 
     @Override
-    public void render(Object ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20 {
-        GuiGraphics c = (GuiGraphics) ctx;
-        //? } else {
-        /*PoseStack c = (PoseStack) ctx;*/
-        //? }
-        keybind.render(c, mouseX, mouseY, delta);
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        keybind.renderWidget(ctx, mouseX, mouseY, delta);
 
         String userLanguage = GUIUtils.getUL();
         if (userLanguage.equals("uk_ua") || userLanguage.equals("ru_ru")) {
-            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.keyDown_1"), 0,
+            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyDown_1"), 0,
                     x + 2, y + 4, "top", "left", 0xFF212121, false);
-            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.key"), 0,
+            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.key"), 0,
                     x + 2, y + 12, "top", "left", 0xFF212121, false);
         } else {
-            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.keyDown"), 0,
+            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyDown"), 0,
                     x + 2, y + 8, "top", "left", 0xFF212121, false);
         }
     }

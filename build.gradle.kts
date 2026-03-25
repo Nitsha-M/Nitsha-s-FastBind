@@ -18,6 +18,7 @@ class VersionDefinition(vararg pairs: Pair<String, String>) {
 
 // Fabric API
 val fabricApiVersion = VersionDefinition(
+    "26.1" to "0.144.0+26.1",
     // 1.21.x
     "1.21.11" to "0.141.3+1.21.11",
     "1.21.10" to "0.135.0+1.21.10",
@@ -58,6 +59,7 @@ val fabricApiVersion = VersionDefinition(
 
 // Mod Menu
 val modMenuVersion = VersionDefinition(
+    "26.1" to "18.0.0-alpha.6",
     // 1.21.x
     "1.21.11" to "17.0.0-beta.2",
     "1.21.10" to "16.0.0-rc.1",
@@ -98,6 +100,7 @@ val modMenuVersion = VersionDefinition(
 
 // NeoForge (только для 1.20.2+)
 val neoForgeVersion = VersionDefinition(
+    "26.1" to "26.1.0.1-beta",
     // 1.21.x
     "1.21.11" to "21.11.38-beta",
     "1.21.10" to "21.10.63",
@@ -149,6 +152,7 @@ val forgeDependenciesVersion = mapOf(
 )
 
 val neoforgeDependenciesVersion = mapOf(
+    "26.1" to "26.1.0.1-beta",
     "1.21.11" to "21.11.0-beta",
     "1.21.10" to "21.9.0-beta",
     "1.21.8" to "21.6.0-beta",
@@ -231,6 +235,7 @@ val parchmentVersion = VersionDefinition(
 
 val additionalVersions = mapOf(
     // 1.21.x
+    "26.1" to emptyList(),
     "1.21.11" to emptyList(),
     "1.21.10" to listOf("1.21.9"),
     "1.21.8" to listOf("1.21.6", "1.21.7"),
@@ -317,6 +322,7 @@ val loader: String = name.split("-")[1]
 config["loader"] = loader
 
 val fabric_loader = when {
+    stonecutter.eval(minecraft_version, ">=21.6") -> "0.18.4"
     stonecutter.eval(minecraft_version, ">=1.21.11") -> "0.17.3"
     stonecutter.eval(minecraft_version, ">=1.21.9") -> "0.17.2"
     else -> "0.16.14"
@@ -411,7 +417,7 @@ config["mnd"] = if (loader == "neoforge") "" else "mandatory = true"
 config["mfd"] = if (loader == "neoforge") neoforge_dep_ver else forge_dep_ver
 
 val java_version = when {
-    // stonecutter.eval(minecraft_version, ">=1.21.9") -> 24
+    stonecutter.eval(minecraft_version, ">=21.6") -> 25
     stonecutter.eval(minecraft_version, ">=1.20.5") -> 21
     stonecutter.eval(minecraft_version, ">=1.18") -> 17
     else -> 16
@@ -468,7 +474,9 @@ modstitch {
 
         replacementProperties.populate {
             put("pack_format", when {
-                    stonecutter.eval(minecraft_version, ">=1.21.11") -> 69
+                    stonecutter.eval(minecraft_version, ">=26.1") -> 84
+                    stonecutter.eval(minecraft_version, ">=1.21.11") -> 75
+                    stonecutter.eval(minecraft_version, ">=1.21.9") -> 69
                     stonecutter.eval(minecraft_version, ">=1.21.8") -> 64
                     stonecutter.eval(minecraft_version, ">=1.21.4") -> 46
                     stonecutter.eval(minecraft_version, ">=1.21.2") -> 41
@@ -563,18 +571,40 @@ stonecutter {
     for (entry in config.entries)
         swap(entry.key, entry.value)
 
-    replacements.string(current.parsed >= "1.21.11") {
-        replace("ResourceLocation", "Identifier")
-        replace("net.minecraft.Util", "net.minecraft.util.Util")
-    }
+    replacements {
+        string(stonecutter.eval(minecraft_version, "<=1.19.4")) {
+            replace("renderWidget", "renderButton")
+            replace("GuiGraphics", "PoseStack")
+        }
 
+        string(stonecutter.eval(minecraft_version, ">=1.21.9")) {
+            replace("public void onPress()", "public void onPress(InputWithModifiers inputWithModifiers)")
+            replace("public void onClick(double mouseX, double mouseY)", "public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl)")
+        }
+
+        string(stonecutter.eval(minecraft_version, ">=1.21.11")) {
+            replace("ResourceLocation", "Identifier")
+            replace("net.minecraft.Util", "net.minecraft.util.Util")
+            replace("ResourceLocation", "Identifier")
+            replace("renderWidget", "renderContents")
+        }
+
+        string(stonecutter.eval(minecraft_version, ">=26.1")) {
+            replace("GuiGraphics", "GuiGraphicsExtractor")
+            replace("import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;", "import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;")
+            replace("KeyBindingHelper.registerKeyBinding", "KeyMappingHelper.registerKeyMapping")
+            replace("KeyBindingHelper.getBoundKeyOf", "KeyMappingHelper.getBoundKeyOf")
+            replace("renderContents", "extractContents")
+            replace("ItemRenderer", "ItemEntityRenderer")
+        }
+    }
 }
 
 dependencies {
     modstitch.loom {
         if (is_fabric) {
             modstitchModImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
-            modstitchModImplementation("com.terraformersmc:modmenu:${modmenu_version}")
+            modstitchModApi("com.terraformersmc:modmenu:${modmenu_version}")
         }
         if (is_neoforge)
             modstitchModImplementation("net.neoforged:neoforge:${neoforge_ver}")

@@ -1,5 +1,6 @@
 package com.nitsha.binds.utils;
 
+import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.action.ActionType;
 import com.nitsha.binds.bind.Bind;
@@ -23,54 +24,45 @@ public class BindExecutor {
 
         BindTask task = new BindTask(bind, client);
         activeTasks.add(task);
+        FBLogger.info("Active bind " + bind.name);
     }
 
-    //? if fabric {
-    public static void onTick(Minecraft client) {
+    public static void tick() {
         activeTasks.removeIf(BindTask::tick);
     }
-    //? } elif neoforge {
-    //? if >1.20.4 {
-    /*public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
-        activeTasks.removeIf(BindTask::tick);
-    }*/
-    //? } else {
-    /*public static void onClientTick(net.neoforged.neoforge.event.TickEvent.ClientTickEvent event) {
-        activeTasks.removeIf(BindTask::tick);
-    }*/
-    //? }
-    //? } else {
-    /*public static void onClientTick(net.minecraftforge.event.TickEvent.ClientTickEvent event) {
-        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
-        activeTasks.removeIf(BindTask::tick);
-    }*/
-    //? }
 
     private static class BindTask {
         private final Queue<Runnable> actions = new LinkedList<>();
         private long waitUntil = 0;
 
         BindTask(Bind bind, Minecraft client) {
-            buildActions(bind.actions, client);
+            buildActions(bind.name, bind.actions, client);
 
             assert client.player != null;
             if (BindsStorage.getBooleanConfig("bindMsg", true)) {
+                //? if >=26.1 {
+                /*client.player.sendSystemMessage(
+                        TextUtils.translatable("nitsha.binds.bindActivate", "§3" + bind.name + "§r"));*/
+                //? } else {
                 client.player.displayClientMessage(
                         TextUtils.translatable("nitsha.binds.bindActivate", "§3" + bind.name + "§r"), true);
+                //? }
             }
         }
 
-        private void buildActions(List<Map<String, Object>> actionDataList, Minecraft client) {
+        private void buildActions(String name, List<Map<String, Object>> actionDataList, Minecraft client) {
             for (int i = 0; i < actionDataList.size(); i++) {
                 Map<String, Object> actionData = actionDataList.get(i);
                 String type = (String) actionData.get("type");
                 if (type == null) continue;
-                System.out.println("ACTION: " + type + " | data: " + actionData);
+                FBLogger.info("Init action for: " + name + ", type: " + type);
 
                 if (type.equals("loop")) {
                     Map<String, Object> loopValue = (Map<String, Object>) actionData.getOrDefault("value", Map.of());
                     int actions = Math.min(((Number) loopValue.getOrDefault("actions", 1)).intValue(), 10);
                     int count = Math.min(((Number) loopValue.getOrDefault("count", 1)).intValue(), 10);
+                    FBLogger.info("Found loop action!");
+                    FBLogger.info("Loop value: actions — " + actions + ", count — " + count);
 
                     List<Map<String, Object>> body = new ArrayList<>();
                     int collected = 0;
@@ -96,7 +88,7 @@ public class BindExecutor {
                     i = j - 1;
 
                     for (int r = 0; r < count; r++) {
-                        buildActions(body, client);
+                        buildActions(name, body, client);
                     }
                     continue;
                 }

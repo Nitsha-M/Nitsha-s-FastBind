@@ -22,72 +22,54 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;*/
 //?}
 
-//? if >=1.17 {
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-//? } else {
-/*import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;*/
-//? }
-
 public class Main {
     public static final String MOD_ID = "nitsha_fastbind";
-
-    //? if >=1.17 {
-    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    //?} else {
-    /*public static final Logger LOGGER = LogManager.getLogger(MOD_ID);*/
-    //?}
 
     public static final float GLOBAL_ANIMATION_SPEED = 0.6f;
 
     public static void init() {
         KeyBinds.register();
-
-        //? if fabric {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            KeyBinds.tick(client);
-            BindExecutor.onTick(client);
-            KeepMovementHandler.tick();
-        });
-        //? } elif neoforge {
-        /*NeoForge.EVENT_BUS.addListener(Main::onClientTick);*/
-        //? } elif forge {
-        /*MinecraftForge.EVENT_BUS.addListener(Main::onClientTick);*/
-        //? }
-
         BindsStorage.loadConfigs();
         BindsStorage.load();
-        BindHandler.register();
+
+        //? if fabric {
+        ClientTickEvents.END_CLIENT_TICK.register(Main::onClientTick);
+        //? } elif neoforge {
+        /*NeoForge.EVENT_BUS.addListener(Main::onClientTickEvent);*/
+        //? } elif forge {
+        /*MinecraftForge.EVENT_BUS.addListener(Main::onClientTickEvent);*/
+        //? }
     }
 
-    //? if fabric && >=1.19 {
-    public static void tick(Minecraft client) {
-        KeyBinds.tick(client);
+    //? if fabric {
+    private static void onClientTick(Minecraft client) {
+        tickClient(client);
     }
-    //?} elif neoforge {
+    //? } elif neoforge {
     //? if >1.20.4 {
-    /*private static void onClientTick(ClientTickEvent.Post event) {
-        KeyBinds.tick(Minecraft.getInstance());
-        BindExecutor.onClientTick(event);
-        KeepMovementHandler.tick();
+    /*private static void onClientTickEvent(ClientTickEvent.Post event) {
+        tickClient(Minecraft.getInstance());
     }*/
     //? } else {
-    /*private static void onClientTick(TickEvent.ClientTickEvent event) {
-        KeyBinds.tick(Minecraft.getInstance());
-        KeepMovementHandler.tick();
-        BindExecutor.onClientTick(event);
+    /*private static void onClientTickEvent(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        tickClient(Minecraft.getInstance());
     }*/
     //? }
-    //?} elif forge {
+    //? } elif forge {
     /*@SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
+    private static void onClientTickEvent(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
-        KeyBinds.tick(Minecraft.getInstance());
+        tickClient(Minecraft.getInstance());
+    }*/
+    //? }
+
+    private static void tickClient(Minecraft client) {
+        KeyBinds.tick(client);
+        BindExecutor.tick();
+        BindHandler.tick();
         KeepMovementHandler.tick();
-        BindExecutor.onClientTick(event);
     }
-    *///?}
 
     //? if >=1.21 {
     public static ResourceLocation id(String path) {

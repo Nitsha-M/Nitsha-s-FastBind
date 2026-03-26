@@ -16,6 +16,10 @@ import net.minecraft.world.level.block.Blocks;
 import org.lwjgl.opengl.GL11;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+//? if >=26.1 {
+// import net.minecraft.world.item.ItemStackTemplate;
+//? }
+
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.MouseButtonEvent;*/
@@ -24,7 +28,6 @@ import net.minecraft.client.input.MouseButtonEvent;*/
 import java.util.Objects;
 
 public class ItemButton extends AbstractButton {
-    private ItemStack icon;
     private final Runnable onClick;
     private final int size;
     private boolean selected;
@@ -34,6 +37,9 @@ public class ItemButton extends AbstractButton {
     private ResourceLocation NOT_FOUND_TEXTURE = Main.id("textures/gui/not_found.png");
 
     private int x, y;
+
+    //? if <26.1 {
+    private ItemStack icon;
 
     public ItemButton(int x, int y, int size, ItemStack icon, Runnable onClick, ResourceLocation texture, String key) {
         super(x, y, size, size, TextUtils.empty());
@@ -52,6 +58,35 @@ public class ItemButton extends AbstractButton {
         this(x, y, 26, icon, onClick, texture, key);
     }
 
+    public void setIcon(ItemStack icon) {
+        this.icon = icon;
+    }
+
+    //? } else {
+    /*
+    private ItemStackTemplate icon;
+    public ItemButton(int x, int y, int size, ItemStackTemplate icon, Runnable onClick, ResourceLocation texture, String key) {
+        super(x, y, size, size, TextUtils.empty());
+        this.icon = icon;
+        this.onClick = onClick;
+        this.selected = false;
+        this.size = size;
+        this.iconOffset = (size - 16) / 2;
+        this.TEXTURE = texture;
+        this.btnKey = key;
+        this.x = x;
+        this.y = y;
+    }
+    public ItemButton(int x, int y, ItemStackTemplate icon, Runnable onClick, ResourceLocation texture, String key) {
+        this(x, y, 26, icon, onClick, texture, key);
+    }
+
+    public void setIcon(ItemStackTemplate icon) {
+        this.icon = icon;
+    }
+    */
+    //? }
+
     public int getXPos() {
         return this.x;
     }
@@ -64,9 +99,6 @@ public class ItemButton extends AbstractButton {
         return btnKey;
     }
 
-    public void setIcon(ItemStack icon) {
-        this.icon = icon;
-    }
 
     public void setSelected(boolean cond) {
         this.selected = cond;
@@ -78,12 +110,11 @@ public class ItemButton extends AbstractButton {
     }
 
     @Override
-    public void onPress() {
+    public void onPress() {}
 
-    }
-
+    //? if <26.1 {
     @Override
-    protected void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         //? if <1.17 {
         // RenderSystem.alphaFunc(GL11.GL_GREATER, 0.0F);
         //?}
@@ -109,6 +140,32 @@ public class ItemButton extends AbstractButton {
             if (this.selected) GUIUtils.adaptiveDrawTexture(ctx, TEXTURE, this.getXPos(), this.getYPos(), this.size, 0, this.size, this.size, this.size * 3, this.size);
         });
     }
+    //? } else {
+    /*@Override
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        GUIUtils.matricesUtil(ctx, 0, 0, 1, () -> {
+            GUIUtils.adaptiveDrawTexture(ctx, TEXTURE, this.getXPos(), this.getYPos(), 0, 0, this.size, this.size, this.size * 3, this.size);
+            try {
+                if (this.icon != null) {
+                    ItemStack renderStack = this.icon.create();
+                    if (renderStack.is(Items.BARRIER)) {
+                        GUIUtils.adaptiveDrawTexture(ctx, NOT_FOUND_TEXTURE, this.getXPos() + iconOffset, this.getYPos() + iconOffset, 0, 0, 16, 16, 16, 16);
+                    } else {
+                        GUIUtils.drawItem(ctx, this.icon, this.getXPos() + iconOffset, this.getYPos() + iconOffset);
+                    }
+                } else {
+                    GUIUtils.adaptiveDrawTexture(ctx, NOT_FOUND_TEXTURE, this.getXPos() + iconOffset, this.getYPos() + iconOffset, 0, 0, 16, 16, 16, 16);
+                }
+            } catch (Exception e) {
+                GUIUtils.adaptiveDrawTexture(ctx, NOT_FOUND_TEXTURE, this.getXPos() + iconOffset, this.getYPos() + iconOffset, 0, 0, 16, 16, 16, 16);
+            }
+        });
+        GUIUtils.matricesUtil(ctx, 0, 0, 200, () -> {
+            if (this.isHovered) GUIUtils.adaptiveDrawTexture(ctx, TEXTURE, this.getXPos(), this.getYPos(), this.size * 2, 0, this.size, this.size, this.size * 3, this.size);
+            if (this.selected) GUIUtils.adaptiveDrawTexture(ctx, TEXTURE, this.getXPos(), this.getYPos(), this.size, 0, this.size, this.size, this.size * 3, this.size);
+        });
+    }*/
+    //? }
 
     //? if >=1.19.3 {
     @Override

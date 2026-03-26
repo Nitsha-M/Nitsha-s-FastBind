@@ -42,23 +42,23 @@ public class Main {
     }
 
     //? if fabric {
-    private static void onClientTick(Minecraft client) {
+    public static void onClientTick(Minecraft client) {
         tickClient(client);
     }
     //? } elif neoforge {
     //? if >1.20.4 {
-    /*private static void onClientTickEvent(ClientTickEvent.Post event) {
+    /*public static void onClientTickEvent(ClientTickEvent.Post event) {
         tickClient(Minecraft.getInstance());
     }*/
     //? } else {
-    /*private static void onClientTickEvent(TickEvent.ClientTickEvent event) {
+    /*public static void onClientTickEvent(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         tickClient(Minecraft.getInstance());
     }*/
     //? }
     //? } elif forge {
     /*@SubscribeEvent
-    private static void onClientTickEvent(TickEvent.ClientTickEvent event) {
+    public static void onClientTickEvent(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         tickClient(Minecraft.getInstance());
     }*/

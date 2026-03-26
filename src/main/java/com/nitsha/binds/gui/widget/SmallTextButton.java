@@ -142,6 +142,7 @@ public class SmallTextButton extends AbstractButton {
 
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        this.isHovered = isMouseOver(mouseX, mouseY);
         Font font = Minecraft.getInstance().font;
         int textWidth = font.width(name);
         int iconWidth = (icon != null) ? this.iconSize + 1 : 0;

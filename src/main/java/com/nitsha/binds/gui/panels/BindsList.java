@@ -20,6 +20,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceLocation;
 
+//? if >=26.1 {
+// import net.minecraft.world.item.ItemStackTemplate;
+//? }
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -192,7 +196,11 @@ public class BindsList extends AnimatedWindow {
         return System.currentTimeMillis() - deleteConfirmationTime < 5000;
     }
 
+    //? if >=26.1 {
+    // public void updateSelected(ItemStackTemplate  icon) {
+    //? } else {
     public void updateSelected(ItemStack icon) {
+    //? }
         int aB = (int) Math.floor((double) BindsEditor.getActiveBind() / 8);
         if (aB == BindsEditor.getCurrentPage()) buttons.get(BindsEditor.getActiveBind() - (8 * aB)).setIcon(icon);
     }

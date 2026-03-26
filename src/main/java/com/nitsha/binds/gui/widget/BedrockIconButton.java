@@ -6,13 +6,18 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 
+//? if >=26.1 {
+// import net.minecraft.world.item.ItemStackTemplate;
+//? }
+
 public class BedrockIconButton extends BedrockButton {
     private ResourceLocation ICON;
     private boolean itemIcon = false;
-    private ItemStack iI;
     private int xO = 0;
     private int yO = 0;
 
+    //? if <26.1 {
+    private ItemStack iI;
     private BedrockIconButton(String iconName, ItemStack stack, int x, int y, int width, int height, boolean isEnabled,
                               Runnable onClick, int btnColor, int btnHoverColor, int textColor, int textHoverColor) {
         super("", x, y, width, height, isEnabled, onClick, btnColor, btnHoverColor, textColor, textHoverColor);
@@ -29,10 +34,6 @@ public class BedrockIconButton extends BedrockButton {
             this.itemIcon = true;
             this.iI = stack;
         }
-    }
-
-    public void setIcon(String iconName) {
-        this.ICON = Main.id("textures/gui/sprites/" + iconName + ".png");
     }
 
     public BedrockIconButton(int x, int y, int width, int height, String iconName, boolean isEnabled, Runnable onClick) {
@@ -56,6 +57,47 @@ public class BedrockIconButton extends BedrockButton {
         this(null, icon, x, y, width, height, isEnabled, onClick,
                 btnColor, btnHoverColor, textColor, textHoverColor);
     }
+    //? } else {
+    /*private ItemStackTemplate iI;
+    private BedrockIconButton(String iconName, ItemStackTemplate stack, int x, int y, int width, int height, boolean isEnabled,
+                              Runnable onClick, int btnColor, int btnHoverColor, int textColor, int textHoverColor) {
+        super("", x, y, width, height, isEnabled, onClick, btnColor, btnHoverColor, textColor, textHoverColor);
+        this.xO = (width - 16) / 2;
+        this.yO = (height - 16) / 2;
+        if (iconName != null) {
+            this.ICON = Main.id("textures/gui/sprites/" + iconName + ".png");
+            this.itemIcon = false;
+            this.iI = null;
+        } else {
+            this.ICON = null;
+            this.itemIcon = true;
+            this.iI = stack;
+        }
+    }
+    public BedrockIconButton(int x, int y, int width, int height, String iconName, boolean isEnabled, Runnable onClick) {
+        this(iconName, null, x, y, width, height, isEnabled, onClick,
+                0xFFFFFFFF, 0xFF3C8527, 0xFF212121, 0xFFFFFFFF);
+    }
+    public BedrockIconButton(int x, int y, int width, int height, String iconName, boolean isEnabled, Runnable onClick,
+                             int btnColor, int btnHoverColor, int textColor, int textHoverColor) {
+        this(iconName, null, x, y, width, height, isEnabled, onClick,
+                btnColor, btnHoverColor, textColor, textHoverColor);
+    }
+    public BedrockIconButton(int x, int y, int width, int height, boolean isEnabled, Runnable onClick, ItemStackTemplate icon) {
+        this(null, icon, x, y, width, height, isEnabled, onClick,
+                0xFFFFFFFF, 0xFF3C8527, 0xFF212121, 0xFFFFFFFF);
+    }
+    public BedrockIconButton(int x, int y, int width, int height, boolean isEnabled, Runnable onClick, ItemStackTemplate icon,
+                             int btnColor, int btnHoverColor, int textColor, int textHoverColor) {
+        this(null, icon, x, y, width, height, isEnabled, onClick,
+                btnColor, btnHoverColor, textColor, textHoverColor);
+    }*/
+    //? }
+
+    public void setIcon(String iconName) {
+        this.ICON = Main.id("textures/gui/sprites/" + iconName + ".png");
+    }
+
 
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {

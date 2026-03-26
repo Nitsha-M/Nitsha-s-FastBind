@@ -10,15 +10,11 @@ import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.RenderUtils;
+import net.minecraft.world.level.block.Blocks;
 //? if fabric {
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 //?}
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import net.minecraft.client.gui.GuiComponent;
-import com.mojang.blaze3d.vertex.PoseStack;*/
-//? }
 import com.nitsha.binds.utils.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -29,6 +25,10 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Map;
+
+//? if >=26.1 {
+// import net.minecraft.world.item.ItemStackTemplate;
+//? }
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -224,7 +224,12 @@ public class BindsEditor extends Screen {
 
     public void saveBind() {
         if (!getCBind().actions.isEmpty()) {
+
+            //? if >=26.1 {
+            // Map.Entry<String, ItemStackTemplate> randomItem = ItemsMapper.getRandomItem();
+            //? } else {
             Map.Entry<String, ItemStack> randomItem = ItemsMapper.getRandomItem();
+            //? }
             String newIcon = (randomItem != null ) ? randomItem.getKey() : "minecraft:grass_block";
             String bindName = window_BasicOptions.getBindName().getText().isEmpty()
                     ? TextUtils.translatable("nitsha.binds.untitled").getString()
@@ -254,7 +259,11 @@ public class BindsEditor extends Screen {
         BindsStorage.setBind(getCurrentPreset(), getActiveBind(), new Bind(
                 "", "minecraft:structure_void", 0, "press", 500, new ArrayList<>()));
         selectBind();
+        //? if >=26.1 {
+        // window_BindsList.updateSelected(ItemStackTemplate.fromNonEmptyStack(new ItemStack(Blocks.STRUCTURE_VOID)));
+        //? } else {
         window_BindsList.updateSelected(new ItemStack(Items.STRUCTURE_VOID));
+        //? }
     }
 
     public void copyBind() {

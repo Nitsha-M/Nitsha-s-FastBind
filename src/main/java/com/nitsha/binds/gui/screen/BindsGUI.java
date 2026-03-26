@@ -32,6 +32,9 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+//? if >=26.1 {
+// import net.minecraft.world.item.ItemStackTemplate;
+//? }
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -267,7 +270,11 @@ public class BindsGUI extends Screen {
         }
     }
 
+    //? if >=26.1 {
+    // private ItemButton createBtn(String text, ItemStackTemplate icon, int x, int y, Bind bind) {
+    //? } else {
     private ItemButton createBtn(String text, ItemStack icon, int x, int y, Bind bind) {
+    //? }
         return new ItemButton(x, y, icon, () -> {
             BindExecutor.startBind(bind);
             if (BindsStorage.getBooleanConfig("closeOnAction", false)) {

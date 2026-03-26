@@ -72,6 +72,7 @@ public class KeybindSelector extends AbstractButton {
 
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        boolean isHovered = isMouseOver(mouseX, mouseY);
         Font font = Minecraft.getInstance().font;
 
         targetOffset = isPressed ? 2 : 0;

@@ -424,6 +424,14 @@ val java_version = when {
 }
 config["java_version"] = java_version.toString()
 
+val fApiName = when {
+    stonecutter.eval(minecraft_version, ">1.19") -> "fabric-api"
+    stonecutter.eval(minecraft_version, "=1.19") -> "fabric"
+    stonecutter.eval(minecraft_version, ">=1.18") -> "fabric-api"
+    else -> "fabric"
+}
+config["fApiName"] = fApiName
+
 version = "${mod_version}+${stonecutter.current.version}"
 group = mod_group
 base.archivesName = mod_id
@@ -499,7 +507,7 @@ modstitch {
     }
 
     if (is_fabric) loom {
-        fabricLoaderVersion.set(fabric_loader)
+        fabricLoaderVersion = fabric_loader
 
         configureLoom {
             runConfigs.configureEach {
@@ -572,8 +580,12 @@ stonecutter {
         swap(entry.key, entry.value)
 
     replacements {
-        string(stonecutter.eval(minecraft_version, "<=1.19.4")) {
+        string(stonecutter.eval(minecraft_version, "<1.19.4")) {
             replace("renderWidget", "renderButton")
+        }
+
+        string(stonecutter.eval(minecraft_version, "<=1.19.4")) {
+            replace("import net.minecraft.client.gui.GuiGraphics;", "import com.mojang.blaze3d.vertex.PoseStack;")
             replace("GuiGraphics", "PoseStack")
         }
 
@@ -590,6 +602,7 @@ stonecutter {
         }
 
         string(stonecutter.eval(minecraft_version, ">=26.1")) {
+            replace("import net.minecraft.client.gui.GuiGraphics;", "import net.minecraft.client.gui.GuiGraphicsExtractor;")
             replace("GuiGraphics", "GuiGraphicsExtractor")
             replace("import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;", "import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;")
             replace("KeyBindingHelper.registerKeyBinding", "KeyMappingHelper.registerKeyMapping")
@@ -604,7 +617,9 @@ dependencies {
     modstitch.loom {
         if (is_fabric) {
             modstitchModImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
-            modstitchModApi("com.terraformersmc:modmenu:${modmenu_version}")
+            modstitchModImplementation("com.terraformersmc:modmenu:${modmenu_version}") {
+                exclude(group = "net.fabricmc", module = "fabric-loader")
+            }
         }
         if (is_neoforge)
             modstitchModImplementation("net.neoforged:neoforge:${neoforge_ver}")
@@ -687,6 +702,10 @@ publishMods {
         minecraftVersions.add(stonecutter.current.version)
         additional.forEach { minecraftVersions.add(it) }
 
+        if (loader == "fabric") {
+            requires("fabric-api")
+            optional("modmenu")
+        }
     }
 
     curseforge {
@@ -695,5 +714,9 @@ publishMods {
         minecraftVersions.add(stonecutter.current.version)
         additional.forEach { minecraftVersions.add(it) }
 
+        if (loader == "fabric") {
+            requires("fabric-api")
+            optional("modmenu")
+        }
     }
 }

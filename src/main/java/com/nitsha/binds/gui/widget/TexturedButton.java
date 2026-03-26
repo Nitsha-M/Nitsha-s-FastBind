@@ -91,6 +91,7 @@ public class TexturedButton extends ImageButton {
     //? if >=1.20.2 {
     @Override
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        this.isHovered = isMouseOver(mouseX, mouseY);
         //? if <1.21.5 {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -103,6 +104,7 @@ public class TexturedButton extends ImageButton {
     //? } else if >=1.20 {
     /*@Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        this.isHovered = isMouseOver(mouseX, mouseY);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         ResourceLocation current = this.isHovered ? hoverTexture : defaultTexture;
@@ -112,26 +114,29 @@ public class TexturedButton extends ImageButton {
     *///? } else if >=1.19.4 {
     /*@Override
     public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        this.isHovered = isMouseOver(mouseX, mouseY);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         ResourceLocation current = this.isHovered ? hoverTexture : defaultTexture;
         RenderSystem.setShaderTexture(0, current);
-        GuiComponent.blit(matrices, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
+        net.minecraft.client.gui.GuiComponent.blit(matrices, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
         RenderSystem.disableBlend();
     }
     *///? } else if >=1.17 {
     /*@Override
     public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        this.isHovered = isMouseOver(mouseX, mouseY);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         ResourceLocation current = this.isHovered ? hoverTexture : defaultTexture;
         RenderSystem.setShaderTexture(0, current);
-        GuiComponent.blit(matrices, this.x, this.y, 0, 0, this.width, this.height, this.width, this.height);
+        net.minecraft.client.gui.GuiComponent.blit(matrices, this.x, this.y, 0, 0, this.width, this.height, this.width, this.height);
         RenderSystem.disableBlend();
     }
     *///?} else {
     /*@Override
     public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        this.isHovered = isMouseOver(mouseX, mouseY);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableAlphaTest();

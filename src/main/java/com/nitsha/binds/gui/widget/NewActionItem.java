@@ -45,12 +45,10 @@ public class NewActionItem extends AbstractButton {
     public int getYPos() { return this.y; }
 
     @Override
-    public void onPress() {
-
-    }
+    public void onPress() {}
 
     @Override
-    protected void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         GUIUtils.drawFill(ctx, getXPos() + 3, getYPos() + 5, getXPos() + 5, getYPos() + 12, this.color);
         GUIUtils.drawFill(ctx, getXPos() + 2, getYPos(), getXPos() + getWidth() - 2, getYPos() + 1, 0xFF555555);
         GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(this.name, 25)), 0, getXPos() + 7, getYPos() + 8, "left", "center", 0xFFFFFFFF, false);

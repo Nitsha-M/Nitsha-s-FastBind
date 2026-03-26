@@ -24,6 +24,7 @@ public class Init {
         MinecraftForge.EVENT_BUS.register(this);
 
         Main.init();
+        //? if <26.1 {
         //? if >=1.19 {
         ModLoadingContext.get().registerExtensionPoint(
             ConfigScreenHandler.ConfigScreenFactory.class,
@@ -35,12 +36,7 @@ public class Init {
             () -> new ConfigGuiHandler.ConfigGuiFactory((mc, prevScreen) -> new BindsEditor(prevScreen){})
         );
         //? }
-    }
-
-    @SubscribeEvent
-    public void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        KeyBinds.tick(Minecraft.getInstance());
+        //? }
     }
 }
 */

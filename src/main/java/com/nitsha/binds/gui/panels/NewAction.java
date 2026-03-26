@@ -12,8 +12,8 @@ import com.nitsha.binds.gui.widget.ScrollableWindow;
 import com.nitsha.binds.gui.widget.SmallTextButton;
 import com.nitsha.binds.utils.RenderUtils;
 import net.minecraft.client.Minecraft;
-//? if >=1.17 {
 import net.minecraft.client.gui.GuiGraphics;
+//? if >=1.17 {
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}

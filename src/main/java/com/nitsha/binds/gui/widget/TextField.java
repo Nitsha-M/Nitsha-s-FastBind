@@ -6,12 +6,7 @@ import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.ChatFormatting;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
-import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -125,7 +120,7 @@ public class TextField extends AbstractButton {
     public void setAnimatedPlaceholder(boolean animated) {
         isAnimatedPlaceholder = animated;
     }
-    
+
     // Misc
     //? if >=1.21.9 {
     /* public static boolean hasControlDown() {
@@ -145,7 +140,7 @@ public class TextField extends AbstractButton {
     }
     public static boolean hasAltDown() {
         Window handle = Minecraft.getInstance().getWindow();
-        return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_ALT) || 
+        return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_ALT) ||
                InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_ALT);
     }*/
     //? } else {
@@ -672,9 +667,10 @@ public class TextField extends AbstractButton {
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         if (!visible) return;
+        this.isHovered = isMouseOver(mouseX, mouseY);
         GUIUtils.drawResizableBox(
                 ctx,
-                (this.isFocused()) ? FOCUS : NORMAL,
+                (this.isFocused() || isHovered) ? FOCUS : NORMAL,
                 getX(), getY(), getWidth(), getHeight(),
                 3, 7);
 
@@ -794,7 +790,7 @@ public class TextField extends AbstractButton {
         int rectTop = Math.round(phBoxY);
         int rectRight = rectLeft + Math.round(font.width(this.placeholder) * scaleFocused) + 4;
         int rectBottom = getY() + 1;
-        int outlineColor = isFocused() ? 0xFFFFFFFF : 0xFFA0A0A0;
+        int outlineColor = (isFocused() || isHovered) ? 0xFFFFFFFF : 0xFFA0A0A0;
 
         GUIUtils.drawFill(ctx, rectLeft + 1, rectTop, rectRight - 1, rectBottom - 1, outlineColor);
         GUIUtils.drawFill(ctx, rectLeft, rectTop + 1, rectRight, rectBottom - 1, outlineColor);

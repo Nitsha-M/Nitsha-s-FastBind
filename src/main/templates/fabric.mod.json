@@ -30,7 +30,7 @@
   "depends": {
     "fabricloader" : ">=${fabric_loader}",
     "minecraft": "${mod_versionRange}",
-    "fabric-api": "*"
+    "${fApiName}": ">=${fabric_version}"
   },
   "recommends": {
     "modmenu": "*"

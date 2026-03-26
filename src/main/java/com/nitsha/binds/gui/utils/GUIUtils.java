@@ -37,6 +37,10 @@ import org.joml.Matrix4f;
 //? }
 import org.lwjgl.opengl.GL11;
 
+//? if >=26.1 {
+// import net.minecraft.world.item.ItemStackTemplate;
+//? }
+
 public class GUIUtils {
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -350,10 +354,20 @@ public class GUIUtils {
         *///?}
     }
 
+    //? if >=26.1 {
+    /*public static void drawItem(GuiGraphics ctx, ItemStackTemplate stack, int x, int y, float scale) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return;
+        ctx.item(stack.create(), x, y);
+    }
+
+    public static void drawItem(GuiGraphics ctx, ItemStackTemplate stack, int x, int y) {
+        drawItem(ctx, stack, x, y, 1);
+    }
+    */
+    //? } else {
     public static void drawItem(GuiGraphics ctx, ItemStack stack, int x, int y, float scale) {
-        //? if >=26.1 {
-        // ctx.item(stack, x, y);
-        //? } else if >=1.20 {
+        //? if >=1.20 {
         ctx.renderItem(stack, x, y);
         //? } else if >=1.19.4 {
         /*ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
@@ -361,17 +375,17 @@ public class GUIUtils {
         *///? } else if >=1.17 {
         /*Minecraft client = Minecraft.getInstance();
         ItemRenderer itemRenderer = client.getItemRenderer();
-        ((PoseStack) ctx).pushPose();
-        ((PoseStack) ctx).translate((float)x, (float)y, 150.0F);
-        ((PoseStack) ctx).translate(8.0F, 8.0F, 0.0F);
+        ctx.pushPose();
+        ctx.translate((float)x, (float)y, 150.0F);
+        ctx.translate(8.0F, 8.0F, 0.0F);
         //? if >=1.19.3 {
-        ((PoseStack) ctx).last().pose().mul((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
+        ctx.last().pose().mul((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
         //? } else if >=1.18 {
-        ((PoseStack) ctx).last().pose().multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
+        ctx.last().pose().multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
         //? } else {
-        ((PoseStack) ctx).last().pose().multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
+        ctx.last().pose().multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
         //? }
-        ((PoseStack) ctx).scale(16.0F, 16.0F, 16.0F);
+        ctx.scale(16.0F, 16.0F, 16.0F);
         MultiBufferSource.BufferSource immediate = client.renderBuffers().bufferSource();
         //? if >=1.18 {
         BakedModel model = itemRenderer.getModel(stack, null, null, 0);
@@ -396,7 +410,7 @@ public class GUIUtils {
         RenderSystem.enableDepthTest();
         if (bl) Lighting.setupFor3DItems();
 
-        ((PoseStack) ctx).popPose();
+        ctx.popPose();
         matrixStack.popPose();
         RenderSystem.applyModelViewMatrix();
         *///? } else {
@@ -435,6 +449,9 @@ public class GUIUtils {
     public static void drawItem(GuiGraphics ctx, ItemStack stack, int x, int y) {
         drawItem(ctx, stack, x, y, 1);
     }
+    //? }
+
+
 
     public static String getUL() {
         //? if >=1.19.4 {

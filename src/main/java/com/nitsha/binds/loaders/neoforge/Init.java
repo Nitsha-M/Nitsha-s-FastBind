@@ -18,6 +18,7 @@ public class Init {
         Main.init();
         KeyBinds.registerNeoForge(modEventBus);
 
+        //? if <26.1 {
         //? if >1.20.4 {
         ModLoadingContext.get().registerExtensionPoint(
             IConfigScreenFactory.class,
@@ -28,6 +29,7 @@ public class Init {
             ConfigScreenHandler.ConfigScreenFactory.class,
             () -> new ConfigScreenHandler.ConfigScreenFactory((mc, prevScreen) -> new BindsEditor(prevScreen){})
         );
+        //? }
         //? }
     }
 }

@@ -124,6 +124,7 @@ public class BindsStorage {
         } else {
             createDefault();
         }
+        BindHandler.invalidateCache();
     }
 
     private static void migrate() {
@@ -277,6 +278,7 @@ public class BindsStorage {
         for (int i = 1; i <= 9; i++) {
             addPreset("Preset " + i);
         }
+        BindHandler.invalidateCache();
     }
 
     public static void addPreset(String name) {
@@ -382,6 +384,7 @@ public class BindsStorage {
 
         page.binds.set(bindInPage, newBind);
         save();
+        BindHandler.invalidateCache();
     }
 
     public static void addBindAction(int presetIndex, int bindIndex, int actionIndex, Map<String, Object> action) {
@@ -414,7 +417,6 @@ public class BindsStorage {
         if (bind != null) {
             bind.keyCode = keyCode;
             setBind(presetIndex, bindIndex, bind);
-            BindHandler.getAllKeyBind();
         }
     }
 

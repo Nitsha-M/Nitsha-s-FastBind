@@ -4,11 +4,7 @@ import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.resources.ResourceLocation;
 
@@ -52,13 +48,7 @@ public class ModalWindow extends AnimatedWindow {
     }
 
     @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //? } else {
-            /*PoseStack ctx*/
-            //? }
-            , int mouseX, int mouseY, float delta) {
+    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         int adjX = mouseX - this.getX();
         int adjY = mouseY - this.getYOffset();
 
@@ -69,7 +59,7 @@ public class ModalWindow extends AnimatedWindow {
 
         GUIUtils.matricesUtil(ctx, 0, 0, 200, () -> {
             GUIUtils.drawFill(ctx, 0, 0, 10000, 10000, bgColor);
-            super.render(ctx, mouseX, mouseY, delta);
+            super.renderWindow(ctx, mouseX, mouseY, delta);
         });
     }
 

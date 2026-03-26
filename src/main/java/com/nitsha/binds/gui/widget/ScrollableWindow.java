@@ -1,14 +1,12 @@
 package com.nitsha.binds.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Window;
-import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.DrawElement;
 import com.nitsha.binds.utils.RenderUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.*;
 import com.nitsha.binds.utils.Renderable;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 //? if >=1.17 {
@@ -16,13 +14,11 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -148,14 +144,15 @@ public class ScrollableWindow extends AbstractContainerEventHandler
         updateScrollLogic();
     }
 
-    @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //?} else {
-            /*PoseStack ctx*/
-            //?}
-            , int mouseX, int mouseY, float delta) {
+    //? if >=26.1 {
+    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+    //? } else {
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        //? }
+        renderWindow(ctx, mouseX, mouseY, delta);
+    }
+
+    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
         int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
 
@@ -163,7 +160,11 @@ public class ScrollableWindow extends AbstractContainerEventHandler
             int mX = (!isMouseInside(mouseX, mouseY)) ? -10000 : mouseX - aX;
             int mY = (!isMouseInside(mouseX, mouseY)) ? -10000 : mouseY - aY;
             drawElements.forEach(element -> element.render(ctx, mX, mY));
+            //? if >=26.1 {
+            // renderables.forEach(element -> element.extractRenderState(ctx, mX, mY, delta));
+            //? } else {
             renderables.forEach(element -> element.render(ctx, mX, mY, delta));
+            //? }
         });
 
         if (this.scrollableArea > this.height) {
@@ -257,6 +258,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
      *///?}
 
     private boolean isInsideScrollbar(double mouseX, double mouseY) {
+        if (scrollableArea <= height) return false;
         int scrollbarX = this.getX() + this.width - 4;
         int scrollbarY = this.getY() + 1 + scrollBarOffset;
         return mouseX >= scrollbarX && mouseX <= scrollbarX + 4 &&
@@ -298,6 +300,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
                 }
             }
         }
+            System.out.println(clicked);
 
         return clicked;
     }*/
@@ -315,8 +318,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
                 clicked = true;
             }
 
-
-        if (isMouseInside(mouseX, mouseY)) {
+            if (isMouseInside(mouseX, mouseY)) {
                 for (GuiEventListener element : new ArrayList<>(this.children())) {
                     if (element.mouseClicked(mouseX - aX, mouseY - aY, button)) {
                         this.setFocused(element);
@@ -343,7 +345,10 @@ public class ScrollableWindow extends AbstractContainerEventHandler
         if (button == 0 && isDraggingScrollbar) {
             isDraggingScrollbar = false;
         }
-        return super.mouseReleased(event);
+        for (GuiEventListener child : new ArrayList<>(children)) {
+                child.mouseReleased(new MouseButtonEvent(mouseX - aX, mouseY - aY, event.buttonInfo()));
+        }
+        return false;
     }*/
     //? } else {
         public boolean mouseReleased(double mouseX, double mouseY, int button) {
@@ -352,7 +357,10 @@ public class ScrollableWindow extends AbstractContainerEventHandler
             if (button == 0 && isDraggingScrollbar) {
                 isDraggingScrollbar = false;
             }
-            return super.mouseReleased(mouseX - aX, mouseY - aY, button);
+            for (GuiEventListener child : new ArrayList<>(children)) {
+                child.mouseReleased(mouseX - aX, mouseY - aY, button);
+            }
+            return false;
         }
     //? }
 

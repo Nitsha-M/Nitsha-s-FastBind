@@ -17,11 +17,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 //? }
 
 import net.minecraft.client.Minecraft;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//? } else {
-/*import com.mojang.blaze3d.vertex.PoseStack;*/
-//? }
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.KeyMapping;
@@ -36,6 +32,9 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+//? if >=26.1 {
+// import net.minecraft.world.item.ItemStackTemplate;
+//? }
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -129,13 +128,11 @@ public class BindsGUI extends Screen {
     }
 
     @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //? } else {
-            /* PoseStack ctx */
-            //? }
-            , int mouseX, int mouseY, float delta) {
+    //? if >=26.1 {
+    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+    //? } else {
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    //? }
         if (!this.checkForClose()) {
             GUIUtils.drawResizableBox(ctx, MENU_BG, centerX, centerY, MENU_WIDTH, 106, 3, 7);
             GUIUtils.drawResizableBox(ctx, MENU_HEADER, centerX, centerY, MENU_WIDTH, 22, 4, 9);
@@ -213,14 +210,21 @@ public class BindsGUI extends Screen {
                 });
             }
 
+            //? if >=26.1 {
+            // super.extractRenderState(ctx, mouseX, mouseY, delta);
+            //? } else {
             super.render(ctx, mouseX, mouseY, delta);
+            //? }
         }
     }
 
-    //? if >=1.20 {
     //? if >=1.21 {
     @Override
     //? }
+    //? if >=26.1 {
+    /*public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    }*/
+    //? } else >=1.20.2 {
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
     //? }
@@ -266,7 +270,11 @@ public class BindsGUI extends Screen {
         }
     }
 
+    //? if >=26.1 {
+    // private ItemButton createBtn(String text, ItemStackTemplate icon, int x, int y, Bind bind) {
+    //? } else {
     private ItemButton createBtn(String text, ItemStack icon, int x, int y, Bind bind) {
+    //? }
         return new ItemButton(x, y, icon, () -> {
             BindExecutor.startBind(bind);
             if (BindsStorage.getBooleanConfig("closeOnAction", false)) {
@@ -422,6 +430,16 @@ public class BindsGUI extends Screen {
         if (handleClick(mouseX, mouseY, centerX, centerY - 20, 22, 18, () -> updatePreset(-1))) return true;
         if (handleClick(mouseX, mouseY, centerX + MENU_WIDTH - 22, centerY - 20, 22, 18, () -> updatePreset(1))) return true;
 
+        if (this.matchesMouse(KeyBinds.PREV_PAGE, event)) {
+            updatePage(-1);
+            return true;
+        }
+
+        if (this.matchesMouse(KeyBinds.NEXT_PAGE, event)) {
+            updatePage(1);
+            return true;
+        }
+
         return super.mouseClicked(event, bl);
     }*/
     //? } else {
@@ -434,6 +452,16 @@ public class BindsGUI extends Screen {
             return true;
         if (handleClick(mouseX, mouseY, centerX + MENU_WIDTH - 22, centerY - 20, 22, 18, () -> updatePreset(1)))
             return true;
+
+        if (this.matchesMouse(KeyBinds.PREV_PAGE, button)) {
+            updatePage(-1);
+            return true;
+        }
+
+        if (this.matchesMouse(KeyBinds.NEXT_PAGE, button)) {
+            updatePage(1);
+            return true;
+        }
 
         return super.mouseClicked(mouseX, mouseY, button);
     }
@@ -486,34 +514,20 @@ public class BindsGUI extends Screen {
     int scanCode = event.scancode();*/
     //? } else {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        //? }
-        //? if fabric {
-        int bindKey = KeyBindingHelper.getBoundKeyOf(KeyBinds.BINDS).getValue();
-        //? } else {
-        // int bindKey = KeyBinds.BINDS.getDefaultKey().getValue();
-        //? }
-
-        if ((keyCode == bindKey && !BindsStorage.getBooleanConfig("holdToOpen", true) && !ignoreHoldToOpenOnce) ||
+    //? }
+        if ((this.matchesKey(KeyBinds.BINDS, keyCode, scanCode) && !BindsStorage.getBooleanConfig("holdToOpen", true) && !ignoreHoldToOpenOnce) ||
                 keyCode == GLFW.GLFW_KEY_ESCAPE) {
             ignoreHoldToOpenOnce = false;
             minecraft.setScreen(null);
             return true;
         }
 
-        //? if fabric {
-        if (keyCode == KeyBindingHelper.getBoundKeyOf(KeyBinds.PREV_PAGE).getValue()) {
-        //? } else {
-        // if (keyCode == KeyBinds.PREV_PAGE.getDefaultKey().getValue()) {
-        //? }
+        if (this.matchesKey(KeyBinds.PREV_PAGE, keyCode, scanCode)) {
             updatePage(-1);
             return true;
         }
 
-        //? if fabric {
-        if (keyCode == KeyBindingHelper.getBoundKeyOf(KeyBinds.NEXT_PAGE).getValue()) {
-        //? } else {
-        // if (keyCode == KeyBinds.NEXT_PAGE.getDefaultKey().getValue()) {
-        //? }
+        if (this.matchesKey(KeyBinds.NEXT_PAGE, keyCode, scanCode)) {
             updatePage(1);
             return true;
         }
@@ -528,6 +542,23 @@ public class BindsGUI extends Screen {
         // return super.keyPressed(event);
         //? } else {
         return super.keyPressed(keyCode, scanCode, modifiers);
+        //? }
+    }
+
+    private boolean matchesKey(KeyMapping key, int keyCode, int scanCode) {
+        //? if >=1.21.9 {
+        // return key.matches(new KeyEvent(keyCode, scanCode, 0));
+        //? } else {
+        return key.matches(keyCode, scanCode);
+        //? }
+    }
+
+    //? if >=1.21.9 {
+    //  private boolean matchesMouse(KeyMapping key, MouseButtonEvent event) {
+    // return key.matchesMouse(event);
+    //? } else {
+    private boolean matchesMouse(KeyMapping key, int button) {
+        return key.matchesMouse(button);
         //? }
     }
 

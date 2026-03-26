@@ -8,17 +8,20 @@ import com.nitsha.binds.utils.EventBus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
-
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.InputWithModifiers;*/
+//? }
+
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
 public class KeyEventAction extends ActionType {
@@ -83,7 +86,14 @@ public class KeyEventAction extends ActionType {
         this.y = y;
         this.width = width;
 
-        this.selector = new KeyEventSelector(x, y + 24, width, 20);
+        this.selector = new KeyEventSelector(x, y + 24, width, 20, () -> {
+            EventBus.off("selectKeyEvent.result");
+            EventBus.on("selectKeyEvent.result", (String selectedKey) -> {
+                selector.setSelectedItem(selectedKey);
+            });
+            EventBus.emit("selectKeyEvent.open", null);
+        });
+
         this.msField = new TextField(
                 Minecraft.getInstance().font,
                 x + width - 36 - 20, y + 24, 36, 20,
@@ -91,21 +101,9 @@ public class KeyEventAction extends ActionType {
                 TextUtils.translatable("nitsha.binds.advances.actions.delayLine").getString(), true
         );
 
-        this.modeButton = new BedrockIconOptionButton(x + width - 18, y + 24, 18, 20) {
-            //? <1.21.9 {
-            @Override
-            public void onPress() {
-                super.onPress();
-                rebuildModeWidgets(getSelected(), msField != null ? msField.getText() : "500");
-            }
-            //? } else {
-            /*@Override
-            public void onPress(InputWithModifiers inputWithModifiers) {
-                super.onPress(inputWithModifiers);
-                rebuildModeWidgets(getSelected(), msField != null ? msField.getText() : "500");
-            }*/
-            //? }
-        };
+        this.modeButton = new BedrockIconOptionButton(x + width - 18, y + 24, 18, 20, () -> {
+                rebuildModeWidgets(this.modeButton.getSelected(), msField != null ? msField.getText() : "500");
+        });
 
         String savedMode = MODE_PRESS;
         String savedMs = "500";
@@ -122,11 +120,6 @@ public class KeyEventAction extends ActionType {
 
         this.selector.setSelectedItem(savedKey);
         rebuildModeWidgets(savedMode, savedMs);
-
-        EventBus.off("selectKeyEvent.result");
-        EventBus.on("selectKeyEvent.result", (String selectedKey) -> {
-            selector.setSelectedItem(selectedKey);
-        });
     }
 
     private void rebuildModeWidgets(String mode, String  msValue) {
@@ -140,26 +133,20 @@ public class KeyEventAction extends ActionType {
     }
 
     @Override
-    public void render(Object ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20 {
-        GuiGraphics c = (GuiGraphics) ctx;
-        //?} else {
-        /*PoseStack c = (PoseStack) ctx;*/
-        //?}
-
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         String userLanguage = GUIUtils.getUL();
         if (userLanguage.equals("ja_jp") || userLanguage.equals("uk_ua")) {
-            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent_1"), 0,
+            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent_1"), 0,
                     x + 2, y + 4, "top", "left", 0xFF212121, false);
-            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent_2"), 0,
+            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent_2"), 0,
                     x + 2, y + 12, "top", "left", 0xFF212121, false);
         } else {
-            GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent"), 0,
+            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent"), 0,
                     x + 2, y + 8, "top", "left", 0xFF212121, false);
         }
-        selector.render(c, mouseX, mouseY, delta);
-        msField.render(c, mouseX, mouseY, delta);
-        modeButton.render(c, mouseX, mouseY, delta);
+        selector.renderWidget(ctx, mouseX, mouseY, delta);
+        msField.renderWidget(ctx, mouseX, mouseY, delta);
+        modeButton.renderWidget(ctx, mouseX, mouseY, delta);
     }
 
     @Override
@@ -237,6 +224,7 @@ public class KeyEventAction extends ActionType {
     public boolean mouseReleased(double mx, double my, int btn) {
         boolean r = selector.mouseReleased(mx, my, btn);
         r |= modeButton.mouseReleased(mx, my, btn);
+        System.out.println("i'm  free");
         return r;
     }
     //? }

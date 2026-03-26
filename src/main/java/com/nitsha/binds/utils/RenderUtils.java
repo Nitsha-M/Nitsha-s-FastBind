@@ -1,9 +1,6 @@
 package com.nitsha.binds.utils;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?}
 import net.minecraft.client.gui.components.events.GuiEventListener;
 
 public class RenderUtils {
@@ -12,17 +9,20 @@ public class RenderUtils {
             return (Renderable) element;
         }
 
-        //? if >=1.19.3 {
+        //? if >=26.1 {
+        /*if (element instanceof net.minecraft.client.gui.components.Renderable vanilla) {
+            return new Renderable() {
+                @Override
+                public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+                    vanilla.extractRenderState(ctx, mouseX, mouseY, delta);
+                }
+            };
+        }*/
+        //? } else >=1.19.3 {
         if (element instanceof net.minecraft.client.gui.components.Renderable vanilla) {
             return new Renderable() {
                 @Override
-                public void render(
-                        //? if >=1.20 {
-                        GuiGraphics ctx
-                        //? } else {
-                        // PoseStack ctx
-                        //? }
-                        , int mouseX, int mouseY, float delta) {
+                public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
                     vanilla.render(ctx, mouseX, mouseY, delta);
                 }
             };

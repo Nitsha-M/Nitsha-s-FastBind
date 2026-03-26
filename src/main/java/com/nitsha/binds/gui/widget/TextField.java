@@ -6,12 +6,7 @@ import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.ChatFormatting;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
-import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -60,8 +55,6 @@ public class TextField extends AbstractButton {
     private int firstCharacterIndex = 0;
 
     private long lastSwitchFocusTime = Util.getMillis();
-
-    private final List<Object> focusExceptions = new ArrayList<>();
 
     private float phScale = 1f;
     private float phTextX = 0f;
@@ -127,7 +120,7 @@ public class TextField extends AbstractButton {
     public void setAnimatedPlaceholder(boolean animated) {
         isAnimatedPlaceholder = animated;
     }
-    
+
     // Misc
     //? if >=1.21.9 {
     /* public static boolean hasControlDown() {
@@ -147,7 +140,7 @@ public class TextField extends AbstractButton {
     }
     public static boolean hasAltDown() {
         Window handle = Minecraft.getInstance().getWindow();
-        return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_ALT) || 
+        return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_ALT) ||
                InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_ALT);
     }*/
     //? } else {
@@ -668,46 +661,16 @@ public class TextField extends AbstractButton {
         return this.text.substring(startIndex, i);
     }
 
-    //? if >=1.21.9 {
-    // public void onPress(InputWithModifiers inputWithModifiers) {}
-    //? } else {
     @Override
-    public void onPress() { }
-    //? }
+    public void onPress() {}
 
-    //? if >=1.21.11 {
-    /*@Override
-    public void renderContents(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        rndr(ctx, mouseX, mouseY, delta);
-    }*/
-    //?} else if >1.20.2 {
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        rndr(ctx, mouseX, mouseY, delta);
-    }
-    //? } else if >=1.20 {
-    /*
-     @Override
-     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float
-     delta) {
-     rndr(ctx, mouseX, mouseY, delta);
-     }
-     *///? } else if >=1.19.4 {
-    /*@Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    *///? } else {
-    /*@Override
-    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? }
-
-    private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
+        if (!visible) return;
+        this.isHovered = isMouseOver(mouseX, mouseY);
         GUIUtils.drawResizableBox(
                 ctx,
-                (this.isFocused()) ? FOCUS : NORMAL,
+                (this.isFocused() || isHovered) ? FOCUS : NORMAL,
                 getX(), getY(), getWidth(), getHeight(),
                 3, 7);
 
@@ -746,12 +709,14 @@ public class TextField extends AbstractButton {
                     continue;
 
                 Component styledText = TextUtils.literal(segment.text).setStyle(segment.style);
-                //? if >=1.20 {
-                ((GuiGraphics) ctx).drawString(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
+                //? if >=26.1 {
+                // ctx.text(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
+                //? } else if >=1.20 {
+                ctx.drawString(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
                 //? } else {
-                /*((PoseStack)ctx).pushPose();
+                /*ctx.pushPose();
                  this.font.drawShadow((PoseStack)ctx, styledText, renderX, renderY, 0xFFFFFFFF);
-                 ((PoseStack)ctx).popPose();*/
+                 ctx.popPose();*/
                 //? }
 
                 renderX += font.width(TextUtils.literal(segment.text).setStyle(segment.style));
@@ -786,7 +751,7 @@ public class TextField extends AbstractButton {
         }
     }
 
-    private void animatedPlaceholder(Object ctx) {
+    private void animatedPlaceholder(GuiGraphics ctx) {
         float scaleFocused = 0.5f;
         float scaleUnfocused = 1f;
 
@@ -825,7 +790,7 @@ public class TextField extends AbstractButton {
         int rectTop = Math.round(phBoxY);
         int rectRight = rectLeft + Math.round(font.width(this.placeholder) * scaleFocused) + 4;
         int rectBottom = getY() + 1;
-        int outlineColor = isFocused() ? 0xFFFFFFFF : 0xFFA0A0A0;
+        int outlineColor = (isFocused() || isHovered) ? 0xFFFFFFFF : 0xFFA0A0A0;
 
         GUIUtils.drawFill(ctx, rectLeft + 1, rectTop, rectRight - 1, rectBottom - 1, outlineColor);
         GUIUtils.drawFill(ctx, rectLeft, rectTop + 1, rectRight, rectBottom - 1, outlineColor);

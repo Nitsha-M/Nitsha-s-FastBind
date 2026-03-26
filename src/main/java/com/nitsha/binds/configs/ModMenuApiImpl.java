@@ -6,14 +6,15 @@ import com.terraformersmc.modmenu.api.*;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 
 @Environment(EnvType.CLIENT)
 public class ModMenuApiImpl implements ModMenuApi
 {
+	//? if <26.1 {
 	@Override
 	public ConfigScreenFactory<?> getModConfigScreenFactory() {
 		return parent -> new BindsEditor(parent);
 	}
+	//? }
 }
 //? }

@@ -4,11 +4,8 @@ import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.nitsha.binds.utils.RenderUtils;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?}
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 
 import com.nitsha.binds.utils.Renderable;
@@ -19,6 +16,9 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //? }
 
+//? if >=26.1 {
+// import net.minecraft.world.item.ItemStackTemplate;
+//? }
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
@@ -57,13 +57,27 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
     private boolean isDraggingScrollbar = false;
 
     private String currentCategory = "blocks";
-    //? if <=1.20.4 {
+
+    //? if >=26.1 {
+    // private ItemStackTemplate maceIcon = new ItemStackTemplate(Items.MACE);
+    //? } else if <=1.20.4 {
     /*private ItemStack maceIcon = new ItemStack(Items.DIAMOND_HOE);
     *///?} else {
     private ItemStack maceIcon = new ItemStack(Items.MACE);
     //?}
+    //? if >=26.1 {
+    /*private ItemStackTemplate[] categories = {
+            new ItemStackTemplate(Items.GRASS_BLOCK),
+            maceIcon,
+            new ItemStackTemplate(Items.RED_BED),
+            ItemsMapper.getPotionItem(Potions.SWIFTNESS, Items.POTION),
+            new ItemStackTemplate(Items.GOLD_INGOT),
+            new ItemStackTemplate(Items.COMMAND_BLOCK)
+    };*/
+    //? } else {
     private ItemStack[] categories = {new ItemStack(Items.GRASS_BLOCK), maceIcon, new ItemStack(Items.RED_BED),
                                       ItemsMapper.getPotionItem(Potions.SWIFTNESS, Items.POTION), new ItemStack(Items.GOLD_INGOT), new ItemStack(Items.COMMAND_BLOCK)};
+    //? }
     private final String[] categoriesList = {"blocks", "tools", "colored", "foods", "gold", "mods"};
 
     private final BindsEditor screen;
@@ -94,6 +108,43 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
         }
     }
 
+    //? if >=26.1 {
+    /*
+        private void createButtons() {
+        this.children.removeIf(element -> element instanceof ItemButton);
+        Map<String, ItemStackTemplate> sourceMap = ItemsMapper.getCategories().getOrDefault(currentCategory, ItemsMapper.getItemStackMap());
+        List<Map.Entry<String, ItemStackTemplate>> fullList = new ArrayList<>(sourceMap.entrySet());
+        int offset = scrollOffset * COLUMNS;
+        int total = fullList.size();
+        int maxVisible = COLUMNS * VISIBLE_ROWS;
+        int startX = x;
+        int startY = y;
+        for (int i = 0; i < maxVisible && (i + offset) < total; i++) {
+            Map.Entry<String, ItemStackTemplate> entry = fullList.get(i + offset);
+            int row = i / COLUMNS;
+            int col = i % COLUMNS;
+            int bx = startX + col * 18;
+            int by = startY + row * 18;
+            ItemStackTemplate stack = entry.getValue();
+            String key = entry.getKey();
+            ItemButton button = new ItemButton(bx, by, 18, stack, () -> {
+                screen.getBasicOptionsWindow().getEditIcon().setIcon(stack);
+                updateButtons(key);
+                BindsEditor.editIconBtnString = key;
+                if (!BindsEditor.getCBind().actions.isEmpty())  {
+                    screen.saveBind();
+                }
+            }, ITEMS, key);
+            this.children.add(button);
+        }
+        int rowAmount = (int) Math.ceil(fullList.size() / (float) COLUMNS);
+        maxScroll = Math.max(0, rowAmount - VISIBLE_ROWS);
+        updateScrollLogic(rowAmount);
+        updateButtons(activeKey);
+    }
+     */
+    //? } else {
+    Map.Entry<String, ItemStack> randomItem = ItemsMapper.getRandomItem();
     private void createButtons() {
         this.children.removeIf(element -> element instanceof ItemButton);
         Map<String, ItemStack> sourceMap = ItemsMapper.categories.getOrDefault(currentCategory, ItemsMapper.itemStackMap);
@@ -133,7 +184,21 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
         updateScrollLogic(rowAmount);
         updateButtons(activeKey);
     }
-
+    //? }
+    //? if >=26.1 {
+    /*public void pickRandom() {
+        Map.Entry<String, ItemStackTemplate> randomItem = ItemsMapper.getRandomItem();
+        if (randomItem == null) return;
+        String key = randomItem.getKey();
+        ItemStackTemplate stack = randomItem.getValue();
+        screen.getBasicOptionsWindow().getEditIcon().setIcon(stack);
+        updateButtons(key);
+        BindsEditor.editIconBtnString = key;
+        if (!BindsEditor.getCBind().actions.isEmpty()) {
+            screen.saveBind();
+        }
+    }*/
+    //? } else {
     public void pickRandom() {
         Map.Entry<String, ItemStack> randomItem = ItemsMapper.getRandomItem();
         if (randomItem == null) return;
@@ -149,7 +214,7 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
             screen.saveBind();
         }
     }
-
+    //? }
 
     public void updateButtons(String key) {
         activeKey = key;
@@ -176,18 +241,23 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
         createButtons();
     }
 
-    @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //?} else {
-            /*PoseStack ctx
-            *///?}
-            , int mouseX, int mouseY, float delta) {
+    //? if >=26.1 {
+    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+    //? } else {
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    //? }
+        renderWindow(ctx, mouseX, mouseY, delta);
+    }
+
+    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         for (GuiEventListener element : this.children) {
             Renderable drawable = RenderUtils.wrapRenderable(element);
             if (drawable != null) {
+                //? if >=26.1 {
+                // drawable.extractRenderState(ctx, mouseX, mouseY, delta);
+                //? } else {
                 drawable.render(ctx, mouseX, mouseY, delta);
+                //? }
             }
         }
 

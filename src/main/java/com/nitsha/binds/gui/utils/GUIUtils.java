@@ -2,28 +2,23 @@ package com.nitsha.binds.gui.utils;
 
 //? if <1.21.5 {
 import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 //?}
-import com.mojang.blaze3d.platform.Lighting;import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.platform.Window;
 import com.nitsha.binds.gui.widget.TexturedButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
+//? if <1.20 {
 /*import net.minecraft.client.gui.GuiComponent;
 import com.mojang.blaze3d.platform.GlStateManager;
 *///?}
-//? if >1.20.1 {
-import net.minecraft.client.gui.components.WidgetSprites;
-//?}
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.texture.OverlayTexture;import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.resources.ResourceLocation;
@@ -41,9 +36,10 @@ import org.joml.Matrix4f;
 // import com.mojang.math.Matrix4f;
 //? }
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.system.MemoryStack;
 
-import java.nio.IntBuffer;
+//? if >=26.1 {
+// import net.minecraft.world.item.ItemStackTemplate;
+//? }
 
 public class GUIUtils {
     private static final Minecraft MC = Minecraft.getInstance();
@@ -56,29 +52,29 @@ public class GUIUtils {
         return str;
     }
 
-    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY) {
+    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY) {
         addText(ctx, text, width, offsetX, offsetY, "left", "top", 0xFFFFFFFF, true);
     }
 
-    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign) {
+    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign) {
         addText(ctx, text, width, offsetX, offsetY, hAlign, vAlign, 0xFFFFFFFF, true);
     }
 
-    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY, int color) {
+    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY, int color) {
         addText(ctx, text, width, offsetX, offsetY, "left", "top", color, true);
     }
 
-    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY, int color, String hAlign, String vAlign) {
+    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY, int color, String hAlign, String vAlign) {
         addText(ctx, text, width, offsetX, offsetY, hAlign, vAlign, color, true);
     }
 
-    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color) {
+    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color) {
         addText(ctx, text, width, offsetX, offsetY, hAlign, vAlign, color, true);
     }
 
     // ---------------- Универсальный метод ----------------
 
-    public static void addText(Object ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color, boolean shadow) {
+    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color, boolean shadow) {
         if (text == null || text.getString().isBlank()) return;
         Font font = MC.font;
         int chWidth = font.width(text);
@@ -110,26 +106,27 @@ public class GUIUtils {
                 break;
         }
 
-        //? if >=1.20 {
-        ((GuiGraphics)ctx).drawString(font, text, alignCoordX, alignCoordY, color, shadow);
+        //? if >=26.1 {
+        // ctx.text(font, text, alignCoordX, alignCoordY, color, shadow);
+        //? } else if >=1.20 {
+        ctx.drawString(font, text, alignCoordX, alignCoordY, color, shadow);
         //?} else {
-        /*((PoseStack)ctx).pushPose();
+        /*ctx.pushPose();
         if (shadow) {
-            font.drawShadow((PoseStack)ctx, text, alignCoordX, alignCoordY, color);
+            font.drawShadow(ctx, text, alignCoordX, alignCoordY, color);
         } else {
-            font.draw((PoseStack)ctx, text, alignCoordX, alignCoordY, color);
+            font.draw(ctx, text, alignCoordX, alignCoordY, color);
         }
-        ((PoseStack)ctx).popPose();
+        ctx.popPose();
         *///?}
     }
 
-    public static void adaptiveDrawTexture(Object ctx, ResourceLocation texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
                                            int width, int height, int textureWidth, int textureHeight, int color) {
         //? if >=1.21.6 {
-        /*((GuiGraphics)ctx).blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v,
-                width, height, textureWidth, textureHeight, color);
+        /*ctx.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, textureWidth, textureHeight, color);
         *///?} else if >1.21.1 {
-        ((GuiGraphics)ctx).blit(RenderType::guiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight, color);
+        ctx.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight, color);
         //?} else if >=1.20 {
         /*RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -138,7 +135,7 @@ public class GUIUtils {
         float blue = (color & 0xFF) / 255.0f;
         float alpha = ((color >> 24) & 0xFF) / 255.0f;
         RenderSystem.setShaderColor(red, green, blue, alpha);
-        ((GuiGraphics) ctx).blit(texture, x, y, 0, u, v, width, height, textureWidth, textureHeight);
+        ctx.blit(texture, x, y, 0, u, v, width, height, textureWidth, textureHeight);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableBlend();
         *///?} else if >=1.17 {
@@ -161,7 +158,7 @@ public class GUIUtils {
         RenderSystem.setShaderTexture(0, texture);
 
         GuiComponent.blit(
-            (PoseStack) ctx,
+            ctx,
             x, y,
             u, v,
             width, height,
@@ -184,7 +181,7 @@ public class GUIUtils {
 
         Minecraft.getInstance().getTextureManager().bind(texture);
         GuiComponent.blit(
-                (PoseStack) ctx,
+                ctx,
                 x, y,
                 u, v,
                 width, height,
@@ -196,17 +193,17 @@ public class GUIUtils {
         *///?}
     }
 
-    public static void adaptiveDrawTexture(Object ctx, ResourceLocation texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
                                            int width, int height, int textureWidth, int textureHeight) {
         adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, textureWidth, textureHeight, 0xFFFFFFFF);
     }
 
-    public static void adaptiveDrawTexture(Object ctx, ResourceLocation texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
                                            int width, int height, int textureWidth) {
         adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, textureWidth, textureWidth, 0xFFFFFFFF);
     }
 
-    public static void adaptiveDrawTexture(Object ctx, ResourceLocation texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
                                            int width, int height) {
         adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, 256, 256, 0xFFFFFFFF);
     }
@@ -218,7 +215,7 @@ public class GUIUtils {
 
     // ------------------- RESIZABLE BOX -------------------
 
-    public static void drawResizableBox(Object ctx, ResourceLocation texture,
+    public static void drawResizableBox(GuiGraphics ctx, ResourceLocation texture,
                                         int x, int y, int width, int height, int edge, int tS, int color) {
         int iW = width - edge * 2;
         int iH = height - edge * 2;
@@ -254,7 +251,7 @@ public class GUIUtils {
         }
     }
 
-    public static void drawResizableBox(Object ctx, ResourceLocation texture, int x, int y, int width, int height, int edge, int tS) {
+    public static void drawResizableBox(GuiGraphics ctx, ResourceLocation texture, int x, int y, int width, int height, int edge, int tS) {
         drawResizableBox(ctx, texture, x, y, width, height, edge, tS, 0xFFFFFFFF);
     }
 
@@ -262,56 +259,52 @@ public class GUIUtils {
         return Mth.clamp(value, 0.001f, 1.0f);
     }
 
-    public static void matricesUtil(Object ctx, float x, float y, int zIndex, Runnable action) {
+    public static void matricesUtil(GuiGraphics ctx, float x, float y, int zIndex, Runnable action) {
         //? if >=1.21.6 {
-        /* GuiGraphics graphics = (GuiGraphics)ctx;
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(x, y);
+        /*ctx.pose().pushMatrix();
+        ctx.pose().translate(x, y);
         action.run();
-        graphics.pose().popMatrix();
+        ctx.pose().popMatrix();
         *///?} else if >=1.20 {
-        ((GuiGraphics)ctx).pose().pushPose();
-        ((GuiGraphics)ctx).pose().translate(x, y, zIndex);
+        ctx.pose().pushPose();
+        ctx.pose().translate(x, y, zIndex);
         action.run();
-        ((GuiGraphics)ctx).pose().translate(-x, -y, 0);
-        ((GuiGraphics)ctx).pose().popPose();
+        ctx.pose().translate(-x, -y, 0);
+        ctx.pose().popPose();
         //?} else {
-        /*PoseStack matrices = (PoseStack) ctx;
-        matrices.pushPose();
-        matrices.translate(x, y, zIndex);
+        /*ctx.pushPose();
+        ctx.translate(x, y, zIndex);
         action.run();
-        matrices.translate(-x, -y, 0);
-        matrices.popPose();
+        ctx.translate(-x, -y, 0);
+        ctx.popPose();
         *///?}
     }
 
-    public static void customScissor(Object ctx, int x, int y, int width, int height, Runnable action) {
+    public static void customScissor(GuiGraphics ctx, int x, int y, int width, int height, Runnable action) {
         //? if >=1.21.6 {
-        /*GuiGraphics graphics = (GuiGraphics)ctx;
-        graphics.enableScissor(0, 0, 10000, 10000);
-        graphics.pose().pushMatrix();
-        graphics.enableScissor(x, y, x + width, y + height);
+        /*ctx.enableScissor(0, 0, 10000, 10000);
+        ctx.pose().pushMatrix();
+        ctx.enableScissor(x, y, x + width, y + height);
         action.run();
-        graphics.disableScissor();
-        graphics.pose().popMatrix();
-        graphics.disableScissor();*/
+        ctx.disableScissor();
+        ctx.pose().popMatrix();
+        ctx.disableScissor();*/
         //? } else if >=1.21.4 {
-        /*GuiGraphics graphics = (GuiGraphics)ctx;
-        graphics.enableScissor(0, 0, 10000, 10000);
-        graphics.pose().pushPose();
-        graphics.enableScissor(x, y, x + width, y + height);
+        /*ctx.enableScissor(0, 0, 10000, 10000);
+        ctx.pose().pushPose();
+        ctx.enableScissor(x, y, x + width, y + height);
         action.run();
-        graphics.disableScissor();
-        graphics.pose().popPose();
-        graphics.disableScissor();
+        ctx.disableScissor();
+        ctx.pose().popPose();
+        ctx.disableScissor();
         *///?} else if >=1.20 {
-        ((GuiGraphics)ctx).enableScissor(0, 0, 10000, 10000);
-        ((GuiGraphics)ctx).pose().pushPose();
-        ((GuiGraphics)ctx).enableScissor(x, y, x + width, y + height);
+        ctx.enableScissor(0, 0, 10000, 10000);
+        ctx.pose().pushPose();
+        ctx.enableScissor(x, y, x + width, y + height);
         action.run();
-        ((GuiGraphics)ctx).disableScissor();
-        ((GuiGraphics)ctx).pose().popPose();
-        ((GuiGraphics)ctx).disableScissor();
+        ctx.disableScissor();
+        ctx.pose().popPose();
+        ctx.disableScissor();
         //?} else {
         /*
         Window window = Minecraft.getInstance().getWindow();
@@ -322,71 +315,77 @@ public class GUIUtils {
         double g = (double)width * d;
         double h = (double)height * d;
         RenderSystem.enableScissor(0, 0, 10000, 10000);
-        ((PoseStack)ctx).pushPose();
+        ctx.pushPose();
         RenderSystem.enableScissor((int)e, (int)f, Math.max(0, (int)g), Math.max(0, (int)h));
         action.run();
         RenderSystem.disableScissor();
-        ((PoseStack)ctx).popPose();
+        ctx.popPose();
         RenderSystem.disableScissor();
         */
         //?}
     }
 
-    public static void matricesScale(Object ctx, float scale, Runnable action) {
+    public static void matricesScale(GuiGraphics ctx, float scale, Runnable action) {
         //? if >=1.21.6 {
-        /*GuiGraphics graphics = (GuiGraphics)ctx;
-        graphics.pose().pushMatrix();
-        graphics.pose().scale(scale, scale);
+        /*ctx.pose().pushMatrix();
+        ctx.pose().scale(scale, scale);
         action.run();
-        graphics.pose().popMatrix();
+        ctx.pose().popMatrix();
         *///?} else if >=1.20 {
-        GuiGraphics gctx = (GuiGraphics) ctx;
-        gctx.pose().pushPose();
-        gctx.pose().scale(scale, scale, 1.0f);
+        ctx.pose().pushPose();
+        ctx.pose().scale(scale, scale, 1.0f);
         action.run();
-        gctx.pose().popPose();
+        ctx.pose().popPose();
         //?} else {
-        /*PoseStack matrices = (PoseStack) ctx;
-        matrices.pushPose();
-        matrices.scale(scale, scale, 1.0f);
+        /*ctx.pushPose();
+        ctx.scale(scale, scale, 1.0f);
         action.run();
-        matrices.popPose();
+        ctx.popPose();
         *///?}
     }
 
     // Draw
 
-    public static void drawFill(Object ctx, int x1, int y1, int x2, int y2, int color) {
+    public static void drawFill(GuiGraphics ctx, int x1, int y1, int x2, int y2, int color) {
         //? if >=1.20 {
-        GuiGraphics context = (GuiGraphics) ctx;
-        context.fill(x1, y1, x2, y2, color);
+        ctx.fill(x1, y1, x2, y2, color);
         //?} else {
-        /*PoseStack matrices = (PoseStack) ctx;
-        GuiComponent.fill(matrices, x1, y1, x2, y2, color);
+        /*GuiComponent.fill(ctx, x1, y1, x2, y2, color);
         *///?}
     }
 
-    public static void drawItem(Object ctx, ItemStack stack, int x, int y, float scale) {
+    //? if >=26.1 {
+    /*public static void drawItem(GuiGraphics ctx, ItemStackTemplate stack, int x, int y, float scale) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return;
+        ctx.item(stack.create(), x, y);
+    }
+
+    public static void drawItem(GuiGraphics ctx, ItemStackTemplate stack, int x, int y) {
+        drawItem(ctx, stack, x, y, 1);
+    }
+    */
+    //? } else {
+    public static void drawItem(GuiGraphics ctx, ItemStack stack, int x, int y, float scale) {
         //? if >=1.20 {
-        ((GuiGraphics)ctx).renderItem(stack, x, y);
-        //?} else if >=1.19.4 {
+        ctx.renderItem(stack, x, y);
+        //? } else if >=1.19.4 {
         /*ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-        itemRenderer.renderGuiItem((PoseStack) ctx, stack, x, y);
-        *///?} else if >=1.17 {
+        itemRenderer.renderGuiItem(ctx, stack, x, y);
+        *///? } else if >=1.17 {
         /*Minecraft client = Minecraft.getInstance();
         ItemRenderer itemRenderer = client.getItemRenderer();
-        PoseStack matrices = (PoseStack) ctx;
-        matrices.pushPose();
-        matrices.translate((float)x, (float)y, 150.0F);
-        matrices.translate(8.0F, 8.0F, 0.0F);
+        ctx.pushPose();
+        ctx.translate((float)x, (float)y, 150.0F);
+        ctx.translate(8.0F, 8.0F, 0.0F);
         //? if >=1.19.3 {
-        matrices.last().pose().mul((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
+        ctx.last().pose().mul((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
         //? } else if >=1.18 {
-        matrices.last().pose().multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
+        ctx.last().pose().multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
         //? } else {
-        matrices.last().pose().multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
+        ctx.last().pose().multiply(Matrix4f.createScaleMatrix(1.0F, -1.0F, 1.0F));
         //? }
-        matrices.scale(16.0F, 16.0F, 16.0F);
+        ctx.scale(16.0F, 16.0F, 16.0F);
         MultiBufferSource.BufferSource immediate = client.renderBuffers().bufferSource();
         //? if >=1.18 {
         BakedModel model = itemRenderer.getModel(stack, null, null, 0);
@@ -399,10 +398,10 @@ public class GUIUtils {
         PoseStack matrixStack = RenderSystem.getModelViewStack();
         matrixStack.pushPose();
         //? if >=1.18 {
-        matrixStack.mulPoseMatrix(matrices.last().pose());
+        matrixStack.mulPoseMatrix(((PoseStack) ctx).last().pose());
         RenderSystem.applyModelViewMatrix();
         //? } else {
-        matrixStack.mulPoseMatrix(matrices.last().pose());
+        matrixStack.mulPoseMatrix(((PoseStack) ctx).last().pose());
         RenderSystem.applyModelViewMatrix();
         //? }
 
@@ -411,20 +410,19 @@ public class GUIUtils {
         RenderSystem.enableDepthTest();
         if (bl) Lighting.setupFor3DItems();
 
-        matrices.popPose();
+        ctx.popPose();
         matrixStack.popPose();
         RenderSystem.applyModelViewMatrix();
-        *///?} else {
+        *///? } else {
         /*Minecraft client = Minecraft.getInstance();
         ItemRenderer itemRenderer = client.getItemRenderer();
-        PoseStack matrices = (PoseStack) ctx;
         RenderSystem.pushMatrix();
         RenderSystem.enableRescaleNormal();
         RenderSystem.enableAlphaTest();
         RenderSystem.defaultAlphaFunc();
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.multMatrix(matrices.last().pose());
+        RenderSystem.multMatrix(((PoseStack) ctx).last().pose());
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.translatef((float)x, (float)y, 150.0F);
         RenderSystem.translatef(8.0F, 8.0F, 0.0F);
@@ -445,12 +443,15 @@ public class GUIUtils {
         RenderSystem.disableAlphaTest();
         RenderSystem.disableRescaleNormal();
         RenderSystem.popMatrix();
-        *///?}
+        *///? }
     }
 
-    public static void drawItem(Object ctx, ItemStack stack, int x, int y) {
+    public static void drawItem(GuiGraphics ctx, ItemStack stack, int x, int y) {
         drawItem(ctx, stack, x, y, 1);
     }
+    //? }
+
+
 
     public static String getUL() {
         //? if >=1.19.4 {

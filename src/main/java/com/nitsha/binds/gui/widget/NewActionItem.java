@@ -3,17 +3,12 @@ package com.nitsha.binds.gui.widget;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.panels.NewAction;
 import com.nitsha.binds.gui.utils.GUIUtils;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.nitsha.binds.gui.utils.TextUtils;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import net.minecraft.client.gui.GuiComponent;*/
-//?}
+import net.minecraft.client.gui.components.AbstractButton;
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.resources.ResourceLocation;
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -23,7 +18,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
-public class NewActionItem extends AbstractWidget {
+public class NewActionItem extends AbstractButton {
     private final NewAction parent;
 
     private final String name;
@@ -49,48 +44,21 @@ public class NewActionItem extends AbstractWidget {
     public int getXPos() { return this.x; }
     public int getYPos() { return this.y; }
 
-    private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20 {
-        GuiGraphics c = (GuiGraphics) ctx;
-        //?} else {
-        /*PoseStack c = (PoseStack) ctx;*/
-        //?}
+    @Override
+    public void onPress() {}
+
+    @Override
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         GUIUtils.drawFill(ctx, getXPos() + 3, getYPos() + 5, getXPos() + 5, getYPos() + 12, this.color);
         GUIUtils.drawFill(ctx, getXPos() + 2, getYPos(), getXPos() + getWidth() - 2, getYPos() + 1, 0xFF555555);
-        GUIUtils.addText(c, TextUtils.literal(GUIUtils.truncateString(this.name, 25)), 0, getXPos() + 7, getYPos() + 8, "left", "center", 0xFFFFFFFF, false);
+        GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(this.name, 25)), 0, getXPos() + 7, getYPos() + 8, "left", "center", 0xFFFFFFFF, false);
         GUIUtils.adaptiveDrawTexture(ctx, ADD_NEW, this.getXPos() + this.getWidth() - 10, this.getYPos() + 6, 0, 0, 5, 5, 5, 5);
         if ((this.isMouseOver(mouseX, mouseY) || isHovered) && parent.isOpen())
-            GUIUtils.drawFill(c, getXPos(), getYPos(), getXPos() + getWidth(), getYPos() + getHeight(), 0x0DFFFFFF);
+            GUIUtils.drawFill(ctx, getXPos(), getYPos(), getXPos() + getWidth(), getYPos() + getHeight(), 0x0DFFFFFF);
     }
 
-    //? if >1.20.2 {
     @Override
-    protected void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    //?} else if >=1.20 {
-    /*@Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //?} else if >=1.19.4 {
-    /*@Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //?} else {
-    /*@Override
-    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }*/
-    //? }
-
-    @Override
-            //? if <1.21.9 {
     public void onClick(double mouseX, double mouseY) {
-        //? } else {
-        /*public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl) {*/
-        //? }
         parent.openSelector(false);
         parent.addAction(this.typeId, this.value);
     }

@@ -5,7 +5,7 @@
   "version": "${mod_version}",
   "icon": "${mod_icon}",
   "description": "${mod_description}",
-  "environment": "*",
+  "environment": "client",
   "contact": {
     "homepage" : "https://modrinth.com/mod/nitshas-fastbind",
     "issues": "https://github.com/Nitsha-M/Nitsha-s-FastBind/issues"
@@ -29,7 +29,8 @@
   },
   "depends": {
     "fabricloader" : ">=${fabric_loader}",
-    "minecraft": "${mod_versionRange}"
+    "minecraft": "${mod_versionRange}",
+    "${fApiName}": ">=${fabric_version}"
   },
   "recommends": {
     "modmenu": "*"

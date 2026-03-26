@@ -1,6 +1,5 @@
 package com.nitsha.binds.gui.panels;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.configs.BindsStorage;
@@ -13,9 +12,6 @@ import com.nitsha.binds.utils.EasterEgg;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-//? if >=1.20 {
-import net.minecraft.client.gui.GuiGraphics;
-//? }
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
 //? if >=1.21.9 {
@@ -65,7 +61,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
         catMeow2.setPosition(120, 158);
 
         catEasterEgg = new EasterEgg(
-                10,
+                4,
                 500,
                 () -> {
                     if (!BindsStorage.getBooleanConfig("easterEgg", false)) {
@@ -86,11 +82,6 @@ public class BasicOptionsWindow extends AnimatedWindow {
         catTail.startAnimation(true);
         this.addDrawElement((ctx, mouseX, mouseY) -> {
             GUIUtils.matricesUtil(ctx, 0, 0, 50, () -> {
-                //? if >=1.20 {
-                GuiGraphics c = (GuiGraphics) ctx;
-                //?} else {
-                /*PoseStack c = (PoseStack) ctx;
-                 *///?}
                 GUIUtils.adaptiveDrawTexture(ctx, CAT_MENU, 4, 165, 0, 0, 126, 26, 126, 26);
                 GUIUtils.addText(
                         ctx, TextUtils.translatable("nitsha.binds.autosave"), 0,
@@ -118,9 +109,9 @@ public class BasicOptionsWindow extends AnimatedWindow {
                     );
                 });
 
-                catTail.render(c);
-                if (meowStates == CatMeowStates.HAPPY) catMeow1.render(c);
-                if (meowStates == CatMeowStates.SAD) catMeow2.render(c);
+                catTail.render(ctx);
+                if (meowStates == CatMeowStates.HAPPY) catMeow1.render(ctx);
+                if (meowStates == CatMeowStates.SAD) catMeow2.render(ctx);
             });
         }, 1);
 

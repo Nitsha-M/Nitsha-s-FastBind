@@ -4,21 +4,16 @@ import com.google.common.collect.Lists;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.nitsha.binds.gui.screen.BindsGUI;
 import com.nitsha.binds.gui.utils.DrawElement;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.AnimatedWindow;
 import com.nitsha.binds.gui.widget.PresetListItem;
 import com.nitsha.binds.gui.widget.ScrollableWindow;
 import com.nitsha.binds.gui.widget.SmallTextButton;
 import com.nitsha.binds.utils.Renderable;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import com.nitsha.binds.utils.RenderUtils;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?}
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 //? if >=1.17 {
@@ -26,7 +21,6 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -232,14 +226,11 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
 
 
     @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //?} else {
-            /*PoseStack ctx
-             *///?}
-            , int mouseX, int mouseY, float delta) {
-
+    //? if >=26.1 {
+    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+    //? } else {
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    //? }
         int alphaByte = (int)(alpha * 255.0f) & 0xFF;
         globalColor = (alphaByte << 24) | 0xFFFFFFFF;
 
@@ -254,7 +245,11 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
         renderables.forEach(element -> {
             Runnable render = () -> {
                 GUIUtils.matricesUtil(ctx, xO, yO, 500, () -> {
+                    //? if >=26.1 {
+                    //element.extractRenderState(ctx, mouseX - xO, mouseY - yO, delta);
+                    //? } else {
                     element.render(ctx, mouseX - xO, mouseY - yO, delta);
+                    //? }
                 });
             };
             if (element instanceof ScrollableWindow) {

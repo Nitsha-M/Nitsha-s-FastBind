@@ -1,5 +1,6 @@
 package com.nitsha.binds.bind;
 
+import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.utils.BindExecutor;
 import net.minecraft.client.Minecraft;
@@ -24,56 +25,32 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class BindHandler {
     private static Minecraft client;
-    private static final Set<Bind> activeBinds = new HashSet<>();
+
     private static final Map<Integer, Long> keyPressStartTime = new HashMap<>();
     private static final Set<Integer> activeKeys = new HashSet<>();
 
-    public static void register() {
-        //? if fabric {
-        ClientTickEvents.END_CLIENT_TICK.register(mc -> {
-            if (mc.player == null)
-                return;
-            tick();
-        });
-        //? } elif neoforge {
-        // NeoForge.EVENT_BUS.addListener(BindHandler::onClientTick);
-        //? } elif forge {
-        // MinecraftForge.EVENT_BUS.addListener(BindHandler::onClientTick);
-        //? }
-    }
+    private static Map<Integer, List<Bind>> bindsByKeyCache = null;
 
-    //? if neoforge {
-    //? if >1.20.4 {
-    /*private static void onClientTick(ClientTickEvent.Post event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        tick();
-    }*/
-    //? } else {
-    /*private static void onClientTick(TickEvent.ClientTickEvent event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        tick();
-    }*/
-    //? }
-    //? }
+    private static Map<Integer, List<Bind>> getBindsByKey() {
+        if (bindsByKeyCache != null) return bindsByKeyCache;
 
-    //? if forge {
-    /*@SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        tick();
-    }*/
-    //? }
+        FBLogger.info("Loading all binds with key shortcut...");
 
-    private static void tick() {
-        Map<Integer, List<Bind>> bindsByKey = new HashMap<>();
+        bindsByKeyCache = new HashMap<>();
         for (Bind bind : getAllKeyBind()) {
             if (bind.keyCode == 0) continue;
-            bindsByKey.computeIfAbsent(bind.keyCode, k -> new ArrayList<>()).add(bind);
+            bindsByKeyCache.computeIfAbsent(bind.keyCode, k -> new ArrayList<>()).add(bind);
         }
+        FBLogger.info("Successfully loaded " + bindsByKeyCache.size() + " key binds.");
+        return bindsByKeyCache;
+    }
+
+    public static void invalidateCache() {
+        bindsByKeyCache = null;
+    }
+
+    public static void tick() {
+        Map<Integer, List<Bind>> bindsByKey = getBindsByKey();
 
         for (Map.Entry<Integer, List<Bind>> entry : bindsByKey.entrySet()) {
             int key = entry.getKey();
@@ -87,12 +64,14 @@ public class BindHandler {
             } else {
                 if (activeKeys.contains(key)) {
                     long held = System.currentTimeMillis() - keyPressStartTime.getOrDefault(key, 0L);
+                    FBLogger.info("Key released: " + key + ", held: " + held + "ms");
                     activeKeys.remove(key);
                     keyPressStartTime.remove(key);
 
                     Bind best = null;
                     for (Bind bind : binds) {
                         int required = "hold".equals(bind.keyMode) ? bind.holdMs : 0;
+                        FBLogger.info("Checking bind: " + bind.name + ", keyMode=" + bind.keyMode + ", required=" + required + ", held=" + held);
                         if (held >= required) {
                             if (best == null) {
                                 best = bind;
@@ -104,6 +83,8 @@ public class BindHandler {
                             }
                         }
                     }
+
+                    FBLogger.info("Best bind selected: " + (best != null ? best.name : "null"));
 
                     if (best != null) {
                         BindExecutor.startBind(best);

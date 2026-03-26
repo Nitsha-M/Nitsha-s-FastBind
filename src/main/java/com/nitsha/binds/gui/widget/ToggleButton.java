@@ -3,21 +3,17 @@ package com.nitsha.binds.gui.widget;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-//? if >=1.20 {
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import net.minecraft.client.gui.GuiComponent;
-import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-//?}
-import net.minecraft.client.gui.components.AbstractWidget;
+//? } else {
+/*import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.systems.RenderSystem;*/
+//? }
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import com.mojang.blaze3d.systems.RenderSystem;
-import org.lwjgl.opengl.GL11;
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.InputWithModifiers;
@@ -26,7 +22,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
-public class ToggleButton extends AbstractWidget {
+public class ToggleButton extends AbstractButton {
     private static ResourceLocation TEXTURE;
 
     private boolean firstRender = true;
@@ -57,11 +53,7 @@ public class ToggleButton extends AbstractWidget {
     }
 
     @Override
-    //? <1.21.9 {
     public void onClick(double mouseX, double mouseY) {
-    //? } else {
-    // public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl) {
-    //? }
         this.onClick.run();
         this.toggled = !this.toggled;
     }
@@ -78,35 +70,13 @@ public class ToggleButton extends AbstractWidget {
         return this.height;
     }
 
-    //? if >1.20.2 {
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    //?} else if >=1.20 {
-    /*@Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    *///?} else if >=1.19.4 {
-    /*@Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    *///?} else {
-    /*@Override
-    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    */
-    //? }
+    public void onPress() {
 
-    private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20 {
-        GuiGraphics c = (GuiGraphics) ctx;
-        //?} else {
-        /*PoseStack c = (PoseStack) ctx;
-         *///?}
+    }
+
+    @Override
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         int tX = this.getX() + this.width - 23 - 4;
         int tY = this.getY() + height / 2 - 6;
         if (firstRender) {
@@ -121,15 +91,15 @@ public class ToggleButton extends AbstractWidget {
         // RenderSystem.alphaFunc(GL11.GL_GREATER, 0.0F);
         //?}
 
-        if (this.isHovered) GUIUtils.drawFill(c, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0x0D000000);
+        if (this.isHovered) GUIUtils.drawFill(ctx, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0x0D000000);
 
-        GUIUtils.addText(c, name, 0, this.getX() + 4, this.getY() + (this.height / 2), "left", "center", 0xFF212121, false);
+        GUIUtils.addText(ctx, name, 0, this.getX() + 4, this.getY() + (this.height / 2), "left", "center", 0xFF212121, false);
 
         // Button
-        GUIUtils.adaptiveDrawTexture(c, TEXTURE, tX, tY, 0, 0, 23, 12, 256, 256);
+        GUIUtils.adaptiveDrawTexture(ctx, TEXTURE, tX, tY, 0, 0, 23, 12, 256, 256);
 
         // Point
-        GUIUtils.adaptiveDrawTexture(c, TEXTURE, Math.round(pointX), tY - 1, 0, 12, 13, 12, 256, 256);
+        GUIUtils.adaptiveDrawTexture(ctx, TEXTURE, Math.round(pointX), tY - 1, 0, 12, 13, 12, 256, 256);
     }
 
     //? if >=1.19.3 {

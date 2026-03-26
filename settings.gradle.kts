@@ -36,6 +36,8 @@ stonecutter {
         val loaders_1 = listOf("fabric", "forge")
         val loaders_1_1 = listOf("fabric")
         val loaders_2 = listOf("fabric", "neoforge")
+
+        mc("26.1", loaders = loaders_2)
         // 1.21
 //        mc("1.21.11", loaders = loaders_2)
         mc("1.21.11", loaders = loaders_2)

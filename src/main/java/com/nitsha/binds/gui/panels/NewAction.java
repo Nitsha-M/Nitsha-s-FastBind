@@ -1,7 +1,6 @@
 package com.nitsha.binds.gui.panels;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.action.ActionType;
@@ -13,9 +12,7 @@ import com.nitsha.binds.gui.widget.ScrollableWindow;
 import com.nitsha.binds.gui.widget.SmallTextButton;
 import com.nitsha.binds.utils.RenderUtils;
 import net.minecraft.client.Minecraft;
-//? if >=1.20 {
-import net.minecraft.client.gui.*;
-//?}
+import net.minecraft.client.gui.GuiGraphics;
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -28,7 +25,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
-import java.util.ArrayList;
 import java.util.List;
 
 //? if >=1.21.9 {
@@ -184,13 +180,11 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
     }
 
     @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //?} else {
-            /*PoseStack ctx*/
-            //?}
-            , int mouseX, int mouseY, float delta) {
+    //? if >=26.1 {
+    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+    //? } else {
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    //? }
 
         int xO = getX();
         int yO = getY();
@@ -200,34 +194,30 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
             drawElements.forEach(element -> element.render(ctx, mouseX - xO, mouseY - yO));
         });
 
-        //? if <1.21.4 {
         renderables.forEach(element -> {
-            Runnable render = () -> GUIUtils.matricesUtil(ctx, xO, yO, 4, () ->
+            //? if >=26.1 {
+            /*Runnable render = () -> GUIUtils.matricesUtil(ctx, xO, yO, 4, () ->
+                    element.extractRenderState(ctx, mouseX - xO, mouseY - yO, delta));*/
+            //? } else {
+             Runnable render = () -> GUIUtils.matricesUtil(ctx, xO, yO, 4, () ->
                     element.render(ctx, mouseX - xO, mouseY - yO, delta));
+            //? }
+
             if (element instanceof ScrollableWindow) {
                 ScrollableWindow sw = (ScrollableWindow) element;
+                //? if <1.21.4 {
                 if (isOpen) GUIUtils.customScissor(ctx,
                         parent.getX() + xO, parent.getY() + yO + 15,
                         xO + sw.getWidth(), sw.getHeight(), render);
+                //? } else {
+                /*if (isOpen) GUIUtils.customScissor(ctx,
+                        xO, yO + 15,
+                        xO + sw.getWidth(), sw.getHeight(), render);*/
+                //? }
             } else {
                 render.run();
             }
         });
-        //? } else {
-        /*renderables.forEach(element -> {
-            Runnable render = () -> GUIUtils.matricesUtil(ctx, xO, yO, 4, () ->
-                    element.render(ctx, mouseX - xO, mouseY - yO, delta));
-            if (element instanceof ScrollableWindow) {
-                ScrollableWindow sw = (ScrollableWindow) element;
-                if (isOpen) GUIUtils.customScissor(ctx,
-                        xO, yO + 15,
-                       xO + sw.getWidth(), sw.getHeight(), render);
-            } else {
-                render.run();
-            }
-        });*/
-        //? }
-
         animateValues();
     }
 
@@ -254,10 +244,8 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
     }
 
     public boolean isMouseInside(double mouseX, double mouseY) {
-        float windowX = this.parent.getX() + this.getX();
-        float windowY = this.parent.getY() + this.getY();
-        return mouseX >= windowX && mouseX <= windowX + getWidth()
-                && mouseY >= windowY && mouseY <= windowY + getHeight();
+        return mouseX >= this.x && mouseX <= this.x + this.width
+                && mouseY >= this.y && mouseY <= this.y + this.height;
     }
 
     public boolean isMouseInsideArea(double mouseX, double mouseY) {
@@ -296,7 +284,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
     //?}
 
     @Override
-            //? if >=1.21.9 {
+    //? if >=1.21.9 {
     /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         double adjustedX = event.x() - getX();
         double adjustedY = event.y() - getY();
@@ -306,7 +294,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
         }
         return false;
     }*/
-            //? } else {
+    //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getY();
@@ -318,7 +306,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
     //? }
 
     @Override
-            //? if >=1.21.9 {
+    //? if >=1.21.9 {
     /*public boolean mouseReleased(MouseButtonEvent event) {
         double adjustedX = event.x() - getX();
         double adjustedY = event.y() - getY();
@@ -329,7 +317,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
         }
         return released;
     }*/
-            //? } else {
+    //? } else {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getY();
@@ -342,7 +330,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
     //? }
 
     @Override
-            //? if >=1.21.9 {
+    //? if >=1.21.9 {
     /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         double adjustedX = event.x() - getX();
         double adjustedY = event.y() - getY();
@@ -353,7 +341,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
         }
         return dragged;
     }*/
-            //? } else {
+    //? } else {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         double adjustedX = mouseX - getX();
         double adjustedY = mouseY - getY();

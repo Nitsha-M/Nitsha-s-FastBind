@@ -12,17 +12,17 @@ import com.nitsha.binds.gui.widget.ItemButton;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.SmallTextButton;
 import net.minecraft.client.Minecraft;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceLocation;
+
+//? if >=26.1 {
+// import net.minecraft.world.item.ItemStackTemplate;
+//? }
 
 import java.util.ArrayList;
 import java.util.List;
@@ -196,7 +196,11 @@ public class BindsList extends AnimatedWindow {
         return System.currentTimeMillis() - deleteConfirmationTime < 5000;
     }
 
+    //? if >=26.1 {
+    // public void updateSelected(ItemStackTemplate  icon) {
+    //? } else {
     public void updateSelected(ItemStack icon) {
+    //? }
         int aB = (int) Math.floor((double) BindsEditor.getActiveBind() / 8);
         if (aB == BindsEditor.getCurrentPage()) buttons.get(BindsEditor.getActiveBind() - (8 * aB)).setIcon(icon);
     }
@@ -247,15 +251,9 @@ public class BindsList extends AnimatedWindow {
     }
 
     @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //?} else {
-            /*PoseStack ctx
-             *///?}
-            , int mouseX, int mouseY, float delta) {
+    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         GUIUtils.matricesUtil(ctx, 0, 0, 2, () -> {
-            super.render(ctx, mouseX, mouseY, delta);
+            super.renderWindow(ctx, mouseX, mouseY, delta);
         });
     }
 

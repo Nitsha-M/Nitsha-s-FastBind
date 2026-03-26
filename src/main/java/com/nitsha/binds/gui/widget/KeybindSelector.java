@@ -5,11 +5,7 @@ import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
@@ -71,48 +67,12 @@ public class KeybindSelector extends AbstractButton {
         focusedKeybind = fK;
     }
 
-    //? <1.21.9 {
     @Override
     public void onPress() {}
-    //? } else {
-    /*@Override
-    public void onPress(InputWithModifiers inputWithModifiers) {}*/
-    //? }
 
-    //? if >=1.21.11 {
-    /*@Override
-    public void renderContents(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        rndr(ctx, mouseX, mouseY, delta);
-    }*/
-    //?} else if >1.20.2 {
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        rndr(ctx, mouseX, mouseY, delta);
-    }
-    //?} else if >=1.20 {
-    /*@Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    *///?} else if >=1.19.4 {
-    /*@Override
-    public void renderWidget(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    *///?} else {
-    /*@Override
-    public void renderButton(PoseStack context, int mouseX, int mouseY, float delta) {
-        rndr(context, mouseX, mouseY, delta);
-    }
-    */
-    //? }
-
-    private String calculateName(String insideName, String fullName, int max) {
-        int textCut = Math.min(fullName.length(), max);
-        return GUIUtils.truncateString(insideName, textCut);
-    }
-
-    private void rndr(Object ctx, int mouseX, int mouseY, float delta) {
+        boolean isHovered = isMouseOver(mouseX, mouseY);
         Font font = Minecraft.getInstance().font;
 
         targetOffset = isPressed ? 2 : 0;
@@ -133,6 +93,11 @@ public class KeybindSelector extends AbstractButton {
                 getX() + (width / 2) - (textWidth / 2),
                 getY() + Math.round(yOffset) + (height / 2),
                 "left", "center", (isHovered || isPressed) ? 0xFFFFFFFF : 0xFF212121, false);
+    }
+
+    private String calculateName(String insideName, String fullName, int max) {
+        int textCut = Math.min(fullName.length(), max);
+        return GUIUtils.truncateString(insideName, textCut);
     }
 
     //? if >=1.19.3 {
@@ -158,7 +123,7 @@ public class KeybindSelector extends AbstractButton {
     }
 
     @Override
-            //? if >=1.21.9 {
+    //? if >=1.21.9 {
     /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         double mouseX = event.x();
         double mouseY = event.y();
@@ -170,7 +135,7 @@ public class KeybindSelector extends AbstractButton {
         }
         return super.mouseClicked(event, bl);
     }*/
-            //? } else {
+    //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (isMouseOver(mouseX, mouseY)) {
             setLastClickedWidget(this);
@@ -183,7 +148,7 @@ public class KeybindSelector extends AbstractButton {
     //? }
 
     @Override
-            //? if >=1.21.9 {
+    //? if >=1.21.9 {
     /*public boolean keyPressed(KeyEvent event) {
         if (focusedKeybind != null) {
             int keyCode = event.key();
@@ -195,7 +160,7 @@ public class KeybindSelector extends AbstractButton {
         }
         return super.keyPressed(event);
     }*/
-            //? } else {
+    //? } else {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (focusedKeybind != null) {
             int newKey = (keyCode == GLFW.GLFW_KEY_ESCAPE) ? 0 : keyCode;

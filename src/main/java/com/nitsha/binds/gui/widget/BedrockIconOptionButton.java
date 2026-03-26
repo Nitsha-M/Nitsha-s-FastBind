@@ -4,14 +4,8 @@ import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;
- *///?}
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -35,8 +29,8 @@ public class BedrockIconOptionButton extends BedrockButton {
     private static final ResourceLocation KEY_HOLD = Main.id("textures/gui/sprites/key_hold.png");
     private static final ResourceLocation TOOLTIP = Main.id("textures/gui/btns/tooltip.png");
 
-    public BedrockIconOptionButton(int x, int y, int width, int height) {
-        super("", x, y, width, height, true, ()->{});
+    public BedrockIconOptionButton(int x, int y, int width, int height, Runnable onRelease) {
+        super("", x, y, width, height, true, onRelease);
         this.xO = (width - 16) / 2;
         this.yO = (height - 16) / 2;
         this.options = new String[]{"press", "hold"};
@@ -81,58 +75,33 @@ public class BedrockIconOptionButton extends BedrockButton {
             }
         }
     }
-    @Override
-    //? <1.21.9 {
-    public void onPress() {
-        super.onPress();
-    //? } else {
-    // public void onPress(InputWithModifiers inputWithModifiers) {
-    // super.onPress(inputWithModifiers);
-    //? }
-        if (options.length == 0) return;
-        selectedIndex = (selectedIndex + 1) % options.length;
-        setupColor();
-    }
 
-    //? if >=1.21.11 {
+    //? if >=1.21.9 {
     /*@Override
-    public void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderContents(context, mouseX, mouseY, delta);
-        renderOverlay(context, mouseX, mouseY, delta);
+    public void onRelease(MouseButtonEvent event) {
+        if (isMouseOver(event.x(), event.y()) && isPressed()) {
+            if (options.length == 0) return;
+            selectedIndex = (selectedIndex + 1) % options.length;
+            setupColor();
+        }
+        super.onRelease(event);
     }*/
-    //? } else if >1.20.2 {
+    //? } else {
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderWidget(context, mouseX, mouseY, delta);
-        renderOverlay(context, mouseX, mouseY, delta);
+    public void onRelease(double mouseX, double mouseY) {
+        if (isMouseOver(mouseX, mouseY) && isPressed()) {
+            if (options.length == 0) return;
+            selectedIndex = (selectedIndex + 1) % options.length;
+            setupColor();
+        }
+        super.onRelease(mouseX, mouseY);
     }
-    //? } else if >=1.20 {
-    /*@Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderWidget(context, mouseX, mouseY, delta);
-        renderOverlay(context, mouseX, mouseY, delta);
-    }
-    *///? } else if >=1.19.4 {
-    /*@Override
-    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
-        super.renderWidget(context, mouseX, mouseY, delta);
-        renderOverlay(context, mouseX, mouseY, delta);
-    }
-    *///?} else {
-    /*@Override
-    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
-        super.renderButton(context, mouseX, mouseY, delta);
-        renderOverlay(context, mouseX, mouseY, delta);
-    }
-    */
     //? }
 
-    protected void renderOverlay(Object ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20 {
-        GuiGraphics context = (GuiGraphics) ctx;
-        //?} else {
-        /*PoseStack context = (PoseStack) ctx;*/
-        //?}
+    @Override
+    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        super.renderWidget(ctx, mouseX, mouseY, delta);
+
         boolean isHold = selectedIndex == 1;
         ResourceLocation icon = isHold ? KEY_HOLD : KEY_PRESS;
         GUIUtils.adaptiveDrawTexture(ctx, icon, this.getX() + xO, this.getY() + yO + Math.round(this.getOffsetY()), 0, 0, 16, 14, 16, 14);
@@ -144,12 +113,11 @@ public class BedrockIconOptionButton extends BedrockButton {
             int tx = mouseX - tooltipWidth - 4;
             int ty = mouseY - tooltipHeight - 2;
 
-            final int ftx = tx, fty = ty;
             int color = this.getBtnColor();
             int transparentColor = (color & 0x00FFFFFF) | (0xCC << 24);
-            GUIUtils.matricesUtil(ctx, 0, 0, 52000, () -> {
-                GUIUtils.drawResizableBox(ctx, TOOLTIP, ftx - 2, fty - 2, tooltipWidth + 6, tooltipHeight, 3, 7, transparentColor);
-                GUIUtils.addText(ctx, tooltip, 0, ftx + 2, fty, "top", "left", 0xFFFFFFFF, false);
+            GUIUtils.matricesUtil(ctx, tx, ty, 200, () -> {
+                GUIUtils.drawResizableBox(ctx, TOOLTIP, -2, -2, tooltipWidth + 6, tooltipHeight, 3, 7, transparentColor);
+                GUIUtils.addText(ctx, tooltip, 0, 2, 0, "top", "left", 0xFFFFFFFF, false);
             });
         }
     }

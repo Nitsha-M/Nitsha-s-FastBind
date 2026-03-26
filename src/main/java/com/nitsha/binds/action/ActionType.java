@@ -1,6 +1,7 @@
 package com.nitsha.binds.action;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.Map;
 import java.util.Queue;
@@ -18,7 +19,7 @@ public abstract class ActionType {
 
     public abstract void init(int x, int y, int width, Object value);
 
-    public abstract void render(Object ctx, int mouseX, int mouseY, float delta);
+    public abstract void render(GuiGraphics ctx, int mouseX, int mouseY, float delta);
 
     public abstract Map<String, Object> getValue();
 

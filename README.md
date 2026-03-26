@@ -1,4 +1,4 @@
-![Nitsha's FastBind](https://cdn.modrinth.com/data/cached_images/274f8f49a2b8912b051cc675a39378ab69a1b4bf_0.webp)
+![Nitsha's FastBind](https://cdn.modrinth.com/data/cached_images/d1be15a0db5702f3b79e1ae6eaf5a39bdf4646d7_0.webp)
 
 <p align="center">
 Adds a menu where you can activate pre-programmed actions. Configure command execution or key press emulation the way you want

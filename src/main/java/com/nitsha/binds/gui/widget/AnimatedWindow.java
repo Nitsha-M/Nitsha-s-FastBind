@@ -5,9 +5,8 @@ import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.DrawElement;
 import com.nitsha.binds.utils.RenderUtils;
-import net.minecraft.client.gui.*;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.nitsha.binds.utils.Renderable;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 //? if >=1.17 {
@@ -240,14 +239,16 @@ public class AnimatedWindow extends AbstractContainerEventHandler implements Ren
         if (Math.abs(this.y - targetY) < 0.1f) this.y = targetY;
     }
 
-    @Override
-    public void render(
-            //? if >=1.20 {
-            GuiGraphics ctx
-            //?} else {
-            /*PoseStack ctx*/
-            //?}
-            , int mouseX, int mouseY, float delta) {
+
+    //? if >=26.1 {
+    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+    //? } else {
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    //? }
+        renderWindow(ctx, mouseX, mouseY, delta);
+    }
+
+    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         int alphaByte = (int)(alpha * 255.0f) & 0xFF;
         globalColor = (alphaByte << 24) | 0xFFFFFFFF;
 
@@ -267,7 +268,11 @@ public class AnimatedWindow extends AbstractContainerEventHandler implements Ren
             renderables.forEach(element -> {
                 Runnable render = () -> {
                     GUIUtils.matricesUtil(ctx, xO, yO, 2, () -> {
+                        //? if >=26.1 {
+                        // element.extractRenderState(ctx, mouseX - xO, mouseY - yO, delta);
+                        //? } else {
                         element.render(ctx, mouseX - xO, mouseY - yO, delta);
+                        //? }
                     });
                 };
                 if (element instanceof ScrollableWindow) {

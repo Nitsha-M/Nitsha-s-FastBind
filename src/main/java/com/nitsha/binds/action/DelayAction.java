@@ -11,12 +11,7 @@ import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.CharacterEvent;*/
 //? }
-//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphics;
-//?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;*/
-//?}
-
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
@@ -69,14 +64,9 @@ public class DelayAction extends ActionType {
     }
 
     @Override
-    public void render(Object ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20 {
-        GuiGraphics c = (GuiGraphics) ctx;
-        //?} else {
-        /*PoseStack c = (PoseStack) ctx;*/
-        //?}
-        field.render(c, mouseX, mouseY, delta);
-        GUIUtils.addText(c, TextUtils.translatable("nitsha.binds.advances.actions.delayDesс"), 0,
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        field.renderWidget(ctx, mouseX, mouseY, delta);
+        GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.delayDesс"), 0,
                 x + 2, y + 8, "top", "left", 0xFF212121, false);
     }
 

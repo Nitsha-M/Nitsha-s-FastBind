@@ -23,6 +23,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class BindsStorage {
+
+    private static final String MAIN_DIR = "nitsha";
+
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .registerTypeAdapter(new TypeToken<Map<String, Object>>(){}.getType(), new JsonDeserializer<Map<String, Object>>() {

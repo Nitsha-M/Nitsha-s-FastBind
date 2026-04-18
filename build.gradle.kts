@@ -235,7 +235,7 @@ val parchmentVersion = VersionDefinition(
 
 val additionalVersions = mapOf(
     // 1.21.x
-    "26.1" to emptyList(),
+    "26.1" to listOf("26.1.1", "26.1.2"),
     "1.21.11" to emptyList(),
     "1.21.10" to listOf("1.21.9"),
     "1.21.8" to listOf("1.21.6", "1.21.7"),

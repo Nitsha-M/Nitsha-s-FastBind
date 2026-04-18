@@ -16,8 +16,19 @@ public class FBLogger {
     /*public static final Logger LOGGER = LogManager.getLogger(Main.MOD_ID);*/
     //?}
 
-    public static void info(String msg) { LOGGER.info(prefix + msg); }
-    public static void warn(String msg) { LOGGER.warn(prefix + msg); }
-    public static void error(String msg) { LOGGER.error(prefix + msg); }
-    public static void debug(String msg) { LOGGER.debug(prefix + msg); }
+    public static void info(String msg, Object... args) {
+        LOGGER.info(prefix + msg, args);
+    }
+
+    public static void warn(String msg, Object... args) {
+        LOGGER.warn(prefix + msg, args);
+    }
+
+    public static void error(String msg, Object... args) {
+        LOGGER.error(prefix + msg, args);
+    }
+
+    public static void debug(String msg, Object... args) {
+        LOGGER.debug(prefix + msg, args);
+    }
 }

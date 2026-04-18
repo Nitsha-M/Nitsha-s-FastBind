@@ -92,4 +92,27 @@ public class Main {
         /*return id("textures/gui/sprites/" + path + ".png");*/
         //?}
     }
+
+    public static String getModVersion() {
+        //? if fabric {
+        return net.fabricmc.loader.api.FabricLoader.getInstance()
+                .getModContainer(MOD_ID)
+                .map(mod -> mod.getMetadata().getVersion().getFriendlyString())
+                .orElse("5.0.0");
+        //? } elif neoforge {
+        /*
+        return net.neoforged.fml.ModList.get()
+                .getModContainerById(MOD_ID)
+                .map(mod -> mod.getModInfo().getVersion().toString())
+                .orElse("5.0.0");
+        */
+        //? } elif forge {
+        /*
+        return net.minecraftforge.fml.ModList.get()
+                .getModContainerById(MOD_ID)
+                .map(mod -> mod.getModInfo().getVersion().toString())
+                .orElse("5.0.0");
+        */
+        //? }
+    }
 }

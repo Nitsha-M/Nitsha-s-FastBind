@@ -62,5 +62,7 @@
   "nitsha.binds.advances.modals.selectKeyEvent" : "sᴇʟᴇᴄᴛ ᴋᴇʏ ᴇᴠᴇɴᴛ",
 
   "nitsha.binds.advances.actions.option.hold" : "Hold",
-  "nitsha.binds.advances.actions.option.press" : "Press"
+  "nitsha.binds.advances.actions.option.press" : "Press",
+
+  "nitsha.binds.default.newPreset" : "New preset"
 }

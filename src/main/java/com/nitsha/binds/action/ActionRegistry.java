@@ -9,8 +9,8 @@ import java.util.function.Supplier;
 
 public class ActionRegistry {
 
-    private static final Map<String, Supplier<ActionType>> BY_ID = new LinkedHashMap<>();
-    private static final Map<Integer, Supplier<ActionType>> BY_INDEX = new LinkedHashMap<>();
+    private static final Map<String, Supplier<ActionType<?>>> BY_ID = new LinkedHashMap<>();
+    private static final Map<Integer, Supplier<ActionType<?>>> BY_INDEX = new LinkedHashMap<>();
 
     static {
         register(1, CommandAction::new);
@@ -22,29 +22,30 @@ public class ActionRegistry {
         register(7, TitleMessageAction::new);
         register(8, KeyEventAction::new);
         register(9, LoopAction::new);
+        register(10, PlaySoundAction::new);
     }
 
-    private static void register(int index, Supplier<ActionType> factory) {
-        ActionType sample = factory.get();
+    private static void register(int index, Supplier<ActionType<?>> factory) {
+        ActionType<?> sample = factory.get();
         BY_ID.put(sample.getId(), factory);
         BY_INDEX.put(index, factory);
     }
 
-    public static ActionType createById(String id) {
-        Supplier<ActionType> factory = BY_ID.get(id);
+    public static ActionType<?> createById(String id) {
+        Supplier<ActionType<?>> factory = BY_ID.get(id);
         if (factory == null) throw new IllegalArgumentException("Unknown action id: " + id);
         return factory.get();
     }
 
-    public static ActionType createByIndex(int index) {
-        Supplier<ActionType> factory = BY_INDEX.get(index);
+    public static ActionType<?> createByIndex(int index) {
+        Supplier<ActionType<?>> factory = BY_INDEX.get(index);
         if (factory == null) throw new IllegalArgumentException("Unknown action index: " + index);
         return factory.get();
     }
 
-    public static List<ActionType> allInstances() {
-        List<ActionType> list = new ArrayList<>();
-        for (Supplier<ActionType> factory : BY_ID.values()) {
+    public static List<ActionType<?>> allInstances() {
+        List<ActionType<?>> list = new ArrayList<>();
+        for (Supplier<ActionType<?>> factory : BY_ID.values()) {
             list.add(factory.get());
         }
         return list;

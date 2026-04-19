@@ -24,7 +24,10 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
-public class KeyEventAction extends ActionType {
+import com.nitsha.binds.configs.dto.actions.AllActionsData.KeyEventActionData;
+import com.nitsha.binds.configs.dto.actions.AllActionsData.KeyEventInnerData;
+
+public class KeyEventAction extends ActionType<KeyEventActionData> {
 
     private int x, y, width;
     private KeyEventSelector selector;
@@ -50,15 +53,16 @@ public class KeyEventAction extends ActionType {
     @Override public int getHeight() { return 46; }
 
     @Override
-    public void buildTasks(Map<String, Object> data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> map = (Map<String, Object>) data.get("value");
-        if (map == null) return;
+    public KeyEventActionData createDefaultData() { return new KeyEventActionData("keyEvent"); }
 
-        String id = String.valueOf(map.get("value"));
-        String mode = String.valueOf(map.getOrDefault("mode", MODE_PRESS));
+    @Override
+    public void buildTasks(KeyEventActionData data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
+        if (data.value == null) return;
+
+        String id = data.value.value;
+        String mode = data.value.mode != null ? data.value.mode : MODE_PRESS;
         int holdMs = 100;
-        try { holdMs = Integer.parseInt(String.valueOf(map.getOrDefault("ms", 100))); } catch (NumberFormatException ignored) {}
+        try { holdMs = Integer.parseInt(data.value.ms != null ? data.value.ms : "100"); } catch (NumberFormatException ignored) {}
         final int finalHoldMs = holdMs;
 
         actions.add(() -> {
@@ -81,10 +85,14 @@ public class KeyEventAction extends ActionType {
     }
 
     @Override
-    public void init(int x, int y, int width, Object value) {
+    public void init(int x, int y, int width, KeyEventActionData data) {
         this.x = x;
         this.y = y;
         this.width = width;
+
+        String savedKey = data.value.value != null ? data.value.value : "";
+        String savedMode = data.value.mode != null ? data.value.mode : MODE_PRESS;
+        String savedMs = data.value.ms != null ? data.value.ms : "500";
 
         this.selector = new KeyEventSelector(x, y + 24, width, 20, () -> {
             EventBus.off("selectKeyEvent.result");
@@ -104,19 +112,6 @@ public class KeyEventAction extends ActionType {
         this.modeButton = new BedrockIconOptionButton(x + width - 18, y + 24, 18, 20, () -> {
                 rebuildModeWidgets(this.modeButton.getSelected(), msField != null ? msField.getText() : "500");
         });
-
-        String savedMode = MODE_PRESS;
-        String savedMs = "500";
-        String savedKey = "";
-
-        if (value instanceof Map<?, ?> map) {
-            Object v = map.get("value");
-            Object m = map.get("mode");
-            Object ms = map.get("ms");
-            if (v != null) savedKey = String.valueOf(v);
-            if (m != null) savedMode = String.valueOf(m);
-            if (ms != null) savedMs = String.valueOf(ms);
-        }
 
         this.selector.setSelectedItem(savedKey);
         rebuildModeWidgets(savedMode, savedMs);
@@ -150,15 +145,11 @@ public class KeyEventAction extends ActionType {
     }
 
     @Override
-    public Map<String, Object> getValue() {
-        Map<String, Object> inner = new java.util.HashMap<>();
-        inner.put("value", selector.getSelectedItem());
-        inner.put("mode", modeButton.getSelected());
-        inner.put("ms", msField != null ? msField.getText() : "500");
-
-        Map<String, Object> result = new java.util.HashMap<>();
-        result.put("type", "keyEvent");
-        result.put("value", inner);
+    public KeyEventActionData getValue() {
+        KeyEventActionData result = new KeyEventActionData("keyEvent");
+        result.value.value = selector.getSelectedItem();
+        result.value.mode = modeButton.getSelected();
+        result.value.ms = msField != null ? msField.getText() : "500";
         return result;
     }
 
@@ -224,7 +215,6 @@ public class KeyEventAction extends ActionType {
     public boolean mouseReleased(double mx, double my, int btn) {
         boolean r = selector.mouseReleased(mx, my, btn);
         r |= modeButton.mouseReleased(mx, my, btn);
-        System.out.println("i'm  free");
         return r;
     }
     //? }

@@ -11,7 +11,10 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 
-public class LoopAction extends ActionType {
+import com.nitsha.binds.configs.dto.actions.AllActionsData.LoopActionData;
+import com.nitsha.binds.configs.dto.actions.AllActionsData.LoopInnerData;
+
+public class LoopAction extends ActionType<LoopActionData> {
 
     private int x, y, width;
     private TextField actionsField;
@@ -29,10 +32,18 @@ public class LoopAction extends ActionType {
     @Override public int getHeight() { return 45; }
 
     @Override
-    public void buildTasks(Map<String, Object> data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {}
+    public LoopActionData createDefaultData() { return new LoopActionData(); }
 
     @Override
-    public void init(int x, int y, int width, Object value) {
+    public void buildTasks(LoopActionData data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
+        if (data.value == null) return;
+        int aIdx = data.value.actions;
+        int tIdx = data.value.count;
+        if (aIdx == 0 || tIdx == 0) return;
+    }
+
+    @Override
+    public void init(int x, int y, int width, LoopActionData value) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -51,14 +62,9 @@ public class LoopAction extends ActionType {
                 TextUtils.translatable("nitsha.binds.advances.actions.loop.count").getString(), true
         );
 
-        if (value instanceof Map) {
-            Map<String, Object> data = (Map<String, Object>) value;
-            if (data.containsKey("actions")) {
-                actionsField.setText(String.valueOf(data.get("actions")));
-            }
-            if (data.containsKey("count")) {
-                countField.setText(String.valueOf(data.get("count")));
-            }
+        if (value != null) {
+            actionsField.setText(String.valueOf(value.value.actions));
+            countField.setText(String.valueOf(value.value.count));
         }
     }
 
@@ -71,18 +77,10 @@ public class LoopAction extends ActionType {
     }
 
     @Override
-    public Map<String, Object> getValue() {
-        int actions = 1, count = 1;
-        try { actions = Integer.parseInt(actionsField.getText()); } catch (NumberFormatException ignored) {}
-        try { count = Integer.parseInt(countField.getText()); } catch (NumberFormatException ignored) {}
-
-        Map<String, Object> value = new HashMap<>();
-        value.put("actions", actions);
-        value.put("count", count);
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("type", "loop");
-        result.put("value", value);
+    public LoopActionData getValue() {
+        LoopActionData result = new LoopActionData();
+        try { result.value.actions = Integer.parseInt(actionsField.getText()); } catch (NumberFormatException ignored) {}
+        try { result.value.count = Integer.parseInt(countField.getText()); } catch (NumberFormatException ignored) {}
         return result;
     }
 

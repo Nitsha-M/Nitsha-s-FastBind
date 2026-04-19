@@ -16,7 +16,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 
-public class DelayAction extends ActionType {
+import com.nitsha.binds.configs.dto.actions.AllActionsData.DelayActionData;
+
+public class DelayAction extends ActionType<DelayActionData> {
 
     private TextField field;
     private int x, y;
@@ -33,31 +35,27 @@ public class DelayAction extends ActionType {
     @Override public int getHeight() { return 26; }
 
     @Override
-    public void buildTasks(Map<String, Object> data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
-        Object value = data.get("value");
-        try {
-            int ms;
-            if (value instanceof Number) {
-                ms = ((Number) value).intValue();
-            } else {
-                String msText = String.valueOf(value);
-                if (msText.isEmpty()) msText = "0";
-                ms = Integer.parseInt(msText);
-            }
-            final int finalMs = ms;
-            actions.add(() -> setWaitUntil.accept(Util.getMillis() + finalMs));
-        } catch (NumberFormatException ignored) {}
+    public DelayActionData createDefaultData() {
+        DelayActionData delay = new DelayActionData();
+        delay.value = 100;
+        return delay;
     }
 
     @Override
-    public void init(int x, int y, int width, Object value) {
+    public void buildTasks(DelayActionData data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
+        final int finalMs = data.value;
+        actions.add(() -> setWaitUntil.accept(Util.getMillis() + finalMs));
+    }
+
+    @Override
+    public void init(int x, int y, int width, DelayActionData data) {
         this.x = x;
         this.y = y;
         this.field = new TextField(
                 Minecraft.getInstance().font,
                 x + 90, y + 3, width - 116, 19,
                 6,
-                String.valueOf(value),
+                String.valueOf(data.value),
                 TextUtils.translatable("nitsha.binds.advances.actions.delayLine").getString(),
                 true
         );
@@ -71,14 +69,14 @@ public class DelayAction extends ActionType {
     }
 
     @Override
-    public Map<String, Object> getValue() {
-        int ms;
+    public DelayActionData getValue() {
+        DelayActionData result = new DelayActionData();
         try {
-            ms = Integer.parseInt(field.getText());
+            result.value = Integer.parseInt(field.getText());
         } catch (NumberFormatException e) {
-            ms = 100;
+            result.value = 100;
         }
-        return Map.of("type", "delay", "value", ms);
+        return result;
     }
 
     @Override public void reset() { field.setText("100"); }

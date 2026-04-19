@@ -1,7 +1,7 @@
 package com.nitsha.binds.utils;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.nitsha.binds.configs.BindsStorage;
+import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.gui.screen.BindsGUI;
 import com.nitsha.binds.mixin.KeyMappingAccessor;
 import net.minecraft.client.KeyMapping;
@@ -29,7 +29,7 @@ public class KeepMovementHandler {
     }
 
     public static boolean shouldKeepMovement() {
-        return (mc.screen instanceof BindsGUI) && BindsStorage.getBooleanConfig("keepMovement", false);
+        return (mc.screen instanceof BindsGUI) && Storage.options.keepMovement;
     }
 
     private static void updateKey(KeyMapping keyMapping) {

@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 
-public class CommandAction extends ActionType {
+import com.nitsha.binds.configs.dto.actions.AllActionsData.CommandActionData;
+
+public class CommandAction extends ActionType<CommandActionData> {
 
     private TextField field;
 
@@ -30,8 +32,11 @@ public class CommandAction extends ActionType {
     public int getHeight() { return 25; }
 
     @Override
-    public void buildTasks(Map<String, Object> data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
-        String cmd = String.valueOf(data.get("value"));
+    public CommandActionData createDefaultData() { return new CommandActionData(); }
+
+    @Override
+    public void buildTasks(CommandActionData data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
+        String cmd = data.value;
         if (cmd.isEmpty()) return;
         if (client.player == null || client.getConnection() == null) return;
 
@@ -47,12 +52,12 @@ public class CommandAction extends ActionType {
     }
 
     @Override
-    public void init(int x, int y, int width, Object value) {
+    public void init(int x, int y, int width, CommandActionData data) {
         this.field = new TextField(
                 Minecraft.getInstance().font,
                 x, y + 3, width - 26, 19,
                 Integer.MAX_VALUE,
-                String.valueOf(value),
+                data.value,
                 TextUtils.translatable("nitsha.binds.advances.actions.commandLine").getString()
         );
     }
@@ -63,8 +68,10 @@ public class CommandAction extends ActionType {
     }
 
     @Override
-    public Map<String, Object> getValue() {
-        return Map.of("type", "command", "value", field.getText());
+    public CommandActionData getValue() {
+        CommandActionData result = new CommandActionData();
+        result.value = field.getText();
+        return result;
     }
 
     @Override

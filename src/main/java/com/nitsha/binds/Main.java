@@ -1,8 +1,8 @@
 package com.nitsha.binds;
 
+import com.nitsha.binds.bind.BindExecutor;
 import com.nitsha.binds.bind.BindHandler;
 import com.nitsha.binds.configs.*;
-import com.nitsha.binds.utils.BindExecutor;
 import com.nitsha.binds.utils.KeepMovementHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -29,8 +29,8 @@ public class Main {
 
     public static void init() {
         KeyBinds.register();
-        BindsStorage.loadConfigs();
-        BindsStorage.load();
+        Storage.loadModOptions();
+        Storage.loadAllPresets();
 
         //? if fabric {
         ClientTickEvents.END_CLIENT_TICK.register(Main::onClientTick);

@@ -20,7 +20,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 
-public class KeyPressAction extends ActionType {
+import com.nitsha.binds.configs.dto.actions.AllActionsData.KeybindActionData;
+
+public class KeyPressAction extends ActionType<KeybindActionData> {
 
     private KeybindSelector keybind;
     private int x, y;
@@ -37,16 +39,12 @@ public class KeyPressAction extends ActionType {
     @Override public int getHeight() { return 26; }
 
     @Override
-    public void buildTasks(Map<String, Object> data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
-        Object value = data.get("value");
-        try {
-            int keyCode;
-            if (value instanceof Number) {
-                keyCode = ((Number) value).intValue();
-            } else {
-                keyCode = Integer.parseInt(String.valueOf(value));
-            }
-            if (keyCode == 0) return;
+    public KeybindActionData createDefaultData() { return new KeybindActionData("keybind"); }
+
+    @Override
+    public void buildTasks(KeybindActionData data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
+        int keyCode = data.value;
+        if (keyCode == 0) return;
 
             //? if >=1.21.9 {
             /*final int finalKeyCode = keyCode;
@@ -73,24 +71,14 @@ public class KeyPressAction extends ActionType {
                 KeyMapping.set(key, false);
             });
             //? }
-        } catch (NumberFormatException ignored) {}
     }
 
     @Override
-    public void init(int x, int y, int width, Object value) {
+    public void init(int x, int y, int width, KeybindActionData data) {
         this.x = x;
         this.y = y;
         this.keybind = new KeybindSelector(x + width - 26 - 68, y + 3, 68, 19);
-
-        int keyCode = 0;
-        if (value instanceof Number) {
-            keyCode = ((Number) value).intValue();
-        } else {
-            try {
-                keyCode = Integer.parseInt(String.valueOf(value));
-            } catch (NumberFormatException ignored) {}
-        }
-        this.keybind.setKeyCode(keyCode);
+        this.keybind.setKeyCode(data.value);
     }
 
     @Override
@@ -110,8 +98,10 @@ public class KeyPressAction extends ActionType {
     }
 
     @Override
-    public Map<String, Object> getValue() {
-        return Map.of("type", "keybind", "value", keybind.getKeyCode());
+    public KeybindActionData getValue() {
+        KeybindActionData result = new KeybindActionData("keybind");
+        result.value = keybind.getKeyCode();
+        return result;
     }
 
     @Override

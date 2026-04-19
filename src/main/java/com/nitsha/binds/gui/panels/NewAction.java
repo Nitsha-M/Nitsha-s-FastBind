@@ -59,7 +59,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
     private float targetWidth, targetHeight;
     private long lastUpdateTime;
 
-    private final List<ActionType> entries;
+    private final List<ActionType<?>> entries;
     private int currentAction = 0;
 
     public NewAction(AdvancedOptions parent, int x, int y, float width, int height) {
@@ -75,7 +75,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
         initUI();
     }
 
-    private ActionType currentEntry() {
+    private ActionType<?> currentEntry() {
         return entries.get(currentAction);
     }
 
@@ -106,7 +106,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
         this.addElement(this.actionList);
 
         int tY = 0;
-        for (ActionType entry : entries) {
+        for (ActionType<?> entry : entries) {
             int h = 16;
             NewActionItem item = new NewActionItem(
                     this,
@@ -137,7 +137,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
         parent.addAction(typeId, value);
     }
 
-    private void addAction(ActionType entry) {
+    private void addAction(ActionType<?> entry) {
         parent.addAction(entry.getId(), entry.getDefaultValue());
     }
 

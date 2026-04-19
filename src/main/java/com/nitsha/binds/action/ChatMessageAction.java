@@ -31,7 +31,10 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 
-public class ChatMessageAction extends ActionType {
+import com.nitsha.binds.configs.dto.actions.AllActionsData.ChatMessageActionData;
+import com.nitsha.binds.configs.dto.actions.AllActionsData.TextFormatData;
+
+public class ChatMessageAction extends ActionType<ChatMessageActionData> {
 
     private static final ResourceLocation LEFT        = Main.idSprite("action_left_normal");
     private static final ResourceLocation LEFT_HOVER  = Main.idSprite("action_left_hover");
@@ -91,23 +94,26 @@ public class ChatMessageAction extends ActionType {
     @Override public int getHeight() { return 36; }
 
     @Override
-    public void buildTasks(Map<String, Object> data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
-        Object value = data.get("value");
+    public ChatMessageActionData createDefaultData() { return new ChatMessageActionData(); }
+
+    @Override
+    public void buildTasks(ChatMessageActionData data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
+        TextFormatData value = data.value;
+        if (value == null) return;
         MutableComponent message;
 
-        if (value instanceof Map) {
-            Map<String, Object> formattedText = (Map<String, Object>) value;
-            String text = (String) formattedText.get("text");
-            message = TextUtils.empty();
+        String text = value.text;
+        if (text == null) text = "";
+        message = TextUtils.empty();
 
-            if (formattedText.containsKey("marks")) {
-                List<Map<String, Object>> marks = (List<Map<String, Object>>) formattedText.get("marks");
-                Style currentStyle = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
+        if (value.marks != null && !value.marks.isEmpty()) {
+            List<Map<String, Integer>> marks = value.marks;
+            Style currentStyle = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
                 int lastPos = 0;
 
-                for (Map<String, Object> markData : marks) {
-                    int pos = ((Number) markData.get("pos")).intValue();
-                    int styleCode = ((Number) markData.get("style")).intValue();
+                for (Map<String, Integer> markData : marks) {
+                    int pos = markData.get("pos");
+                    int styleCode = markData.get("style");
 
                     if (pos > lastPos) {
                         message = message.append(
@@ -120,11 +126,8 @@ public class ChatMessageAction extends ActionType {
                 if (lastPos < text.length()) {
                     message = message.append(TextUtils.literal(text.substring(lastPos)).setStyle(currentStyle));
                 }
-            } else {
-                message = TextUtils.literal(text);
-            }
         } else {
-            message = TextUtils.literal(String.valueOf(value));
+            message = TextUtils.literal(text);
         }
 
         final MutableComponent finalMessage = message;
@@ -140,7 +143,7 @@ public class ChatMessageAction extends ActionType {
     }
 
     @Override
-    public void init(int x, int y, int width, Object value) {
+    public void init(int x, int y, int width, ChatMessageActionData data) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -153,8 +156,8 @@ public class ChatMessageAction extends ActionType {
                 TextUtils.translatable("nitsha.binds.advances.actions.chatMessage").getString()
         );
 
-        if (value instanceof Map) {
-            loadFormattedText(this.field, (Map<String, Object>) value);
+        if (data.value != null) {
+            loadFormattedText(this.field, data.value);
         }
 
         this.leftBtn = GUIUtils.createTexturedBtn(x, colorButtonsY, 9, 9,
@@ -176,19 +179,18 @@ public class ChatMessageAction extends ActionType {
         }
     }
 
-    private void loadFormattedText(TextField field, Map<String, Object> data) {
-        String text = (String) data.get("text");
-        field.setText(text);
-        if (data.containsKey("marks")) {
-            List<Map<String, Object>> marks = (List<Map<String, Object>>) data.get("marks");
-            field.setFormatMarksFromMap(marks);
+    private void loadFormattedText(TextField field, TextFormatData data) {
+        String text = data.text;
+        if (text != null) field.setText(text);
+        if (data.marks != null) {
+            field.setFormatMarksFromMap(data.marks);
         }
     }
 
-    private Map<String, Object> saveFormattedText(TextField field) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("text", field.getText());
-        data.put("marks", field.getFormatMarksAsMap());
+    private TextFormatData saveFormattedText(TextField field) {
+        TextFormatData data = new TextFormatData();
+        data.text = field.getText();
+        data.marks = field.getFormatMarksAsMap();
         return data;
     }
 
@@ -218,10 +220,9 @@ public class ChatMessageAction extends ActionType {
     }
 
     @Override
-    public Map<String, Object> getValue() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("type", "chatMessage");
-        result.put("value", saveFormattedText(field));
+    public ChatMessageActionData getValue() {
+        ChatMessageActionData result = new ChatMessageActionData();
+        result.value = saveFormattedText(field);
         return result;
     }
 

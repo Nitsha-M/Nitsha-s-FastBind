@@ -1,5 +1,6 @@
 package com.nitsha.binds.gui.widget;
 
+import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.action.ActionType;
@@ -24,6 +25,7 @@ import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
 import java.util.Map;
+import com.nitsha.binds.configs.dto.preset.ActionData;
 
 public class ActionItem extends AbstractButton {
 
@@ -32,28 +34,32 @@ public class ActionItem extends AbstractButton {
     private final TexturedButton resetBtn;
     private final TexturedButton deleteBtn;
 
-    private static final ResourceLocation TOP          = Main.idSprite("action_top_normal");
-    private static final ResourceLocation TOP_HOVER    = Main.idSprite("action_top_hover");
-    private static final ResourceLocation BOTTOM       = Main.idSprite("action_bottom_normal");
-    private static final ResourceLocation BOTTOM_HOVER = Main.idSprite("action_bottom_hover");
-    private static final ResourceLocation RESET        = Main.idSprite("action_reset_normal");
-    private static final ResourceLocation RESET_HOVER  = Main.idSprite("action_reset_hover");
-    private static final ResourceLocation DELETE       = Main.idSprite("action_delete_normal");
-    private static final ResourceLocation DELETE_HOVER = Main.idSprite("action_delete_hover");
+    private static final ResourceLocation TOP            = Main.idSprite("action_top_normal");
+    private static final ResourceLocation TOP_HOVER      = Main.idSprite("action_top_hover");
+    private static final ResourceLocation BOTTOM         = Main.idSprite("action_bottom_normal");
+    private static final ResourceLocation BOTTOM_HOVER   = Main.idSprite("action_bottom_hover");
+    private static final ResourceLocation RESET          = Main.idSprite("action_reset_normal");
+    private static final ResourceLocation RESET_HOVER    = Main.idSprite("action_reset_hover");
+    private static final ResourceLocation DELETE         = Main.idSprite("action_delete_normal");
+    private static final ResourceLocation DELETE_HOVER   = Main.idSprite("action_delete_hover");
     private static final ResourceLocation ARROW_DISABLED = Main.id("textures/gui/test/arrow_disabled.png");
 
     private final int index;
     private final int x, y;
 
-    private final ActionType action;
+    private final ActionType<ActionData> action;
 
-    public ActionItem(AdvancedOptions parent, String typeId, int x, int y, int width, int height, Object value, int index) {
+    @SuppressWarnings("unchecked")
+    public ActionItem(AdvancedOptions parent, String typeId, int x, int y, int width, int height, ActionData value, int index) {
         super(x, y, width, height, TextUtils.empty());
         this.index = index;
         this.x = x;
         this.y = y;
 
-        this.action = ActionRegistry.createById(typeId);
+        this.action = (ActionType<ActionData>) ActionRegistry.createById(typeId);
+        if (value == null) {
+            value = this.action.createDefaultData();
+        }
         this.action.init(x, y, width, value);
 
         this.topBtn = GUIUtils.createTexturedBtn(x + width - 9, y + 3, 9, 9,
@@ -74,10 +80,33 @@ public class ActionItem extends AbstractButton {
     }
 
     public int getX() { return this.x; }
-    public int getY() { return this.y; }
+    public int getY() { return super.getY(); } // using super.getY() to allow dynamic movement
 
-    public Map<String, Object> getValue() {
+    @Override
+    public void setY(int y) {
+        super.setY(y);
+        this.topBtn.setY(y + 3);
+        this.bottomBtn.setY(y + 13);
+        this.resetBtn.setY(y + 3);
+        this.deleteBtn.setY(y + 13);
+        action.setPosition(getX(), y);
+    }
+
+    public void updateLayout() {
+        this.height = action.getHeight();
+    }
+
+    @Override
+    public int getHeight() {
+        return this.height;
+    }
+
+    public ActionData getValue() {
         return action.getValue();
+    }
+    
+    public ActionType<?> getActionType() {
+        return action;
     }
 
     public boolean isMouseOverColorButtons(double mouseX, double mouseY) {
@@ -107,7 +136,7 @@ public class ActionItem extends AbstractButton {
     }
 
     @Override
-            //? if >=1.21.9 {
+    //? if >=1.21.9 {
     /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         boolean clicked = action.mouseClicked(event, bl);
         if (this.deleteBtn.mouseClicked(event, bl)) clicked = true;
@@ -116,7 +145,7 @@ public class ActionItem extends AbstractButton {
         if (this.topBtn.mouseClicked(event, bl))    clicked = true;
         return clicked;
     }*/
-            //? } else {
+    //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         boolean clicked = action.mouseClicked(mouseX, mouseY, button);
         if (this.deleteBtn.mouseClicked(mouseX, mouseY, button)) clicked = true;
@@ -137,7 +166,7 @@ public class ActionItem extends AbstractButton {
         if (this.topBtn.mouseReleased(event))    clicked = true;
         return clicked;
     }*/
-            //? } else {
+    //? } else {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         boolean clicked = action.mouseReleased(mouseX, mouseY, button);
         if (this.deleteBtn.mouseReleased(mouseX, mouseY, button)) clicked = true;
@@ -149,22 +178,43 @@ public class ActionItem extends AbstractButton {
     //? }
 
     @Override
-            //? if >=1.21.9 {
+    //? if >=1.21.9 {
+    /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        boolean clicked = action.mouseDragged(event, deltaX, deltaY);
+        if (this.deleteBtn.mouseDragged(event, deltaX, deltaY)) clicked = true;
+        if (this.bottomBtn.mouseDragged(event, deltaX, deltaY)) clicked = true;
+        if (this.resetBtn.mouseDragged(event, deltaX, deltaY))  clicked = true;
+        if (this.topBtn.mouseDragged(event, deltaX, deltaY))    clicked = true;
+        return clicked;
+    }*/
+    //? } else {
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        boolean clicked = action.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        if (this.deleteBtn.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) clicked = true;
+        if (this.bottomBtn.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) clicked = true;
+        if (this.resetBtn.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))  clicked = true;
+        if (this.topBtn.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))    clicked = true;
+        return clicked;
+    }
+    //? }
+
+    @Override
+    //? if >=1.21.9 {
     /*public boolean keyPressed(KeyEvent event) {
         return action.keyPressed(event) || super.keyPressed(event);
     }*/
-            //? } else {
+    //? } else {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         return action.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
     }
     //? }
 
     @Override
-            //? if >=1.21.9 {
+    //? if >=1.21.9 {
     /*public boolean charTyped(CharacterEvent event) {
         return action.charTyped(event) || super.charTyped(event);
     }*/
-            //? } else {
+    //? } else {
     public boolean charTyped(char codePoint, int modifiers) {
         return action.charTyped(codePoint, modifiers) || super.charTyped(codePoint, modifiers);
     }

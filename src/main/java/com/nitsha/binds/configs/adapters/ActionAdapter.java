@@ -24,28 +24,45 @@ public class ActionAdapter implements JsonSerializer<ActionData>, JsonDeserializ
         }
 
         String type = jsonObject.get("type").getAsString();
+        ActionData result = null;
         switch (type) {
             case "command":
-                return context.deserialize(jsonObject, AllActionsData.CommandActionData.class);
+                result = context.deserialize(jsonObject, AllActionsData.CommandActionData.class);
+                break;
             case "delay":
-                return context.deserialize(jsonObject, AllActionsData.DelayActionData.class);
+                result = context.deserialize(jsonObject, AllActionsData.DelayActionData.class);
+                break;
             case "keybind":
             case "keyDown":
             case "keyUp":
-                return context.deserialize(jsonObject, AllActionsData.KeybindActionData.class);
+                result = context.deserialize(jsonObject, AllActionsData.KeybindActionData.class);
+                break;
             case "chatMessage":
-                return context.deserialize(jsonObject, AllActionsData.ChatMessageActionData.class);
+                result = context.deserialize(jsonObject, AllActionsData.ChatMessageActionData.class);
+                break;
             case "titleMessage":
-                return context.deserialize(jsonObject, AllActionsData.TitleMessageActionData.class);
+                result = context.deserialize(jsonObject, AllActionsData.TitleMessageActionData.class);
+                break;
             case "keyEvent":
-                return context.deserialize(jsonObject, AllActionsData.KeyEventActionData.class);
+                result = context.deserialize(jsonObject, AllActionsData.KeyEventActionData.class);
+                break;
             case "playSound":
-                return context.deserialize(jsonObject, AllActionsData.PlaySoundActionData.class);
+                result = context.deserialize(jsonObject, AllActionsData.PlaySoundActionData.class);
+                break;
             case "loop":
-                return context.deserialize(jsonObject, AllActionsData.LoopActionData.class);
+                result = context.deserialize(jsonObject, AllActionsData.LoopActionData.class);
+                break;
+            case "toast":
+                result = context.deserialize(jsonObject, AllActionsData.ToastActionData.class);
+                break;
             default:
                 System.err.println("Unknown action type: " + type);
                 return null;
         }
+
+        if (result != null) {
+            result.type = type;
+        }
+        return result;
     }
 }

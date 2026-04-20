@@ -10,6 +10,14 @@ import java.util.function.LongConsumer;
 
 public abstract class ActionType<T extends ActionData> {
 
+    protected Runnable heightChangeListener;
+
+    public void setHeightChangeListener(Runnable listener) {
+        this.heightChangeListener = listener;
+    }
+
+    public void setPosition(int x, int y) {}
+
     public abstract String getId();
     public abstract String getDisplayName();
     public abstract String getDefaultValue();

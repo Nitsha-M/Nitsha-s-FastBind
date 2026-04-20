@@ -23,6 +23,7 @@ public class ActionRegistry {
         register(8, KeyEventAction::new);
         register(9, LoopAction::new);
         register(10, PlaySoundAction::new);
+        register(11, ToastAction::new);
     }
 
     private static void register(int index, Supplier<ActionType<?>> factory) {

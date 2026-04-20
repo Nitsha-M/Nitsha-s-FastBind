@@ -36,6 +36,7 @@ public class AllActionsData {
 
     public static class PlaySoundInnerData {
         public String value = "";
+        public boolean isExternal = false;
         public float volume = 1.0f;
         public float pitch = 1.0f;
     }
@@ -74,6 +75,17 @@ public class AllActionsData {
     public static class TitleMessageActionData extends ActionData {
         public TitleInnerData value = new TitleInnerData();
         public TitleMessageActionData() { super("titleMessage"); }
+    }
+
+    public static class ToastInnerData {
+        public TextFormatData title = new TextFormatData();
+        public String icon = "minecraft:diamond";
+        public String toastType = "task";
+    }
+
+    public static class ToastActionData extends ActionData {
+        public ToastInnerData value = new ToastInnerData();
+        public ToastActionData() { super("toast"); }
     }
 
 }

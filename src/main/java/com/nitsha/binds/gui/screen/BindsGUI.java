@@ -1,17 +1,17 @@
 package com.nitsha.binds.gui.screen;
 
 import com.nitsha.binds.Main;
-import com.nitsha.binds.bind.Bind;
-import com.nitsha.binds.configs.BindsStorage;
+import com.nitsha.binds.bind.BindExecutor;
 import com.nitsha.binds.configs.KeyBinds;
-import com.nitsha.binds.bind.Preset;
-import com.nitsha.binds.bind.Page;
 import com.nitsha.binds.ItemsMapper;
+import com.nitsha.binds.configs.Storage;
+import com.nitsha.binds.configs.dto.preset.BindData;
+import com.nitsha.binds.configs.dto.preset.PageData;
+import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.ItemButton;
 import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.utils.BindExecutor;
 //? if fabric {
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 //? }
@@ -51,27 +51,30 @@ public class BindsGUI extends Screen {
     private static final ResourceLocation ITEMS_SELECTOR = Main.id("textures/gui/test/items_3.png");
     private static final ResourceLocation MENU_BG = Main.id("textures/gui/test/menu_bg.png");
     private static final ResourceLocation MENU_HEADER = Main.id("textures/gui/test/menu_header.png");
+    private static final ResourceLocation CAT = Main.id("textures/gui/cat_2.png");
+    private static final ResourceLocation CAT_SPRITE = Main.id("textures/gui/cat_sprite_2.png");
+    private static final ResourceLocation CAT_EYES = Main.id("textures/gui/cat_eyes.png");
 
     private final List<ItemButton> itemButtons = new ArrayList<>();
     private String displayText = TextUtils.translatable("nitsha.binds.list").getString();
     private int centerX;
     private int centerY;
-    private static int currentPage;
     private final int MENU_WIDTH = 125;
 
     private String textLEFT, textRIGHT;
     private Component leftArrow, rightArrow;
 
-    public static int currentPreset;
-
-    private static final ResourceLocation CAT = Main.id("textures/gui/cat_2.png");
-    private static final ResourceLocation CAT_SPRITE = Main.id("textures/gui/cat_sprite_2.png");
-    private static final ResourceLocation CAT_EYES = Main.id("textures/gui/cat_eyes.png");
     private AnimatedSprite catTail;
     private float eyeDx = 0;
     private float eyeDy = 0;
 
     public static boolean ignoreHoldToOpenOnce = false;
+
+    public String activePresetId;
+    public PresetData activePreset;
+    public PageData activePage;
+    public int activePresetIndex = 0;
+    public int currentPageIndex = 0;
 
     public BindsGUI() {
         super(TextUtils.empty());
@@ -79,19 +82,31 @@ public class BindsGUI extends Screen {
 
     protected void init() {
         super.init();
-
         itemButtons.clear();
-        currentPage = (BindsStorage.getBooleanConfig("openLastPage", true) ? BindsStorage.getIntConfig("lastPage", 0)
-                : 0);
-        currentPreset = (BindsStorage.getBooleanConfig("openLastPreset", true)
-                ? BindsStorage.getIntConfig("lastPreset", 0)
-                : 0);
+
+        List<PresetData> allPresets = Storage.getSortedPresets();
+        if (allPresets.isEmpty()) return;
+
+        String savedId = Storage.options.lastPresetId;
+        if (Storage.options.openLastPreset && !savedId.isEmpty() && Storage.PRESET_REGISTRY.containsKey(savedId)) {
+            this.activePreset = Storage.PRESET_REGISTRY.get(savedId);
+            this.activePresetIndex = this.activePreset.index;
+        } else {
+            this.activePreset = allPresets.getFirst();
+        }
+        this.activePresetId = this.activePreset.id;
+
+        if (Storage.options.openLastPage) {
+            this.currentPageIndex = Math.min(Storage.options.lastPageIndex, this.activePreset.pages.size() - 1);
+        }
+
+        this.activePage = this.activePreset.pages.get(this.currentPageIndex);
 
         // Validate indices
-        if (currentPreset >= BindsStorage.presets.size())
-            currentPreset = 0;
-        if (currentPage >= BindsStorage.presets.get(currentPreset).pages.size())
-            currentPage = 0;
+        if (this.activePresetIndex >= Storage.PRESET_REGISTRY.size())
+            this.activePresetIndex = 0;
+        if (this.currentPageIndex >= this.activePreset.pages.size())
+            this.currentPageIndex = 0;
 
         this.textLEFT = "[ "
                 + GUIUtils.truncateString(
@@ -118,7 +133,7 @@ public class BindsGUI extends Screen {
         //? }
 
         this.catTail = new AnimatedSprite(14, 12, CAT_SPRITE, 0, false, 0, 0, 490, 14, 60, 504, 12);
-        if (BindsStorage.getBooleanConfig("easterEgg", false)) {
+        if (Storage.options.easterEgg) {
             this.catTail.setLoop(true);
             this.catTail.setPosition(centerX + 101, centerY + 9);
             this.catTail.startAnimation(true);
@@ -139,9 +154,9 @@ public class BindsGUI extends Screen {
 
             GUIUtils.addText(ctx, TextUtils.literal(displayText), 0, centerX + 5, centerY + 7);
 
-            int totalPages = BindsStorage.presets.get(currentPreset).pages.size();
+            int totalPages = this.activePreset.pages.size();
             GUIUtils.addText(ctx,
-                    TextUtils.literal((currentPage + 1) + "/" + totalPages).withStyle(ChatFormatting.GRAY), MENU_WIDTH,
+                    TextUtils.literal((this.currentPageIndex + 1) + "/" + totalPages).withStyle(ChatFormatting.GRAY), MENU_WIDTH,
                     centerX + MENU_WIDTH - 5, centerY + 7, "right", "top");
 
             int lAC = 0xFFFFFFFF;
@@ -172,7 +187,7 @@ public class BindsGUI extends Screen {
             GUIUtils.addText(ctx, TextUtils.literal("⏵"), MENU_WIDTH, centerX + MENU_WIDTH - 5, centerY - 15, "right",
                     "top", rC);
 
-            String full = BindsStorage.presets.get(currentPreset).name;
+            String full = this.activePreset.name;
 
             if (full.length() < 15) {
                 GUIUtils.addText(ctx, TextUtils.literal(full).withStyle(ChatFormatting.AQUA), MENU_WIDTH, centerX,
@@ -183,7 +198,7 @@ public class BindsGUI extends Screen {
                         centerX + 22, centerY - 15);
             }
 
-            if (BindsStorage.getBooleanConfig("easterEgg", false)) {
+            if (Storage.options.easterEgg) {
                 GUIUtils.matricesUtil(ctx, 0, 0, 5, () -> {
                     GUIUtils.adaptiveDrawTexture(ctx, CAT, centerX + 77, centerY, 0, 0, 35, 26, 35, 26);
                     int eyeCenterX = centerX + 84;
@@ -230,7 +245,7 @@ public class BindsGUI extends Screen {
     //? }
 
     public static int getCurrentPreset() {
-        return currentPreset;
+        return 0;
     }
 
     public void generateButtons(int startX, int startY) {
@@ -243,53 +258,65 @@ public class BindsGUI extends Screen {
             //? }
         }
         itemButtons.clear();
-        int currentX = startX;
-        int currentY = startY;
+        if (this.activePreset != null && this.currentPageIndex < this.activePreset.pages.size()) {
+            PageData page = this.activePreset.pages.get(this.currentPageIndex);
 
-        if (currentPreset < BindsStorage.presets.size()) {
-            Preset preset = BindsStorage.presets.get(currentPreset);
-            if (currentPage < preset.pages.size()) {
-                Page page = preset.pages.get(currentPage);
-                for (int row = 0; row < page.binds.size() && row < 8; row++) {
-                    Bind currentBind = page.binds.get(row);
-                    ItemButton button = createBtn(GUIUtils.truncateString(currentBind.name, 12),
-                            ItemsMapper.getItemStack(currentBind.icon), currentX, currentY, currentBind);
-                    itemButtons.add(button);
-                    //? if >=1.17 {
-                    this.addRenderableWidget(button);
-                    //? } else {
-                    /* this.addButton(button); */
-                    //? }
-                    currentX += 31;
-                    if (row == 3) {
-                        currentX = startX;
-                        currentY = startY + 31;
+            for (int slot = 0; slot < 8; slot++) {
+
+                int currentX = startX + (slot % 4) * 31;
+                int currentY = startY + (slot / 4) * 31;
+
+                BindData foundBind = null;
+                if (page.binds != null) {
+                    for (BindData b : page.binds) {
+                        if (b.index == slot) {
+                            foundBind = b;
+                            break;
+                        }
                     }
                 }
+
+                ItemButton button;
+                if (foundBind != null) {
+                    BindData finalFoundBind = foundBind;
+                    button = createBtn(GUIUtils.truncateString(foundBind.name, 12),
+                            ItemsMapper.getItemStack(foundBind.icon), currentX, currentY, () -> {
+                                BindExecutor.startBind(finalFoundBind);
+                                if (Storage.options.closeOnAction) {
+                                    BindsGUI.ignoreHoldToOpenOnce = true;
+                                    minecraft.setScreen(null);
+                                }
+                            });
+                } else {
+                    BindData dummyBind = new BindData();
+                    dummyBind.index = slot;
+                    button = createBtn(TextUtils.translatable("nitsha.binds.empty").getString(), ItemsMapper.getItemStack("minecraft:structure_void"),
+                            currentX, currentY, () -> {});
+                }
+                itemButtons.add(button);
+
+                //? if >=1.17 {
+                this.addRenderableWidget(button);
+                //? } else {
+                /* this.addButton(button); */
+                //? }
             }
         }
     }
 
+
     //? if >=26.1 {
     // private ItemButton createBtn(String text, ItemStackTemplate icon, int x, int y, Bind bind) {
     //? } else {
-    private ItemButton createBtn(String text, ItemStack icon, int x, int y, Bind bind) {
+    private ItemButton createBtn(String text, ItemStack icon, int x, int y, Runnable onClick) {
     //? }
-        return new ItemButton(x, y, icon, () -> {
-            BindExecutor.startBind(bind);
-            if (BindsStorage.getBooleanConfig("closeOnAction", false)) {
-                BindsGUI.ignoreHoldToOpenOnce = true;
-                minecraft.setScreen(null);
-            }
-        }, ITEMS_SELECTOR, "") {
+        return new ItemButton(x, y, icon, onClick, ITEMS_SELECTOR, "") {
             //? if >1.20.2 {
             @Override
             public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
                 super.renderWidget(ctx, mouseX, mouseY, delta);
                 if (this.isHovered) {
                     displayText = text;
-                    if (text.isEmpty())
-                        displayText = TextUtils.translatable("nitsha.binds.empty").getString();
                 }
             }
             //? } else if >=1.20 {
@@ -298,7 +325,6 @@ public class BindsGUI extends Screen {
                 super.renderWidget(ctx, mouseX, mouseY, delta);
                 if (this.isHovered) {
                     displayText = text;
-                    if (text.isEmpty()) displayText = TextUtils.translatable("nitsha.binds.empty").getString();
                 }
             }*/
             //? } else if >=1.19.4 {
@@ -307,7 +333,6 @@ public class BindsGUI extends Screen {
                 super.renderWidget(ctx, mouseX, mouseY, delta);
                 if (this.isHovered) {
                     displayText = text;
-                    if (text.isEmpty()) displayText = TextUtils.translatable("nitsha.binds.empty").getString();
                 }
             }*/
             //? } else {
@@ -316,7 +341,6 @@ public class BindsGUI extends Screen {
                 super.renderButton(ctx, mouseX, mouseY, delta);
                 if (this.isHovered) {
                     displayText = text;
-                    if (text.isEmpty()) displayText = TextUtils.translatable("nitsha.binds.empty").getString();
                 }
             }*/
             //? }
@@ -345,7 +369,7 @@ public class BindsGUI extends Screen {
     }
 
     private boolean checkForClose() {
-        if (!BindsStorage.getBooleanConfig("holdToOpen", true))
+        if (!Storage.options.holdToOpen)
             return false;
         if (ignoreHoldToOpenOnce) {
             ignoreHoldToOpenOnce = false;
@@ -372,39 +396,74 @@ public class BindsGUI extends Screen {
     }
 
     private void updatePage(int dir) {
-        int totalPages = BindsStorage.presets.get(currentPreset).pages.size();
-        if (dir == -1 && currentPage == 0)
-            currentPage = totalPages;
-        currentPage += dir;
-        if (currentPage == totalPages)
-            currentPage = 0;
-        BindsStorage.setConfig("lastPreset", currentPreset);
-        BindsStorage.setConfig("lastPage", currentPage);
+        if (this.activePreset == null) return;
+
+        int totalPages = this.activePreset.pages.size();
+        if (totalPages == 0) return;
+
+        if (dir == -1 && this.currentPageIndex == 0) {
+            this.currentPageIndex = totalPages - 1;
+        } else {
+            this.currentPageIndex += dir;
+            if (this.currentPageIndex >= totalPages) {
+                this.currentPageIndex = 0;
+            }
+        }
+
+        Storage.options.lastPresetId = this.activePresetId;
+        Storage.options.lastPageIndex = this.currentPageIndex;
+        Storage.saveModOptions();
+
         generateButtons(centerX + 3, centerY + 27);
     }
 
     private void updatePreset(int dir) {
-        int totalPresets = BindsStorage.presets.size();
-        if (dir == -1 && currentPreset == 0)
-            currentPreset = totalPresets;
-        currentPreset += dir;
-        if (currentPreset == totalPresets)
-            currentPreset = 0;
-        currentPage = 0;
-        BindsStorage.setConfig("lastPreset", currentPreset);
-        BindsStorage.setConfig("lastPage", currentPage);
+        List<PresetData> sortedPresets = Storage.getSortedPresets();
+        int totalPresets = sortedPresets.size();
+        if (totalPresets == 0) return;
+
+        int currentIndex = sortedPresets.indexOf(this.activePreset);
+        if (currentIndex == -1) currentIndex = 0;
+
+        if (dir == -1 && currentIndex == 0) {
+            currentIndex = totalPresets - 1;
+        } else {
+            currentIndex += dir;
+            if (currentIndex >= totalPresets) {
+                currentIndex = 0;
+            }
+        }
+
+        this.activePreset = sortedPresets.get(currentIndex);
+        this.activePresetId = this.activePreset.id;
+        this.activePresetIndex = currentIndex;
+
+        this.currentPageIndex = 0;
+
+        Storage.options.lastPresetId = this.activePresetId;
+        Storage.options.lastPageIndex = this.currentPageIndex;
+        Storage.saveModOptions();
+
         generateButtons(centerX + 3, centerY + 27);
     }
 
     private void setPreset(int index) {
-        if (index >= 0 && index < BindsStorage.presets.size()) {
-            currentPreset = index;
-            currentPage = 0;
-            BindsStorage.setConfig("lastPreset", currentPreset);
-            BindsStorage.setConfig("lastPage", currentPage);
+        List<PresetData> sortedPresets = Storage.getSortedPresets();
+
+        if (index >= 0 && index < sortedPresets.size()) {
+            this.activePreset = sortedPresets.get(index);
+            this.activePresetId = this.activePreset.id;
+
+            this.activePresetIndex = index;
+            this.currentPageIndex = 0;
+
+            Storage.options.lastPresetId = this.activePresetId;
+            Storage.options.lastPageIndex = this.currentPageIndex;
+            Storage.saveModOptions();
             generateButtons(centerX + 3, centerY + 27);
         }
     }
+
 
     public static boolean isInside(double mouseX, double mouseY, int x, int y, int width, int height) {
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
@@ -477,7 +536,7 @@ public class BindsGUI extends Screen {
                     SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
             return true;
         }
-        if (isInside(mouseX, mouseY, centerX + 3, centerY + 92, 119, 12)) {
+        if (isInside(mouseX, mouseY, centerX, centerY, MENU_WIDTH, 106)) {
             int direction = verticalAmount > 0 ? -1 : 1;
             updatePage(direction);
             Minecraft.getInstance().getSoundManager().play(
@@ -496,7 +555,7 @@ public class BindsGUI extends Screen {
             SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
             return true;
         }
-        if (isInside(mouseX, mouseY, centerX + 3, centerY + 92, 119, 12)) {
+        if (isInside(mouseX, mouseY, centerX, centerY, MENU_WIDTH, 106)) {
             int direction = amount > 0 ? -1 : 1;
             updatePage(direction);
             Minecraft.getInstance().getSoundManager().play(
@@ -515,7 +574,7 @@ public class BindsGUI extends Screen {
     //? } else {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
     //? }
-        if ((this.matchesKey(KeyBinds.BINDS, keyCode, scanCode) && !BindsStorage.getBooleanConfig("holdToOpen", true) && !ignoreHoldToOpenOnce) ||
+        if ((this.matchesKey(KeyBinds.BINDS, keyCode, scanCode) && !Storage.options.holdToOpen && !ignoreHoldToOpenOnce) ||
                 keyCode == GLFW.GLFW_KEY_ESCAPE) {
             ignoreHoldToOpenOnce = false;
             minecraft.setScreen(null);
@@ -559,13 +618,13 @@ public class BindsGUI extends Screen {
     //? } else {
     private boolean matchesMouse(KeyMapping key, int button) {
         return key.matchesMouse(button);
-        //? }
+    //? }
     }
 
     @Override
     //? if >=1.21.9 {
     /*public boolean keyReleased(KeyEvent event) {
-        if (BindsStorage.getBooleanConfig("keepMovement", false)) {
+        if (Storage.options.keepMovement) {
             InputConstants.Key key = InputConstants.getKey(event);
             KeyMapping.set(key, false);
         }

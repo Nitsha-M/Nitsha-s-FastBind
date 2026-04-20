@@ -92,6 +92,18 @@ public class Slider extends AbstractButton {
         return this.height;
     }
 
+    @Override
+    public void setX(int x) {
+        super.setX(x);
+        this.x = x;
+    }
+
+    @Override
+    public void setY(int y) {
+        super.setY(y);
+        this.y = y;
+    }
+
     public float getValue() {
         return this.value;
     }
@@ -185,7 +197,7 @@ public class Slider extends AbstractButton {
         int fY = this.getY();
         int fW = this.getWidth();
 
-        int outlineColor = (isHovered || isPressed) ? 0xFFFFFFFF : 0xFF000000;
+        int outlineColor = (isHovered || isPressed) ? 0xFFFFFFFF : 0xFFA0A0A0;
         GUIUtils.drawFill(ctx, fX + 1, fY, fX + getWidth() - 1, fY + sliderH, outlineColor);
         GUIUtils.drawFill(ctx, fX, fY +  1, fX + getWidth(), fY + sliderH - 1, outlineColor);
         GUIUtils.drawFill(ctx, fX + 1, fY + 1, fX + getWidth() - 1, fY + sliderH - 1, 0xFF212121);
@@ -218,13 +230,13 @@ public class Slider extends AbstractButton {
                 fX + 1 + sliderOffset + 7,
                 fY + Math.round(yOffset) + 5,
                 scrollbarColor);
-
-        GUIUtils.drawFill(ctx,
-                fX + 1 + sliderOffset + 3,
-                fY + Math.round(yOffset) + 6,
-                fX + 1 + sliderOffset + 7,
-                fY + Math.round(yOffset) + 7,
-                scrollbarColor);
+//
+//        GUIUtils.drawFill(ctx,
+//                fX + 1 + sliderOffset + 3,
+//                fY + Math.round(yOffset) + 6,
+//                fX + 1 + sliderOffset + 7,
+//                fY + Math.round(yOffset) + 7,
+//                scrollbarColor);
     }
 
     public boolean isInsideKnob(double mouseX, double mouseY) {
@@ -255,6 +267,19 @@ public class Slider extends AbstractButton {
             isPressed = true;
             this.playDownSound(Minecraft.getInstance().getSoundManager());
             return true;
+        } else if (isMouseOver(event.x(), event.y())){
+            int knobWidth = 10;
+            int trackX = this.getX() + 1;
+            int trackWidth = this.getWidth() - 2;
+            int scrollArea = trackWidth - knobWidth;
+
+            sliderOffset = Mth.clamp((int) event.x() - trackX - knobWidth / 2, 0, scrollArea);
+
+            float t = scrollArea > 0 ? sliderOffset / (float) scrollArea : 0.0f;
+            value = Math.round((min + t * (max - min)) * 10f) / 10f;
+
+            isPressed = true;
+            this.playDownSound(Minecraft.getInstance().getSoundManager());
         }
         return false;
     }*/
@@ -263,10 +288,24 @@ public class Slider extends AbstractButton {
         if (!this.isEnabled() || !this.visible) return false;
         if (button != 0) return false;
 
+
         if (isInsideKnob(mouseX, mouseY)) {
             isPressed = true;
             this.playDownSound(Minecraft.getInstance().getSoundManager());
             return true;
+        } else if (isMouseOver(mouseX, mouseY)){
+            int knobWidth = 10;
+            int trackX = this.getX() + 1;
+            int trackWidth = this.getWidth() - 2;
+            int scrollArea = trackWidth - knobWidth;
+
+            sliderOffset = Mth.clamp((int) mouseX - trackX - knobWidth / 2, 0, scrollArea);
+
+            float t = scrollArea > 0 ? sliderOffset / (float) scrollArea : 0.0f;
+            value = Math.round((min + t * (max - min)) * 10f) / 10f;
+
+            isPressed = true;
+            this.playDownSound(Minecraft.getInstance().getSoundManager());
         }
         return false;
     }
@@ -294,7 +333,6 @@ public class Slider extends AbstractButton {
     @Override
     //? if >=1.21.9 {
     /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        FBLogger.info("edcce3222");
         if (!isPressed || event.button() != 0) return false;
 
         int knobWidth = 10;

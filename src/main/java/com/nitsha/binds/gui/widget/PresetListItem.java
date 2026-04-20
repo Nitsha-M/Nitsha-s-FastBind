@@ -1,7 +1,8 @@
 package com.nitsha.binds.gui.widget;
 
 import com.nitsha.binds.Main;
-import com.nitsha.binds.configs.BindsStorage;
+import com.nitsha.binds.configs.Storage;
+import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.gui.panels.PresetSelector;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
@@ -82,12 +83,21 @@ public class PresetListItem extends AbstractButton {
         });
 
         this.deleteConfBtn = GUIUtils.createTexturedBtn(x + 91, y + 7, 9, 9, new ResourceLocation[]{SAVE, SAVE_HOVER}, button -> {
-            int totalPresets = BindsStorage.presets.size();
-            int currentPreset = BindsEditor.getCurrentPreset();
+            java.util.List<PresetData> sorted = Storage.getSortedPresets();
+            int totalPresets = sorted.size();
+            int currentPreset = sorted.indexOf(BindsEditor.activePreset);
 
             if (totalPresets <= 1) return;
 
-            BindsStorage.removePreset(index);
+            PresetData pd = sorted.get(index);
+            Storage.PRESET_REGISTRY.remove(pd.id);
+            Storage.PRESETS_DIR.resolve(pd.id + Storage.FILE_EXT).toFile().delete();
+            
+            sorted = Storage.getSortedPresets();
+            for (int i = 0; i < sorted.size(); i++) {
+                sorted.get(i).index = i;
+                Storage.savePreset(sorted.get(i), sorted.get(i).id);
+            }
 
             if (index < currentPreset) {
                 parent.screen.selectPreset(currentPreset - 1);
@@ -115,16 +125,23 @@ public class PresetListItem extends AbstractButton {
 
     public void movePreset(int dir) {
         int index = this.index;
-        int last = BindsStorage.presets.size() - 1;
+        int last = Storage.getSortedPresets().size() - 1;
         if (dir == -1 && index == 0) return;
         if (dir == 1 && index == last) return;
 
         int scrollOffset = scrollableList.getScrollOffset();
 
         int newIndex = index + dir;
-        int currentSelected = BindsEditor.getCurrentPreset();
+        int currentSelected = Storage.getSortedPresets().indexOf(BindsEditor.activePreset);
 
-        BindsStorage.swapPresets(index, newIndex);
+        java.util.List<PresetData> sorted = Storage.getSortedPresets();
+        PresetData a = sorted.get(index);
+        PresetData b = sorted.get(newIndex);
+        int tempPos = a.index;
+        a.index = b.index;
+        b.index = tempPos;
+        Storage.savePreset(a, a.id);
+        Storage.savePreset(b, b.id);
         this.index = newIndex;
 
         if (currentSelected == index) {
@@ -169,7 +186,9 @@ public class PresetListItem extends AbstractButton {
         isEditing = false;
         String getName = this.newNameField.getText();
         String newName = (getName.isEmpty()) ? "Preset " +  (index + 1) : getName;
-        BindsStorage.renamePreset(this.index, newName);
+        PresetData pd = Storage.getSortedPresets().get(this.index);
+        pd.name = newName;
+        Storage.savePreset(pd, pd.id);
         this.newNameField.setText(newName);
         this.name = newName;
     }
@@ -186,20 +205,21 @@ public class PresetListItem extends AbstractButton {
         } else {
             int nameX = 15;
             int maxLength = (isDeleteConfirmation()) ? 12 : 13;
-            if (BindsStorage.presets.size() == 1) {
+            if (Storage.getSortedPresets().size() == 1) {
                 nameX = 3;
                 maxLength = (isDeleteConfirmation()) ? 13 : 14;
             } else {
                 GUIUtils.adaptiveDrawTexture(ctx, ARROW_DISABLED, getX() + 3, getY() + 2, 0, 0, 9, 19, 9, 19);
             }
-            if (this.isHovered && parent.isOpen() && index != BindsEditor.getCurrentPreset()) GUIUtils.drawFill(ctx, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x0DFFFFFF);
-            if (index == BindsEditor.getCurrentPreset()) GUIUtils.drawFill(ctx, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x1A4AFF00);
+            int currentPreset = Storage.getSortedPresets().indexOf(BindsEditor.activePreset);
+            if (this.isHovered && parent.isOpen() && index != currentPreset) GUIUtils.drawFill(ctx, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x0DFFFFFF);
+            if (index == currentPreset) GUIUtils.drawFill(ctx, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x1A4AFF00);
             GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(this.name, maxLength)), 0, getX() + nameX, getY() + 1 + (getHeight() / 2), "left", "center",0xFFFFFFFF, false);
             this.editBtn.renderWidget(ctx, mouseX, mouseY, delta);
             this.deleteBtn.renderWidget(ctx, mouseX, mouseY, delta);
-            if (BindsStorage.presets.size() > 1) {
+            if (Storage.getSortedPresets().size() > 1) {
                 if (index > 0) this.moveTop.renderWidget(ctx, mouseX, mouseY, delta);
-                if (index < BindsStorage.presets.size() - 1) this.moveBottom.renderWidget(ctx, mouseX, mouseY, delta);
+                if (index < Storage.getSortedPresets().size() - 1) this.moveBottom.renderWidget(ctx, mouseX, mouseY, delta);
             }
             if (isDeleteConfirmation()) this.deleteConfBtn.renderWidget(ctx, mouseX, mouseY, delta);
         }

@@ -1,13 +1,16 @@
 package com.nitsha.binds.gui.panels;
 
+import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.configs.BindsStorage;
+import com.nitsha.binds.configs.Storage;
+import com.nitsha.binds.configs.dto.preset.BindData;
+import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.nitsha.binds.gui.screen.BindsGUI;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.*;
+import com.nitsha.binds.utils.CodecUtil;
 import com.nitsha.binds.utils.EasterEgg;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
@@ -22,7 +25,8 @@ public class BasicOptionsWindow extends AnimatedWindow {
     private TextField bindNameField;
     private ItemButton editIconBtn;
     private BedrockIconButton pasteBtn;
-    private BedrockIconTextButton editAction;
+    private BedrockIconButton importBtn;
+    private BedrockIconButton exportBtn;
 
     private static final ResourceLocation ITEMS_EDIT = Main.id("textures/gui/test/items_1.png");
     private static final ResourceLocation CAT_MENU = Main.id("textures/gui/cat_menu.png");
@@ -64,13 +68,15 @@ public class BasicOptionsWindow extends AnimatedWindow {
                 4,
                 500,
                 () -> {
-                    if (!BindsStorage.getBooleanConfig("easterEgg", false)) {
-                        BindsStorage.setConfig("easterEgg", true);
+                    if (!Storage.options.easterEgg) {
+                        Storage.options.easterEgg = true;
+                        Storage.saveModOptions();
                         meowStates = CatMeowStates.HAPPY;
                         catMeow2.stopAnimation();
                         catMeow1.startAnimation(true);
                     } else {
-                        BindsStorage.setConfig("easterEgg", false);
+                        Storage.options.easterEgg = false;
+                        Storage.saveModOptions();
                         meowStates = CatMeowStates.SAD;
                         catMeow1.stopAnimation();
                         catMeow2.startAnimation(true);
@@ -116,21 +122,16 @@ public class BasicOptionsWindow extends AnimatedWindow {
         }, 1);
 
         this.bindNameField = new TextField(textRenderer, 4, 126, 105, 20, 20, "", TextUtils.translatable("nitsha.binds.name").getString());
-        this.editIconBtn = new ItemButton(111, 123, ItemsMapper.getItemStack(BindsStorage.getBind(BindsGUI.getCurrentPreset(), BindsEditor.getActiveBind()).icon), () -> {
-//            screen.openAdvancedOptions();
+        this.editIconBtn = new ItemButton(111, 123, ItemsMapper.getItemStack(BindsEditor.getCBind().icon), () -> {
             screen.getAdvancedOptionsWindow().selectTab(1);
         }, ITEMS_EDIT, "");
 
-//        this.editAction = new BedrockIconTextButton(4, 129, 133, 20, "edit_action", TextUtils.translatable("nitsha.binds.openEditor").getString(), true, ()-> {
-//            screen.openAdvancedOptions();
-//            screen.getAdvancedOptionsWindow().selectTab(1);
-//        });
 
-        this.pasteBtn = new BedrockIconButton(49, 151, 43, 20, "paste", false, screen::pasteBind, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
+        this.pasteBtn = new BedrockIconButton(31, 151, 25, 20, "paste", false, screen::pasteBind, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
         if (screen.copied.name.isEmpty()) pasteBtn.setEnabled(false);
-        this.addElement(new BedrockIconButton(4, 151, 43, 20, "copy", true, screen::copyBind));
+        this.addElement(new BedrockIconButton(4, 151, 25, 20, "copy", true, screen::copyBind));
 
-        this.deleteBtn = new BedrockIconButton(94, 151, 43, 20, "delete", true, ()-> {
+        this.deleteBtn = new BedrockIconButton(58, 151, 25, 20, "delete", false, ()-> {
             if (deleteConfirmShown) {
                 screen.deleteBind();
                 confirm(false);
@@ -140,12 +141,55 @@ public class BasicOptionsWindow extends AnimatedWindow {
             }
         }, 0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF);
 
+        this.exportBtn = new BedrockIconButton(85, 151, 25, 20, "copy", true, () -> {
+            screen.saveBind();
+
+            BindData currentBind = BindsEditor.getCBind();
+
+            String encodedBind = CodecUtil.exportToText(currentBind);
+
+            if (encodedBind != null) {
+                Minecraft.getInstance().keyboardHandler.setClipboard(encodedBind);
+            }
+        }, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
+
+        this.importBtn = new BedrockIconButton(112, 151, 25, 20, "paste", true, () -> {
+            String clipboardText = Minecraft.getInstance().keyboardHandler.getClipboard();
+
+            BindData importedBind = CodecUtil.importFromText(clipboardText, BindData.class);
+
+            if (importedBind != null) {
+                importedBind.index = BindsEditor.activeBind;
+
+                PageData page = BindsEditor.activePreset.pages.get(BindsEditor.currentPage);
+                boolean found = false;
+
+                if (page.binds != null) {
+                    for (int i = 0; i < page.binds.size(); i++) {
+                        if (page.binds.get(i).index == BindsEditor.activeBind) {
+                            page.binds.set(i, importedBind);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        page.binds.add(importedBind);
+                    }
+                }
+
+                Storage.savePreset(BindsEditor.activePreset, BindsEditor.activePresetId);
+                screen.getBindsListWindow().updateSelected(ItemsMapper.getItemStack(importedBind.icon));
+                screen.selectBind();
+            }
+        }, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
+
         this.addElement(deleteBtn);
+        this.addElement(importBtn);
+        this.addElement(exportBtn);
 
         this.addElement(bindNameField);
         this.addElement(editIconBtn);
         this.addElement(pasteBtn);
-//        this.addElement(editAction);
 
         this.open(() -> {});
     }

@@ -2,8 +2,10 @@ package com.nitsha.binds.gui.panels;
 
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.bind.Bind;
-import com.nitsha.binds.configs.BindsStorage;
+import com.nitsha.binds.configs.dto.preset.BindData;
+import com.nitsha.binds.configs.dto.preset.PageData;
+import com.nitsha.binds.configs.Storage;
+import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
 import com.nitsha.binds.gui.utils.GUIUtils;
@@ -104,8 +106,8 @@ public class BindsList extends AnimatedWindow {
             MutableComponent page = TextUtils.translatable("nitsha.binds.page");
             MutableComponent currentPage = TextUtils.literal(toSuper(String.valueOf(BindsEditor.getCurrentPage() + 1)));
             MutableComponent totalPage = TextUtils.literal(toSuper(String.valueOf(
-                    BindsEditor.getCurrentPreset() >= 0 && BindsEditor.getCurrentPreset() < BindsStorage.presets.size()
-                            ? BindsStorage.presets.get(BindsEditor.getCurrentPreset()).pages.size()
+                    BindsEditor.activePreset != null
+                            ? BindsEditor.activePreset.pages.size()
                             : 1
             )));
             int pWidth = Minecraft.getInstance().font.width(page);
@@ -126,14 +128,16 @@ public class BindsList extends AnimatedWindow {
         this.deleteBtn = new SmallTextButton(TextUtils.translatable("nitsha.binds.delete"), 4, 107, 0xFF790e06, 61, "left", DELETE_SMALL, ()-> {
             if (deleteConfirmShown) {
                 int currentPage = BindsEditor.getCurrentPage();
-                int currentPreset = BindsEditor.getCurrentPreset();
                 int activeBind = screen.getActiveBind();
 
                 boolean activeBindOnDeletedPage = screen.isActiveBindOnPage(currentPage);
 
-                BindsStorage.removePage(currentPreset, currentPage);
+                if (BindsEditor.activePreset != null && BindsEditor.activePreset.pages.size() > 1) {
+                    BindsEditor.activePreset.pages.remove(currentPage);
+                    Storage.savePreset(BindsEditor.activePreset, BindsEditor.activePresetId);
+                }
 
-                int newTotalPages = BindsStorage.presets.get(currentPreset).pages.size();
+                int newTotalPages = BindsEditor.activePreset != null ? BindsEditor.activePreset.pages.size() : 1;
 
                 if (currentPage >= newTotalPages) {
                     currentPage = newTotalPages - 1;
@@ -158,7 +162,10 @@ public class BindsList extends AnimatedWindow {
         });
 
         this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.addNew"), 67, 107, 0xFF4d9109, 62, "left", ADD_NEW, ()-> {
-            BindsStorage.addPage(BindsEditor.getCurrentPreset());
+            if (BindsEditor.activePreset != null) {
+                BindsEditor.activePreset.pages.add(new PageData());
+                Storage.savePreset(BindsEditor.activePreset, BindsEditor.activePresetId);
+            }
             deleteBtn.setEnabled(true);
         }));
 
@@ -217,7 +224,18 @@ public class BindsList extends AnimatedWindow {
 
         for (int row = 0; row < 8; row++) {
             int bindIndex = row + (8 * currentPage);
-            Bind currentBind = BindsStorage.getBind(BindsEditor.getCurrentPreset(), bindIndex);
+            BindData currentBind = null;
+            if (BindsEditor.activePreset != null && currentPage < BindsEditor.activePreset.pages.size()) {
+                PageData page = BindsEditor.activePreset.pages.get(currentPage);
+                if (page.binds != null) {
+                    for (BindData b : page.binds) {
+                        if (b.index == bindIndex) { currentBind = b; break; }
+                    }
+                }
+            }
+            if (currentBind == null) {
+                currentBind = new BindData(); currentBind.index = bindIndex;
+            }
 
             ItemButton[] buttonHolder = new ItemButton[1];
 
@@ -247,7 +265,7 @@ public class BindsList extends AnimatedWindow {
         if (aB == currentPage) {
             buttons.get(activeBind - (8 * aB)).setSelected(true);
         }
-        deleteBtn.setEnabled(BindsStorage.presets.get(BindsEditor.getCurrentPreset()).pages.size() > 1);
+        deleteBtn.setEnabled(BindsEditor.activePreset != null && BindsEditor.activePreset.pages.size() > 1);
     }
 
     @Override

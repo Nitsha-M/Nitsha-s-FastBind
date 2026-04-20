@@ -56,6 +56,19 @@ public class KeybindSelector extends AbstractButton {
 
     public int getX() { return this.x; }
     public int getY() { return this.y; }
+
+    @Override
+    public void setX(int x) {
+        super.setX(x);
+        this.x = x;
+    }
+
+    @Override
+    public void setY(int y) {
+        super.setY(y);
+        this.y = y;
+    }
+
     public int getKeyCode() { return this.keyCode; }
     public int getHeight() { return this.height; }
     public boolean isPressed() { return isPressed; }

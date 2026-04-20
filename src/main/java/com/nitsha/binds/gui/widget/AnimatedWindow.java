@@ -185,7 +185,6 @@ public class AnimatedWindow extends AbstractContainerEventHandler implements Ren
             case FINISHED:
                 break;
             case HIDDEN:
-                System.out.println("i'm hidden");
                 break;
         }
     }

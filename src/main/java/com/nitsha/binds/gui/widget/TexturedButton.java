@@ -69,11 +69,15 @@ public class TexturedButton extends ImageButton {
         return height;
     }
 
+    @Override
     public void setX(int x) {
+        super.setX(x);
         this.x = x;
     }
 
+    @Override
     public void setY(int y) {
+        super.setY(y);
         this.y = y;
     }
 

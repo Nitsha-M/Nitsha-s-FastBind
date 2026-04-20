@@ -98,7 +98,6 @@ public class BedrockIconButton extends BedrockButton {
         this.ICON = Main.id("textures/gui/sprites/" + iconName + ".png");
     }
 
-
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         super.renderWidget(ctx, mouseX, mouseY, delta);

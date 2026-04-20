@@ -22,7 +22,9 @@ import org.lwjgl.glfw.GLFW;
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-//?}
+//?} else {
+/*import com.mojang.blaze3d.vertex.PoseStack;*/
+//? }
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -65,6 +67,22 @@ public class TextField extends AbstractButton {
     private boolean isAnimatedPlaceholder = true;
 
     private int x, y, width, height;
+
+    private boolean multiline = false;
+    private int maxLines = 1;
+    private int scrollLines = 0;
+    private Runnable heightChangeListener;
+
+    public static class LineInfo {
+        public int startIndex, endIndex;
+        public String text;
+        public LineInfo(int start, int end, String text) {
+            this.startIndex = start;
+            this.endIndex = end;
+            this.text = text;
+        }
+    }
+    private List<LineInfo> cachedLines = new ArrayList<>();
 
     public static class FormatMark implements Comparable<FormatMark> {
         public int position;
@@ -116,6 +134,88 @@ public class TextField extends AbstractButton {
     public int getY() { return y; }
     public int getWidth() { return width; }
     public int getHeight() { return height; }
+
+    @Override
+    public void setX(int x) {
+        super.setX(x);
+        this.x = x;
+    }
+
+    @Override
+    public void setY(int y) {
+        super.setY(y);
+        this.y = y;
+    }
+
+    public void configureMultiline(boolean multiline, int maxLines) {
+        this.multiline = multiline;
+        this.maxLines = maxLines;
+        recalculateLines();
+    }
+
+    public void setHeightChangeListener(Runnable listener) {
+        this.heightChangeListener = listener;
+    }
+
+    private void recalculateLines() {
+        if (!multiline) return;
+        cachedLines.clear();
+        int innerWidth = this.width - 8;
+        if (this.text.isEmpty()) {
+            cachedLines.add(new LineInfo(0, 0, ""));
+        } else {
+            int currStart = 0;
+            while(currStart < text.length()) {
+                String remain = text.substring(currStart);
+                int len = 1;
+                int lastSpace = -1;
+                while(len <= remain.length() && styledWidth(currStart, currStart + len) <= innerWidth) {
+                   if (len > 0 && remain.charAt(len-1) == ' ') lastSpace = len;
+                   len++;
+                }
+                len--;
+                if (len < remain.length()) {
+                    if (lastSpace > 0) {
+                        len = lastSpace;
+                    } else if (len == 0) {
+                        len = 1; 
+                    }
+                }
+                if (len == 0) len = 1;
+                cachedLines.add(new LineInfo(currStart, currStart + len, remain.substring(0, len)));
+                currStart += len;
+            }
+        }
+        updateScrolling();
+    }
+
+    private void updateScrolling() {
+        if (!multiline) return;
+        int oldHeight = this.height;
+        int visibleLines = Math.min(cachedLines.size(), maxLines);
+        this.height = Math.max(19, 8 + visibleLines * 11);
+        
+        int cursorLine = getLineForOffset(this.selectionStart);
+        if (cursorLine < scrollLines) {
+            scrollLines = cursorLine;
+        } else if (cursorLine >= scrollLines + visibleLines) {
+            scrollLines = cursorLine - visibleLines + 1;
+        }
+        scrollLines = Mth.clamp(scrollLines, 0, Math.max(0, cachedLines.size() - visibleLines));
+        
+        if (this.height != oldHeight && heightChangeListener != null) {
+            heightChangeListener.run();
+        }
+    }
+
+    private int getLineForOffset(int offset) {
+        if (!multiline || cachedLines.isEmpty()) return 0;
+        for (int i = 0; i < cachedLines.size(); i++) {
+            LineInfo info = cachedLines.get(i);
+            if (offset >= info.startIndex && offset < info.endIndex) return i;
+        }
+        return cachedLines.size() - 1;
+    }
 
     public void setAnimatedPlaceholder(boolean animated) {
         isAnimatedPlaceholder = animated;
@@ -319,12 +419,14 @@ public class TextField extends AbstractButton {
         return result;
     }
 
-    public void setFormatMarksFromMap(List<Map<String, Object>> marks) {
+    public void setFormatMarksFromMap(List<Map<String, Integer>> marks) {
         formatMarks.clear();
-        for (Map<String, Object> markData : marks) {
-            int pos = ((Number) markData.get("pos")).intValue();
-            int style = ((Number) markData.get("style")).intValue();
-            formatMarks.add(new FormatMark(pos, style));
+        if (marks != null) {
+            for (Map<String, Integer> markData : marks) {
+                int pos = markData.getOrDefault("pos", 0);
+                int style = markData.getOrDefault("style", 0);
+                formatMarks.add(new FormatMark(pos, style));
+            }
         }
         Collections.sort(formatMarks);
     }
@@ -481,8 +583,9 @@ public class TextField extends AbstractButton {
         } else {
             this.text = text;
         }
-        this.setCursorToEnd(false);
         this.formatMarks.clear();
+        if (multiline) recalculateLines();
+        this.setCursorToEnd(false);
     }
 
     public String getText() {
@@ -503,6 +606,15 @@ public class TextField extends AbstractButton {
         }
 
         this.updateFirstCharacterIndex(this.selectionStart);
+
+        if (multiline) {
+            int lineIdx = getLineForOffset(this.selectionStart);
+            if (lineIdx < scrollLines) {
+                scrollLines = lineIdx;
+            } else if (lineIdx >= scrollLines + maxLines) {
+                scrollLines = lineIdx - maxLines + 1;
+            }
+        }
     }
 
     public void setCursorToStart(boolean shiftKeyPressed) {
@@ -571,6 +683,8 @@ public class TextField extends AbstractButton {
             this.text = newText;
 
             updateFormatMarksAfterEdit(i, lengthChange);
+            
+            if (multiline) recalculateLines();
 
             this.setCursor(i + len, false);
         }
@@ -610,6 +724,8 @@ public class TextField extends AbstractButton {
 
                     // Обновляем метки форматирования
                     updateFormatMarksAfterEdit(i, -(j - i));
+                    
+                    if (multiline) recalculateLines();
 
                     this.setCursor(i, false);
                 }
@@ -667,6 +783,10 @@ public class TextField extends AbstractButton {
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         if (!visible) return;
+        if (multiline) {
+            renderMultiline(ctx, mouseX, mouseY, delta);
+            return;
+        }
         this.isHovered = isMouseOver(mouseX, mouseY);
         GUIUtils.drawResizableBox(
                 ctx,
@@ -751,25 +871,100 @@ public class TextField extends AbstractButton {
         }
     }
 
+    private void renderMultiline(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        this.isHovered = isMouseOver(mouseX, mouseY);
+        GUIUtils.drawResizableBox(
+                ctx,
+                (this.isFocused() || isHovered) ? FOCUS : NORMAL,
+                getX(), getY(), getWidth(), getHeight(),
+                3, 7);
+
+        int renderX = getX() + 4;
+        int renderY = this.getY() + 4;
+        
+        int visibleLines = Math.min(cachedLines.size(), maxLines);
+        
+        for (int i = 0; i < visibleLines; i++) {
+            int lineIdx = scrollLines + i;
+            if (lineIdx >= cachedLines.size()) break;
+            LineInfo line = cachedLines.get(lineIdx);
+
+            if (this.selectionStart != this.selectionEnd) {
+                int selStart = Math.max(line.startIndex, Math.min(this.selectionStart, this.selectionEnd));
+                int selEnd = Math.min(line.endIndex, Math.max(this.selectionStart, this.selectionEnd));
+                if (selStart < selEnd) {
+                    int wStart = styledWidth(line.startIndex, selStart);
+                    int wEnd = styledWidth(line.startIndex, selEnd);
+                    GUIUtils.drawFill(ctx, renderX + wStart, renderY, renderX + wEnd, renderY + 11, 0x8033AAFF);
+                }
+            }
+
+            if (!line.text.isEmpty()) {
+                List<StyledSegment> segments = buildStyledSegments(this.text, line.startIndex, line.endIndex);
+                int segX = renderX;
+                for (StyledSegment segment : segments) {
+                    if (segment.text.isEmpty()) continue;
+                    Component styledText = TextUtils.literal(segment.text).setStyle(segment.style);
+                    //? if >=26.1 {
+                    // ctx.text(this.font, styledText, segX, renderY, 0xFFFFFFFF, true);
+                    //? } else if >=1.20 {
+                    ctx.drawString(this.font, styledText, segX, renderY, 0xFFFFFFFF, true);
+                    //? } else {
+                    /*ctx.pushPose();
+                     this.font.drawShadow((PoseStack)ctx, styledText, segX, renderY, 0xFFFFFFFF);
+                     ctx.popPose();*/
+                    //? }
+                    segX += font.width(styledText);
+                }
+            }
+
+            boolean shouldBlink = (Util.getMillis() - this.lastSwitchFocusTime) / 300L % 2L == 0L;
+            if (isFocused() && getLineForOffset(this.selectionStart) == lineIdx && shouldBlink) {
+                int cursorPosInLine = this.selectionStart - line.startIndex;
+                int cursorX = renderX + styledWidth(line.startIndex, line.startIndex + cursorPosInLine);
+                GUIUtils.drawFill(ctx, cursorX, renderY - 1, cursorX + 1, renderY + 9, 0xFFFFFFFF);
+            }
+
+            renderY += 11;
+        }
+
+        if (isAnimatedPlaceholder) {
+            animatedPlaceholder(ctx);
+        } else {
+            if (!isFocused() && getText().isEmpty()) {
+                GUIUtils.addText(
+                        ctx,
+                        TextUtils.literal(this.placeholder.getString()),
+                        0,
+                        getX() + 4,
+                        getY() + 4,
+                        "top",
+                        "left",
+                        0xFFAAAAAA,
+                        false);
+            }
+        }
+    }
+
     private void animatedPlaceholder(GuiGraphics ctx) {
         float scaleFocused = 0.5f;
         float scaleUnfocused = 1f;
 
-        float boxUnfocusedY = getY();
-        float boxFocusedY = getY() - 3f;
+        float boxUnfocusedOffsetY = 0f;
+        float boxFocusedOffsetY = -3f;
 
-        int textUnfocusedX = getX() + 4;
-        int textFocusedX = getX() + 5;
+        float textUnfocusedOffsetX = 4f;
+        float textFocusedOffsetX = 5f;
 
-        int textUnfocusedY = getY() + (getHeight() - 8) / 2;
-        int textFocusedY = getY() - 1;
+        float textUnfocusedOffsetY = ((multiline ? 19 : getHeight()) - 8) / 2;
+        float textFocusedOffsetY = -1f;
 
         boolean animatedPlaceholder = isFocused() || !this.getText().isEmpty();
 
         float wantScale = animatedPlaceholder ? scaleFocused : scaleUnfocused;
-        float wantTextX = animatedPlaceholder ? textFocusedX : textUnfocusedX;
-        float wantTextY = animatedPlaceholder ? textFocusedY : textUnfocusedY;
-        float wantBoxY = animatedPlaceholder ? boxFocusedY : boxUnfocusedY;
+        float wantTextX = animatedPlaceholder ? textFocusedOffsetX : textUnfocusedOffsetX;
+        float wantTextY = animatedPlaceholder ? textFocusedOffsetY : textUnfocusedOffsetY;
+        float wantBoxY = animatedPlaceholder ? boxFocusedOffsetY : boxUnfocusedOffsetY;
         int wantPColor = animatedPlaceholder ? 0xFFFFFFFF : 0xFFAAAAAA;
 
         float smooth = 0.22f;
@@ -778,7 +973,7 @@ public class TextField extends AbstractButton {
         phTextY = Mth.lerp(smooth, phTextY, wantTextY);
         phBoxY = Mth.lerp(smooth, phBoxY, wantBoxY);
 
-        if (!phInit) {
+        if (!phInit || Math.abs(phTextX) > 100) { // reset if absolute coordinates were cached
             phInit = true;
             phScale = wantScale;
             phTextX = wantTextX;
@@ -786,8 +981,12 @@ public class TextField extends AbstractButton {
             phBoxY = wantBoxY;
         }
 
+        int absoluteBoxY = Math.round(getY() + phBoxY);
+        int absoluteTextX = Math.round(getX() + phTextX);
+        int absoluteTextY = Math.round(getY() + phTextY);
+
         int rectLeft = getX() + 3;
-        int rectTop = Math.round(phBoxY);
+        int rectTop = absoluteBoxY;
         int rectRight = rectLeft + Math.round(font.width(this.placeholder) * scaleFocused) + 4;
         int rectBottom = getY() + 1;
         int outlineColor = (isFocused() || isHovered) ? 0xFFFFFFFF : 0xFFA0A0A0;
@@ -805,8 +1004,8 @@ public class TextField extends AbstractButton {
                     ctx,
                     TextUtils.literal(this.placeholder.getString()),
                     0,
-                    Math.round(phTextX / phScale),
-                    Math.round(phTextY / phScale),
+                    Math.round(absoluteTextX / phScale),
+                    Math.round(absoluteTextY / phScale),
                     "top",
                     "left",
                     wantPColor,
@@ -881,33 +1080,69 @@ public class TextField extends AbstractButton {
             setFocusedField(this);
             this.setFocused(true);
 
-            int relativeX = Mth.floor(mouseX) - this.getX() - 4;
-            String visibleText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex),
-                    this.width - 8);
-            int clickedPos = this.font.plainSubstrByWidth(visibleText, relativeX).length() + this.firstCharacterIndex;
-            this.setCursor(clickedPos, hasShiftDown());
+            this.setCursor(getIndexByCoords(mouseX, mouseY), hasShiftDown());
 
             return true;
         }
         return false;
     }*/
     //? } else {
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (isMouseOver(mouseX, mouseY)) {
-                setLastClickedWidget(this);
-                setFocusedField(this);
-                this.setFocused(true);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (isMouseOver(mouseX, mouseY)) {
+            setLastClickedWidget(this);
+            setFocusedField(this);
+            this.setFocused(true);
 
-                int relativeX = Mth.floor(mouseX) - this.getX() - 4;
-                String visibleText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex),
-                        this.width - 8);
-                int clickedPos = this.font.plainSubstrByWidth(visibleText, relativeX).length() + this.firstCharacterIndex;
-                this.setCursor(clickedPos, hasShiftDown());
+            this.setCursor(getIndexByCoords(mouseX, mouseY), hasShiftDown());
 
-                return true;
-            }
-            return false;
+            return true;
         }
+        return false;
+    }
+    //? }
+
+    private int getIndexByCoords(double mouseX, double mouseY) {
+        if (multiline) {
+            int lineClick = (int) ((mouseY - (this.getY() + 4)) / 11);
+            int actualLine = scrollLines + lineClick;
+            if (actualLine >= 0 && actualLine < cachedLines.size()) {
+                LineInfo line = cachedLines.get(actualLine);
+                int offset = 0;
+                for (int n = 0; n <= line.text.length(); n++) {
+                    if (styledWidth(line.startIndex, line.startIndex + n) >= mouseX - (this.getX() + 4)) {
+                        break;
+                    }
+                    offset = n;
+                }
+                return line.startIndex + offset;
+            }
+            return this.text.length();
+        } else {
+            int relativeX = Mth.floor(mouseX) - this.getX() - 4;
+            String visibleText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex),
+                    this.width - 8);
+            return this.font.plainSubstrByWidth(visibleText, relativeX).length() + this.firstCharacterIndex;
+        }
+    }
+
+    //? if >=1.20.2 {
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (multiline && isMouseOver(mouseX, mouseY) && cachedLines.size() > maxLines) {
+            scrollLines = Mth.clamp(scrollLines - (int)Math.signum(verticalAmount), 0, cachedLines.size() - maxLines);
+            return true;
+        }
+        return false;
+    }
+    //? } else {
+    /*@Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (multiline && isMouseOver(mouseX, mouseY) && cachedLines.size() > maxLines) {
+            scrollLines = Mth.clamp(scrollLines - (int)Math.signum(amount), 0, cachedLines.size() - maxLines);
+            return true;
+        }
+        return false;
+    }*/
     //? }
 
     @Override
@@ -950,6 +1185,46 @@ public class TextField extends AbstractButton {
                     this.moveCursor(1, hasShiftDown());
                 }
                 return true;
+
+            case GLFW.GLFW_KEY_UP:
+                if (multiline) {
+                    int cursorLineIdx = getLineForOffset(this.selectionStart);
+                    if (cursorLineIdx > 0) {
+                        LineInfo cl = cachedLines.get(cursorLineIdx);
+                        int xOffset = styledWidth(cl.startIndex, this.selectionStart);
+                        LineInfo pl = cachedLines.get(cursorLineIdx - 1);
+                        int newOffset = 0;
+                        for (int n = 0; n <= pl.text.length(); n++) {
+                            if (styledWidth(pl.startIndex, pl.startIndex + n) > xOffset) {
+                                break;
+                            }
+                            newOffset = n;
+                        }
+                        this.setCursor(pl.startIndex + newOffset, hasShiftDown());
+                        return true;
+                    }
+                }
+                return false;
+
+            case GLFW.GLFW_KEY_DOWN:
+                if (multiline) {
+                    int cursorLineIdx = getLineForOffset(this.selectionStart);
+                    if (cursorLineIdx < cachedLines.size() - 1) {
+                        LineInfo cl = cachedLines.get(cursorLineIdx);
+                        int xOffset = styledWidth(cl.startIndex, this.selectionStart);
+                        LineInfo nl = cachedLines.get(cursorLineIdx + 1);
+                        int newOffset = 0;
+                        for (int n = 0; n <= nl.text.length(); n++) {
+                            if (styledWidth(nl.startIndex, nl.startIndex + n) > xOffset) {
+                                break;
+                            }
+                            newOffset = n;
+                        }
+                        this.setCursor(nl.startIndex + newOffset, hasShiftDown());
+                        return true;
+                    }
+                }
+                return false;
 
             case GLFW.GLFW_KEY_HOME:
                 this.setCursorToStart(hasShiftDown());

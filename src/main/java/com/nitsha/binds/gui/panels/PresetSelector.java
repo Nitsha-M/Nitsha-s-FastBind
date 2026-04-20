@@ -2,7 +2,8 @@ package com.nitsha.binds.gui.panels;
 
 import com.google.common.collect.Lists;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.configs.BindsStorage;
+import com.nitsha.binds.configs.Storage;
+import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.DrawElement;
 import com.nitsha.binds.gui.utils.GUIUtils;
@@ -27,6 +28,7 @@ import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -70,7 +72,6 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
     private float yOffset;
     private float alpha;
     private int globalColor = 0xFFFFFFFF;
-    private int currentPreset;
 
     public PresetSelector(BindsEditor screen, int x, int y, float width, int height, int delay) {
         clearChildren();
@@ -85,7 +86,6 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
         this.delayMs = delay;
         this.alpha = 0.0f;
         this.lastUpdateTime = 0;
-        currentPreset = BindsEditor.getCurrentPreset();
         initUI(screen);
     }
 
@@ -110,7 +110,14 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
         generatePresetsList();
 
         this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.addNew"), 4, 147, 0xFF4d9109, getWidth() - 8, "left", ADD_NEW, ()-> {
-            BindsStorage.addPreset("Preset " + (items.size() + 1));
+           List<PresetData> sorted = Storage.getSortedPresets();
+            String newId = UUID.randomUUID().toString();
+            PresetData preset = new PresetData();
+            preset.name = "Preset " + (items.size() + 1);
+            preset.index = sorted.size();
+            preset.id = newId;
+            Storage.PRESET_REGISTRY.put(newId, preset);
+            Storage.savePreset(preset, newId);
             generatePresetsList();
         }));
 
@@ -123,9 +130,10 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
         this.presetsList.resetScroll();
         items.clear();
         int tY = 0;
-        for (int i = 0; i < BindsStorage.presets.size(); i++) {
+        List<PresetData> sorted = Storage.getSortedPresets();
+        for (int i = 0; i < sorted.size(); i++) {
             int h = 22;
-            PresetListItem item = new PresetListItem(this, this.presetsList, BindsStorage.presets.get(i).name, 0, tY, this.getWidth() - 4, h, i);
+            PresetListItem item = new PresetListItem(this, this.presetsList, sorted.get(i).name, 0, tY, this.getWidth() - 4, h, i);
             this.presetsList.addElement(item);
             this.presetsList.addScrollableArea(h);
             items.add(item);
@@ -134,8 +142,10 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
     }
 
     private void selectActivePreset(int dir) {
-        currentPreset = (currentPreset + dir + items.size()) % items.size();
-        screen.selectPreset(currentPreset);
+        int cP = Storage.getSortedPresets().indexOf(BindsEditor.activePreset);
+        if (cP == -1) cP = 0;
+        int nextId = (cP + dir + items.size()) % items.size();
+        screen.selectPreset(nextId);
     }
 
     public List<PresetListItem> getItems() {

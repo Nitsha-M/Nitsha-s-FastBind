@@ -85,6 +85,18 @@ public class BedrockButton extends AbstractButton {
         return this.y;
     }
 
+    @Override
+    public void setX(int x) {
+        super.setX(x);
+        this.x = x;
+    }
+
+    @Override
+    public void setY(int y) {
+        super.setY(y);
+        this.y = y;
+    }
+
     public int getBtnColor() {
         return btnColor;
     }
@@ -105,7 +117,7 @@ public class BedrockButton extends AbstractButton {
     @Override
     //? if >=1.21.9 {
     // public void onRelease(MouseButtonEvent event) {
-    //  if (isMouseOver(event.x(), event.y())) this.onClick.run();
+    //  if (isMouseOver(event.x(), event.y()) && isEnabled && isPressed) this.onClick.run();
     //? } else {
     public void onRelease(double mouseX, double mouseY) {
         if (isMouseOver(mouseX, mouseY) && isEnabled && isPressed) this.onClick.run();
@@ -198,14 +210,16 @@ public class BedrockButton extends AbstractButton {
         if (!this.isEnabled() || !this.visible) return false;
         if (event.button() == 0 && isPressed) {
             onRelease(event);
+            return true;
         }
-        return super.mouseReleased(event);
+        return false;
     }*/
     //? } else {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (!this.isEnabled() || !this.visible) return false;
         if (button == 0 && isPressed) {
             onRelease(mouseX, mouseY);
+            return true;
         }
         return false;
     }

@@ -15,45 +15,59 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BedrockIconOptionButton extends BedrockButton {
-    private final ResourceLocation ICON;
-    private boolean itemIcon = false;
+
+    public static class Option {
+        public String id;
+        public String nameKey;
+        public ResourceLocation icon;
+        public int color1;
+        public int color2;
+        
+        public Option(String id, String nameKey, ResourceLocation icon, int color1, int color2) {
+            this.id = id;
+            this.nameKey = nameKey;
+            this.icon = icon;
+            this.color1 = color1;
+            this.color2 = color2;
+        }
+    }
+
     private int xO = 0;
     private int yO = 0;
 
-    private final String[] options;
-    private final String[] name;
+    private final List<Option> options = new ArrayList<>();
     private int selectedIndex = 0;
 
-    private static final ResourceLocation KEY_PRESS = Main.id("textures/gui/sprites/key_press.png");
-    private static final ResourceLocation KEY_HOLD = Main.id("textures/gui/sprites/key_hold.png");
     private static final ResourceLocation TOOLTIP = Main.id("textures/gui/btns/tooltip.png");
 
     public BedrockIconOptionButton(int x, int y, int width, int height, Runnable onRelease) {
         super("", x, y, width, height, true, onRelease);
         this.xO = (width - 16) / 2;
         this.yO = (height - 16) / 2;
-        this.options = new String[]{"press", "hold"};
-        this.name = new String[]{"nitsha.binds.advances.actions.option.press", "nitsha.binds.advances.actions.option.hold"};
-        this.ICON = null;
-        this.itemIcon = false;
+    }
+
+    public BedrockIconOptionButton addOption(String id, String nameKey, ResourceLocation icon, int color1, int color2) {
+        this.options.add(new Option(id, nameKey, icon, color1, color2));
+        if (options.size() == 1) setupColor();
+        return this;
     }
 
     private void setupColor() {
-        boolean isHold = selectedIndex == 1;
-        this.setColors(
-            isHold ? 0xFF9cc708 : 0xFF07938d,
-            isHold ? 0xFFafda19 : 0xFF0fb2ab,
-            0xFFFFFFFF, 0xFFFFFFFF
-        );
+        if (options.isEmpty()) return;
+        Option opt = options.get(selectedIndex);
+        this.setColors(opt.color1, opt.color2, 0xFFFFFFFF, 0xFFFFFFFF);
     }
 
     public String getSelected() {
-        return (options.length == 0) ? "" : options[selectedIndex];
+        return options.isEmpty() ? "" : options.get(selectedIndex).id;
     }
 
     public String getSelectedName() {
-        return (name.length == 0) ? "" : name[selectedIndex];
+        return options.isEmpty() ? "" : options.get(selectedIndex).nameKey;
     }
 
     public int getSelectedIndex() {
@@ -61,14 +75,15 @@ public class BedrockIconOptionButton extends BedrockButton {
     }
 
     public void setSelectedIndex(int index) {
-        if (index >= 0 && index < options.length) {
+        if (index >= 0 && index < options.size()) {
             this.selectedIndex = index;
+            setupColor();
         }
     }
 
     public void setSelected(String value) {
-        for (int i = 0; i < options.length; i++) {
-            if (options[i].equals(value)) {
+        for (int i = 0; i < options.size(); i++) {
+            if (options.get(i).id.equals(value)) {
                 selectedIndex = i;
                 setupColor();
                 return;
@@ -80,8 +95,8 @@ public class BedrockIconOptionButton extends BedrockButton {
     /*@Override
     public void onRelease(MouseButtonEvent event) {
         if (isMouseOver(event.x(), event.y()) && isPressed()) {
-            if (options.length == 0) return;
-            selectedIndex = (selectedIndex + 1) % options.length;
+            if (options.isEmpty()) return;
+            selectedIndex = (selectedIndex + 1) % options.size();
             setupColor();
         }
         super.onRelease(event);
@@ -90,8 +105,8 @@ public class BedrockIconOptionButton extends BedrockButton {
     @Override
     public void onRelease(double mouseX, double mouseY) {
         if (isMouseOver(mouseX, mouseY) && isPressed()) {
-            if (options.length == 0) return;
-            selectedIndex = (selectedIndex + 1) % options.length;
+            if (options.isEmpty()) return;
+            selectedIndex = (selectedIndex + 1) % options.size();
             setupColor();
         }
         super.onRelease(mouseX, mouseY);
@@ -101,12 +116,12 @@ public class BedrockIconOptionButton extends BedrockButton {
     @Override
     public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         super.renderWidget(ctx, mouseX, mouseY, delta);
+        if (options.isEmpty()) return;
 
-        boolean isHold = selectedIndex == 1;
-        ResourceLocation icon = isHold ? KEY_HOLD : KEY_PRESS;
-        GUIUtils.adaptiveDrawTexture(ctx, icon, this.getX() + xO, this.getY() + yO + Math.round(this.getOffsetY()), 0, 0, 16, 14, 16, 14);
+        Option opt = options.get(selectedIndex);
+        GUIUtils.adaptiveDrawTexture(ctx, opt.icon, this.getX() + xO, this.getY() + yO + Math.round(this.getOffsetY()), 0, 0, 16, 14, 16, 14);
         if (isMouseOver(mouseX, mouseY)) {
-            Component tooltip = TextUtils.translatable(name[selectedIndex]);
+            Component tooltip = TextUtils.translatable(opt.nameKey);
             int tooltipWidth = Minecraft.getInstance().font.width(tooltip);
             int tooltipHeight = Minecraft.getInstance().font.lineHeight + 4;
 

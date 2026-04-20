@@ -1,5 +1,6 @@
-package com.nitsha.binds.action;
+package com.nitsha.binds.utils;
 
+import com.nitsha.binds.configs.dto.actions.AllActionsData;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.MutableComponent;
@@ -10,6 +11,30 @@ import java.util.List;
 import java.util.Map;
 
 public class FormattedTextUtils {
+
+    public static MutableComponent buildComponent(AllActionsData.TextFormatData data) {
+        if (data == null || data.text == null || data.text.isEmpty()) return TextUtils.empty();
+        MutableComponent message = TextUtils.empty();
+        if (data.marks != null && !data.marks.isEmpty()) {
+            Style currentStyle = Style.EMPTY.withColor(net.minecraft.network.chat.TextColor.fromRgb(0xFFFFFF));
+            int lastPos = 0;
+            for (Map<String, Integer> markData : data.marks) {
+                int pos = markData.getOrDefault("pos", 0);
+                int styleCode = markData.getOrDefault("style", 0);
+                if (pos > lastPos) {
+                    message = message.append(TextUtils.literal(data.text.substring(lastPos, pos)).setStyle(currentStyle));
+                }
+                currentStyle = applyStyleCode(styleCode, currentStyle);
+                lastPos = pos;
+            }
+            if (lastPos < data.text.length()) {
+                message = message.append(TextUtils.literal(data.text.substring(lastPos)).setStyle(currentStyle));
+            }
+        } else {
+            message = TextUtils.literal(data.text);
+        }
+        return message;
+    }
 
     public static MutableComponent buildFormattedComponent(Map<String, Object> formattedText) {
         String text = (String) formattedText.get("text");

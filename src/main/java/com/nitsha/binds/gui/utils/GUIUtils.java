@@ -43,6 +43,18 @@ import org.lwjgl.opengl.GL11;
 
 public class GUIUtils {
     private static final Minecraft MC = Minecraft.getInstance();
+    private static final char[] SUPER = {'⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'};
+
+    public static String toSuper(String s) {
+        StringBuilder r = new StringBuilder();
+        for (char c : s.toCharArray())
+            r.append(
+                    c >= '0' && c <= '9' ? SUPER[c - '0'] :
+                            c == '.' ? '•' :
+                                    c
+            );
+        return r.toString();
+    }
 
     // Cut a string
     public static String truncateString(String str, int maxLength) {

@@ -2,7 +2,10 @@ package com.nitsha.binds.gui.screen;
 
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.bind.Bind;
+import com.nitsha.binds.configs.dto.preset.BindData;
+import com.nitsha.binds.configs.dto.preset.PresetData;
+import com.nitsha.binds.configs.dto.preset.PageData;
+import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.configs.*;
 import com.nitsha.binds.gui.modals.SelectKeyEvent;
 import com.nitsha.binds.gui.panels.*;
@@ -24,7 +27,9 @@ import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import com.nitsha.binds.configs.dto.preset.ActionData;
 
 //? if >=26.1 {
 // import net.minecraft.world.item.ItemStackTemplate;
@@ -50,11 +55,13 @@ public class BindsEditor extends Screen {
     private int centerX;
     private int centerY;
 
-    private static int currentPage = 0;
-    private static int activeBind = 0;
+    public static String activePresetId;
+    public static PresetData activePreset;
+    public static int currentPage = 0;
+    public static int activeBind = 0;
     public static String editIconBtnString = "minecraft:structure_void";
 
-    public Bind copied = new Bind("", "minecraft:structure_void", 0, "press", 500, new ArrayList<>());
+    public BindData copied = new BindData();
 
     private BasicOptionsWindow window_BasicOptions;
     private BindsList window_BindsList;
@@ -62,15 +69,11 @@ public class BindsEditor extends Screen {
     private PresetSelector window_PresetSelector;
     private SelectKeyEvent window_SelectKeyEvent;
 
-    public static int currentPreset = BindsGUI.getCurrentPreset();
-
     private final Screen parent;
 
     public BindsEditor(Screen parent) {
         super(TextUtils.empty());
         this.parent = parent;
-        currentPage = 0;
-        activeBind = 0;
     }
 
     protected void init() {
@@ -82,6 +85,23 @@ public class BindsEditor extends Screen {
         //? }
         this.centerX = (this.width / 2) - (TEXTURE_WIDTH / 2);
         this.centerY = (this.height - TEXTURE_HEIGHT) / 2;
+
+        List<PresetData> allPresets = Storage.getSortedPresets();
+        if (allPresets != null && !allPresets.isEmpty()) {
+            String savedId = Storage.options.lastPresetId;
+            if (Storage.options.openLastPreset && savedId != null && !savedId.isEmpty() && Storage.PRESET_REGISTRY.containsKey(savedId)) {
+                activePreset = Storage.PRESET_REGISTRY.get(savedId);
+            } else {
+                activePreset = allPresets.get(0);
+            }
+            activePresetId = activePreset.id;
+
+            if (Storage.options.openLastPage) {
+                currentPage = Math.min(Storage.options.lastPageIndex, activePreset.pages.size() - 1);
+            } else {
+                currentPage = 0;
+            }
+        }
 
         // Basic options (bind name, single-command, icon)
         window_BasicOptions = new BasicOptionsWindow(this, centerX - 100, centerY, TEXTURE_WIDTH, TEXTURE_HEIGHT,
@@ -110,7 +130,7 @@ public class BindsEditor extends Screen {
         //? }
 
         // Advanced options (icon, actions, mod options)
-        window_AdvancedOptions = new AdvancedOptions(this, centerX + 61, centerY, 180, TEXTURE_HEIGHT,
+        window_AdvancedOptions = new AdvancedOptions(this, centerX + 61, centerY - 16, 180, TEXTURE_HEIGHT + 16,
                 BACKGROUND, BACKGROUND_FLAT, 140);
         //? if >=1.17 {
         this.addRenderableWidget(window_AdvancedOptions);
@@ -152,7 +172,7 @@ public class BindsEditor extends Screen {
     }
 
     public static String getPresetName() {
-        return BindsStorage.presets.get(currentPreset).name;
+        return activePreset != null ? activePreset.name : "";
     }
 
     public static int getCurrentPage() {
@@ -180,84 +200,151 @@ public class BindsEditor extends Screen {
     }
 
     public void setNewPage(int dir) {
-        int totalPages = BindsStorage.presets.get(currentPreset).pages.size();
+        if (activePreset == null) return;
+        int totalPages = activePreset.pages.size();
+        if (totalPages == 0) return;
         if (dir == -1 && currentPage == 0)
             currentPage = totalPages;
         currentPage += dir;
-        if (currentPage == totalPages)
+        if (currentPage >= totalPages)
             currentPage = 0;
+            
+        Storage.options.lastPresetId = activePresetId;
+        Storage.options.lastPageIndex = currentPage;
+        Storage.saveModOptions();
         window_BindsList.generateButtons(7, 31);
     }
 
     public void selectPage(int i) {
         currentPage = i;
+        Storage.options.lastPageIndex = currentPage;
+        Storage.saveModOptions();
     }
 
     public void setNewPreset(int dir) {
-        int totalPresets = BindsStorage.presets.size();
-        if (dir == -1 && currentPreset == 0)
-            currentPreset = totalPresets;
-        currentPreset += dir;
-        if (currentPreset == totalPresets)
-            currentPreset = 0;
-        selectPreset(currentPreset);
+        List<PresetData> sortedPresets = Storage.getSortedPresets();
+        if (sortedPresets.isEmpty()) return;
+        
+        int currentIndex = sortedPresets.indexOf(activePreset);
+        if (currentIndex == -1) currentIndex = 0;
+        
+        int totalPresets = sortedPresets.size();
+        if (dir == -1 && currentIndex == 0)
+            currentIndex = totalPresets;
+        currentIndex += dir;
+        if (currentIndex >= totalPresets)
+            currentIndex = 0;
+            
+        selectPreset(currentIndex);
     }
 
     // Functions
     public void selectPreset(int i) {
-        if (i >= 0 && i < BindsStorage.presets.size()) {
-            currentPreset = i;
+        List<PresetData> sortedPresets = Storage.getSortedPresets();
+        if (i >= 0 && i < sortedPresets.size()) {
+            activePreset = sortedPresets.get(i);
+            activePresetId = activePreset.id;
             currentPage = 0;
             setActiveBind(0);
+            
+            Storage.options.lastPresetId = activePresetId;
+            Storage.options.lastPageIndex = currentPage;
+            Storage.saveModOptions();
+            
             window_BindsList.generateButtons(7, 31);
             selectBind();
         }
     }
 
-    public static Bind getCBind() {
-        return BindsStorage.getBind(getCurrentPreset(), getActiveBind());
+    public static BindData getCBind() {
+        if (activePreset != null && currentPage < activePreset.pages.size()) {
+            PageData page = activePreset.pages.get(currentPage);
+            if (page.binds != null) {
+                for (BindData b : page.binds) {
+                    if (b.index == activeBind) return b;
+                }
+            }
+        }
+        BindData dummy = new BindData();
+        dummy.index = activeBind;
+        return dummy;
     }
 
-    public static int getCurrentPreset() {
-        return currentPreset;
+    public static String getCurrentPresetId() {
+        return activePresetId;
     }
 
     public void saveBind() {
-        if (!getCBind().actions.isEmpty()) {
+        List<ActionData> actions = window_AdvancedOptions.getAllActions();
+        boolean hasActions = actions != null && !actions.isEmpty();
+        String currentName = window_BasicOptions.getBindName().getText();
+        boolean hasName = currentName != null && !currentName.trim().isEmpty();
+        int keyCode = window_AdvancedOptions.keybind.getKeyCode();
+        boolean hasKey = keyCode != 0 && keyCode != -1;
 
+        String localizedUntitled = TextUtils.translatable("nitsha.binds.untitled").getString();
+        if (hasName && (currentName.equals(localizedUntitled) || currentName.equals("Untitled") || currentName.equals("Без названия")) && !hasActions && !hasKey) {
+            hasName = false;
+        }
+
+        if (hasActions || hasName || hasKey) {
             //? if >=26.1 {
             // Map.Entry<String, ItemStackTemplate> randomItem = ItemsMapper.getRandomItem();
             //? } else {
             Map.Entry<String, ItemStack> randomItem = ItemsMapper.getRandomItem();
             //? }
             String newIcon = (randomItem != null ) ? randomItem.getKey() : "minecraft:grass_block";
-            String bindName = window_BasicOptions.getBindName().getText().isEmpty()
+            String bindName = !hasName
                     ? TextUtils.translatable("nitsha.binds.untitled").getString()
-                    : window_BasicOptions.getBindName().getText();
+                    : currentName;
             if (editIconBtnString.equals("minecraft:structure_void"))
                 editIconBtnString =  newIcon;
-            int keyCode = window_AdvancedOptions.keybind.getKeyCode();
 
-            BindsStorage.setBind(
-                    getCurrentPreset(),
-                    getActiveBind(),
-                    new Bind(bindName, editIconBtnString, keyCode,
-                            window_AdvancedOptions.getTriggerMode(),
-                            window_AdvancedOptions.getHoldMs(),
-                            window_AdvancedOptions.getAllActions()));
+            BindData newBind = new BindData();
+            newBind.index = getActiveBind();
+            newBind.name = bindName;
+            newBind.icon = editIconBtnString;
+            newBind.keyCode = keyCode;
+            newBind.keyMode = window_AdvancedOptions.getTriggerMode();
+            newBind.holdMs = window_AdvancedOptions.getHoldMs();
+            newBind.actions = new ArrayList<>(actions);
 
-            BindsStorage.setBindKeyBind(getCurrentPreset(), getActiveBind(), keyCode);
+            if (activePreset != null && currentPage < activePreset.pages.size()) {
+                 PageData page = activePreset.pages.get(currentPage);
+                 
+                 boolean found = false;
+                 if (page.binds == null) page.binds = new ArrayList<>();
+                 for (int i = 0; i < page.binds.size(); i++) {
+                     if (page.binds.get(i).index == activeBind) {
+                         page.binds.set(i, newBind);
+                         found = true;
+                         break;
+                     }
+                 }
+                 if (!found) {
+                     page.binds.add(newBind);
+                 }
+                 Storage.savePreset(activePreset, activePresetId);
+            }
+
             selectBind();
-            window_BindsList.updateSelected(ItemsMapper.getItemStack(
-                    getCBind().icon));
+            window_BindsList.updateSelected(ItemsMapper.getItemStack(getCBind().icon));
         } else {
             deleteBind();
         }
     }
 
     public void deleteBind() {
-        BindsStorage.setBind(getCurrentPreset(), getActiveBind(), new Bind(
-                "", "minecraft:structure_void", 0, "press", 500, new ArrayList<>()));
+        if (activePreset != null && currentPage < activePreset.pages.size()) {
+             PageData page = activePreset.pages.get(currentPage);
+             boolean removed = false;
+             if (page.binds != null) {
+                 removed = page.binds.removeIf(b -> b.index == activeBind);
+             }
+             if (removed) {
+                 Storage.savePreset(activePreset, activePresetId);
+             }
+        }
         selectBind();
         //? if >=26.1 {
         // window_BindsList.updateSelected(ItemStackTemplate.fromNonEmptyStack(new ItemStack(Blocks.STRUCTURE_VOID)));
@@ -267,36 +354,75 @@ public class BindsEditor extends Screen {
     }
 
     public void copyBind() {
-        Bind currentBind = getCBind();
-        if (!currentBind.name.isEmpty()) {
-            copied = currentBind;
+        BindData currentBind = getCBind();
+        if (currentBind != null && currentBind.name != null && !currentBind.name.isEmpty()) {
+            copied = new BindData();
+            copied.index = currentBind.index;
             copied.name = currentBind.name;
             copied.icon = currentBind.icon;
             copied.keyCode = currentBind.keyCode;
             copied.keyMode = currentBind.keyMode;
             copied.holdMs = currentBind.holdMs;
-            copied.actions = currentBind.actions;
+            if (currentBind.actions != null) {
+                copied.actions = new ArrayList<>(currentBind.actions);
+            } else {
+                copied.actions = new ArrayList<>();
+            }
             window_BasicOptions.getPasteBtn().setEnabled(true);
         }
     }
 
     public void pasteBind() {
-        BindsStorage.setBind(currentPreset, activeBind, copied);
+        if (activePreset != null && currentPage < activePreset.pages.size()) {
+             PageData page = activePreset.pages.get(currentPage);
+             if (page.binds == null) page.binds = new ArrayList<>();
+             
+             BindData newPastedBind = new BindData();
+             newPastedBind.index = activeBind;
+             newPastedBind.name = copied.name;
+             newPastedBind.icon = copied.icon;
+             newPastedBind.keyCode = copied.keyCode;
+             newPastedBind.keyMode = copied.keyMode;
+             newPastedBind.holdMs = copied.holdMs;
+             newPastedBind.actions = new ArrayList<>(copied.actions);
+             
+             boolean found = false;
+             for (int i = 0; i < page.binds.size(); i++) {
+                 if (page.binds.get(i).index == activeBind) {
+                     page.binds.set(i, newPastedBind);
+                     found = true;
+                     break;
+                 }
+             }
+             if (!found) {
+                 page.binds.add(newPastedBind);
+             }
+             Storage.savePreset(activePreset, activePresetId);
+        }
+
         selectBind();
         window_BindsList.updateSelected(ItemsMapper.getItemStack(getCBind().icon));
     }
 
     public void selectBind() {
-        Bind currentBind = getCBind();
-        window_BasicOptions.getBindName().setText(currentBind.name);
+        BindData currentBind = getCBind();
+        
+        window_BasicOptions.getBindName().setText(currentBind.name == null ? "" : currentBind.name);
         window_BasicOptions.getEditIcon().setIcon(ItemsMapper.getItemStack(currentBind.icon));
         editIconBtnString = currentBind.icon;
         window_AdvancedOptions.keybind.setKeyCode(currentBind.keyCode);
-        window_AdvancedOptions.generateActionList(currentBind.actions);
+        
+        if (currentBind.actions != null) {
+            window_AdvancedOptions.generateActionList(currentBind.actions);
+        } else {
+            window_AdvancedOptions.generateActionList(new ArrayList<>());
+        }
+        
         window_AdvancedOptions.getSecondTab().updateButtons(currentBind.icon);
         window_AdvancedOptions.loadTriggerMode(currentBind.keyMode, currentBind.holdMs);
         window_BasicOptions.confirm(false);
-        if(currentBind.name.isEmpty()) {
+        
+        if(currentBind.name == null || currentBind.name.isEmpty()) {
             window_BasicOptions.getDeleteBtn().setEnabled(false);
         } else {
             window_BasicOptions.getDeleteBtn().setEnabled(true);

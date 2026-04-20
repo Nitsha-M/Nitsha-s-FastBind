@@ -12,25 +12,14 @@ import net.minecraft.resources.ResourceLocation;
 /*import net.minecraft.client.input.InputWithModifiers;*/
 //? }
 
-public class KeyEventSelector extends BedrockButton {
+public abstract class KeySelector extends BedrockButton {
 
     private static final ResourceLocation SELECT = Main.id("textures/gui/btns/select_icon.png");
     private String selectedItem = "";
 
-    public KeyEventSelector(int x, int y, int width, int height, Runnable onRelease) {
+    public KeySelector(int x, int y, int width, int height, Runnable onRelease) {
         super("", x, y, width, height, true, onRelease);
         updateName();
-    }
-
-    private void updateName() {
-        if (selectedItem.isEmpty()) {
-            setName(TextUtils.translatable("nitsha.binds.advances.noSelectedKeyItem").getString());
-        } else {
-            Component name = TextUtils.translatable(KeyMappingAccessor.binds$getAll().get(selectedItem).getName());
-            int maxWidth = this.width - 8;
-            int avgCharWidth = 7;
-            setName(GUIUtils.truncateString(name.getString(), maxWidth / avgCharWidth));
-        }
     }
 
     public void setWidth(int width) {
@@ -54,4 +43,10 @@ public class KeyEventSelector extends BedrockButton {
         boolean isHovered = isMouseOver(mouseX, mouseY);
         GUIUtils.adaptiveDrawTexture(ctx, SELECT, this.getX() + 4, this.getY() + 7 + Math.round(this.getOffsetY()), 0, 0, 6, 5, 6, 5, (isHovered || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor());
     }
+
+    protected void updateName() {
+        if (selectedItem.isEmpty()) {
+            setName(TextUtils.translatable("nitsha.binds.advances.noSelectedKeyItem").getString());
+        }
+    };
 }

@@ -82,11 +82,15 @@ public class SmallTextButton extends AbstractButton {
         this(name, x, y, 5, color, color, 0xFFFFFFFF, 0xFFFFFFFF, width, align, icon, onClick);
     }
 
+    @Override
     public void setX(int newX) {
+        super.setX(newX);
         this.x = newX;
     }
 
+    @Override
     public void setY(int newY) {
+        super.setY(newY);
         this.y = newY;
     }
 

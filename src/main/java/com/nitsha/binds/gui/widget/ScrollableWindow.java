@@ -300,8 +300,6 @@ public class ScrollableWindow extends AbstractContainerEventHandler
                 }
             }
         }
-            System.out.println(clicked);
-
         return clicked;
     }*/
     //? } else {
@@ -371,6 +369,17 @@ public class ScrollableWindow extends AbstractContainerEventHandler
         double mouseY = event.y();
         int button = event.buttonInfo().button();
 
+        int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
+        int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
+
+        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
+            event.x() - aX,
+            event.y() - aY,
+            event.buttonInfo()
+        );
+
+        boolean clicked = false;
+
         if (isDraggingScrollbar && button == 0) {
             int trackHeight = height - 2;
             int scrollArea = trackHeight - barSize;
@@ -382,17 +391,24 @@ public class ScrollableWindow extends AbstractContainerEventHandler
 
             float newProgress = maxScroll > 0 ? scrollOffset / (float) maxScroll : 0f;
             scrollBarOffset = (int) (newProgress * scrollArea);
+
+            clicked = true;
         }
 
         for (GuiEventListener child : new ArrayList<>(children)) {
-            if (child.mouseDragged(event, deltaX, deltaY)) {
-                return true;
+            if (child.mouseDragged(adjustedEvent, deltaX, deltaY)) {
+                clicked = true;
             }
         }
-        return super.mouseDragged(event, deltaX, deltaY);
+        return clicked;
     }*/
     //? } else {
         public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+            int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
+            int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
+
+            boolean clicked = false;
+
             if (isDraggingScrollbar && button == 0) {
                 int trackHeight = height - 2;
                 int scrollArea = trackHeight - barSize;
@@ -404,14 +420,16 @@ public class ScrollableWindow extends AbstractContainerEventHandler
 
                 float newProgress = maxScroll > 0 ? scrollOffset / (float) maxScroll : 0f;
                 scrollBarOffset = (int) (newProgress * scrollArea);
+
+                clicked = true;
             }
 
             for (GuiEventListener child : new ArrayList<>(children)) {
-                if (child.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
-                    return true;
+                if (child.mouseDragged(mouseX - aX, mouseY - aY, button, deltaX, deltaY)) {
+                    clicked = true;
                 }
             }
-            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            return clicked;
         }
     //? }
 

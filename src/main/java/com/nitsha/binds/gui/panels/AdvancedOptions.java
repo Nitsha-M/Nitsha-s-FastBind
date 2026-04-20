@@ -2,20 +2,22 @@ package com.nitsha.binds.gui.panels;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
-import com.nitsha.binds.configs.BindsStorage;
 import com.nitsha.binds.configs.KeyBinds;
+import com.nitsha.binds.configs.Storage;
+import com.nitsha.binds.configs.dto.option.HiddenField;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import com.nitsha.binds.configs.dto.preset.ActionData;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -77,7 +79,9 @@ public class AdvancedOptions extends AnimatedWindow {
         }, 0xFFFFFFFF, 0xFFEF4747, 0xFF262626, 0xFFFFFFFF);
         this.resetKeybind.setNormalTextures(NORMAL, PRESSED_NORMAL);
 
-        this.triggerModeBtn = new BedrockIconOptionButton(getWidth() - 22, getHeight() - 26, 18, 20, this::rebuildTriggerWidgets);
+        this.triggerModeBtn = new BedrockIconOptionButton(getWidth() - 22, getHeight() - 26, 18, 20, this::rebuildTriggerWidgets)
+            .addOption("press", "nitsha.binds.advances.actions.option.press", Main.id("textures/gui/sprites/key_press.png"), 0xFF07938d, 0xFF0fb2ab)
+            .addOption("hold", "nitsha.binds.advances.actions.option.hold", Main.id("textures/gui/sprites/key_hold.png"), 0xFF9cc708, 0xFFafda19);
 
         this.holdMsField = new TextField(
                 net.minecraft.client.Minecraft.getInstance().font,
@@ -120,7 +124,7 @@ public class AdvancedOptions extends AnimatedWindow {
                     getHeight() - 44, "top", "left", 0xFF212121, false);
             GUIUtils.drawResizableBox(ctx, TAB2_BG, 4, 24, this.getWidth() - 8, this.getHeight() - 52, 1, 3);
 
-            if (BindsEditor.getCBind().actions.isEmpty()) {
+            if (BindsEditor.getCBind().actions == null || BindsEditor.getCBind().actions.isEmpty()) {
                 GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.noActions"),
                         this.getWidth() - 8, 4, (this.getHeight() - 52) / 2 + 23, "center", "center", 0xFFAEAEAE, false);
             }
@@ -160,54 +164,49 @@ public class AdvancedOptions extends AnimatedWindow {
 
     private void fillThirdTab() {
         thirdTab.clearChildren();
-        final boolean[] options = {
-                BindsStorage.getBooleanConfig("holdToOpen", true),
-                BindsStorage.getBooleanConfig("openLastPage", true),
-                BindsStorage.getBooleanConfig("openLastPreset", true),
-                BindsStorage.getBooleanConfig("keepMovement", false),
-                BindsStorage.getBooleanConfig("closeOnAction", false),
-                BindsStorage.getBooleanConfig("bindMsg", true)
-        };
+        int yOffset = 0;
 
-        this.thirdTab.addElement(new ToggleButton(
-                TextUtils.translatable("nitsha.binds.advances.options.hold",
-                        GUIUtils.truncateString(TextUtils
-                                .translatable(KeyBinds.BINDS.getTranslatedKeyMessage().getString()).getString(), 6)),
-                0, 0, getWidth() - 4, 20, false, options[0], () -> {
-            BindsStorage.setConfig("holdToOpen", !options[0]);
-            options[0] = BindsStorage.getBooleanConfig("holdToOpen", true);
-        }));
-        this.thirdTab.addElement(new ToggleButton(
-                TextUtils.translatable("nitsha.binds.advances.options.openLastPage"),
-                0, 20, getWidth() - 4, 20, false, options[1], () -> {
-            BindsStorage.setConfig("openLastPage", !options[1]);
-            options[1] = BindsStorage.getBooleanConfig("openLastPage", true);
-        }));
-        this.thirdTab.addElement(new ToggleButton(
-                TextUtils.translatable("nitsha.binds.advances.options.openLastPreset"),
-                0, 40, getWidth() - 4, 20, false, options[2], () -> {
-            BindsStorage.setConfig("openLastPreset", !options[2]);
-            options[2] = BindsStorage.getBooleanConfig("openLastPreset", true);
-        }));
-        this.thirdTab.addElement(new ToggleButton(
-                TextUtils.translatable("nitsha.binds.advances.options.keepMovement"),
-                0, 60, getWidth() - 4, 20, false, options[3], () -> {
-            BindsStorage.setConfig("keepMovement", !options[3]);
-            options[3] = BindsStorage.getBooleanConfig("keepMovement", false);
-        }));
-        this.thirdTab.addElement(new ToggleButton(
-                TextUtils.translatable("nitsha.binds.advances.options.closeOnAction"),
-                0, 80, getWidth() - 4, 20, false, options[4], () -> {
-            BindsStorage.setConfig("closeOnAction", !options[4]);
-            options[4] = BindsStorage.getBooleanConfig("closeOnAction", false);
-        }));
-        this.thirdTab.addElement(new ToggleButton(
-                TextUtils.translatable("nitsha.binds.advances.options.bindMsg"),
-                0, 100, getWidth() - 4, 20, false, options[5], () -> {
-            BindsStorage.setConfig("bindMsg", !options[5]);
-            options[5] = BindsStorage.getBooleanConfig("bindMsg", true);
-        }));
-        this.thirdTab.setScrollableArea(120);
+        Field[] fields = Storage.options.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(HiddenField.class)) {
+                continue;
+            }
+            if (field.getType() == boolean.class) {
+                try {
+                    field.setAccessible(true);
+
+                    String langKey = "nitsha.binds.advances.options." + field.getName();
+
+                    boolean currentValue = field.getBoolean(Storage.options);
+
+                    Component text;
+                    if (field.getName().equals("holdToOpen")) {
+                        text = TextUtils.translatable("nitsha.binds.advances.options.holdToOpen",
+                                GUIUtils.truncateString(TextUtils.translatable(KeyBinds.BINDS.getTranslatedKeyMessage().getString()).getString(), 6));
+                    } else {
+                        text = TextUtils.translatable(langKey);
+                    }
+
+                    this.thirdTab.addElement(new ToggleButton(
+                            text, 0, yOffset, getWidth() - 4, 20, false, currentValue,
+                            () -> {
+                                try {
+                                    boolean val = field.getBoolean(Storage.options);
+                                    field.setBoolean(Storage.options, !val);
+
+                                    Storage.saveModOptions();
+                                } catch (IllegalAccessException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                    ));
+                    yOffset += 20;
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        this.thirdTab.setScrollableArea(yOffset + 20);
         addElement(this.thirdTab);
     }
 
@@ -227,59 +226,81 @@ public class AdvancedOptions extends AnimatedWindow {
     private int actionIndex = 0;
     private int actionY = 0;
 
-    public void generateActionList(List<Map<String, Object>> actions) {
+    public void generateActionList(List<ActionData> actions) {
         actionIndex = 0;
         actionY = 0;
         this.firstTab.clearChildren();
 
-        for (Map<String, Object> action : actions) {
-            String typeId = (String) action.get("type");
-            Object value = action.get("value");
+        if (actions != null) {
+            for (ActionData actionData : actions) {
+                if (actionData == null) continue;
+                String typeId = actionData.type;
+                if (typeId == null) continue;
 
-            int h = ActionRegistry.heightById(typeId);
+                int h = ActionRegistry.heightById(typeId);
 
-            ActionItem item = new ActionItem(this, typeId, 4, actionY, getWidth() - 18, h, value, actionIndex);
+                ActionItem item = new ActionItem(this, typeId, 4, actionY, getWidth() - 18, h, actionData, actionIndex);
 
-            this.firstTab.addElement(item);
-            this.firstTab.addScrollableArea(h);
-            actionIndex++;
-            actionY += h;
+                this.firstTab.addElement(item);
+                this.firstTab.addScrollableArea(h);
+                actionIndex++;
+                actionY += h;
+            }
+        }
+        this.firstTab.setScrollableArea(actionY);
+        relayoutActions();
+    }
+
+    public void relayoutActions() {
+        actionY = 0;
+        for (GuiEventListener child : this.firstTab.children()) {
+            if (child instanceof ActionItem) {
+                ActionItem item = (ActionItem) child;
+                item.setY(actionY);
+                item.updateLayout();
+                // Pass layout listener so typing will trigger recalculation without losing focus
+                item.getActionType().setHeightChangeListener(this::relayoutActions);
+                actionY += item.getHeight();
+            }
         }
         this.firstTab.setScrollableArea(actionY);
     }
 
     public void addAction(String typeId, String value) {
-        if (!BindsEditor.getCBind().actions.isEmpty())
-            screen.saveBind();
-
-        Map<String, Object> action = new HashMap<>();
-        action.put("type", typeId);
-        action.put("value", typeId.equals("delay") ? Integer.parseInt(value) : value);
-
-        BindsStorage.addBindAction(BindsEditor.getCurrentPreset(), BindsEditor.getActiveBind(), actionIndex, action);
-        generateActionList(BindsEditor.getCBind().actions);
+        screen.saveBind();
+        ActionData actionData = ActionRegistry.createById(typeId).createDefaultData();
+        List<ActionData> currentActions = new ArrayList<>(getAllActions());
+        currentActions.add(actionData);
+        generateActionList(currentActions);
         screen.saveBind();
         this.firstTab.scrollToBottom();
     }
 
     public void removeAction(int index) {
-        if (!BindsEditor.getCBind().actions.isEmpty())
-            screen.saveBind();
-        BindsStorage.removeBindAction(BindsEditor.getCurrentPreset(), BindsEditor.getActiveBind(), index);
-        generateActionList(BindsEditor.getCBind().actions);
+        screen.saveBind();
+        List<ActionData> currentActions = new ArrayList<>(getAllActions());
+        if (index >= 0 && index < currentActions.size()) {
+            currentActions.remove(index);
+        }
+        generateActionList(currentActions);
         screen.saveBind();
     }
 
     public void moveAction(int index, int dir) {
-        if (!BindsEditor.getCBind().actions.isEmpty())
-            screen.saveBind();
-        BindsStorage.moveBindAction(BindsEditor.getCurrentPreset(), BindsEditor.getActiveBind(), index, dir);
-        generateActionList(BindsEditor.getCBind().actions);
+        screen.saveBind();
+        List<ActionData> currentActions = new ArrayList<>(getAllActions());
+        int target = index + dir;
+        if (target >= 0 && target < currentActions.size() && index >= 0 && index < currentActions.size()) {
+            ActionData temp = currentActions.get(target);
+            currentActions.set(target, currentActions.get(index));
+            currentActions.set(index, temp);
+        }
+        generateActionList(currentActions);
         screen.saveBind();
     }
 
-    public List<Map<String, Object>> getAllActions() {
-        List<Map<String, Object>> actionsList = new ArrayList<>();
+    public List<ActionData> getAllActions() {
+        List<ActionData> actionsList = new ArrayList<>();
         for (GuiEventListener child : this.firstTab.children()) {
             if (child instanceof ActionItem) {
                 ActionItem actionItem = (ActionItem) child;

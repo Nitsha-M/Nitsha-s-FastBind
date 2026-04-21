@@ -3,6 +3,7 @@ package com.nitsha.binds.configs;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nitsha.binds.FBLogger;
+import com.nitsha.binds.bind.BindHandler;
 import com.nitsha.binds.configs.adapters.ActionAdapter;
 import com.nitsha.binds.configs.dto.option.ModOptionsData;
 import com.nitsha.binds.configs.dto.preset.ActionData;
@@ -88,6 +89,7 @@ public class Storage {
             createNewPreset();
             FBLogger.info("Created default preset");
         }
+        BindHandler.invalidateCache();
     }
 
     public static List<PresetData> getSortedPresets() {
@@ -104,6 +106,7 @@ public class Storage {
 
         Storage.PRESET_REGISTRY.put(newId, preset);
         Storage.save(preset, PRESETS_DIR.resolve(newId + FILE_EXT).toFile());
+        BindHandler.invalidateCache();
     }
 
     public static void deletePreset(String fileName) {
@@ -114,6 +117,7 @@ public class Storage {
             file.delete();
             FBLogger.info("Preset {} deleted", fileName);
         }
+        BindHandler.invalidateCache();
     }
 
     public static void swapPresets(String fileName1, String fileName2) {
@@ -128,11 +132,13 @@ public class Storage {
 
             Storage.save(p1, PRESETS_DIR.resolve(fileName1 + FILE_EXT).toFile());
             Storage.save(p2, PRESETS_DIR.resolve(fileName2 + FILE_EXT).toFile());
+            BindHandler.invalidateCache();
         }
     }
 
     public static void savePreset(PresetData preset, String id) {
         save(preset, PRESETS_DIR.resolve(id + FILE_EXT).toFile());
+        BindHandler.invalidateCache();
     }
 
     // Mod options

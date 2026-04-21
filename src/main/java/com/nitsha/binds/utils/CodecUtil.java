@@ -8,9 +8,13 @@ import com.nitsha.binds.configs.adapters.ActionAdapter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.InputStream;
 import java.util.Base64;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 public class CodecUtil {
 
@@ -26,8 +30,11 @@ public class CodecUtil {
             String json = MINIFIED_GSON.toJson(data);
 
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
-                gzipOutputStream.write(json.getBytes("UTF-8"));
+            Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION, true);
+            try (DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(byteArrayOutputStream, deflater)) {
+                deflaterOutputStream.write(json.getBytes("UTF-8"));
+            } finally {
+                deflater.end();
             }
 
             byte[] compressedBytes = byteArrayOutputStream.toByteArray();
@@ -50,11 +57,14 @@ public class CodecUtil {
             byte[] compressedBytes = Base64.getUrlDecoder().decode(base64Text);
 
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(compressedBytes);
-            try (GZIPInputStream gzipInputStream = new GZIPInputStream(byteArrayInputStream)) {
-                byte[] uncompressedBytes = gzipInputStream.readAllBytes();
-                String json = new String(uncompressedBytes, "UTF-8");
+            Inflater inflater = new Inflater(true);
 
+            try (InflaterInputStream is = new InflaterInputStream(byteArrayInputStream, inflater)) {
+                byte[] uncompressedBytes = is.readAllBytes();
+                String json = new String(uncompressedBytes, "UTF-8");
                 return MINIFIED_GSON.fromJson(json, clazz);
+            } finally {
+                inflater.end();
             }
         } catch (Exception e) {
             FBLogger.error("Import error: invalid string format");

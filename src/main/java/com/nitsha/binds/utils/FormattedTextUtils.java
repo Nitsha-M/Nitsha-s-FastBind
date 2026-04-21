@@ -36,6 +36,37 @@ public class FormattedTextUtils {
         return message;
     }
 
+    public static MutableComponent buildComponent(AllActionsData.TextFormatData data, int maxChars) {
+        if (data == null || data.text == null || data.text.isEmpty()) return TextUtils.empty();
+
+        String workText = data.text;
+        if (workText.length() > maxChars) {
+            workText = workText.substring(0, maxChars) + "...";
+        }
+
+        MutableComponent message = TextUtils.empty();
+        if (data.marks != null && !data.marks.isEmpty()) {
+            Style currentStyle = Style.EMPTY.withColor(net.minecraft.network.chat.TextColor.fromRgb(0xFFFFFF));
+            int lastPos = 0;
+            for (Map<String, Integer> markData : data.marks) {
+                int pos = markData.getOrDefault("pos", 0);
+                if (pos > maxChars) continue;
+                int styleCode = markData.getOrDefault("style", 0);
+                if (pos > lastPos) {
+                    message = message.append(TextUtils.literal(workText.substring(lastPos, pos)).setStyle(currentStyle));
+                }
+                currentStyle = applyStyleCode(styleCode, currentStyle);
+                lastPos = pos;
+            }
+            if (lastPos < workText.length()) {
+                message = message.append(TextUtils.literal(workText.substring(lastPos)).setStyle(currentStyle));
+            }
+        } else {
+            message = TextUtils.literal(workText);
+        }
+        return message;
+    }
+
     public static MutableComponent buildFormattedComponent(Map<String, Object> formattedText) {
         String text = (String) formattedText.get("text");
         MutableComponent message = TextUtils.empty();

@@ -62,6 +62,13 @@ public class DelayAction extends ActionType<DelayActionData> {
     }
 
     @Override
+    public void setPosition(int x, int y) {
+        this.x = x;
+        this.y = y;
+        if (field != null) field.setY(y + 3);
+    }
+
+    @Override
     public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         field.renderWidget(ctx, mouseX, mouseY, delta);
         GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.delayDesс"), 0,

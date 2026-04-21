@@ -291,10 +291,8 @@ public class TextField extends AbstractButton {
             formatMarks.removeIf(mark -> mark.position == position);
         } else if (styleCode >= 0 && styleCode <= 15) {
             formatMarks.removeIf(mark -> mark.position == position && mark.styleCode >= 0 && mark.styleCode <= 15);
-            formatMarks.removeIf(mark -> mark.position == position && mark.styleCode == 99);
         } else if (styleCode >= 20 && styleCode <= 24) {
             formatMarks.removeIf(mark -> mark.position == position && mark.styleCode == styleCode);
-            formatMarks.removeIf(mark -> mark.position == position && mark.styleCode == 99);
         }
 
         formatMarks.add(new FormatMark(position, styleCode));
@@ -1118,10 +1116,16 @@ public class TextField extends AbstractButton {
             }
             return this.text.length();
         } else {
-            int relativeX = Mth.floor(mouseX) - this.getX() - 4;
-            String visibleText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex),
-                    this.width - 8);
-            return this.font.plainSubstrByWidth(visibleText, relativeX).length() + this.firstCharacterIndex;
+            int relativeX = Math.max(0, Mth.floor(mouseX) - this.getX() - 4);
+            int offset = 0;
+            int maxChars = this.text.length() - this.firstCharacterIndex;
+            for (int n = 0; n <= maxChars; n++) {
+                if (styledWidth(this.firstCharacterIndex, this.firstCharacterIndex + n) >= relativeX) {
+                    break;
+                }
+                offset = n;
+            }
+            return this.firstCharacterIndex + offset;
         }
     }
 

@@ -82,6 +82,13 @@ public class KeyPressAction extends ActionType<KeybindActionData> {
     }
 
     @Override
+    public void setPosition(int x, int y) {
+        this.x = x;
+        this.y = y;
+        if (keybind != null) keybind.setY(y + 3);
+    }
+
+    @Override
     public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         keybind.renderWidget(ctx, mouseX, mouseY, delta);
 

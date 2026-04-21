@@ -7,6 +7,7 @@ import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.configs.*;
+import com.nitsha.binds.gui.modals.SelectIcon;
 import com.nitsha.binds.gui.modals.SelectKeyEvent;
 import com.nitsha.binds.gui.panels.*;
 import com.nitsha.binds.gui.widget.*;
@@ -67,9 +68,14 @@ public class BindsEditor extends Screen {
     private BindsList window_BindsList;
     private AdvancedOptions window_AdvancedOptions;
     private PresetSelector window_PresetSelector;
-    private SelectKeyEvent window_SelectKeyEvent;
+
+    private SelectKeyEvent modal_SelectKeyEvent;
+    private SelectKeyEvent modal_SelectSound;
+    private SelectIcon modal_SelectIcon;
 
     private final Screen parent;
+
+    private List<ModalWindow> modalWindows = new ArrayList<>();
 
     public BindsEditor(Screen parent) {
         super(TextUtils.empty());
@@ -139,19 +145,34 @@ public class BindsEditor extends Screen {
         //?}
 
         // Select key event
-        window_SelectKeyEvent = new SelectKeyEvent(this, centerX, centerY, 180, TEXTURE_HEIGHT,
+        modal_SelectKeyEvent = new SelectKeyEvent(this, centerX, centerY, 180, TEXTURE_HEIGHT,
                 BACKGROUND, BACKGROUND_FLAT);
         //? if >=1.17 {
-        this.addRenderableWidget(window_SelectKeyEvent);
+        this.addRenderableWidget(modal_SelectKeyEvent);
         //?} else {
-        // this.addWidget(window_SelectKeyEvent);
+        // this.addWidget(modal_SelectKeyEvent);
         //?}
+        modalWindows.add(modal_SelectKeyEvent);
+
+        // Select key event
+        modal_SelectIcon = new SelectIcon(this, centerX, centerY, 180, TEXTURE_HEIGHT,
+                BACKGROUND, BACKGROUND_FLAT);
+        //? if >=1.17 {
+        this.addRenderableWidget(modal_SelectIcon);
+        //?} else {
+        // this.addWidget(modal_SelectIcon);
+        //?}
+        modalWindows.add(modal_SelectIcon);
 
         selectBind();
         window_BindsList.updateSelected(ItemsMapper.getItemStack(getCBind().icon));
 
         EventBus.on("selectKeyEvent.open", (Void v) -> {
-            window_SelectKeyEvent.open(() -> {});
+            modal_SelectKeyEvent.open(() -> {});
+        });
+
+        EventBus.on("selectIcon.open", (Void v) -> {
+            modal_SelectIcon.open(() -> {});
         });
     }
 
@@ -444,19 +465,23 @@ public class BindsEditor extends Screen {
         /* if (this.minecraft.level == null) this.renderBackground(ctx); */
         //? }
         //? if >=26.1 {
-        /*for (GuiEventListener element : children()) {
+        /*
+        boolean anyModalOpen = false;
+        for (ModalWindow m : modalWindows) { if (m.isVisible()) { anyModalOpen = true; break; } }
+        
+        for (GuiEventListener element : children()) {
             Renderable dr = RenderUtils.wrapRenderable(element);
             if (dr != null) {
                 if (element instanceof PresetSelector) {
                     PresetSelector pS = (PresetSelector) element;
                     pS.extractRenderState(ctx, mouseX, mouseY, delta);
-                } else if (element instanceof SelectKeyEvent) {
-                    if (window_SelectKeyEvent.isVisible()) {
-                        SelectKeyEvent sK = (SelectKeyEvent) element;
-                        sK.extractRenderState(ctx, mouseX, mouseY, delta);
+                } else if (element instanceof ModalWindow) {
+                    ModalWindow modal = (ModalWindow) element;
+                    if (modal.isVisible()) {
+                        modal.extractRenderState(ctx, mouseX, mouseY, delta);
                     }
                 } else {
-                    if (window_PresetSelector.isMouseInside(mouseX, mouseY) && window_PresetSelector.isOpen() || window_SelectKeyEvent.isVisible()) {
+                    if (window_PresetSelector.isMouseInside(mouseX, mouseY) && window_PresetSelector.isOpen() || anyModalOpen) {
                         dr.extractRenderState(ctx, -10000, -10000, delta);
                     } else {
                         dr.extractRenderState(ctx, mouseX, mouseY, delta);
@@ -465,19 +490,22 @@ public class BindsEditor extends Screen {
             }
         }*/
         //? } else {
+        boolean anyModalOpen = false;
+        for (ModalWindow m : modalWindows) { if (m.isVisible()) { anyModalOpen = true; break; } }
+        
         for (GuiEventListener element : children()) {
             Renderable dr = RenderUtils.wrapRenderable(element);
             if (dr != null) {
                 if (element instanceof PresetSelector) {
                     PresetSelector pS = (PresetSelector) element;
                     pS.render(ctx, mouseX, mouseY, delta);
-                } else if (element instanceof SelectKeyEvent) {
-                    if (window_SelectKeyEvent.isVisible()) {
-                        SelectKeyEvent sK = (SelectKeyEvent) element;
-                        sK.render(ctx, mouseX, mouseY, delta);
+                } else if (element instanceof ModalWindow) {
+                    ModalWindow modal = (ModalWindow) element;
+                    if (modal.isVisible()) {
+                        modal.render(ctx, mouseX, mouseY, delta);
                     }
                 } else {
-                    if (window_PresetSelector.isMouseInside(mouseX, mouseY) && window_PresetSelector.isOpen() || window_SelectKeyEvent.isVisible()) {
+                    if (window_PresetSelector.isMouseInside(mouseX, mouseY) && window_PresetSelector.isOpen() || anyModalOpen) {
                         dr.render(ctx, -10000, -10000, delta);
                     } else {
                         dr.render(ctx, mouseX, mouseY, delta);
@@ -578,13 +606,17 @@ public class BindsEditor extends Screen {
         TextField.setLastClickedWidget(null);
         KeybindSelector.setLastClickedWidget(null);
         MainKeybindSelector.setLastClickedWidget(null);
-        if (window_SelectKeyEvent.isVisible()) {
-            window_SelectKeyEvent.mouseClicked(event, bl);
-            if (!window_SelectKeyEvent.isMouseInside(mouseX, mouseY)) {
-                window_SelectKeyEvent.close(() -> {});
+        
+        for (ModalWindow modal : modalWindows) {
+            if (modal.isVisible()) {
+                modal.mouseClicked(event, bl);
+                if (!modal.isMouseInside(mouseX, mouseY)) {
+                    modal.close(() -> {});
+                }
+                return true;
             }
-            return true;
         }
+        
         if (window_PresetSelector.isMouseInside(mouseX, mouseY)) {
             window_PresetSelector.mouseClicked(event, bl);
             return true;
@@ -608,13 +640,17 @@ public class BindsEditor extends Screen {
         TextField.setLastClickedWidget(null);
         KeybindSelector.setLastClickedWidget(null);
         MainKeybindSelector.setLastClickedWidget(null);
-        if (window_SelectKeyEvent.isVisible()) {
-            window_SelectKeyEvent.mouseClicked(mouseX, mouseY, button);
-            if (!window_SelectKeyEvent.isMouseInside(mouseX, mouseY)) {
-                window_SelectKeyEvent.close(() -> {});
+        
+        for (ModalWindow modal : modalWindows) {
+            if (modal.isVisible()) {
+                modal.mouseClicked(mouseX, mouseY, button);
+                if (!modal.isMouseInside(mouseX, mouseY)) {
+                    modal.close(() -> {});
+                }
+                return true;
             }
-            return true;
         }
+        
         if (window_PresetSelector.isMouseInside(mouseX, mouseY)) {
             window_PresetSelector.mouseClicked(mouseX, mouseY, button);
             return true;
@@ -681,9 +717,11 @@ public class BindsEditor extends Screen {
     //? if >=1.20.2 {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (window_SelectKeyEvent.isVisible()) {
-            window_SelectKeyEvent.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
-            return true;
+        for (ModalWindow modal : modalWindows) {
+            if (modal.isVisible()) {
+                modal.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+                return true;
+            }
         }
         for (GuiEventListener element : children()) {
             if (element.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
@@ -696,9 +734,11 @@ public class BindsEditor extends Screen {
     /*
      @Override
      public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (window_SelectKeyEvent.isVisible()) {
-            window_SelectKeyEvent.mouseScrolled(mouseX, mouseY, amount);
-            return true;
+        for (ModalWindow modal : modalWindows) {
+            if (modal.isVisible()) {
+                modal.mouseScrolled(mouseX, mouseY, amount);
+                return true;
+            }
         }
          for (GuiEventListener element : children()) {
              if (element.mouseScrolled(mouseX, mouseY, amount)) {
@@ -788,6 +828,15 @@ public class BindsEditor extends Screen {
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
                 MainKeybindSelector.setFocusedField(null);
                 return true;
+            }
+        }
+
+        for (ModalWindow modal : modalWindows) {
+            if (modal.isVisible()) {
+                if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                    modal.close(() -> {});
+                    return true;
+                }
             }
         }
 

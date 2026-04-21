@@ -53,12 +53,9 @@ public class BindsList extends AnimatedWindow {
 
     private static final ResourceLocation SEPARATOR = Main.id("textures/gui/separator.png");
 
-
     private final List<ItemButton> buttons = new ArrayList<>();
 
     private final BindsEditor screen;
-
-    private static final char[] SUPER = {'⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'};
 
     private SmallTextButton deleteBtn;
     private long deleteConfirmationTime = 0;
@@ -104,8 +101,8 @@ public class BindsList extends AnimatedWindow {
             GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.configure"), 141, 8, 11);
 
             MutableComponent page = TextUtils.translatable("nitsha.binds.page");
-            MutableComponent currentPage = TextUtils.literal(toSuper(String.valueOf(BindsEditor.getCurrentPage() + 1)));
-            MutableComponent totalPage = TextUtils.literal(toSuper(String.valueOf(
+            MutableComponent currentPage = TextUtils.literal(GUIUtils.toSuper(String.valueOf(BindsEditor.getCurrentPage() + 1)));
+            MutableComponent totalPage = TextUtils.literal(GUIUtils.toSuper(String.valueOf(
                     BindsEditor.activePreset != null
                             ? BindsEditor.activePreset.pages.size()
                             : 1
@@ -179,13 +176,6 @@ public class BindsList extends AnimatedWindow {
         this.addElement(closeBtn);
         this.addElement(deleteBtn);
         generateButtons(7, 31);
-    }
-
-    public static String toSuper(String s) {
-        StringBuilder r = new StringBuilder();
-        for (char c : s.toCharArray())
-            r.append(c >= '0' && c <= '9' ? SUPER[c - '0'] : c);
-        return r.toString();
     }
 
     public void confirm(boolean status) {

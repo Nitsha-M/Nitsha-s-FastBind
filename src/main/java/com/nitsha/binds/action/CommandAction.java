@@ -29,7 +29,7 @@ public class CommandAction extends ActionType<CommandActionData> {
     public int getLineColor() { return 0xFF4e8605; }
 
     @Override
-    public int getHeight() { return 25; }
+    public int getHeight() { return field != null ? Math.max(25, field.getHeight() + 6) : 25; }
 
     @Override
     public CommandActionData createDefaultData() { return new CommandActionData(); }
@@ -60,6 +60,17 @@ public class CommandAction extends ActionType<CommandActionData> {
                 data.value,
                 TextUtils.translatable("nitsha.binds.advances.actions.commandLine").getString()
         );
+        this.field.setHeightChangeListener(() -> {
+            if (this.heightChangeListener != null) this.heightChangeListener.run();
+        });
+        this.field.configureMultiline(true, 5);
+    }
+
+    @Override
+    public void setPosition(int x, int y) {
+        if (field != null) {
+            field.setY(y + 3);
+        }
     }
 
     @Override
@@ -110,4 +121,14 @@ public class CommandAction extends ActionType<CommandActionData> {
         return field.charTyped(c, mods);
     }
     //? }
+
+    @Override
+    public boolean mouseScrolled(double mx, double my, double amount) {
+        if (field == null) return false;
+        //? if >=1.20.2 {
+        return field.mouseScrolled(mx, my, 0, amount);
+        //? } else {
+        /*return field.mouseScrolled(mx, my, amount);*/
+        //? }
+    }
 }

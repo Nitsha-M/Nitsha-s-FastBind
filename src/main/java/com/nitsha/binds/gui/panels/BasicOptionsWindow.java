@@ -15,8 +15,12 @@ import com.nitsha.binds.utils.EasterEgg;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 //? if >=1.21.9 {
 // import net.minecraft.client.input.MouseButtonEvent;
 //? }
@@ -24,6 +28,7 @@ import net.minecraft.resources.ResourceLocation;
 public class BasicOptionsWindow extends AnimatedWindow {
     private TextField bindNameField;
     private ItemButton editIconBtn;
+    private BedrockIconButton copyBtn;
     private BedrockIconButton pasteBtn;
     private BedrockIconButton importBtn;
     private BedrockIconButton exportBtn;
@@ -55,6 +60,9 @@ public class BasicOptionsWindow extends AnimatedWindow {
     private long deleteConfirmationTime = 0;
     private boolean deleteConfirmShown = false;
 
+    private ScreenTooltip tooltip;
+    private Map<AbstractButton, String> tooltips = new LinkedHashMap<>();
+
     private void initUI(BindsEditor screen) {
         Font textRenderer = Minecraft.getInstance().font;
         meowStates = CatMeowStates.NOTHING;
@@ -63,6 +71,9 @@ public class BasicOptionsWindow extends AnimatedWindow {
         AnimatedSprite catMeow2 = new AnimatedSprite(35, 14, CAT_MEOW2, 0, false, 0, 0, 420, 35, 40, 455, 14);
         catMeow1.setPosition(120, 158);
         catMeow2.setPosition(120, 158);
+
+        tooltip = new ScreenTooltip(0, this.getHeight() + 2, this.getWidth());
+        this.addElement(tooltip);
 
         catEasterEgg = new EasterEgg(
                 4,
@@ -126,10 +137,12 @@ public class BasicOptionsWindow extends AnimatedWindow {
             screen.getAdvancedOptionsWindow().selectTab(1);
         }, ITEMS_EDIT, "");
 
-
-        this.pasteBtn = new BedrockIconButton(31, 151, 25, 20, "paste", false, screen::pasteBind, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
+        this.copyBtn = new BedrockIconButton(4, 151, 26, 20, "copy", true, screen::copyBind);
+        this.copyBtn.setButtonDirection("_left");
+        this.pasteBtn = new BedrockIconButton(30, 151, 26, 20, "paste", false, screen::pasteBind, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
+        this.pasteBtn.setButtonDirection("_right");
         if (screen.copied.name.isEmpty()) pasteBtn.setEnabled(false);
-        this.addElement(new BedrockIconButton(4, 151, 25, 20, "copy", true, screen::copyBind));
+
 
         this.deleteBtn = new BedrockIconButton(58, 151, 25, 20, "delete", false, ()-> {
             if (deleteConfirmShown) {
@@ -141,7 +154,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
             }
         }, 0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF);
 
-        this.exportBtn = new BedrockIconButton(85, 151, 25, 20, "copy", true, () -> {
+        this.exportBtn = new BedrockIconButton(85, 151, 26, 20, "copy", true, () -> {
             screen.saveBind();
 
             BindData currentBind = BindsEditor.getCBind();
@@ -152,8 +165,9 @@ public class BasicOptionsWindow extends AnimatedWindow {
                 Minecraft.getInstance().keyboardHandler.setClipboard(encodedBind);
             }
         }, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
+        this.exportBtn.setButtonDirection("_left");
 
-        this.importBtn = new BedrockIconButton(112, 151, 25, 20, "paste", true, () -> {
+        this.importBtn = new BedrockIconButton(111, 151, 26, 20, "paste", true, () -> {
             String clipboardText = Minecraft.getInstance().keyboardHandler.getClipboard();
 
             BindData importedBind = CodecUtil.importFromText(clipboardText, BindData.class);
@@ -182,14 +196,22 @@ public class BasicOptionsWindow extends AnimatedWindow {
                 screen.selectBind();
             }
         }, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
+        this.importBtn.setButtonDirection("_right");
 
+        this.addElement(bindNameField);
+        this.addElement(editIconBtn);
+
+        this.addElement(copyBtn);
+        this.addElement(pasteBtn);
         this.addElement(deleteBtn);
         this.addElement(importBtn);
         this.addElement(exportBtn);
 
-        this.addElement(bindNameField);
-        this.addElement(editIconBtn);
-        this.addElement(pasteBtn);
+        tooltips.put(copyBtn,   TextUtils.translatable("nitsha.binds.control.copy").getString());
+        tooltips.put(pasteBtn,  TextUtils.translatable("nitsha.binds.control.paste").getString());
+        tooltips.put(deleteBtn, TextUtils.translatable("nitsha.binds.control.delete").getString());
+        tooltips.put(importBtn, TextUtils.translatable("nitsha.binds.control.import").getString());
+        tooltips.put(exportBtn, TextUtils.translatable("nitsha.binds.control.export").getString());
 
         this.open(() -> {});
     }
@@ -284,6 +306,20 @@ public class BasicOptionsWindow extends AnimatedWindow {
         super.tick();
         if (deleteConfirmShown && !isDeleteConfirmation()) {
             confirm(false);
+        }
+        tooltips.forEach((btn, text) -> {
+            if (btn instanceof BedrockIconButton) {
+                BedrockIconButton b = (BedrockIconButton) btn;
+                if (b.isHovered()) {
+                    tooltip.visible = true;
+                    tooltip.setText(text);
+                    tooltip.setColor(b.getBtnColor());
+                }
+            }
+        });
+        if (tooltips.keySet().stream().noneMatch(AbstractButton::isHovered)) {
+            tooltip.visible = false;
+            tooltip.setText("");
         }
     }
 }

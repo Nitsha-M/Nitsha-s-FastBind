@@ -7,9 +7,10 @@ import com.nitsha.binds.mixin.KeyMappingAccessor;
 import com.nitsha.binds.utils.EventBus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.gui.GuiGraphics;
-import java.util.Map;
+
 import java.util.Queue;
 import java.util.function.LongConsumer;
 //? if >=1.21.9 {
@@ -25,20 +26,16 @@ import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
 import com.nitsha.binds.configs.dto.actions.AllActionsData.KeyEventActionData;
-import com.nitsha.binds.configs.dto.actions.AllActionsData.KeyEventInnerData;
 
 public class KeyEventAction extends ActionType<KeyEventActionData> {
 
     private int x, y, width;
-    private KeyEventSelector selector;
+    private KeySelector selector;
     private BedrockIconOptionButton modeButton;
     private TextField msField;
 
     private static final String MODE_PRESS = "press";
     private static final String MODE_HOLD = "hold";
-
-    private static final ResourceLocation NORMAL = Main.id("textures/gui/btns/bedrock_normal_bottom_right.png");
-    private static final ResourceLocation PRESSED_NORMAL = Main.id("textures/gui/btns/bedrock_normal_top_right.png");
 
     @Override
     public String getId() { return "keyEvent"; }
@@ -94,13 +91,24 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
         String savedMode = data.value.mode != null ? data.value.mode : MODE_PRESS;
         String savedMs = data.value.ms != null ? data.value.ms : "500";
 
-        this.selector = new KeyEventSelector(x, y + 24, width, 20, () -> {
+        this.selector = new KeySelector(x, y + 24, width, 20, () -> {
             EventBus.off("selectKeyEvent.result");
             EventBus.on("selectKeyEvent.result", (String selectedKey) -> {
                 selector.setSelectedItem(selectedKey);
             });
             EventBus.emit("selectKeyEvent.open", null);
-        });
+        }) {
+            @Override
+            protected void updateName() {
+                super.updateName();
+                if (!this.getSelectedItem().isEmpty()) {
+                    Component name = TextUtils.translatable(KeyMappingAccessor.binds$getAll().get(this.getSelectedItem()).getName());
+                    int maxWidth = this.width - 8;
+                    int avgCharWidth = 7;
+                    setName(GUIUtils.truncateString(name.getString(), maxWidth / avgCharWidth));
+                }
+            }
+        };
 
         this.msField = new TextField(
                 Minecraft.getInstance().font,
@@ -111,7 +119,8 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
 
         this.modeButton = new BedrockIconOptionButton(x + width - 18, y + 24, 18, 20, () -> {
                 rebuildModeWidgets(this.modeButton.getSelected(), msField != null ? msField.getText() : "500");
-        });
+        }).addOption("press", "nitsha.binds.advances.actions.option.press", Main.id("textures/gui/sprites/key_press.png"), 0xFF07938d, 0xFF0fb2ab)
+          .addOption("hold", "nitsha.binds.advances.actions.option.hold", Main.id("textures/gui/sprites/key_hold.png"), 0xFF9cc708, 0xFFafda19);
 
         this.selector.setSelectedItem(savedKey);
         rebuildModeWidgets(savedMode, savedMs);
@@ -125,6 +134,15 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
         this.msField.setText(msValue);
 
         this.msField.visible = isHold;
+    }
+
+    @Override
+    public void setPosition(int x, int y) {
+        this.x = x;
+        this.y = y;
+        if (selector != null) selector.setY(y + 24);
+        if (msField != null) msField.setY(y + 24);
+        if (modeButton != null) modeButton.setY(y + 24);
     }
 
     @Override

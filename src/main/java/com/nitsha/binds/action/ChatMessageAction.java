@@ -7,8 +7,7 @@ import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.SmallTextButton;
 import com.nitsha.binds.gui.widget.TextField;
 import com.nitsha.binds.gui.widget.TexturedButton;
-import com.nitsha.binds.action.FormattedTextUtils;
-import net.minecraft.ChatFormatting;
+import com.nitsha.binds.utils.FormattedTextUtils;
 import net.minecraft.client.Minecraft;
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -100,35 +99,9 @@ public class ChatMessageAction extends ActionType<ChatMessageActionData> {
     public void buildTasks(ChatMessageActionData data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
         TextFormatData value = data.value;
         if (value == null) return;
-        MutableComponent message;
 
-        String text = value.text;
-        if (text == null) text = "";
-        message = TextUtils.empty();
-
-        if (value.marks != null && !value.marks.isEmpty()) {
-            List<Map<String, Integer>> marks = value.marks;
-            Style currentStyle = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
-                int lastPos = 0;
-
-                for (Map<String, Integer> markData : marks) {
-                    int pos = markData.get("pos");
-                    int styleCode = markData.get("style");
-
-                    if (pos > lastPos) {
-                        message = message.append(
-                                TextUtils.literal(text.substring(lastPos, pos)).setStyle(currentStyle));
-                    }
-                    currentStyle = FormattedTextUtils.applyStyleCode(styleCode, currentStyle);
-                    lastPos = pos;
-                }
-
-                if (lastPos < text.length()) {
-                    message = message.append(TextUtils.literal(text.substring(lastPos)).setStyle(currentStyle));
-                }
-        } else {
-            message = TextUtils.literal(text);
-        }
+        MutableComponent message = FormattedTextUtils.buildComponent(value);
+        if (message.getString().isEmpty()) return;
 
         final MutableComponent finalMessage = message;
         actions.add(() -> {
@@ -192,6 +165,16 @@ public class ChatMessageAction extends ActionType<ChatMessageActionData> {
         data.text = field.getText();
         data.marks = field.getFormatMarksAsMap();
         return data;
+    }
+
+    @Override
+    public void setPosition(int x, int y) {
+        this.x = x;
+        this.y = y;
+        this.colorButtonsY = y + 24;
+        if (field != null) field.setY(y + 3);
+        if (leftBtn != null) leftBtn.setY(colorButtonsY);
+        if (rightBtn != null) rightBtn.setY(colorButtonsY);
     }
 
     @Override

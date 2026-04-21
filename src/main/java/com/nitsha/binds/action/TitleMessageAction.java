@@ -7,7 +7,7 @@ import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.SmallTextButton;
 import com.nitsha.binds.gui.widget.TextField;
 import com.nitsha.binds.gui.widget.TexturedButton;
-import com.nitsha.binds.action.FormattedTextUtils;
+import com.nitsha.binds.utils.FormattedTextUtils;
 import net.minecraft.client.Minecraft;
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -28,7 +28,11 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 
-public class TitleMessageAction extends ActionType {
+import com.nitsha.binds.configs.dto.actions.AllActionsData.TitleMessageActionData;
+import com.nitsha.binds.configs.dto.actions.AllActionsData.TitleInnerData;
+import com.nitsha.binds.configs.dto.actions.AllActionsData.TextFormatData;
+
+public class TitleMessageAction extends ActionType<TitleMessageActionData> {
 
     private static final ResourceLocation LEFT        = Main.idSprite("action_left_normal");
     private static final ResourceLocation LEFT_HOVER  = Main.idSprite("action_left_hover");
@@ -61,23 +65,15 @@ public class TitleMessageAction extends ActionType {
     @Override public int getHeight() { return 57; }
 
     @Override
-    public void buildTasks(Map<String, Object> data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
-        Object value = data.get("value");
-        if (!(value instanceof Map)) return;
+    public TitleMessageActionData createDefaultData() { return new TitleMessageActionData(); }
 
-        Map<String, Object> titleData = (Map<String, Object>) value;
+    @Override
+    public void buildTasks(TitleMessageActionData data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
+        TitleInnerData titleData = data.value;
+        if (titleData == null) return;
 
-        MutableComponent titleComponent = TextUtils.empty();
-        if (titleData.containsKey("title") && titleData.get("title") instanceof Map) {
-            titleComponent = FormattedTextUtils.buildFormattedComponent(
-                    (Map<String, Object>) titleData.get("title"));
-        }
-
-        MutableComponent subtitleComponent = TextUtils.empty();
-        if (titleData.containsKey("subtitle") && titleData.get("subtitle") instanceof Map) {
-            subtitleComponent = FormattedTextUtils.buildFormattedComponent(
-                    (Map<String, Object>) titleData.get("subtitle"));
-        }
+        MutableComponent titleComponent = FormattedTextUtils.buildComponent(titleData.title);
+        MutableComponent subtitleComponent = FormattedTextUtils.buildComponent(titleData.subtitle);
 
         if (titleComponent.getString().isEmpty() && subtitleComponent.getString().isEmpty()) return;
 
@@ -109,7 +105,7 @@ public class TitleMessageAction extends ActionType {
     }
 
     @Override
-    public void init(int x, int y, int width, Object value) {
+    public void init(int x, int y, int width, TitleMessageActionData data) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -129,13 +125,12 @@ public class TitleMessageAction extends ActionType {
                 TextUtils.translatable("nitsha.binds.advances.actions.subtitleLine").getString()
         );
 
-        if (value instanceof Map) {
-            Map<String, Object> titleData = (Map<String, Object>) value;
-            if (titleData.containsKey("title")) {
-                loadFormattedText(this.titleField, (Map<String, Object>) titleData.get("title"));
+        if (data.value != null) {
+            if (data.value.title != null) {
+                loadFormattedText(this.titleField, data.value.title);
             }
-            if (titleData.containsKey("subtitle")) {
-                loadFormattedText(this.subtitleField, (Map<String, Object>) titleData.get("subtitle"));
+            if (data.value.subtitle != null) {
+                loadFormattedText(this.subtitleField, data.value.subtitle);
             }
         }
 
@@ -158,19 +153,18 @@ public class TitleMessageAction extends ActionType {
         }
     }
 
-    private void loadFormattedText(TextField field, Map<String, Object> data) {
-        String text = (String) data.get("text");
-        field.setText(text);
-        if (data.containsKey("marks")) {
-            List<Map<String, Object>> marks = (List<Map<String, Object>>) data.get("marks");
-            field.setFormatMarksFromMap(marks);
+    private void loadFormattedText(TextField field, TextFormatData data) {
+        String text = data.text;
+        if (text != null) field.setText(text);
+        if (data.marks != null) {
+            field.setFormatMarksFromMap(data.marks);
         }
     }
 
-    private Map<String, Object> saveFormattedText(TextField field) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("text", field.getText());
-        data.put("marks", field.getFormatMarksAsMap());
+    private TextFormatData saveFormattedText(TextField field) {
+        TextFormatData data = new TextFormatData();
+        data.text = field.getText();
+        data.marks = field.getFormatMarksAsMap();
         return data;
     }
 
@@ -201,14 +195,24 @@ public class TitleMessageAction extends ActionType {
     }
 
     @Override
-    public Map<String, Object> getValue() {
-        Map<String, Object> titleData = new HashMap<>();
-        titleData.put("title", saveFormattedText(titleField));
-        titleData.put("subtitle", saveFormattedText(subtitleField));
+    public void setPosition(int x, int y) {
+        this.y = y;
+        this.x = x;
+        this.colorButtonsY = y + 3 + FIELD_HEIGHT + GAP + FIELD_HEIGHT + GAP;
+        if (titleField != null) titleField.setY(y + 3);
+        if (subtitleField != null) subtitleField.setY(y + 3 + FIELD_HEIGHT + GAP);
+        if (leftBtn != null) leftBtn.setY(colorButtonsY);
+        if (rightBtn != null) rightBtn.setY(colorButtonsY);
+        for (SmallTextButton btn : colorsItem) {
+            btn.setY(colorButtonsY);
+        }
+    }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("type", "titleMessage");
-        result.put("value", titleData);
+    @Override
+    public TitleMessageActionData getValue() {
+        TitleMessageActionData result = new TitleMessageActionData();
+        result.value.title = saveFormattedText(titleField);
+        result.value.subtitle = saveFormattedText(subtitleField);
         return result;
     }
 

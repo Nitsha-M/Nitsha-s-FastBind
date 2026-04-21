@@ -1,13 +1,14 @@
 package com.nitsha.binds.action;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
+import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.SmallTextButton;
-import com.nitsha.binds.gui.widget.TextField;
-import com.nitsha.binds.gui.widget.TexturedButton;
+import com.nitsha.binds.gui.widget.*;
+import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.FormattedTextUtils;
 import com.nitsha.binds.utils.ToastUtils;
 import net.minecraft.client.Minecraft;
@@ -18,6 +19,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.CharacterEvent;*/
 //? }
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -36,23 +38,15 @@ import com.nitsha.binds.configs.dto.actions.AllActionsData.TextFormatData;
 
 public class ToastAction extends ActionType<ToastActionData> {
 
-    private static final ResourceLocation LEFT        = Main.idSprite("action_left_normal");
-    private static final ResourceLocation LEFT_HOVER  = Main.idSprite("action_left_hover");
-    private static final ResourceLocation RIGHT       = Main.idSprite("action_right_normal");
-    private static final ResourceLocation RIGHT_HOVER = Main.idSprite("action_right_hover");
-
-    private static final int VISIBLE_COLORS = 13;
-    private static final int FIELD_HEIGHT = 19;
-    private static final int GAP = 2;
+    private static final ResourceLocation ITEMS_SELECTOR_1 = Main.id("textures/gui/test/items_5.png");
+    private static final ResourceLocation ITEMS_SELECTOR_2 = Main.id("textures/gui/test/items_6.png");
+    private static final ResourceLocation ITEMS_SELECTOR_3 = Main.id("textures/gui/test/items_7.png");
+    private static final ResourceLocation TOAST_BG = Main.id("textures/gui/test/toast_bg.png");
 
     private TextField titleField;
-    private TexturedButton leftBtn;
-    private TexturedButton rightBtn;
-    private final List<SmallTextButton> colorsItem = new ArrayList<>();
-    private int colorOffset = 0;
-
+    private ItemButton iconSelector;
+    private BedrockIconOptionButton iconStyle;
     private int x, y, width;
-    private int colorButtonsY;
 
     @Override public String getId() { return "toast"; }
 
@@ -63,7 +57,7 @@ public class ToastAction extends ActionType<ToastActionData> {
 
     @Override public String getDefaultValue() { return ""; }
     @Override public int getLineColor() { return 0xFF5facfa; }
-    @Override public int getHeight() { return 57; }
+    @Override public int getHeight() { return 58; }
 
     @Override
     public ToastActionData createDefaultData() { return new ToastActionData(); }
@@ -99,37 +93,35 @@ public class ToastAction extends ActionType<ToastActionData> {
         this.x = x;
         this.y = y;
         this.width = width;
-        this.colorButtonsY = y + 3 + FIELD_HEIGHT + GAP + FIELD_HEIGHT + GAP;
 
         this.titleField = new TextField(
                 Minecraft.getInstance().font,
-                x, y + 3, width - 26, FIELD_HEIGHT,
+                x, y + 3, width - 26 - 19, 19,
                 Integer.MAX_VALUE, "",
-                TextUtils.translatable("nitsha.binds.advances.actions.titleLine").getString()
+                TextUtils.translatable("nitsha.binds.advances.actions.toastText").getString()
         );
 
+        this.iconSelector = new ItemButton(x + 5, y + 29, 22, ItemsMapper.getItemStack(data.value.icon), () -> {
+            EventBus.off("selectIcon.result");
+            EventBus.on("selectIcon.result", (String selectedKey) -> {
+                this.iconSelector.setKey(selectedKey);
+                this.iconSelector.setIcon(ItemsMapper.getItemStack(selectedKey));
+            });
+            EventBus.emit("selectIcon.open", null);
+        }, getIconSelectorTexture(data.value.toastType), data.value.icon);
+
+        this.iconStyle = new BedrockIconOptionButton(x + width - 26 - 18, y + 3, 18, 19, () -> {
+            data.value.toastType = this.iconStyle.getSelected();
+            this.iconSelector.setTexture(getIconSelectorTexture(data.value.toastType));
+        }).addOption("task", "nitsha.binds.advances.actions.option.task", Main.id("textures/gui/sprites/toast_task.png"), 0xFF07938d, 0xFF0fb2ab)
+        .addOption("challenge", "nitsha.binds.advances.actions.option.challenge", Main.id("textures/gui/sprites/toast_challenge.png"), 0xFF07938d, 0xFF0fb2ab)
+        .addOption("goal", "nitsha.binds.advances.actions.option.goal", Main.id("textures/gui/sprites/toast_goal.png"), 0xFF9cc708, 0xFFafda19);
+
+        this.iconStyle.setSelected(data.value.toastType.toLowerCase());
         if (data.value != null) {
             if (data.value.title != null) {
                 loadFormattedText(this.titleField, data.value.title);
             }
-        }
-
-        this.leftBtn = GUIUtils.createTexturedBtn(x, colorButtonsY, 9, 9,
-                new ResourceLocation[]{ LEFT, LEFT_HOVER },
-                button -> colorOffset = (colorOffset - 1 + ChatMessageAction.COLORS_DATA.length) % ChatMessageAction.COLORS_DATA.length);
-
-        this.rightBtn = GUIUtils.createTexturedBtn(x + width - 9, colorButtonsY, 9, 9,
-                new ResourceLocation[]{ RIGHT, RIGHT_HOVER },
-                button -> colorOffset = (colorOffset + 1) % ChatMessageAction.COLORS_DATA.length);
-
-        for (int i = 0; i < ChatMessageAction.COLORS_DATA.length; i++) {
-            int color = (int) ChatMessageAction.COLORS_DATA[i][0];
-            int code  = (int) ChatMessageAction.COLORS_DATA[i][1];
-            MutableComponent text = (MutableComponent) ChatMessageAction.COLORS_DATA[i][2];
-            colorsItem.add(new SmallTextButton(text, x + 10, colorButtonsY, color, 10, "left", () -> {
-                TextField focused = TextField.getFocusedField();
-                if (focused != null) focused.setStyle(code);
-            }));
         }
     }
 
@@ -141,16 +133,21 @@ public class ToastAction extends ActionType<ToastActionData> {
         }
     }
 
+    public ResourceLocation getIconSelectorTexture(String type) {
+        return switch (type) {
+            case "challenge" -> ITEMS_SELECTOR_3;
+            case "goal" -> ITEMS_SELECTOR_2;
+            default -> ITEMS_SELECTOR_1;
+        };
+    }
+
     @Override
     public void setPosition(int x, int y) {
         this.y = y;
         this.x = x;
-        this.colorButtonsY = y + 3 + FIELD_HEIGHT + GAP + FIELD_HEIGHT + GAP;
         if (titleField != null) titleField.setY(y + 3);
-        if (leftBtn != null) leftBtn.setY(colorButtonsY);
-        if (rightBtn != null) rightBtn.setY(colorButtonsY);
-        for (SmallTextButton btn : colorsItem) {
-            btn.setY(colorButtonsY);
+        if (iconSelector != null) {
+            iconSelector.setY(y + 29);
         }
     }
 
@@ -164,55 +161,51 @@ public class ToastAction extends ActionType<ToastActionData> {
     @Override
     public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         titleField.renderWidget(ctx, mouseX, mouseY, delta);
+        iconStyle.renderWidget(ctx, mouseX, mouseY, delta);
 
-        for (int i = 0; i < VISIBLE_COLORS; i++) {
-            int actualIndex = (colorOffset + i) % ChatMessageAction.COLORS_DATA.length;
-            SmallTextButton item = colorsItem.get(actualIndex);
-            item.setX(x + 10 + (i * 11));
-            item.setY(colorButtonsY);
+        GUIUtils.drawResizableBox(ctx, TOAST_BG, x, y + 24, width, 32, 4, 9);
+        iconSelector.render(ctx, mouseX, mouseY, delta);
 
-            int itemWidth  = item.isHovered() ? 12 : 10;
-            int itemHeight = item.isHovered() ? 11 : 9;
-            int itemOffset = item.isHovered() ? -1 : 0;
-            item.setWidth(itemWidth);
-            item.setHeight(itemHeight);
+        String advMade = switch (this.iconStyle.getSelected()) {
+            case "goal" -> "advancements.toast.goal";
+            case "challenge" -> "advancements.toast.challenge";
+            default -> "advancements.toast.task";
+        };
+        int advColor = (this.iconStyle.getSelected().equals("challenge")) ? 0xFFFC86FC : 0xFFFCFC00;
+        GUIUtils.addText(ctx, TextUtils.translatable(advMade), 0, x + 30, y + 31, "left", "top", advColor, false);
 
-            GUIUtils.matricesUtil(ctx, itemOffset, itemOffset, 0, () -> item.renderWidget(ctx, mouseX, mouseY, delta));
+        if (this.titleField.getText().isEmpty()) {
+            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.typeSomeText"), 0, x + 30, y + 42, "left", "top", 0xFFAAAAAA, false);
+        } else {
+            TextFormatData data = saveFormattedText(titleField);
+            int maxChars = (width - 44) / 7;
+            MutableComponent formattedTitle = FormattedTextUtils.buildComponent(data, maxChars);
+
+            GUIUtils.addText(ctx, formattedTitle, 0, x + 30, y + 42, "left", "top", 0xFFFFFFFF, false);
         }
-
-        leftBtn.setY(colorButtonsY);
-        rightBtn.setY(colorButtonsY);
-        leftBtn.renderWidget(ctx, mouseX, mouseY, delta);
-        rightBtn.renderWidget(ctx, mouseX, mouseY, delta);
     }
 
     @Override
     public ToastActionData getValue() {
         ToastActionData result = new ToastActionData();
         result.value.title = saveFormattedText(titleField);
+        result.value.toastType = this.iconStyle.getSelected();
+        result.value.icon = this.iconSelector.getKey();
         return result;
     }
 
     @Override
     public void reset() {
         titleField.setText("");
-    }
-
-    @Override
-    public boolean isMouseOverColorButtons(double mouseX, double mouseY) {
-        return mouseX >= x + 10 && mouseX <= x + 10 + width - 20
-                && mouseY >= colorButtonsY && mouseY <= colorButtonsY + 10;
+        iconSelector.setIcon(ItemsMapper.getItemStack("minecraft:diamond"));
+        iconSelector.setKey("minecraft:diamond");
+        iconStyle.setSelected("task");
     }
 
     //? if >=1.21.9 {
     /*@Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
-        boolean clicked = titleField.mouseClicked(event, bl);
-        if (leftBtn.mouseClicked(event, bl) || rightBtn.mouseClicked(event, bl)) clicked = true;
-        for (int i = 0; i < VISIBLE_COLORS; i++) {
-            int actualIndex = (colorOffset + i) % ChatMessageAction.COLORS_DATA.length;
-            if (colorsItem.get(actualIndex).mouseClicked(event, bl)) clicked = true;
-        }
+        boolean clicked = titleField.mouseClicked(event, bl) || iconSelector.mouseClicked(event, bl) || iconStyle.mouseClicked(event, bl);
         return clicked;
     }
 
@@ -228,12 +221,7 @@ public class ToastAction extends ActionType<ToastActionData> {
     //? } else {
     @Override
     public boolean mouseClicked(double mx, double my, int btn) {
-        boolean clicked = titleField.mouseClicked(mx, my, btn);
-        if (leftBtn.mouseClicked(mx, my, btn) || rightBtn.mouseClicked(mx, my, btn)) clicked = true;
-        for (int i = 0; i < VISIBLE_COLORS; i++) {
-            int actualIndex = (colorOffset + i) % ChatMessageAction.COLORS_DATA.length;
-            if (colorsItem.get(actualIndex).mouseClicked(mx, my, btn)) clicked = true;
-        }
+        boolean clicked = titleField.mouseClicked(mx, my, btn) || iconSelector.mouseClicked(mx, my, btn) || iconStyle.mouseClicked(mx, my, btn);
         return clicked;
     }
 
@@ -248,22 +236,19 @@ public class ToastAction extends ActionType<ToastActionData> {
     }
     //? }
 
+    //? if >=1.21.9 {
+    /*@Override
+    public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        boolean r = titleField.mouseReleased(event);
+        r |= iconStyle.mouseReleased(event);
+        return r;
+    }*/
+    //? } else {
     @Override
-    public boolean mouseScrolled(double mx, double my, double amount) {
-        if (!isMouseOverColorButtons(mx, my)) return false;
-        //? if >=1.21.9 {
-        // com.mojang.blaze3d.platform.Window window = Minecraft.getInstance().getWindow();
-        //? } else {
-        long window = Minecraft.getInstance().getWindow().getWindow();
-        //? }
-        boolean shift = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT)
-                || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
-        if (!shift) return false;
-        if (amount > 0) {
-            colorOffset = (colorOffset - 1 + ChatMessageAction.COLORS_DATA.length) % ChatMessageAction.COLORS_DATA.length;
-        } else if (amount < 0) {
-            colorOffset = (colorOffset + 1) % ChatMessageAction.COLORS_DATA.length;
-        }
-        return true;
+    public boolean mouseReleased(double mx, double my, int btn) {
+        boolean r = titleField.mouseReleased(mx, my, btn);
+        r |= iconStyle.mouseReleased(mx, my, btn);
+        return r;
     }
+    //? }
 }

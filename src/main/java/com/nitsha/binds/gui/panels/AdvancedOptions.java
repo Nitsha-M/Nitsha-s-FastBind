@@ -1,5 +1,6 @@
 package com.nitsha.binds.gui.panels;
 
+import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.configs.KeyBinds;
@@ -14,20 +15,24 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import com.nitsha.binds.configs.dto.preset.ActionData;
+import net.minecraft.world.item.ItemStack;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.InputWithModifiers;*/
 //? }
 
+//? if >=26.1 {
+// import net.minecraft.world.item.ItemStackTemplate;
+//? }
+
 public class AdvancedOptions extends AnimatedWindow {
     private static final ResourceLocation TAB2_BG = Main.id("textures/gui/test/scroller.png");
-    private static final ResourceLocation NORMAL = Main.id("textures/gui/btns/bedrock_normal_bottom_right.png");
-    private static final ResourceLocation PRESSED_NORMAL = Main.id("textures/gui/btns/bedrock_normal_top_right.png");
     private static final ResourceLocation RANDOM_SMALL = Main.id("textures/gui/test/random.png");
     private final List<TabButton> tabsBtn = new ArrayList<>();
 
@@ -69,7 +74,14 @@ public class AdvancedOptions extends AnimatedWindow {
         tabsBtn.add(tab3);
 
         this.firstTab = new ScrollableWindow(5, 25, this.getX(), this.getY(), getWidth() - 10, getHeight() - 54, false);
-        this.secondTab = new IconSelector(screen, 4, 20, 162, 126);
+        this.secondTab = new IconSelector(4, 20, 162, 144, (stack, key) -> {
+            screen.getBasicOptionsWindow().getEditIcon().setIcon(stack);
+            this.secondTab.updateButtons(key);
+            BindsEditor.editIconBtnString = key;
+            if (!BindsEditor.getCBind().actions.isEmpty())  {
+                screen.saveBind();
+            }
+        });
         this.thirdTab = new ScrollableWindow(2, 4, this.getX(), this.getY(), getWidth() - 4, getHeight() - 11, false);
 
         this.keybind = new MainKeybindSelector(4, this.getHeight() - 26, 80, 20);
@@ -77,7 +89,7 @@ public class AdvancedOptions extends AnimatedWindow {
             this.keybind.setKeyCode(0);
             this.keybind.setPressed(false);
         }, 0xFFFFFFFF, 0xFFEF4747, 0xFF262626, 0xFFFFFFFF);
-        this.resetKeybind.setNormalTextures(NORMAL, PRESSED_NORMAL);
+        this.resetKeybind.setButtonDirection("_right");
 
         this.triggerModeBtn = new BedrockIconOptionButton(getWidth() - 22, getHeight() - 26, 18, 20, this::rebuildTriggerWidgets)
             .addOption("press", "nitsha.binds.advances.actions.option.press", Main.id("textures/gui/sprites/key_press.png"), 0xFF07938d, 0xFF0fb2ab)
@@ -157,8 +169,23 @@ public class AdvancedOptions extends AnimatedWindow {
         });
 
         this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.advances.random_icon"), getWidth() - 4, 6, 7, 0x33000000, 0xFF232425, 0xFF232425, 0xFFe7bc1c, 0, "right", RANDOM_SMALL, ()-> {
-            this.secondTab.pickRandom();
+            //? if >=26.1 {
+            // Map.Entry<String, ItemStackTemplate> randomItem = ItemsMapper.getRandomItem();
+            //? } else {
+            Map.Entry<String, ItemStack> randomItem = ItemsMapper.getRandomItem();
+            //? }
+
+            if (randomItem == null) return;
+
+            screen.getBasicOptionsWindow().getEditIcon().setIcon(randomItem.getValue());
+            this.secondTab.updateButtons(randomItem.getKey());
+            BindsEditor.editIconBtnString = randomItem.getKey();
+
+            if (!BindsEditor.getCBind().actions.isEmpty()) {
+                screen.saveBind();
+            }
         }));
+
         this.addElement(this.secondTab);
     }
 

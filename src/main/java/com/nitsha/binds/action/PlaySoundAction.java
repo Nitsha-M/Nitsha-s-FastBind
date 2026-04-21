@@ -1,24 +1,14 @@
 package com.nitsha.binds.action;
 
-import com.nitsha.binds.FBLogger;
-import com.nitsha.binds.Main;
-import com.nitsha.binds.configs.dto.actions.AllActionsData;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.BedrockIconOptionButton;
-import com.nitsha.binds.gui.widget.KeyEventSelector;
-import com.nitsha.binds.gui.widget.Slider;
-import com.nitsha.binds.gui.widget.TextField;
+import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.mixin.KeyMappingAccessor;
+import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.EventBus;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.resources.ResourceLocation;
 
-import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 //? if >=1.21.9 {
@@ -34,15 +24,13 @@ import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
 import com.nitsha.binds.configs.dto.actions.AllActionsData.PlaySoundActionData;
-import com.nitsha.binds.configs.dto.actions.AllActionsData.PlaySoundInnerData;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.network.chat.Component;
 
 public class PlaySoundAction extends ActionType<PlaySoundActionData> {
 
     private int x, y, width;
-    private KeyEventSelector selector;
+    private KeySelector selector;
+    private BedrockIconButton playButton;
 
     private Slider volumeSlider;
     private Slider pitchSlider;
@@ -57,7 +45,7 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
 
     @Override public String getDefaultValue() { return ""; }
     @Override public int getLineColor() { return 0xFFD50FC2; }
-    @Override public int getHeight() { return 72; }
+    @Override public int getHeight() { return 76; }
 
     @Override
     public PlaySoundActionData createDefaultData() { return new PlaySoundActionData("playSound"); }
@@ -66,17 +54,20 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
     public void buildTasks(PlaySoundActionData data, Queue<Runnable> actions, Minecraft client, LongConsumer setWaitUntil) {
         if (data.value == null) return;
         String id = data.value.value;
+        boolean isExternal = data.value.isExternal;
         float volume = data.value.volume;
         float pitch = data.value.pitch;
 
         actions.add(() -> {
-            ResourceLocation sound = ResourceLocation.fromNamespaceAndPath("minecraft", "entity.cow.ambient");
-            FBLogger.info("sound: {}", sound);
-            Minecraft.getInstance().getSoundManager().play(
-                    new SimpleSoundInstance(sound, SoundSource.MASTER, volume, pitch,
-                            SoundInstance.createUnseededRandom(), false, 0,
-                            SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true)
-            );
+            if (!isExternal) {
+                if (!id.contains(":")) return;
+                String[] parts = id.split(":");
+                String namespace = parts[0];
+                String name = parts[1];
+                AudioPlayer.playSound(namespace, name, volume, pitch);
+            } else {
+                AudioPlayer.playSound("minecraft", "entity.pig.ambient", volume, pitch);
+            }
         });
     }
 
@@ -86,27 +77,77 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         this.y = y;
         this.width = width;
 
-        this.selector = new KeyEventSelector(x, y + 24, width, 20, () -> {
+        String savedKey = data.value.value != null ? data.value.value : "";
+
+        this.selector = new KeySelector(x, y + 24, width - 20, 20, () -> {
             EventBus.off("selectKeyEvent.result");
             EventBus.on("selectKeyEvent.result", (String selectedKey) -> {
                 selector.setSelectedItem(selectedKey);
             });
             EventBus.emit("selectKeyEvent.open", null);
+        })  {
+            @Override
+            protected void updateName() {
+                super.updateName();
+                if (!this.getSelectedItem().isEmpty()) {
+                    Component name = TextUtils.literal(savedKey);
+                    int maxWidth = this.width - 8;
+                    int avgCharWidth = 7;
+                    setName(GUIUtils.truncateString(name.getString(), maxWidth / avgCharWidth));
+                }
+            }
+        };
+        this.selector.setSelectedItem(savedKey);
+
+
+        this.playButton = new BedrockIconButton(x + width - 18, y + 24, 18, 20, "paste", true, () -> {
+            if (!data.value.isExternal) {
+                if (!savedKey.contains(":")) return;
+                String[] parts = savedKey.split(":", 2);
+                String namespace = parts[0];
+                String name = parts[1];
+                AudioPlayer.playSound(namespace, name, this.volumeSlider.getValue(), this.pitchSlider.getValue());
+            } else {
+                AudioPlayer.playSound("minecraft", "entity.pig.ambient", this.volumeSlider.getValue(), this.pitchSlider.getValue());
+            }
         });
 
-        this.volumeSlider = new Slider(x + width - 80, y + 50, 80, 10, true, 0.1f, 2.0f, data.value.volume);
-        this.pitchSlider = new Slider(x + width - 80, y + 62, 80, 10, true, 0.1f, 2.0f, data.value.pitch);
-
-
+        this.volumeSlider = new Slider(x + width - 70, y + 47, 70, 12, true, 0.1f, 2.0f, data.value.volume);
+        this.pitchSlider = new Slider(x + width - 70, y + 62, 70, 12, true, 0.1f, 2.0f, data.value.pitch);
     }
 
     @Override
     public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.playSound"), 0,
-                x + 2, y + 8, "top", "left", 0xFF212121, false);
+                x + 2, y + 12, "left", "center", 0xFF212121, false);
+
+        GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.volume"), 0,
+                x + 2, y + 52, "left", "center", 0xFF212121, false);
+
+        GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.pitch"), 0,
+                x + 2, y + 67, "left", "center", 0xFF212121, false);
+
+        // Volume
+        GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.toSuper(String.valueOf(this.volumeSlider.getValue()))), 0,
+                x + width - 70 - 2, y + 54, "right", "center", 0xFF212121, false);
+        // Pitch
+        GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.toSuper(String.valueOf(this.pitchSlider.getValue()))), 0,
+                x + width - 70 - 2, y + 69, "right", "center", 0xFF212121, false);
+
         selector.renderWidget(ctx, mouseX, mouseY, delta);
         volumeSlider.renderWidget(ctx, mouseX, mouseY, delta);
         pitchSlider.renderWidget(ctx, mouseX, mouseY, delta);
+        playButton.renderWidget(ctx, mouseX, mouseY, delta);
+    }
+
+    @Override
+    public void setPosition(int x, int y) {
+        this.x = x;
+        this.y = y;
+        if (selector != null) selector.setY(y + 24);
+        if (playButton != null) playButton.setY(y + 24);
+        if (volumeSlider != null) volumeSlider.setY(y + 47);
+        if (pitchSlider != null) pitchSlider.setY(y + 62);
     }
 
     @Override
@@ -121,12 +162,14 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
     @Override
     public void reset() {
         selector.setSelectedItem("");
+        volumeSlider.setValue(1.0f);
+        pitchSlider.setValue(1.0f);
     }
 
     //? if >=1.21.9 {
     /*@Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
-        boolean r = selector.mouseClicked(event, bl) || volumeSlider.mouseClicked(event, bl) || pitchSlider.mouseClicked(event, bl);
+        boolean r = selector.mouseClicked(event, bl) || volumeSlider.mouseClicked(event, bl) || pitchSlider.mouseClicked(event, bl) || playButton.mouseClicked(event, bl);
         return r;
     }
 
@@ -144,7 +187,7 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
     //? } else {
     @Override
     public boolean mouseClicked(double mx, double my, int btn) {
-        boolean r = selector.mouseClicked(mx, my, btn) || volumeSlider.mouseClicked(mx, my, btn) || pitchSlider.mouseClicked(mx, my, btn);
+        boolean r = selector.mouseClicked(mx, my, btn) || volumeSlider.mouseClicked(mx, my, btn) || pitchSlider.mouseClicked(mx, my, btn) || playButton.mouseClicked(mx, my, btn);
         return r;
     }
 
@@ -167,6 +210,7 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         boolean r = selector.mouseReleased(event);
         r |= volumeSlider.mouseReleased(event);
         r |= pitchSlider.mouseReleased(event);
+        r |= playButton.mouseReleased(event);
         return r;
     }*/
     //? } else {
@@ -175,6 +219,7 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         boolean r = selector.mouseReleased(mx, my, btn);
         r |= volumeSlider.mouseReleased(mx, my, btn);
         r |= pitchSlider.mouseReleased(mx, my, btn);
+        r |= playButton.mouseReleased(mx, my, btn);
         return r;
     }
     //? }
@@ -185,7 +230,6 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         boolean r = selector.mouseDragged(event, deltaX, deltaY);
         r |= volumeSlider.mouseDragged(event, deltaX, deltaY);
         r |= pitchSlider.mouseDragged(event, deltaX, deltaY);
-        FBLogger.info("wqd");
         return r;
     }*/
     //? } else {

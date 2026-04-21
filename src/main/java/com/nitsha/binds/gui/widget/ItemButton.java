@@ -32,7 +32,7 @@ public class ItemButton extends AbstractButton {
     private final int size;
     private boolean selected;
     private int iconOffset = 0;
-    private final String btnKey;
+    private String btnKey;
     private ResourceLocation TEXTURE;
     private ResourceLocation NOT_FOUND_TEXTURE = Main.id("textures/gui/not_found.png");
 
@@ -60,6 +60,10 @@ public class ItemButton extends AbstractButton {
 
     public void setIcon(ItemStack icon) {
         this.icon = icon;
+    }
+
+    public void setTexture(ResourceLocation texture) {
+        this.TEXTURE = texture;
     }
 
     //? } else {
@@ -95,10 +99,25 @@ public class ItemButton extends AbstractButton {
         return this.y;
     }
 
+    @Override
+    public void setX(int x) {
+        super.setX(x);
+        this.x = x;
+    }
+
+    @Override
+    public void setY(int y) {
+        super.setY(y);
+        this.y = y;
+    }
+
+    public void setKey(String key) {
+        this.btnKey = key;
+    }
+
     public String getKey() {
         return btnKey;
     }
-
 
     public void setSelected(boolean cond) {
         this.selected = cond;

@@ -19,10 +19,8 @@ import net.minecraft.client.input.InputWithModifiers;*/
 //? }
 
 public class BedrockButton extends AbstractButton {
-    private ResourceLocation NORMAL = Main.id("textures/gui/btns/bedrock_normal_bottom.png");
-    private final ResourceLocation DISABLE = Main.id("textures/gui/btns/bedrock_disabled_bottom.png");
-    private ResourceLocation PRESSED_NORMAL = Main.id("textures/gui/btns/bedrock_normal_top.png");
-    private final ResourceLocation PRESSED_DISABLE = Main.id("textures/gui/btns/bedrock_disabled_top.png");
+
+    private ResourceLocation NORMAL, DISABLE, PRESSED_NORMAL, PRESSED_DISABLE;
     private final Runnable onClick;
 
     private String name;
@@ -51,6 +49,8 @@ public class BedrockButton extends AbstractButton {
         this.textHoverColor = textHoverColor;
         this.x = x;
         this.y = y;
+
+        setButtonDirection("");
     }
 
     public BedrockButton(String name, int x, int y, int width, int height, Runnable onClick) {
@@ -59,6 +59,13 @@ public class BedrockButton extends AbstractButton {
 
     public BedrockButton(String name, int x, int y, int width, int height, boolean isEnabled, Runnable onClick) {
         this(name, x, y, width, height, isEnabled, onClick, 0xFFFFFFFF, 0xFF3C8527, 0xFF212121, 0xFFFFFFFF);
+    }
+
+    public void setButtonDirection(String dir) {
+        NORMAL = Main.id("textures/gui/btns/bedrock_normal_bottom" + dir + ".png");
+        DISABLE = Main.id("textures/gui/btns/bedrock_disabled_bottom" + dir + ".png");
+        PRESSED_NORMAL = Main.id("textures/gui/btns/bedrock_normal_top" + dir + ".png");
+        PRESSED_DISABLE = Main.id("textures/gui/btns/bedrock_disabled_top" + dir + ".png");
     }
 
     public void setColors(int btnColor, int btnHoverColor, int textColor, int textHoverColor) {

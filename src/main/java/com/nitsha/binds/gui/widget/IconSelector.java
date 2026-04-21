@@ -19,16 +19,15 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 //? if >=26.1 {
 // import net.minecraft.world.item.ItemStackTemplate;
 //? }
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;*/
@@ -51,7 +50,7 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
     private int barSize = 20;
 
     private static final int COLUMNS = 9;
-    private static final int VISIBLE_ROWS = 7;
+    private static final int VISIBLE_ROWS = 8;
 
     public static String activeKey = "STRUCTURE_BLOCK";
     private boolean isDraggingScrollbar = false;
@@ -80,14 +79,19 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
     //? }
     private final String[] categoriesList = {"blocks", "tools", "colored", "foods", "gold", "mods"};
 
-    private final BindsEditor screen;
 
-    public IconSelector(BindsEditor screen, int x, int y, int width, int height) {
+    //? if >=26.1 {
+    // private BiConsumer<ItemStackTemplate, String> onClick;
+    //? } else {
+    private BiConsumer<ItemStack, String> onClick;
+    //? }
+
+    public IconSelector(int x, int y, int width, int height, BiConsumer</*? if <26.1 {*/ItemStack/*?} else {*//*ItemStackTemplate*//*?}*/, String> onClick) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        this.screen = screen;
+        this.onClick = onClick;
         createButtons();
 
         int catNum = 6;
@@ -95,7 +99,7 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
 
         for (int i = 0; i < catNum; i++) {
             int finalI = i;
-            BedrockIconButton cat = new BedrockIconButton(this.x + ((btnW + 2) * i), this.y + this.height + 2, btnW, 20, true, () -> {
+            BedrockIconButton cat = new BedrockIconButton(this.x + ((btnW + 2) * i), this.y + this.height + 1, btnW, 20, true, () -> {
                 this.currentCategory = categoriesList[finalI];
                 this.scrollOffset = 0;
                 for (BedrockIconButton btn : catBtns) { btn.setPressed(false); }
@@ -128,12 +132,7 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
             ItemStackTemplate stack = entry.getValue();
             String key = entry.getKey();
             ItemButton button = new ItemButton(bx, by, 18, stack, () -> {
-                screen.getBasicOptionsWindow().getEditIcon().setIcon(stack);
-                updateButtons(key);
-                BindsEditor.editIconBtnString = key;
-                if (!BindsEditor.getCBind().actions.isEmpty())  {
-                    screen.saveBind();
-                }
+                this.onClick.accept(stack, key);
             }, ITEMS, key);
             this.children.add(button);
         }
@@ -144,7 +143,6 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
     }
      */
     //? } else {
-    Map.Entry<String, ItemStack> randomItem = ItemsMapper.getRandomItem();
     private void createButtons() {
         this.children.removeIf(element -> element instanceof ItemButton);
         Map<String, ItemStack> sourceMap = ItemsMapper.categories.getOrDefault(currentCategory, ItemsMapper.itemStackMap);
@@ -169,12 +167,7 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
             String key = entry.getKey();
 
             ItemButton button = new ItemButton(bx, by, 18, stack, () -> {
-                screen.getBasicOptionsWindow().getEditIcon().setIcon(stack);
-                updateButtons(key);
-                BindsEditor.editIconBtnString = key;
-                if (!BindsEditor.getCBind().actions.isEmpty())  {
-                    screen.saveBind();
-                }
+                this.onClick.accept(stack, key);
             }, ITEMS, key);
             this.children.add(button);
         }
@@ -183,36 +176,6 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
         maxScroll = Math.max(0, rowAmount - VISIBLE_ROWS);
         updateScrollLogic(rowAmount);
         updateButtons(activeKey);
-    }
-    //? }
-    //? if >=26.1 {
-    /*public void pickRandom() {
-        Map.Entry<String, ItemStackTemplate> randomItem = ItemsMapper.getRandomItem();
-        if (randomItem == null) return;
-        String key = randomItem.getKey();
-        ItemStackTemplate stack = randomItem.getValue();
-        screen.getBasicOptionsWindow().getEditIcon().setIcon(stack);
-        updateButtons(key);
-        BindsEditor.editIconBtnString = key;
-        if (!BindsEditor.getCBind().actions.isEmpty()) {
-            screen.saveBind();
-        }
-    }*/
-    //? } else {
-    public void pickRandom() {
-        Map.Entry<String, ItemStack> randomItem = ItemsMapper.getRandomItem();
-        if (randomItem == null) return;
-
-        String key = randomItem.getKey();
-        ItemStack stack = randomItem.getValue();
-
-        screen.getBasicOptionsWindow().getEditIcon().setIcon(stack);
-        updateButtons(key);
-        BindsEditor.editIconBtnString = key;
-
-        if (!BindsEditor.getCBind().actions.isEmpty()) {
-            screen.saveBind();
-        }
     }
     //? }
 
@@ -313,7 +276,7 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
     }
 
     public void updateScrollLogic(int rowAmount) {
-        this.maxScroll = Math.max(0, rowAmount - 7);
+        this.maxScroll = Math.max(0, rowAmount - 8);
         int trackHeight = height - 2;
         this.barSize = Math.max(20, trackHeight - (maxScroll * 5));
         int scrollArea = trackHeight - barSize;

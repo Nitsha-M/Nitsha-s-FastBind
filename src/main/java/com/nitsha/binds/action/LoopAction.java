@@ -69,6 +69,14 @@ public class LoopAction extends ActionType<LoopActionData> {
     }
 
     @Override
+    public void setPosition(int x, int y) {
+        this.x = x;
+        this.y = y;
+        if (actionsField != null) actionsField.setY(y + 24);
+        if (countField != null) countField.setY(y + 24);
+    }
+
+    @Override
     public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.loop"), 0,
                 x + 2, y + 8, "top", "left", 0xFF212121, false);

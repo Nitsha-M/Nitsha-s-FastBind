@@ -323,7 +323,7 @@ config["loader"] = loader
 
 val fabric_loader = when {
     stonecutter.eval(minecraft_version, ">=21.6") -> "0.18.4"
-    stonecutter.eval(minecraft_version, ">=1.21.11") -> "0.17.3"
+    stonecutter.eval(minecraft_version, ">=1.21.11") -> "0.18.2"
     stonecutter.eval(minecraft_version, ">=1.21.9") -> "0.17.2"
     else -> "0.16.14"
 }
@@ -580,7 +580,7 @@ stonecutter {
         swap(entry.key, entry.value)
 
     replacements {
-        string(stonecutter.eval(minecraft_version, "<1.19.4")) {
+        string(stonecutter.eval(minecraft_version, "<1.19.4"), "!widget") {
             replace("renderWidget", "renderButton")
         }
 
@@ -598,7 +598,14 @@ stonecutter {
             replace("ResourceLocation", "Identifier")
             replace("net.minecraft.Util", "net.minecraft.util.Util")
             replace("ResourceLocation", "Identifier")
+        }
+
+        string(stonecutter.eval(minecraft_version, ">=1.21.11"), "!widget") {
             replace("renderWidget", "renderContents")
+        }
+
+        string(stonecutter.eval(minecraft_version, ">=26.1"), "!widget") {
+            replace("renderContents", "extractContents")
         }
 
         string(stonecutter.eval(minecraft_version, ">=26.1")) {

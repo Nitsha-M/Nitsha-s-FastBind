@@ -6,6 +6,7 @@ import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.utils.EventBus;
+import com.nitsha.binds.utils.SearchUtil;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;*/
@@ -32,12 +34,16 @@ public class SelectKeyEvent extends ModalWindow {
         super(screen, x, y, width, height, t1, t2, "nitsha.binds.advances.modals.selectKeyEvent");
         this.screen = screen;
 
+        this.setNeedSearch(true);
+
         this.addDrawElement((ctx, mouseX, mouseY) -> {
             GUIUtils.drawResizableBox(ctx, TAB2_BG, 4, 20, this.getWidth() - 8, this.getHeight() - 27, 1, 3);
         });
 
         this.eventsList = new ScrollableWindow(5, 21, 5, 21, getWidth() - 10, getHeight() - 29, false);
         this.addElement(this.eventsList);
+
+        this.getSearchField().setTypingEvent(this::generateList);
 
         generateList();
     }
@@ -56,11 +62,13 @@ public class SelectKeyEvent extends ModalWindow {
 
     public void generateList() {
         actionY = 0;
+        actionIndex = 0;
         this.eventsList.clearChildren();
         this.eventsList.setScrollableArea(0);
         this.eventsList.resetScroll();
 
         Map<String, List<KeyMapping>> byCategory = new LinkedHashMap<>();
+        String query = this.getSearchField().getText().toLowerCase();
 
         for (KeyMapping key : Minecraft.getInstance().options.keyMappings) {
             byCategory.computeIfAbsent(getCategoryKey(key), k -> new ArrayList<>()).add(key);
@@ -68,13 +76,19 @@ public class SelectKeyEvent extends ModalWindow {
 
         int h = 14;
         for (Map.Entry<String, List<KeyMapping>> entry : byCategory.entrySet()) {
-            actionIndex = 0;
             String category = entry.getKey();
             List<KeyMapping> keys = entry.getValue();
 
+            boolean categoryMatches = !query.isEmpty() && SearchUtil.matches(getCategoryLabel(category).getString().toLowerCase(), query);
+
+            List<KeyMapping> filtered = query.isEmpty() ? keys : categoryMatches ? keys : keys.stream()
+                    .filter(k -> SearchUtil.matches(k.getName().toLowerCase(), query))
+                    .toList();
+
+            if (filtered.isEmpty()) continue;
+
             final int capturedY = actionY;
             final String capturedCategory = category;
-
             this.eventsList.addDrawElement((ctx, mouseX, mouseY) -> {
                 GUIUtils.drawFill(ctx, 2, capturedY + 3, this.eventsList.getWidth() - 4, capturedY + 14, 0xFF212121);
                 GUIUtils.drawFill(ctx, 3, capturedY + 2, this.eventsList.getWidth() - 6, capturedY + 15, 0xFF212121);
@@ -84,7 +98,7 @@ public class SelectKeyEvent extends ModalWindow {
             actionY += 17;
             this.eventsList.addScrollableArea(17);
 
-            for (KeyMapping key : keys) {
+            for (KeyMapping key : filtered) {
                 KeyEventItem item = new KeyEventItem(this, 0, actionY, getWidth(), h, key.getName(), actionIndex);
                 this.eventsList.addElement(item);
                 this.eventsList.addScrollableArea(h);

@@ -3,6 +3,7 @@ package com.nitsha.binds;
 import com.nitsha.binds.bind.BindExecutor;
 import com.nitsha.binds.bind.BindHandler;
 import com.nitsha.binds.configs.*;
+import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.KeepMovementHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -31,6 +32,7 @@ public class Main {
         KeyBinds.register();
         Storage.loadModOptions();
         Storage.loadAllPresets();
+        AudioPlayer.loadExternalSounds();
 
         //? if fabric {
         ClientTickEvents.END_CLIENT_TICK.register(Main::onClientTick);
@@ -69,6 +71,7 @@ public class Main {
         BindExecutor.tick();
         BindHandler.tick();
         KeepMovementHandler.tick();
+        AudioPlayer.tick();
     }
 
     //? if >=1.21 {

@@ -53,12 +53,12 @@
   "nitsha.binds.advances.actions.loop.actions" : "Кількість дій (макс. 10)",
   "nitsha.binds.advances.actions.loop.count" : "Повторень (макс. 10)",
 
-  "nitsha.binds.advances.options.hold" : "Затисніть %s для меню",
+  "nitsha.binds.advances.options.holdToOpen" : "Затисніть %s для меню",
   "nitsha.binds.advances.options.openLastPage" : "Відкрити останню сторінку",
   "nitsha.binds.advances.options.openLastPreset" : "Відкрити останній пресет",
   "nitsha.binds.advances.options.keepMovement" : "Не блокувати рух",
   "nitsha.binds.advances.options.closeOnAction" : "Закривати при дії",
-  "nitsha.binds.advances.options.bindMsg" : "Сповіщення активації",
+  "nitsha.binds.advances.options.showActivationMessage" : "Сповіщення активації",
 
   "nitsha.binds.bindActivate" : "Бінд %s активовано",
 

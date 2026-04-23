@@ -103,9 +103,9 @@ public class ToastAction extends ActionType<ToastActionData> {
 
         this.iconSelector = new ItemButton(x + 5, y + 29, 22, ItemsMapper.getItemStack(data.value.icon), () -> {
             EventBus.off("selectIcon.result");
-            EventBus.on("selectIcon.result", (String selectedKey) -> {
-                this.iconSelector.setKey(selectedKey);
-                this.iconSelector.setIcon(ItemsMapper.getItemStack(selectedKey));
+            EventBus.on("selectIcon.result", (Object[] d) -> {
+                this.iconSelector.setKey((String) d[0]);
+                this.iconSelector.setIcon(ItemsMapper.getItemStack((String) d[0]));
             });
             EventBus.emit("selectIcon.open", null);
         }, getIconSelectorTexture(data.value.toastType), data.value.icon);
@@ -113,9 +113,9 @@ public class ToastAction extends ActionType<ToastActionData> {
         this.iconStyle = new BedrockIconOptionButton(x + width - 26 - 18, y + 3, 18, 19, () -> {
             data.value.toastType = this.iconStyle.getSelected();
             this.iconSelector.setTexture(getIconSelectorTexture(data.value.toastType));
-        }).addOption("task", "nitsha.binds.advances.actions.option.task", Main.id("textures/gui/sprites/toast_task.png"), 0xFF07938d, 0xFF0fb2ab)
-        .addOption("challenge", "nitsha.binds.advances.actions.option.challenge", Main.id("textures/gui/sprites/toast_challenge.png"), 0xFF07938d, 0xFF0fb2ab)
-        .addOption("goal", "nitsha.binds.advances.actions.option.goal", Main.id("textures/gui/sprites/toast_goal.png"), 0xFF9cc708, 0xFFafda19);
+        }).addOption("task", "nitsha.binds.advances.actions.option.task", Main.id("textures/gui/sprites/toast_task.png"), 0xFFfac70c, 0xFFfcd02f, 0xFF212121, 0xFF212121)
+        .addOption("challenge", "nitsha.binds.advances.actions.option.challenge", Main.id("textures/gui/sprites/toast_challenge.png"), 0xFFf356fd, 0xFFee78f5, 0xFFFFFFFF, 0xFFFFFFFF)
+        .addOption("goal", "nitsha.binds.advances.actions.option.goal", Main.id("textures/gui/sprites/toast_goal.png"), 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
 
         this.iconStyle.setSelected(data.value.toastType.toLowerCase());
         if (data.value != null) {
@@ -148,6 +148,9 @@ public class ToastAction extends ActionType<ToastActionData> {
         if (titleField != null) titleField.setY(y + 3);
         if (iconSelector != null) {
             iconSelector.setY(y + 29);
+        }
+        if (iconStyle != null) {
+            iconStyle.setY(y + 3);
         }
     }
 

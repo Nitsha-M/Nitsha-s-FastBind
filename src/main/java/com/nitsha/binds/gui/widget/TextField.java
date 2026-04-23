@@ -43,6 +43,8 @@ public class TextField extends AbstractButton {
     private final boolean isNumerical;
     private Runnable escapeEvent;
     private Runnable enterEvent;
+    private Runnable clickOutEvent;
+    private Runnable typingEvent;
 
     private static final ResourceLocation NORMAL = Main.id("textures/gui/test/text_field_normal.png");
     private static final ResourceLocation FOCUS = Main.id("textures/gui/test/text_field_focus.png");
@@ -72,6 +74,8 @@ public class TextField extends AbstractButton {
     private int maxLines = 1;
     private int scrollLines = 0;
     private Runnable heightChangeListener;
+
+    private boolean renderBackground = true;
 
     public static class LineInfo {
         public int startIndex, endIndex;
@@ -134,6 +138,10 @@ public class TextField extends AbstractButton {
     public int getY() { return y; }
     public int getWidth() { return width; }
     public int getHeight() { return height; }
+
+    public void setRenderBackground(boolean renderBackground) {
+        this.renderBackground = renderBackground;
+    }
 
     @Override
     public void setX(int x) {
@@ -563,6 +571,22 @@ public class TextField extends AbstractButton {
         this.enterEvent = event;
     }
 
+    public void setTypingEvent(Runnable typingEvent) {
+        this.typingEvent = typingEvent;
+    }
+
+    public void setClickOutEvent(Runnable clickOutEvent) {
+        this.clickOutEvent = clickOutEvent;
+    }
+
+    public Runnable getTypingEvent() {
+        return typingEvent;
+    }
+
+    public Runnable getClickOutEvent() {
+        return clickOutEvent;
+    }
+
     public Runnable getEscapeEvent() {
         return this.escapeEvent;
     }
@@ -584,6 +608,9 @@ public class TextField extends AbstractButton {
         this.formatMarks.clear();
         if (multiline) recalculateLines();
         this.setCursorToEnd(false);
+        if (this.typingEvent != null) {
+            this.typingEvent.run();
+        }
     }
 
     public String getText() {
@@ -686,6 +713,9 @@ public class TextField extends AbstractButton {
 
             this.setCursor(i + len, false);
         }
+        if (this.typingEvent != null) {
+            this.typingEvent.run();
+        }
     }
 
     private void erase(int offset) {
@@ -693,6 +723,9 @@ public class TextField extends AbstractButton {
             this.eraseWords(offset);
         } else {
             this.eraseCharacters(offset);
+        }
+        if (this.typingEvent != null) {
+            this.typingEvent.run();
         }
     }
 
@@ -786,11 +819,13 @@ public class TextField extends AbstractButton {
             return;
         }
         this.isHovered = isMouseOver(mouseX, mouseY);
-        GUIUtils.drawResizableBox(
-                ctx,
-                (this.isFocused() || isHovered) ? FOCUS : NORMAL,
-                getX(), getY(), getWidth(), getHeight(),
-                3, 7);
+        if (this.renderBackground) {
+            GUIUtils.drawResizableBox(
+                    ctx,
+                    (this.isFocused() || isHovered) ? FOCUS : NORMAL,
+                    getX(), getY(), getWidth(), getHeight(),
+                    3, 7);
+        }
 
         int renderX = getX() + 4;
         int renderY = this.getY() + (this.height - 8) / 2;
@@ -1081,6 +1116,10 @@ public class TextField extends AbstractButton {
             this.setCursor(getIndexByCoords(mouseX, mouseY), hasShiftDown());
 
             return true;
+        } else {
+            if (this.getClickOutEvent() != null) {
+                this.getClickOutEvent().run();
+            }
         }
         return false;
     }*/
@@ -1094,6 +1133,10 @@ public class TextField extends AbstractButton {
             this.setCursor(getIndexByCoords(mouseX, mouseY), hasShiftDown());
 
             return true;
+        } else {
+            if (this.getClickOutEvent() != null) {
+                this.getClickOutEvent().run();
+            }
         }
         return false;
     }

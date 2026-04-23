@@ -154,7 +154,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
             }
         }, 0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF);
 
-        this.exportBtn = new BedrockIconButton(85, 151, 26, 20, "copy", true, () -> {
+        this.exportBtn = new BedrockIconButton(85, 151, 26, 20, "export", true, () -> {
             screen.saveBind();
 
             BindData currentBind = BindsEditor.getCBind();
@@ -164,10 +164,10 @@ public class BasicOptionsWindow extends AnimatedWindow {
             if (encodedBind != null) {
                 Minecraft.getInstance().keyboardHandler.setClipboard(encodedBind);
             }
-        }, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
+        });
         this.exportBtn.setButtonDirection("_left");
 
-        this.importBtn = new BedrockIconButton(111, 151, 26, 20, "paste", true, () -> {
+        this.importBtn = new BedrockIconButton(111, 151, 26, 20, "import", true, () -> {
             String clipboardText = Minecraft.getInstance().keyboardHandler.getClipboard();
 
             BindData importedBind = CodecUtil.importFromText(clipboardText, BindData.class);
@@ -197,6 +197,12 @@ public class BasicOptionsWindow extends AnimatedWindow {
             }
         }, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
         this.importBtn.setButtonDirection("_right");
+
+
+        this.copyBtn.setNeighbor(this.pasteBtn);
+        this.pasteBtn.setNeighbor(this.copyBtn);
+        this.importBtn.setNeighbor(this.exportBtn);
+        this.exportBtn.setNeighbor(this.importBtn);
 
         this.addElement(bindNameField);
         this.addElement(editIconBtn);

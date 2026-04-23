@@ -32,6 +32,7 @@ public class Storage {
     public static final Path COMMON_DIR = StorageUtils.createFolder(MAIN_DIR_NAME);
     public static final Path MOD_DIR = StorageUtils.createFolder(MAIN_DIR_NAME, MOD_DIR_NAME);
     public static final Path PRESETS_DIR = StorageUtils.createFolder(MAIN_DIR_NAME, MOD_DIR_NAME + "/presets");
+    public static final Path SOUNDS_DIR = StorageUtils.createFolder(MAIN_DIR_NAME, MOD_DIR_NAME + "/sounds");
 
     private static final File CONFIG_FILE = MOD_DIR.resolve("fastbind_options.json").toFile();
 

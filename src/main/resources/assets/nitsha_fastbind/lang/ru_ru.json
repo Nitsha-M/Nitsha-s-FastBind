@@ -47,12 +47,12 @@
   "nitsha.binds.advances.actions.delayLine" : "в мс.",
   "nitsha.binds.advances.actions.addNew" : "доб.",
 
-  "nitsha.binds.advances.options.hold" : "Зажать %s для открытия",
+  "nitsha.binds.advances.options.holdToOpen" : "Зажать %s для открытия",
   "nitsha.binds.advances.options.openLastPage" : "Открыть на посл. странице",
   "nitsha.binds.advances.options.openLastPreset" : "Открыть на посл. пресете",
   "nitsha.binds.advances.options.keepMovement" : "Не блокировать движение",
   "nitsha.binds.advances.options.closeOnAction" : "Закрывать при активации",
-  "nitsha.binds.advances.options.bindMsg" : "Уведомление активации",
+  "nitsha.binds.advances.options.showActivationMessage" : "Уведомление активации",
 
   "nitsha.binds.bindActivate" : "Бинд %s активирован",
 

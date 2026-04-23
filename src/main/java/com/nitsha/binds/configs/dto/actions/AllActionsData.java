@@ -39,6 +39,7 @@ public class AllActionsData {
         public boolean isExternal = false;
         public float volume = 1.0f;
         public float pitch = 1.0f;
+        public int channel = 0;
     }
 
     public static class PlaySoundActionData extends ActionData {

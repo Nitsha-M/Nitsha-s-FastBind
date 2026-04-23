@@ -1,5 +1,6 @@
 package com.nitsha.binds.gui.panels;
 
+import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
@@ -11,8 +12,10 @@ import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import com.nitsha.binds.configs.dto.preset.ActionData;
 import net.minecraft.world.item.ItemStack;
@@ -55,10 +58,11 @@ public class AdvancedOptions extends AnimatedWindow {
 
     private BedrockIconOptionButton triggerModeBtn;
     private TextField holdMsField;
+    private final SmallTextButton changeHeight;
 
     public AdvancedOptions(BindsEditor screen, int x, int y, int width, int height, ResourceLocation t1,
                            ResourceLocation t2, int delay) {
-        super(x, y + 16, width, height - 16, t1, t2, delay);
+        super(x, y, width, height, t1, t2, delay);
         tabsBtn.clear();
         this.screen = screen;
 
@@ -91,9 +95,12 @@ public class AdvancedOptions extends AnimatedWindow {
         }, 0xFFFFFFFF, 0xFFEF4747, 0xFF262626, 0xFFFFFFFF);
         this.resetKeybind.setButtonDirection("_right");
 
+        this.keybind.setNeighbor(this.resetKeybind);
+        this.resetKeybind.setNeighbor(this.keybind);
+
         this.triggerModeBtn = new BedrockIconOptionButton(getWidth() - 22, getHeight() - 26, 18, 20, this::rebuildTriggerWidgets)
-            .addOption("press", "nitsha.binds.advances.actions.option.press", Main.id("textures/gui/sprites/key_press.png"), 0xFF07938d, 0xFF0fb2ab)
-            .addOption("hold", "nitsha.binds.advances.actions.option.hold", Main.id("textures/gui/sprites/key_hold.png"), 0xFF9cc708, 0xFFafda19);
+            .addOption("press", "nitsha.binds.advances.actions.option.press", Main.id("textures/gui/sprites/key_press.png"), 0xFF07938d, 0xFF0fb2ab, 0xFFFFFFFF, 0xFFFFFFFF)
+            .addOption("hold", "nitsha.binds.advances.actions.option.hold", Main.id("textures/gui/sprites/key_hold.png"), 0xFF9cc708, 0xFFafda19, 0xFFFFFFFF, 0xFFFFFFFF);
 
         this.holdMsField = new TextField(
                 net.minecraft.client.Minecraft.getInstance().font,
@@ -103,6 +110,26 @@ public class AdvancedOptions extends AnimatedWindow {
         this.holdMsField.setAnimatedPlaceholder(false);
 
         this.addNewAction = new NewAction(this, 4, actionY + 4, getWidth() - 8, 17);
+
+        this.changeHeight = new SmallTextButton(TextUtils.literal("⇕"), getWidth() + 4, 0, 0, 0x33000000, 0xFF232425, 0xFF232425, 0xFFe7bc1c, 9, "left", null, ()-> {
+            Storage.options.fullHeightEditor = !Storage.options.fullHeightEditor;
+            
+            int newY = (Storage.options.fullHeightEditor) ? 16 : ((screen.height - 190) / 2);
+            int newH = (Storage.options.fullHeightEditor) ? screen.height - 16 : 190;
+            
+            this.setHeight(newH);
+            this.setY(newY);
+
+            this.firstTab.setHeight(newH - 54);
+            this.thirdTab.setHeight(newH - 11);
+
+            this.keybind.setY(newH - 26);
+            this.resetKeybind.setY(newH - 26);
+            this.holdMsField.setY(newH - 26);
+            this.triggerModeBtn.setY(newH - 26);
+
+            Storage.saveModOptions();
+        });
 
         openTab(0);
 
@@ -347,6 +374,7 @@ public class AdvancedOptions extends AnimatedWindow {
                 for (TabButton btn : tabsBtn) {
                     btn.renderWidget(ctx, adjX, adjY, delta);
                 }
+                this.changeHeight.renderWidget(ctx, adjX, adjY, delta);
             }
         });
 
@@ -413,6 +441,8 @@ public class AdvancedOptions extends AnimatedWindow {
             if (btn.mouseClicked(adjustedEvent, bl)) clicked = true;
         }
 
+        if (this.changeHeight.mouseClicked(adjustedEvent, bl)) clicked = true;
+
         if (!wasOpen || !insidePanel) {
             if (super.mouseClicked(event, bl)) clicked = true;
         }
@@ -454,6 +484,8 @@ public class AdvancedOptions extends AnimatedWindow {
         for (TabButton btn : tabsBtn) {
             if (btn.mouseClicked(adjX, adjY, button)) clicked = true;
         }
+
+        if (this.changeHeight.mouseClicked(adjX, adjY, button)) clicked = true;
 
         if (!wasOpen || !insidePanel) {
             if (super.mouseClicked(mouseX, mouseY, button)) clicked = true;

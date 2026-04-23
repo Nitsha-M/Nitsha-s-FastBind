@@ -18,6 +18,12 @@
   "nitsha.binds.page" : "ᴘᴀɢᴇ",
   "nitsha.binds.autosave" : "ᴀᴜᴛᴏsᴀᴠᴇ",
 
+  "nitsha.binds.control.copy" : "Copy bind",
+  "nitsha.binds.control.paste" : "Paste bind",
+  "nitsha.binds.control.delete" : "Delete bind",
+  "nitsha.binds.control.import" : "Import bind from buffer",
+  "nitsha.binds.control.export" : "Export bind to buffer",
+
   "nitsha.binds.advances.tab1" : "ᴀᴄᴛɪᴏɴs",
   "nitsha.binds.advances.tab2" : "ɪᴄᴏɴ",
   "nitsha.binds.advances.tab3" : "ᴍᴏᴅ ᴏᴘᴛɪᴏɴs",
@@ -46,13 +52,20 @@
   "nitsha.binds.advances.actions.loop" : "ʀᴇᴘᴇᴀᴛ ғᴏʟʟᴏᴡɪɴɢ",
   "nitsha.binds.advances.actions.loop.actions" : "Actions count (10 max)",
   "nitsha.binds.advances.actions.loop.count" : "Repeat (10 max)",
+  "nitsha.binds.advances.actions.playSound" : "ᴘʟᴀʏ sᴏᴜɴᴅ",
+  "nitsha.binds.advances.actions.volume" : "ᴠᴏʟᴜᴍᴇ",
+  "nitsha.binds.advances.actions.pitch" : "ᴘɪᴛᴄʜ",
+  "nitsha.binds.advances.actions.slot" : "sʟᴏᴛ",
+  "nitsha.binds.advances.actions.toast" : "ᴛᴏᴀsᴛ",
+  "nitsha.binds.advances.actions.toastText" : "Toast text",
+  "nitsha.binds.advances.actions.typeSomeText" : "Type some text",
 
-  "nitsha.binds.advances.options.hold" : "Hold %s to show menu",
+  "nitsha.binds.advances.options.holdToOpen" : "Hold %s to show menu",
   "nitsha.binds.advances.options.openLastPage" : "Reopen last page",
   "nitsha.binds.advances.options.openLastPreset" : "Reopen last preset",
   "nitsha.binds.advances.options.keepMovement" : "Keep moving while open",
   "nitsha.binds.advances.options.closeOnAction" : "Close on action",
-  "nitsha.binds.advances.options.bindMsg" : "Bind activation message",
+  "nitsha.binds.advances.options.showActivationMessage" : "Bind activation message",
 
   "nitsha.binds.bindActivate" : "Bind %s activated",
 
@@ -60,9 +73,21 @@
   "nitsha.binds.advances.noSelectedKeyItem" : "Select item",
 
   "nitsha.binds.advances.modals.selectKeyEvent" : "sᴇʟᴇᴄᴛ ᴋᴇʏ ᴇᴠᴇɴᴛ",
+  "nitsha.binds.advances.modals.choose_icon" : "ᴄʜᴏᴏsᴇ ɪᴄᴏɴ",
+  "nitsha.binds.advances.modals.selectSound" : "sᴇʟᴇᴄᴛ sᴏᴜɴᴅ",
+  "nitsha.binds.advances.modals.noSound" : "ɴᴏ sᴏᴜɴᴅs ғᴏᴜɴᴅ",
 
+  "nitsha.binds.advances.modals.buttons.openFolder" : "ᴏᴘᴇɴ ғᴏʟᴅᴇʀ",
+  "nitsha.binds.advances.modals.buttons.reload" : "ʀᴇʟᴏᴀᴅ",
+  "nitsha.binds.advances.modals.buttons.minecraft" : "Minecraft",
+  "nitsha.binds.advances.modals.buttons.external" : "External",
+
+  "nitsha.binds.advances.actions.option.task" : "Task",
+  "nitsha.binds.advances.actions.option.goal" : "Goal",
+  "nitsha.binds.advances.actions.option.challenge" : "Challenge",
   "nitsha.binds.advances.actions.option.hold" : "Hold",
   "nitsha.binds.advances.actions.option.press" : "Press",
 
-  "nitsha.binds.default.newPreset" : "New preset"
+  "nitsha.binds.default.newPreset" : "New preset",
+  "nitsha.binds.default.newBind" : "Untitled"
 }

@@ -26,13 +26,17 @@ public class BedrockIconOptionButton extends BedrockButton {
         public ResourceLocation icon;
         public int color1;
         public int color2;
-        
-        public Option(String id, String nameKey, ResourceLocation icon, int color1, int color2) {
+        public int color3;
+        public int color4;
+
+        public Option(String id, String nameKey, ResourceLocation icon, int color1, int color2, int color3, int color4) {
             this.id = id;
             this.nameKey = nameKey;
             this.icon = icon;
             this.color1 = color1;
             this.color2 = color2;
+            this.color3 = color3;
+            this.color4 = color4;
         }
     }
 
@@ -50,8 +54,8 @@ public class BedrockIconOptionButton extends BedrockButton {
         this.yO = (height - 16) / 2;
     }
 
-    public BedrockIconOptionButton addOption(String id, String nameKey, ResourceLocation icon, int color1, int color2) {
-        this.options.add(new Option(id, nameKey, icon, color1, color2));
+    public BedrockIconOptionButton addOption(String id, String nameKey, ResourceLocation icon, int color1, int color2, int color3, int color4) {
+        this.options.add(new Option(id, nameKey, icon, color1, color2, color3, color4));
         if (options.size() == 1) setupColor();
         return this;
     }
@@ -59,7 +63,7 @@ public class BedrockIconOptionButton extends BedrockButton {
     private void setupColor() {
         if (options.isEmpty()) return;
         Option opt = options.get(selectedIndex);
-        this.setColors(opt.color1, opt.color2, 0xFFFFFFFF, 0xFFFFFFFF);
+        this.setColors(opt.color1, opt.color2, opt.color3, opt.color4);
     }
 
     public String getSelected() {

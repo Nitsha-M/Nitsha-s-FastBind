@@ -183,6 +183,7 @@ public class AnimatedWindow extends AbstractContainerEventHandler implements Ren
                 }
                 break;
             case FINISHED:
+                baseYOffset = this.y + 2;
                 break;
             case HIDDEN:
                 break;

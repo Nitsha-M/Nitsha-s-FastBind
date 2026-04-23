@@ -136,9 +136,4 @@ public class SelectKeyEvent extends ModalWindow {
         EventBus.emit("selectKeyEvent.result", key);
         this.close(() -> {});
     }
-
-    public boolean isMouseInside(double mouseX, double mouseY) {
-        return mouseX >= this.getX() && mouseX < this.getX() + this.getWidth()
-                && mouseY >= this.getY() - 16 && mouseY < this.getY() + this.getHeight();
-    }
 }

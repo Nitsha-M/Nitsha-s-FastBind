@@ -1,5 +1,6 @@
 package com.nitsha.binds.gui.widget;
 
+import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
@@ -38,6 +39,10 @@ public class BedrockButton extends AbstractButton {
 
     private int x, y;
 
+    private String dir;
+
+    private BedrockButton neighbor;
+
     public BedrockButton(String name, int x, int y, int width, int height, boolean isEnabled, Runnable onClick, int btnColor, int btnHoverColor, int textColor, int textHoverColor) {
         super(x, y, width, height, TextUtils.empty());
         this.name = name;
@@ -61,7 +66,12 @@ public class BedrockButton extends AbstractButton {
         this(name, x, y, width, height, isEnabled, onClick, 0xFFFFFFFF, 0xFF3C8527, 0xFF212121, 0xFFFFFFFF);
     }
 
+    public void setNeighbor(BedrockButton neighbor) {
+        this.neighbor = neighbor;
+    }
+
     public void setButtonDirection(String dir) {
+        this.dir = dir;
         NORMAL = Main.id("textures/gui/btns/bedrock_normal_bottom" + dir + ".png");
         DISABLE = Main.id("textures/gui/btns/bedrock_disabled_bottom" + dir + ".png");
         PRESSED_NORMAL = Main.id("textures/gui/btns/bedrock_normal_top" + dir + ".png");
@@ -170,11 +180,20 @@ public class BedrockButton extends AbstractButton {
         yOffset = Mth.lerp(GUIUtils.clampSpeed(speed * delta), yOffset, targetOffset);
         if (Math.abs(yOffset - targetOffset) < 0.001f) yOffset = targetOffset;
 
+        int outlineColor = 0xFF000000;
+
         int fX = this.getX();
         int fY = this.getY();
         int fW = this.getWidth();
         int fH = this.getHeight();
 
+        if (neighbor != null) {
+            if (this.dir.equals("_left")) {
+                GUIUtils.drawFill(ctx, fX + fW - 1, fY + Math.round(neighbor.getOffsetY()), fX + fW, fY + fH, outlineColor);
+            } else if (this.dir.equals("_right")) {
+                GUIUtils.drawFill(ctx, fX, fY + Math.round(neighbor.getOffsetY()), fX + 1, fY + fH, outlineColor);
+            }
+        }
 
         // Bottom texture
         GUIUtils.drawResizableBox(ctx, (!isEnabled) ? DISABLE : NORMAL, fX, fY + 2, fW, fH - 2, 5, 11, ((isHovered || isPressed) && isEnabled) ? btnHoverColor : btnColor);

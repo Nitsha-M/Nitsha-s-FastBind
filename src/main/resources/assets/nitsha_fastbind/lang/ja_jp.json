@@ -50,12 +50,12 @@
   "nitsha.binds.advances.actions.loop.actions": "アクション数 (最大10)",
   "nitsha.binds.advances.actions.loop.count": "繰り返し回数 (最大10)",
 
-  "nitsha.binds.advances.options.hold" : "%s を長押しでメニューを表示",
+  "nitsha.binds.advances.options.holdToOpen" : "%s を長押しでメニューを表示",
   "nitsha.binds.advances.options.openLastPage" : "前回のページを再表示",
   "nitsha.binds.advances.options.openLastPreset" : "前回のプリセットを再表示",
   "nitsha.binds.advances.options.keepMovement" : "開いている間も移動を維持",
   "nitsha.binds.advances.options.closeOnAction" : "アクション実行時に閉じる",
-  "nitsha.binds.advances.options.bindMsg" : "バインド起動メッセージ",
+  "nitsha.binds.advances.options.showActivationMessage" : "バインド起動メッセージ",
 
   "nitsha.binds.bindActivate" : "バインド %s を起動しました",
 

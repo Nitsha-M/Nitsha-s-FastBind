@@ -15,4 +15,6 @@ public class ModOptionsData {
     public String lastPresetId = "";
     @HiddenField
     public int lastPageIndex = 0;
+    @HiddenField
+    public boolean fullHeightEditor = false;
 }

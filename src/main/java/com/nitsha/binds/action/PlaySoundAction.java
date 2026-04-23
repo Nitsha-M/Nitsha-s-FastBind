@@ -1,5 +1,6 @@
 package com.nitsha.binds.action;
 
+import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.*;
@@ -9,6 +10,9 @@ import com.nitsha.binds.utils.EventBus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 //? if >=1.21.9 {
@@ -34,6 +38,9 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
 
     private Slider volumeSlider;
     private Slider pitchSlider;
+    private boolean isExternal = false;
+    private List<SmallToggleButton> slotBtns = new ArrayList<>();
+    private int selectedSlot = 0;
 
     @Override
     public String getId() { return "playSound"; }
@@ -45,7 +52,7 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
 
     @Override public String getDefaultValue() { return ""; }
     @Override public int getLineColor() { return 0xFFD50FC2; }
-    @Override public int getHeight() { return 76; }
+    @Override public int getHeight() { return 91; }
 
     @Override
     public PlaySoundActionData createDefaultData() { return new PlaySoundActionData("playSound"); }
@@ -57,6 +64,7 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         boolean isExternal = data.value.isExternal;
         float volume = data.value.volume;
         float pitch = data.value.pitch;
+        if (id.isEmpty()) return;
 
         actions.add(() -> {
             if (!isExternal) {
@@ -64,9 +72,10 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
                 String[] parts = id.split(":");
                 String namespace = parts[0];
                 String name = parts[1];
-                AudioPlayer.playSound(namespace, name, volume, pitch);
+                AudioPlayer.playSound(data.value.channel, namespace, name, volume, pitch, () -> {});
             } else {
-                AudioPlayer.playSound("minecraft", "entity.pig.ambient", volume, pitch);
+                File sound = AudioPlayer.EXTERNAL_SOUNDS.get(id);
+                AudioPlayer.playExternalSound(data.value.channel, sound, volume, pitch, () -> {});
             }
         });
     }
@@ -77,20 +86,27 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         this.y = y;
         this.width = width;
 
+        this.selectedSlot = data.value.channel;
+
         String savedKey = data.value.value != null ? data.value.value : "";
+        this.isExternal = data.value.isExternal;
 
         this.selector = new KeySelector(x, y + 24, width - 20, 20, () -> {
-            EventBus.off("selectKeyEvent.result");
-            EventBus.on("selectKeyEvent.result", (String selectedKey) -> {
-                selector.setSelectedItem(selectedKey);
+            EventBus.off("selectSound.result");
+            EventBus.on("selectSound.result", (Object[] d) -> {
+                FBLogger.info("key: {}", (String) d[0]);
+                selector.setSelectedItem((String) d[0]);
+                AudioPlayer.stopChannel(9);
+                this.isExternal = (boolean) d[1];
+                play(false);
             });
-            EventBus.emit("selectKeyEvent.open", null);
+            EventBus.emit("selectSound.open", null);
         })  {
             @Override
             protected void updateName() {
                 super.updateName();
                 if (!this.getSelectedItem().isEmpty()) {
-                    Component name = TextUtils.literal(savedKey);
+                    Component name = TextUtils.literal(this.getSelectedItem());
                     int maxWidth = this.width - 8;
                     int avgCharWidth = 7;
                     setName(GUIUtils.truncateString(name.getString(), maxWidth / avgCharWidth));
@@ -99,21 +115,38 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         };
         this.selector.setSelectedItem(savedKey);
 
-
-        this.playButton = new BedrockIconButton(x + width - 18, y + 24, 18, 20, "paste", true, () -> {
-            if (!data.value.isExternal) {
-                if (!savedKey.contains(":")) return;
-                String[] parts = savedKey.split(":", 2);
-                String namespace = parts[0];
-                String name = parts[1];
-                AudioPlayer.playSound(namespace, name, this.volumeSlider.getValue(), this.pitchSlider.getValue());
-            } else {
-                AudioPlayer.playSound("minecraft", "entity.pig.ambient", this.volumeSlider.getValue(), this.pitchSlider.getValue());
-            }
+        this.playButton = new BedrockIconButton(x + width - 18, y + 24, 18, 20, "sound_play", true, () -> {
+            if (this.selector.getSelectedItem().isEmpty()) return;
+            AudioPlayer.previewSound(9, this.selector.getSelectedItem(), this.volumeSlider.getValue(), this.pitchSlider.getValue(), this.isExternal, () -> play(true), () -> play(false), () -> play(false));
         });
 
-        this.volumeSlider = new Slider(x + width - 70, y + 47, 70, 12, true, 0.1f, 2.0f, data.value.volume);
+        this.volumeSlider = new Slider(x + width - 70, y + 47, 70, 12, true, 0.1f, 1.0f, data.value.volume);
         this.pitchSlider = new Slider(x + width - 70, y + 62, 70, 12, true, 0.1f, 2.0f, data.value.pitch);
+
+        int slotX = x + width - 108;
+        for (int i = 0; i < 9; i++) {
+            int finalI = i;
+            SmallToggleButton it = new SmallToggleButton(TextUtils.literal(String.valueOf(i)), slotX, y + 77, 12, 12, this.selectedSlot == i, () -> {
+                selectSlot(finalI);
+            });
+            switch (i) {
+                case 0 -> it.setButtonDirection("_left");
+                case 8 -> it.setButtonDirection("_right");
+                default -> it.setButtonDirection("_both");
+            }
+            slotBtns.add(it);
+            slotX += 12;
+        }
+    }
+
+    public void play(boolean status) {
+        if (status) {
+            this.playButton.setColors(0xFFfac70c, 0xFFfcd02f, 0xFFFFFFFF, 0xFFFFFFFF);
+            this.playButton.setIcon("sound_pause");
+        } else {
+            this.playButton.setColors(0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF);
+            this.playButton.setIcon("sound_play");
+        }
     }
 
     @Override
@@ -127,6 +160,9 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.pitch"), 0,
                 x + 2, y + 67, "left", "center", 0xFF212121, false);
 
+        GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.slot"), 0,
+                x + 2, y + 82, "left", "center", 0xFF212121, false);
+
         // Volume
         GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.toSuper(String.valueOf(this.volumeSlider.getValue()))), 0,
                 x + width - 70 - 2, y + 54, "right", "center", 0xFF212121, false);
@@ -138,6 +174,7 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         volumeSlider.renderWidget(ctx, mouseX, mouseY, delta);
         pitchSlider.renderWidget(ctx, mouseX, mouseY, delta);
         playButton.renderWidget(ctx, mouseX, mouseY, delta);
+        slotBtns.forEach(btn -> btn.renderWidget(ctx, mouseX, mouseY, delta));
     }
 
     @Override
@@ -148,6 +185,11 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         if (playButton != null) playButton.setY(y + 24);
         if (volumeSlider != null) volumeSlider.setY(y + 47);
         if (pitchSlider != null) pitchSlider.setY(y + 62);
+        if (slotBtns != null) {
+            for (SmallToggleButton btn : slotBtns) {
+                btn.setY(y + 77);
+            }
+        }
     }
 
     @Override
@@ -156,6 +198,8 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         result.value.value = selector.getSelectedItem();
         result.value.volume = volumeSlider.getValue();
         result.value.pitch = pitchSlider.getValue();
+        result.value.isExternal = this.isExternal;
+        result.value.channel = this.selectedSlot;
         return result;
     }
 
@@ -164,12 +208,24 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         selector.setSelectedItem("");
         volumeSlider.setValue(1.0f);
         pitchSlider.setValue(1.0f);
+        if (!slotBtns.isEmpty()) {
+            selectSlot(0);
+        }
+    }
+
+    private void selectSlot(int slot) {
+        slotBtns.forEach(btn -> btn.setToggled(false));
+        slotBtns.get(slot).setToggled(true);
+        selectedSlot = slot;
     }
 
     //? if >=1.21.9 {
     /*@Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
         boolean r = selector.mouseClicked(event, bl) || volumeSlider.mouseClicked(event, bl) || pitchSlider.mouseClicked(event, bl) || playButton.mouseClicked(event, bl);
+        for (SmallToggleButton b : slotBtns) {
+            r |= b.mouseClicked(event, bl);
+        }
         return r;
     }
 
@@ -188,6 +244,9 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
     @Override
     public boolean mouseClicked(double mx, double my, int btn) {
         boolean r = selector.mouseClicked(mx, my, btn) || volumeSlider.mouseClicked(mx, my, btn) || pitchSlider.mouseClicked(mx, my, btn) || playButton.mouseClicked(mx, my, btn);
+        for (SmallToggleButton b : slotBtns) {
+            r |= b.mouseClicked(mx, my, btn);
+        }
         return r;
     }
 

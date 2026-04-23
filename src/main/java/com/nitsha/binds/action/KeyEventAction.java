@@ -1,5 +1,6 @@
 package com.nitsha.binds.action;
 
+import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.*;
@@ -93,8 +94,8 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
 
         this.selector = new KeySelector(x, y + 24, width, 20, () -> {
             EventBus.off("selectKeyEvent.result");
-            EventBus.on("selectKeyEvent.result", (String selectedKey) -> {
-                selector.setSelectedItem(selectedKey);
+            EventBus.on("selectKeyEvent.result", (Object[] d) -> {
+                selector.setSelectedItem((String) d[0]);
             });
             EventBus.emit("selectKeyEvent.open", null);
         }) {
@@ -119,8 +120,8 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
 
         this.modeButton = new BedrockIconOptionButton(x + width - 18, y + 24, 18, 20, () -> {
                 rebuildModeWidgets(this.modeButton.getSelected(), msField != null ? msField.getText() : "500");
-        }).addOption("press", "nitsha.binds.advances.actions.option.press", Main.id("textures/gui/sprites/key_press.png"), 0xFF07938d, 0xFF0fb2ab)
-          .addOption("hold", "nitsha.binds.advances.actions.option.hold", Main.id("textures/gui/sprites/key_hold.png"), 0xFF9cc708, 0xFFafda19);
+        }).addOption("press", "nitsha.binds.advances.actions.option.press", Main.id("textures/gui/sprites/key_press.png"), 0xFF07938d, 0xFF0fb2ab, 0xFFFFFFFF, 0xFFFFFFFF)
+          .addOption("hold", "nitsha.binds.advances.actions.option.hold", Main.id("textures/gui/sprites/key_hold.png"), 0xFF9cc708, 0xFFafda19, 0xFFFFFFFF, 0xFFFFFFFF);
 
         this.selector.setSelectedItem(savedKey);
         rebuildModeWidgets(savedMode, savedMs);

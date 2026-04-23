@@ -47,12 +47,12 @@
   "nitsha.binds.advances.actions.loop.actions": "动作数量（最多10个）",
   "nitsha.binds.advances.actions.loop.count": "循环次数（最多10次）",
 
-  "nitsha.binds.advances.options.hold": "长按 %s 显示菜单",
+  "nitsha.binds.advances.options.holdToOpen": "长按 %s 显示菜单",
   "nitsha.binds.advances.options.openLastPage": "记忆上次打开的页面",
   "nitsha.binds.advances.options.openLastPreset": "记忆上次使用的预设",
   "nitsha.binds.advances.options.keepMovement": "开启时保持移动",
   "nitsha.binds.advances.options.closeOnAction": "执行动作后关闭",
-  "nitsha.binds.advances.options.bindMsg": "绑定激活提示信息",
+  "nitsha.binds.advances.options.showActivationMessage": "绑定激活提示信息",
 
   "nitsha.binds.bindActivate": "绑定 %s 已激活",
 

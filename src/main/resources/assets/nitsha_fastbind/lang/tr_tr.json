@@ -47,12 +47,12 @@
   "nitsha.binds.advances.actions.loop.actions" : "Eylem sayısı (maks. 10)",
   "nitsha.binds.advances.actions.loop.count" : "Tekrar sayısı (maks. 10)",
 
-  "nitsha.binds.advances.options.hold" : "%s basılı tut — menü açılır",
+  "nitsha.binds.advances.options.holdToOpen" : "%s basılı tut — menü açılır",
   "nitsha.binds.advances.options.openLastPage" : "Son sayfayı yeniden aç",
   "nitsha.binds.advances.options.openLastPreset" : "Son önayarı yeniden aç",
   "nitsha.binds.advances.options.keepMovement" : "Açıkken hareket et",
   "nitsha.binds.advances.options.closeOnAction" : "Eylemde kapat",
-  "nitsha.binds.advances.options.bindMsg" : "Bind etkinleşme mesajı",
+  "nitsha.binds.advances.options.showActivationMessage" : "Bind etkinleşme mesajı",
 
   "nitsha.binds.bindActivate" : "Bind %s etkinleştirildi",
 

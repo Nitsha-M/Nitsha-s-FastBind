@@ -9,9 +9,11 @@ import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.configs.*;
 import com.nitsha.binds.gui.modals.SelectIcon;
 import com.nitsha.binds.gui.modals.SelectKeyEvent;
+import com.nitsha.binds.gui.modals.SelectSound;
 import com.nitsha.binds.gui.panels.*;
 import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.RenderUtils;
 import net.minecraft.world.level.block.Blocks;
@@ -70,7 +72,7 @@ public class BindsEditor extends Screen {
     private PresetSelector window_PresetSelector;
 
     private SelectKeyEvent modal_SelectKeyEvent;
-    private SelectKeyEvent modal_SelectSound;
+    private SelectSound modal_SelectSound;
     private SelectIcon modal_SelectIcon;
 
     private final Screen parent;
@@ -136,7 +138,7 @@ public class BindsEditor extends Screen {
         //? }
 
         // Advanced options (icon, actions, mod options)
-        window_AdvancedOptions = new AdvancedOptions(this, centerX + 61, centerY - 16, 180, TEXTURE_HEIGHT + 16,
+        window_AdvancedOptions = new AdvancedOptions(this, centerX + 61, (Storage.options.fullHeightEditor) ? 16 : centerY, 180, (Storage.options.fullHeightEditor) ? this.height - 16 : TEXTURE_HEIGHT,
                 BACKGROUND, BACKGROUND_FLAT, 140);
         //? if >=1.17 {
         this.addRenderableWidget(window_AdvancedOptions);
@@ -154,7 +156,7 @@ public class BindsEditor extends Screen {
         //?}
         modalWindows.add(modal_SelectKeyEvent);
 
-        // Select key event
+        // Select icon
         modal_SelectIcon = new SelectIcon(this, centerX, centerY, 180, TEXTURE_HEIGHT,
                 BACKGROUND, BACKGROUND_FLAT);
         //? if >=1.17 {
@@ -163,6 +165,16 @@ public class BindsEditor extends Screen {
         // this.addWidget(modal_SelectIcon);
         //?}
         modalWindows.add(modal_SelectIcon);
+
+        // Select icon
+        modal_SelectSound = new SelectSound(this, centerX, centerY, 180, TEXTURE_HEIGHT,
+                BACKGROUND, BACKGROUND_FLAT);
+        //? if >=1.17 {
+        this.addRenderableWidget(modal_SelectSound);
+        //?} else {
+        // this.addWidget(modal_SelectSound);
+        //?}
+        modalWindows.add(modal_SelectSound);
 
         selectBind();
         window_BindsList.updateSelected(ItemsMapper.getItemStack(getCBind().icon));
@@ -173,6 +185,10 @@ public class BindsEditor extends Screen {
 
         EventBus.on("selectIcon.open", (Void v) -> {
             modal_SelectIcon.open(() -> {});
+        });
+
+        EventBus.on("selectSound.open", (Void v) -> {
+            modal_SelectSound.open(() -> {});
         });
     }
 
@@ -596,6 +612,7 @@ public class BindsEditor extends Screen {
         MainKeybindSelector.setFocusedField(null);
         this.saveBind();
         window_PresetSelector.saveAll();
+        AudioPlayer.stopChannel(9);
     }
 
     @Override

@@ -22,23 +22,25 @@ import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
 public class SmallTextButton extends AbstractButton {
-    private static final ResourceLocation NORMAL = Main.id("textures/gui/btns/smallbtn_normal.png");
-    private static final ResourceLocation HOVER = Main.id("textures/gui/btns/smallbtn_hover.png");
+    private ResourceLocation NORMAL, HOVER;
     private final Runnable onClick;
     private final MutableComponent name;
     private ResourceLocation icon;
 
-    private int color;
-    private int hoverColor;
-    private int textColor;
-    private int hoverTextColor;
+    protected int color;
+    protected int hoverColor;
+    protected int textColor;
+    protected int hoverTextColor;
     private final int iconSize;
 
-    private int x, y, width, height;
-    private boolean isEnabled = true;
+    protected int x, y, width, height;
+    protected boolean isEnabled = true;
+    protected boolean toggled = false;
+
+    private String dir;
 
     public SmallTextButton(MutableComponent name, int x, int y, int iconSize, int color, int hoverColor, int textColor, int hoverTextColor, int width, String align,
-            ResourceLocation icon, Runnable onClick) {
+                           ResourceLocation icon, Runnable onClick) {
         super(x, y, 0, 9, TextUtils.empty());
         this.name = name;
         this.onClick = onClick;
@@ -49,6 +51,8 @@ public class SmallTextButton extends AbstractButton {
         this.textColor = textColor;
         this.hoverTextColor = hoverTextColor;
         this.iconSize = iconSize;
+
+        setButtonDirection("");
 
         Font font = Minecraft.getInstance().font;
         int iconWidth = (icon != null) ? iconSize + 1 : 0;
@@ -64,6 +68,12 @@ public class SmallTextButton extends AbstractButton {
                 this.x = x - getWidth();
                 break;
         }
+    }
+
+    public void setButtonDirection(String dir) {
+        this.dir = dir;
+        NORMAL = Main.id("textures/gui/btns/smallbtn_normal" + dir + ".png");
+        HOVER = Main.id("textures/gui/btns/smallbtn_hover" + dir + ".png");
     }
 
     public SmallTextButton(MutableComponent name, int x, int y, int color, int width, String align, Runnable onClick) {
@@ -94,44 +104,29 @@ public class SmallTextButton extends AbstractButton {
         this.y = newY;
     }
 
-    public int getX() {
-        return this.x;
+    public ResourceLocation getHoverTexture() {
+        return HOVER;
     }
 
-    public int getY() {
-        return this.y;
+    public ResourceLocation getNormalTexture() {
+        return NORMAL;
     }
 
-    public void setWidth(int newWidth) {
-        this.width = newWidth;
-    }
+    public int getX() { return this.x; }
+    public int getY() { return this.y; }
+    public void setWidth(int newWidth) { this.width = newWidth; }
+    public void setHeight(int newHeight) { this.height = newHeight; }
+    public int getWidth() { return this.width; }
+    public int getHeight() { return this.height; }
+    public boolean isHovered() { return this.isHovered; }
+    public boolean isEnabled() { return this.isEnabled; }
+    public void setEnabled(boolean enabled) { this.isEnabled = enabled; }
+    public void setIcon(ResourceLocation icon) { this.icon = icon; }
+    public boolean isToggled() { return toggled; }
+    public void setToggled(boolean toggled) { this.toggled = toggled; }
 
-    public void setHeight(int newHeight) {
-        this.height = newHeight;
-    }
-
-    public int getWidth() {
-        return this.width;
-    }
-
-    public int getHeight() {
-        return this.height;
-    }
-
-    public boolean isHovered() {
-        return this.isHovered;
-    }
-
-    public boolean isEnabled() {
-        return this.isEnabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.isEnabled = enabled;
-    }
-
-    public void setIcon(ResourceLocation icon) {
-        this.icon = icon;
+    protected boolean isActiveState() {
+        return (isHovered && isEnabled) || toggled;
     }
 
     public void setColors(int btnColor, int btnHoverColor, int textColor, int textHoverColor) {
@@ -151,20 +146,16 @@ public class SmallTextButton extends AbstractButton {
         int textWidth = font.width(name);
         int iconWidth = (icon != null) ? this.iconSize + 1 : 0;
 
-        GUIUtils.drawResizableBox(ctx, (isHovered && isEnabled) ? HOVER : NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5, (isHovered && isEnabled) ? hoverColor : color);
+        GUIUtils.drawResizableBox(ctx, isActiveState() ? HOVER : NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5, isActiveState() ? hoverColor : color);
 
         int contentX = this.getX() + ((getWidth() / 2) - ((iconWidth + textWidth) / 2));
 
         if (icon != null) {
-            GUIUtils.adaptiveDrawTexture(ctx, icon, contentX, this.getY() + ((this.height / 2) - (iconSize / 2)), 0, 0, iconSize, iconSize, iconSize, iconSize, (isHovered && isEnabled) ? hoverTextColor : textColor);
+            GUIUtils.adaptiveDrawTexture(ctx, icon, contentX, this.getY() + ((this.height / 2) - (iconSize / 2)), 0, 0, iconSize, iconSize, iconSize, iconSize, isActiveState() ? hoverTextColor : textColor);
             contentX += iconWidth;
         }
 
-        GUIUtils.addText(
-                ctx, name, 0,
-                contentX,
-                this.getY() + (this.height / 2),
-                "left", "center", (isHovered && isEnabled) ? hoverTextColor : textColor, false);
+        GUIUtils.addText(ctx, name, 0, contentX, this.getY() + (this.height / 2), "left", "center", isActiveState() ? hoverTextColor : textColor, false);
 
         if (!this.isEnabled) {
             GUIUtils.drawResizableBox(ctx, NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5, 0x66000000);
@@ -174,13 +165,13 @@ public class SmallTextButton extends AbstractButton {
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
         return this.active && this.visible
-                && mouseX >= (double)this.getX() && mouseY >= (double)this.getY()
-                && mouseX < (double)(this.getX() + this.getWidth())
-                && mouseY < (double)(this.getY() + this.getHeight());
+                && mouseX >= (double) this.getX() && mouseY >= (double) this.getY()
+                && mouseX < (double) (this.getX() + this.getWidth())
+                && mouseY < (double) (this.getY() + this.getHeight());
     }
 
     @Override
-    //? if >=1.21.9 {
+            //? if >=1.21.9 {
     /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         int button = event.buttonInfo().button();
         double mouseX = event.x();
@@ -192,23 +183,22 @@ public class SmallTextButton extends AbstractButton {
         }
         return false;
     }*/
-    //? } else {
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (button == 0 && isMouseOver(mouseX, mouseY) && this.isEnabled) {
-                this.playDownSound(Minecraft.getInstance().getSoundManager());
-                this.onClick.run();
-                return true;
-            }
-            return false;
+            //? } else {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0 && isMouseOver(mouseX, mouseY) && this.isEnabled) {
+            this.playDownSound(Minecraft.getInstance().getSoundManager());
+            this.onClick.run();
+            return true;
         }
+        return false;
+    }
     //? }
 
     //? if >=1.19.3 {
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput builder) {
-    }
+    protected void updateWidgetNarration(NarrationElementOutput builder) {}
     //? } else if >=1.17 {
     /*@Override
-     public void updateNarration(NarrationElementOutput builder) { }*/
+    public void updateNarration(NarrationElementOutput builder) { }*/
     //? }
 }

@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "com.nitsha.binds.mixin",
   "compatibilityLevel": "JAVA_${java_version}",
+  "refmap": "nitsha_fastbind.refmap.json",
   "priority": 1500,
   "mixins": [],
   "client": [

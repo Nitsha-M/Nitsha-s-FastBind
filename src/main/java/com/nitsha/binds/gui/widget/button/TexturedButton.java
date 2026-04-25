@@ -1,4 +1,4 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.button;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;

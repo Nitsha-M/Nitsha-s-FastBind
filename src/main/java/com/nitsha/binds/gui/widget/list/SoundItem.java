@@ -1,8 +1,6 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.list;
 
-import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.gui.modals.SelectKeyEvent;
 import com.nitsha.binds.gui.modals.SelectSound;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
@@ -88,9 +86,9 @@ public class SoundItem extends AbstractButton {
         if (!isExternal) {
             String[] parts = this.value.split(":", 2);
             String[] subparts = parts[1].split("\\.", 2);
-            String obj = subparts[0];
+            String obj = GUIUtils.truncateString(subparts[0], 15);
             name = subparts.length > 1 ? subparts[1] : subparts[0];
-            category = parts[0];
+            category = GUIUtils.truncateString(parts[0], 10);
 
             // obj
             GUIUtils.drawResizableBox(ctx, NORMAL, iX + 12, this.getY() + 1, font.width(obj) + 4, 10, 2, 5, 0xFF316D20);

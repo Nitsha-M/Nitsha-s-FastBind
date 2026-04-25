@@ -1,4 +1,4 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.button;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
@@ -10,7 +10,6 @@ import net.minecraft.client.gui.GuiGraphics;
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 //? if >=1.21.9 {

@@ -1,6 +1,5 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.button;
 
-import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;

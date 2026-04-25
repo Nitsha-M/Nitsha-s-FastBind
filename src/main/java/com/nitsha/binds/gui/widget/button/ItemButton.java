@@ -1,4 +1,4 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.button;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
@@ -9,12 +9,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
-import org.lwjgl.opengl.GL11;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 //? if >=26.1 {
 // import net.minecraft.world.item.ItemStackTemplate;
@@ -25,7 +21,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.input.MouseButtonEvent;*/
 //? }
 
-import java.util.Objects;
 
 public class ItemButton extends AbstractButton {
     private final Runnable onClick;

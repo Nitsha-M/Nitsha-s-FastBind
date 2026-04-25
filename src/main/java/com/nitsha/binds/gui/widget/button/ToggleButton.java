@@ -1,4 +1,4 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.button;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;

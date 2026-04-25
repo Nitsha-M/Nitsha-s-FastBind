@@ -1,4 +1,4 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.list;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.configs.Storage;
@@ -7,6 +7,9 @@ import com.nitsha.binds.gui.panels.PresetSelector;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.gui.widget.window.ScrollableWindow;
+import com.nitsha.binds.gui.widget.TextField;
+import com.nitsha.binds.gui.widget.button.TexturedButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;

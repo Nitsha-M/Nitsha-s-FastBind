@@ -1,4 +1,4 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.list;
 
 import com.nitsha.binds.gui.modals.SelectKeyEvent;
 import com.nitsha.binds.gui.utils.GUIUtils;
@@ -20,7 +20,6 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
-import java.util.Map;
 
 public class KeyEventItem extends AbstractButton {
     private final int index;

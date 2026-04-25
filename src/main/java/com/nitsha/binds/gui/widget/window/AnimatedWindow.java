@@ -1,4 +1,4 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.window;
 
 import com.google.common.collect.Lists;
 import com.nitsha.binds.Main;

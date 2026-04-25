@@ -1,9 +1,10 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.window;
 
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.screen.BindsEditor;
+import com.nitsha.binds.gui.widget.button.BedrockIconButton;
+import com.nitsha.binds.gui.widget.button.ItemButton;
 import com.nitsha.binds.utils.RenderUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
@@ -19,7 +20,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 //? if >=26.1 {
 // import net.minecraft.world.item.ItemStackTemplate;
 //? }
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
@@ -33,7 +33,7 @@ import java.util.function.BiConsumer;
 /*import net.minecraft.client.input.MouseButtonEvent;*/
 //? }
 
-public class IconSelector extends AbstractContainerEventHandler implements Renderable, GuiEventListener /*? if >=1.17 {*/, NarratableEntry /*?}*/ {
+public class IconSelectorWindow extends AbstractContainerEventHandler implements Renderable, GuiEventListener /*? if >=1.17 {*/, NarratableEntry /*?}*/ {
     private final List<GuiEventListener> children = new ArrayList<>();
     private final List<BedrockIconButton> catBtns = new ArrayList<>();
 
@@ -86,7 +86,7 @@ public class IconSelector extends AbstractContainerEventHandler implements Rende
     private BiConsumer<ItemStack, String> onClick;
     //? }
 
-    public IconSelector(int x, int y, int width, int height, BiConsumer</*? if <26.1 {*/ItemStack/*?} else {*//*ItemStackTemplate*//*?}*/, String> onClick) {
+    public IconSelectorWindow(int x, int y, int width, int height, BiConsumer</*? if <26.1 {*/ItemStack/*?} else {*//*ItemStackTemplate*//*?}*/, String> onClick) {
         this.x = x;
         this.y = y;
         this.width = width;

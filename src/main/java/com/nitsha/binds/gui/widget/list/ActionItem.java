@@ -1,6 +1,5 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.list;
 
-import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.action.ActionType;
@@ -8,6 +7,7 @@ import com.nitsha.binds.gui.panels.AdvancedOptions;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.gui.widget.button.TexturedButton;
 import net.minecraft.client.gui.GuiGraphics;
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -15,7 +15,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.resources.ResourceLocation;
-import org.lwjgl.glfw.GLFW;
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;
@@ -24,7 +23,6 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.CharacterEvent;*/
 //? }
 
-import java.util.Map;
 import com.nitsha.binds.configs.dto.preset.ActionData;
 
 public class ActionItem extends AbstractButton {

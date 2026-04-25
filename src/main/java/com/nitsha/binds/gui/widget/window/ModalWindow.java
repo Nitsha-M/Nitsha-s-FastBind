@@ -1,10 +1,10 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.window;
 
-import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.gui.widget.TextField;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;

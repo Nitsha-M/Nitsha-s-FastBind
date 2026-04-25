@@ -1,10 +1,8 @@
-package com.nitsha.binds.gui.widget;
+package com.nitsha.binds.gui.widget.window;
 
 import com.google.common.collect.Lists;
-import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.DrawElement;
-import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.utils.RenderUtils;
 import net.minecraft.client.Minecraft;
 import com.nitsha.binds.utils.Renderable;

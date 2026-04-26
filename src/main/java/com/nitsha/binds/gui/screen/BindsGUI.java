@@ -10,7 +10,7 @@ import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
 import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.widget.ItemButton;
+import com.nitsha.binds.gui.widget.button.ItemButton;
 import com.nitsha.binds.gui.utils.TextUtils;
 //? if fabric {
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -92,7 +92,7 @@ public class BindsGUI extends Screen {
             this.activePreset = Storage.PRESET_REGISTRY.get(savedId);
             this.activePresetIndex = this.activePreset.index;
         } else {
-            this.activePreset = allPresets.getFirst();
+            this.activePreset = allPresets.get(0);
         }
         this.activePresetId = this.activePreset.id;
 

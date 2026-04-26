@@ -4,9 +4,9 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.SmallTextButton;
+import com.nitsha.binds.gui.widget.button.SmallTextButton;
 import com.nitsha.binds.gui.widget.TextField;
-import com.nitsha.binds.gui.widget.TexturedButton;
+import com.nitsha.binds.gui.widget.button.TexturedButton;
 import com.nitsha.binds.utils.FormattedTextUtils;
 import net.minecraft.client.Minecraft;
 //? if >=1.21.9 {
@@ -19,14 +19,11 @@ import net.minecraft.client.input.CharacterEvent;*/
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 

@@ -1,15 +1,14 @@
 package com.nitsha.binds.action;
 
-import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.*;
+import com.nitsha.binds.gui.widget.button.BedrockIconOptionButton;
 import com.nitsha.binds.mixin.KeyMappingAccessor;
 import com.nitsha.binds.utils.EventBus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.Queue;

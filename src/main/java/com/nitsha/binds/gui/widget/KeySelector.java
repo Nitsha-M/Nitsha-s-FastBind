@@ -3,9 +3,8 @@ package com.nitsha.binds.gui.widget;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.mixin.KeyMappingAccessor;
+import com.nitsha.binds.gui.widget.button.BedrockButton;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 //? if >=1.21.9 {

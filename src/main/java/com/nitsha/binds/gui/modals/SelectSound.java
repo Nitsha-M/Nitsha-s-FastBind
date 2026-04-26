@@ -5,21 +5,21 @@ import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.*;
+import com.nitsha.binds.gui.widget.button.BedrockButton;
+import com.nitsha.binds.gui.widget.button.SmallTextButton;
+import com.nitsha.binds.gui.widget.button.SmallToggleButton;
+import com.nitsha.binds.gui.widget.list.SoundItem;
+import com.nitsha.binds.gui.widget.window.ModalWindow;
+import com.nitsha.binds.gui.widget.window.ScrollableWindow;
 import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.SearchUtil;
 import net.minecraft.Util;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -198,7 +198,8 @@ public class SelectSound extends ModalWindow {
             for (ResourceLocation key : AudioPlayer.getSortedSounds()) {
                 if (!activeFilter.isEmpty()) {
                     String[] parts = key.getPath().split("\\.");
-                    if (!parts[0].equals(activeFilter)) continue;
+                    String category = key.getPath().contains(".") ? parts[0] : "other";
+                    if (!category.equals(activeFilter)) continue;
                 }
                 String id = key.getNamespace() + ":" + key.getPath();
 
@@ -232,6 +233,7 @@ public class SelectSound extends ModalWindow {
         this.filterList.resetScroll();
         filterBtns.forEach(btn -> btn.setToggled(false));
         activeFilter = "";
+        this.getSearchField().setText("");
         generateList();
         AudioPlayer.loadExternalSounds();
         super.open(onFinish);

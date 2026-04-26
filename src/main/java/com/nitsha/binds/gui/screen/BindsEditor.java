@@ -13,10 +13,10 @@ import com.nitsha.binds.gui.modals.SelectSound;
 import com.nitsha.binds.gui.panels.*;
 import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.gui.widget.window.ModalWindow;
 import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.RenderUtils;
-import net.minecraft.world.level.block.Blocks;
 //? if fabric {
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 //?}
@@ -104,8 +104,8 @@ public class BindsEditor extends Screen {
             }
             activePresetId = activePreset.id;
 
-            if (Storage.options.openLastPage) {
-                currentPage = Math.min(Storage.options.lastPageIndex, activePreset.pages.size() - 1);
+            if (Storage.options.openLastPage && activePreset.pages.size() > 0) {
+                currentPage = Math.max(0, Math.min(Storage.options.lastPageIndex, activePreset.pages.size() - 1));
             } else {
                 currentPage = 0;
             }
@@ -294,7 +294,7 @@ public class BindsEditor extends Screen {
     }
 
     public static BindData getCBind() {
-        if (activePreset != null && currentPage < activePreset.pages.size()) {
+        if (activePreset != null && currentPage >= 0 && currentPage < activePreset.pages.size()) {
             PageData page = activePreset.pages.get(currentPage);
             if (page.binds != null) {
                 for (BindData b : page.binds) {
@@ -312,11 +312,11 @@ public class BindsEditor extends Screen {
     }
 
     public void saveBind() {
-        List<ActionData> actions = window_AdvancedOptions.getAllActions();
+        List<ActionData> actions = window_AdvancedOptions.getActionsTab().getAllActions();
         boolean hasActions = actions != null && !actions.isEmpty();
         String currentName = window_BasicOptions.getBindName().getText();
         boolean hasName = currentName != null && !currentName.trim().isEmpty();
-        int keyCode = window_AdvancedOptions.keybind.getKeyCode();
+        int keyCode = window_AdvancedOptions.getActionsTab().keybind.getKeyCode();
         boolean hasKey = keyCode != 0 && keyCode != -1;
 
         String localizedUntitled = TextUtils.translatable("nitsha.binds.untitled").getString();
@@ -342,8 +342,8 @@ public class BindsEditor extends Screen {
             newBind.name = bindName;
             newBind.icon = editIconBtnString;
             newBind.keyCode = keyCode;
-            newBind.keyMode = window_AdvancedOptions.getTriggerMode();
-            newBind.holdMs = window_AdvancedOptions.getHoldMs();
+            newBind.keyMode = window_AdvancedOptions.getActionsTab().getTriggerMode();
+            newBind.holdMs = window_AdvancedOptions.getActionsTab().getHoldMs();
             newBind.actions = new ArrayList<>(actions);
 
             if (activePreset != null && currentPage < activePreset.pages.size()) {
@@ -447,16 +447,16 @@ public class BindsEditor extends Screen {
         window_BasicOptions.getBindName().setText(currentBind.name == null ? "" : currentBind.name);
         window_BasicOptions.getEditIcon().setIcon(ItemsMapper.getItemStack(currentBind.icon));
         editIconBtnString = currentBind.icon;
-        window_AdvancedOptions.keybind.setKeyCode(currentBind.keyCode);
+        window_AdvancedOptions.getActionsTab().keybind.setKeyCode(currentBind.keyCode);
         
         if (currentBind.actions != null) {
-            window_AdvancedOptions.generateActionList(currentBind.actions);
+            window_AdvancedOptions.getActionsTab().generateActionList(currentBind.actions);
         } else {
-            window_AdvancedOptions.generateActionList(new ArrayList<>());
+            window_AdvancedOptions.getActionsTab().generateActionList(new ArrayList<>());
         }
         
-        window_AdvancedOptions.getSecondTab().updateButtons(currentBind.icon);
-        window_AdvancedOptions.loadTriggerMode(currentBind.keyMode, currentBind.holdMs);
+        window_AdvancedOptions.getIconTab().getIconSelectorWindow().updateButtons(currentBind.icon);
+        window_AdvancedOptions.getActionsTab().loadTriggerMode(currentBind.keyMode, currentBind.holdMs);
         window_BasicOptions.confirm(false);
         
         if(currentBind.name == null || currentBind.name.isEmpty()) {

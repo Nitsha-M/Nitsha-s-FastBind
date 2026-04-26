@@ -290,9 +290,9 @@ public class ScrollableWindow extends AbstractContainerEventHandler
         int w = 0;
         int h = 0;
         if (horizontal) {
-            h = (scrollableArea > width) ? 5 : 0;
+            h = (showScrollbar && scrollableArea > width) ? 5 : 0;
         } else {
-            w = (scrollableArea > height) ? 5 : 0;
+            w = (showScrollbar && scrollableArea > height) ? 5 : 0;
         }
         return mouseX >= this.getX() && mouseX < this.getX() + this.width - w && mouseY >= this.getY()
                 && mouseY < this.getY() + this.height - h;

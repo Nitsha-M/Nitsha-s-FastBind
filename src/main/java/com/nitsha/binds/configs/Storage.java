@@ -7,6 +7,7 @@ import com.nitsha.binds.bind.BindHandler;
 import com.nitsha.binds.configs.adapters.ActionAdapter;
 import com.nitsha.binds.configs.dto.option.ModOptionsData;
 import com.nitsha.binds.configs.dto.preset.ActionData;
+import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.utils.StorageUtils;
 
@@ -83,6 +84,10 @@ public class Storage {
                 
                 LegacyMigrator.migratePresetData(loadedPreset);
 
+                if (loadedPreset.pages.isEmpty()) {
+                    loadedPreset.pages.add(new PageData());
+                }
+
                 PRESET_REGISTRY.put(file.getName(), loadedPreset);
             }
             FBLogger.info("Presets loaded: {}", PRESET_REGISTRY.size());
@@ -104,6 +109,7 @@ public class Storage {
 
         PresetData preset = new PresetData();
         preset.id = newId;
+        preset.pages.add(new PageData());
 
         Storage.PRESET_REGISTRY.put(newId, preset);
         Storage.save(preset, PRESETS_DIR.resolve(newId + FILE_EXT).toFile());

@@ -4,12 +4,13 @@ import com.google.common.collect.Lists;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.action.ActionType;
+import com.nitsha.binds.gui.panels.advanced.ActionsTab;
 import com.nitsha.binds.gui.utils.DrawElement;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.NewActionItem;
-import com.nitsha.binds.gui.widget.ScrollableWindow;
-import com.nitsha.binds.gui.widget.SmallTextButton;
+import com.nitsha.binds.gui.widget.list.NewActionItem;
+import com.nitsha.binds.gui.widget.window.ScrollableWindow;
+import com.nitsha.binds.gui.widget.button.SmallTextButton;
 import com.nitsha.binds.utils.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -51,7 +52,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
     private ScrollableWindow actionList;
 
     private boolean isOpen = false;
-    public AdvancedOptions parent;
+    public ActionsTab parent;
 
     private final float speed = Main.GLOBAL_ANIMATION_SPEED - 0.1f;
     private int x, y;
@@ -62,7 +63,7 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
     private final List<ActionType<?>> entries;
     private int currentAction = 0;
 
-    public NewAction(AdvancedOptions parent, int x, int y, float width, int height) {
+    public NewAction(ActionsTab parent, int x, int y, float width, int height) {
         clearChildren();
         this.parent = parent;
         this.x = x;
@@ -262,8 +263,10 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
                     SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
             return true;
         }
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getY();
         for (GuiEventListener child : children) {
-            if (child.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) return true;
+            if (child.mouseScrolled(adjustedX, adjustedY, horizontalAmount, verticalAmount)) return true;
         }
         return false;
     }
@@ -276,8 +279,10 @@ public class NewAction extends AbstractContainerEventHandler implements Renderab
                     SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
             return true;
         }
+        double adjustedX = mouseX - getX();
+        double adjustedY = mouseY - getY();
         for (GuiEventListener child : children) {
-            if (child.mouseScrolled(mouseX, mouseY, amount)) return true;
+            if (child.mouseScrolled(adjustedX, adjustedY, amount)) return true;
         }
         return false;
     }*/

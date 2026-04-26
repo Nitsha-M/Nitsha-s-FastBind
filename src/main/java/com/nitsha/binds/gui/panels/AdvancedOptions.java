@@ -9,6 +9,7 @@ import com.nitsha.binds.configs.dto.option.HiddenField;
 import com.nitsha.binds.gui.panels.advanced.ActionsTab;
 import com.nitsha.binds.gui.panels.advanced.IconTab;
 import com.nitsha.binds.gui.panels.advanced.OptionsTab;
+import com.nitsha.binds.gui.panels.advanced.VariablesTab;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.*;
@@ -52,6 +53,7 @@ public class AdvancedOptions extends AnimatedWindow {
 
     private ActionsTab actionsTab;
     private IconTab iconTab;
+    private VariablesTab variablesTab;
     private OptionsTab optionsTab;
 
     private ScrollableWindow tabList;
@@ -103,10 +105,12 @@ public class AdvancedOptions extends AnimatedWindow {
 
         this.actionsTab = new ActionsTab(screen, 0, 0, this.getWidth(), this.getHeight());
         this.iconTab = new IconTab(screen, 0, 0, this.getWidth(), this.getHeight());
+        this.variablesTab = new VariablesTab(screen, 0, 0, this.getWidth(), this.getHeight());
         this.optionsTab = new OptionsTab(screen, 0, 0, this.getWidth(), this.getHeight());
 
         this.addElement(this.actionsTab);
         this.addElement(this.iconTab);
+        this.addElement(this.variablesTab);
         this.addElement(this.optionsTab);
 
         this.addElement(changeHeight);
@@ -125,7 +129,7 @@ public class AdvancedOptions extends AnimatedWindow {
 
         if (actionsTab != null) actionsTab.setVisible(i == 0);
         if (iconTab != null) iconTab.setVisible(i == 1);
-        if (optionsTab != null) optionsTab.setVisible(i == 2);
+        if (variablesTab != null) variablesTab.setVisible(i == 2);
         if (optionsTab != null) optionsTab.setVisible(i == 3);
     }
 
@@ -145,6 +149,10 @@ public class AdvancedOptions extends AnimatedWindow {
 
     public OptionsTab getOptionsTab() {
         return optionsTab;
+    }
+
+    public VariablesTab getVariablesTab() {
+        return variablesTab;
     }
 
     @Override

@@ -68,8 +68,6 @@ public class ActionsTab extends ContentWindow {
         this.addNewAction = new NewAction(this, 4, actionY + 4, getWidth() - 8, 17);
 
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.triggerMode"), 0, 5,
-                    getHeight() - 44, "top", "left", 0xFF212121, false);
             GUIUtils.drawResizableBox(ctx, TAB2_BG, 4, 24, this.getWidth() - 8, this.getHeight() - 52, 1, 3);
 
             if (BindsEditor.getCBind().actions == null || BindsEditor.getCBind().actions.isEmpty()) {

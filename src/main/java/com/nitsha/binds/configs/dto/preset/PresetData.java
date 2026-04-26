@@ -9,7 +9,7 @@ import java.util.List;
 public class PresetData {
 
     public String modVersion = Main.getModVersion();
-    public String name = TextUtils.translatable("nitsha.binds.default.newPreset").toString();
+    public String name = TextUtils.translatable("nitsha.binds.default.newPreset").getString();
     public transient String id = "";
     public int index = 0;
     public List<PageData> pages = new ArrayList<>();

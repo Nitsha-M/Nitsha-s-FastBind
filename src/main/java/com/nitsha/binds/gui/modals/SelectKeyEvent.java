@@ -4,7 +4,9 @@ import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.*;
+import com.nitsha.binds.gui.widget.list.KeyEventItem;
+import com.nitsha.binds.gui.widget.window.ModalWindow;
+import com.nitsha.binds.gui.widget.window.ScrollableWindow;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.SearchUtil;
 import net.minecraft.client.KeyMapping;
@@ -17,7 +19,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 //? if >=1.21.9 {
 /*import net.minecraft.client.input.MouseButtonEvent;*/

@@ -4,9 +4,11 @@ import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.action.ActionType;
 import com.nitsha.binds.gui.panels.AdvancedOptions;
+import com.nitsha.binds.gui.panels.advanced.ActionsTab;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.gui.widget.TextField;
 import com.nitsha.binds.gui.widget.button.TexturedButton;
 import net.minecraft.client.gui.GuiGraphics;
 //? if >=1.17 {
@@ -48,7 +50,7 @@ public class ActionItem extends AbstractButton {
     private final ActionType<ActionData> action;
 
     @SuppressWarnings("unchecked")
-    public ActionItem(AdvancedOptions parent, String typeId, int x, int y, int width, int height, ActionData value, int index) {
+    public ActionItem(ActionsTab parent, String typeId, int x, int y, int width, int height, ActionData value, int index) {
         super(x, y, width, height, TextUtils.empty());
         this.index = index;
         this.x = x;
@@ -136,6 +138,9 @@ public class ActionItem extends AbstractButton {
     @Override
     //? if >=1.21.9 {
     /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        if (isMouseOverColorButtons(event.x(), event.y())) {
+            com.nitsha.binds.gui.widget.TextField.setBlockFocus();
+        }
         boolean clicked = action.mouseClicked(event, bl);
         if (this.deleteBtn.mouseClicked(event, bl)) clicked = true;
         if (this.bottomBtn.mouseClicked(event, bl)) clicked = true;
@@ -145,6 +150,9 @@ public class ActionItem extends AbstractButton {
     }*/
     //? } else {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (isMouseOverColorButtons(mouseX, mouseY)) {
+            TextField.setBlockFocus();
+        }
         boolean clicked = action.mouseClicked(mouseX, mouseY, button);
         if (this.deleteBtn.mouseClicked(mouseX, mouseY, button)) clicked = true;
         if (this.bottomBtn.mouseClicked(mouseX, mouseY, button)) clicked = true;

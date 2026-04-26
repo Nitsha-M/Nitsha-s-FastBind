@@ -196,7 +196,7 @@ public class AudioPlayer {
         /* Set<ResourceLocation> keys = net.minecraft.core.Registry.SOUND_EVENT.keySet(); */
         //?}
         List<ResourceLocation> sorted = new ArrayList<>(keys);
-        sorted.sort((a, b) -> a.getPath().compareToIgnoreCase(b.getPath()));
+        sorted.sort((a, b) -> a.toString().compareToIgnoreCase(b.toString()));
         return sorted;
     }
 
@@ -221,10 +221,10 @@ public class AudioPlayer {
 
     public static SoundEvent getSoundByName(String name) {
         ResourceLocation rs = ResourceLocation.parse(name);
-        //? if >=1.19.3 {
+        //? if >1.20.1 {
         return BuiltInRegistries.SOUND_EVENT.getValue(rs);
         //?} else {
-        /* return Registry.SOUND_EVENT.get(rs); */
+        /* return BuiltInRegistries.SOUND_EVENT.get(rs); */
         //?}
     }
 }

@@ -323,7 +323,7 @@ config["loader"] = loader
 
 val fabric_loader = when {
     stonecutter.eval(minecraft_version, ">=21.6") -> "0.18.4"
-    stonecutter.eval(minecraft_version, ">=1.21.11") -> "0.18.2"
+    stonecutter.eval(minecraft_version, ">=1.21.11") -> "0.18.4"
     stonecutter.eval(minecraft_version, ">=1.21.9") -> "0.17.2"
     else -> "0.16.14"
 }
@@ -587,6 +587,10 @@ stonecutter {
         string(stonecutter.eval(minecraft_version, "<=1.19.4")) {
             replace("import net.minecraft.client.gui.GuiGraphics;", "import com.mojang.blaze3d.vertex.PoseStack;")
             replace("GuiGraphics", "PoseStack")
+        }
+
+        string(stonecutter.eval(minecraft_version, "<1.21")) {
+            replace("AdvancementType", "FrameType")
         }
 
         string(stonecutter.eval(minecraft_version, ">=1.21.9")) {

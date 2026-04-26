@@ -1,12 +1,8 @@
 package com.nitsha.binds.gui.utils;
 
 //? if <1.21.5 {
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 //?}
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.platform.Window;
-import com.nitsha.binds.gui.widget.TexturedButton;
+import com.nitsha.binds.gui.widget.button.TexturedButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -16,9 +12,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 *///?}
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.world.item.ItemStack;
+        import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.resources.ResourceLocation;
@@ -27,15 +21,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.renderer.RenderPipelines;
 *///?}
 //? if <1.21.5 {
-import net.minecraft.client.resources.model.BakedModel;
 //?}
-import com.mojang.blaze3d.systems.RenderSystem;
 //? if >=1.19.3 {
-import org.joml.Matrix4f;
 //? } else {
 // import com.mojang.math.Matrix4f;
 //? }
-import org.lwjgl.opengl.GL11;
+
 
 //? if >=26.1 {
 // import net.minecraft.world.item.ItemStackTemplate;

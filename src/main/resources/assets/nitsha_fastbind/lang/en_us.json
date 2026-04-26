@@ -24,9 +24,10 @@
   "nitsha.binds.control.import" : "Import bind from buffer",
   "nitsha.binds.control.export" : "Export bind to buffer",
 
-  "nitsha.binds.advances.tab1" : "ᴀᴄᴛɪᴏɴs",
-  "nitsha.binds.advances.tab2" : "ɪᴄᴏɴ",
-  "nitsha.binds.advances.tab3" : "ᴍᴏᴅ ᴏᴘᴛɪᴏɴs",
+  "nitsha.binds.advances.tab.actions" : "ᴀᴄᴛɪᴏɴs",
+  "nitsha.binds.advances.tab.icon" : "ɪᴄᴏɴ",
+  "nitsha.binds.advances.tab.options" : "ᴍᴏᴅ ᴏᴘᴛɪᴏɴs",
+  "nitsha.binds.advances.tab.variables" : "ᴠᴀʀɪᴀʙʟᴇs",
 
   "nitsha.binds.advances.choose_icon" : "ᴄʜᴏᴏsᴇ ɪᴄᴏɴ",
   "nitsha.binds.advances.random_icon" : "ʀᴀɴᴅᴏᴍ",

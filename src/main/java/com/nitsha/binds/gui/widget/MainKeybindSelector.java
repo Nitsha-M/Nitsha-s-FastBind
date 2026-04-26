@@ -1,9 +1,8 @@
 package com.nitsha.binds.gui.widget;
 
-import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
-import net.minecraft.client.Minecraft;
+import com.nitsha.binds.gui.widget.button.BedrockButton;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import com.mojang.blaze3d.platform.InputConstants;

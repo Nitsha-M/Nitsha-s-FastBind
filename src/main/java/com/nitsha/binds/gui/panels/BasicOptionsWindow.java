@@ -1,6 +1,5 @@
 package com.nitsha.binds.gui.panels;
 
-import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.configs.Storage;
@@ -10,6 +9,9 @@ import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.*;
+import com.nitsha.binds.gui.widget.button.BedrockIconButton;
+import com.nitsha.binds.gui.widget.button.ItemButton;
+import com.nitsha.binds.gui.widget.window.AnimatedWindow;
 import com.nitsha.binds.utils.CodecUtil;
 import com.nitsha.binds.utils.EasterEgg;
 import com.nitsha.binds.gui.utils.TextUtils;

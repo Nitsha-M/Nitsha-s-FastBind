@@ -55,6 +55,14 @@ public class GUIUtils {
         return str;
     }
 
+    public static int darkenColor(int color, float factor) {
+        int a = (color >> 24) & 0xFF;
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = color & 0xFF;
+        return (a << 24) | ((int)(r * factor) << 16) | ((int)(g * factor) << 8) | (int)(b * factor);
+    }
+
     public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY) {
         addText(ctx, text, width, offsetX, offsetY, "left", "top", 0xFFFFFFFF, true);
     }
@@ -125,11 +133,11 @@ public class GUIUtils {
     }
 
     public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
-                                           int width, int height, int textureWidth, int textureHeight, int color) {
+                                           int width, int height, int uWidth, int uHeight, int textureWidth, int textureHeight, int color) {
         //? if >=1.21.6 {
-        /*ctx.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, textureWidth, textureHeight, color);
+        /*ctx.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, uWidth, uHeight, textureWidth, textureHeight, color);
         *///?} else if >1.21.1 {
-        ctx.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight, color);
+        ctx.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, uWidth, uHeight, textureWidth, textureHeight, color);
         //?} else if >=1.20 {
         /*RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -138,7 +146,7 @@ public class GUIUtils {
         float blue = (color & 0xFF) / 255.0f;
         float alpha = ((color >> 24) & 0xFF) / 255.0f;
         RenderSystem.setShaderColor(red, green, blue, alpha);
-        ctx.blit(texture, x, y, 0, u, v, width, height, textureWidth, textureHeight);
+        ctx.blit(texture, x, y, 0, u, v, width, height, uWidth, uHeight, textureWidth, textureHeight);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableBlend();
         *///?} else if >=1.17 {
@@ -165,6 +173,7 @@ public class GUIUtils {
             x, y,
             u, v,
             width, height,
+            uWidth, uHeight,
             textureWidth,
             textureHeight
         );
@@ -188,6 +197,7 @@ public class GUIUtils {
                 x, y,
                 u, v,
                 width, height,
+                uWidth, uHeight,
                 textureWidth, textureHeight
         );
 
@@ -197,18 +207,23 @@ public class GUIUtils {
     }
 
     public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
+                                           int width, int height, int textureWidth, int textureHeight, int color) {
+        adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, width, height, textureWidth, textureHeight, color);
+    }
+
+    public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
                                            int width, int height, int textureWidth, int textureHeight) {
-        adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, textureWidth, textureHeight, 0xFFFFFFFF);
+        adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, width, height, textureWidth, textureHeight, 0xFFFFFFFF);
     }
 
     public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
                                            int width, int height, int textureWidth) {
-        adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, textureWidth, textureWidth, 0xFFFFFFFF);
+        adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, width, height, textureWidth, textureWidth, 0xFFFFFFFF);
     }
 
     public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
                                            int width, int height) {
-        adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, 256, 256, 0xFFFFFFFF);
+        adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, width, height, 256, 256, 0xFFFFFFFF);
     }
 
     public static TexturedButton createTexturedBtn(int x, int y, int width, int height,
@@ -219,14 +234,20 @@ public class GUIUtils {
     // ------------------- RESIZABLE BOX -------------------
 
     public static void drawResizableBox(GuiGraphics ctx, ResourceLocation texture,
-                                        int x, int y, int width, int height, int edge, int tS, int color) {
-        int iW = width - edge * 2;
-        int iH = height - edge * 2;
+                                        int x, int y, int width, int height, int uOffset, int vOffset, int edge, int textureWidth, int textureHeight, int color) {
+        int partW = width - edge * 2;
+        int partH = height - edge * 2;
 
         int[][] parts = {
-                {0, 0}, {edge * iW, 0}, {tS - edge, 0},
-                {0, edge * iH}, {edge * iW, edge * iH}, {tS - edge, edge * iH},
-                {0, tS - edge}, {edge * iW, tS - edge}, {tS - edge, tS - edge}
+                {uOffset, vOffset}, {uOffset + edge, vOffset}, {uOffset + edge + 1, vOffset},
+                {uOffset, vOffset + edge}, {uOffset + edge, vOffset + edge}, {uOffset + edge + 1, vOffset + edge},
+                {uOffset, vOffset + edge + 1}, {uOffset + edge, vOffset + edge + 1}, {uOffset + edge + 1, vOffset + edge + 1},
+        };
+
+        int[][] uSize = {
+                {edge, edge}, {1, edge}, {edge, edge},
+                {edge, 1}, {1, 1}, {edge, 1},
+                {edge, edge}, {1, edge}, {edge, edge}
         };
 
         int[][] positions = {
@@ -235,27 +256,26 @@ public class GUIUtils {
                 {x, y + height - edge}, {x + edge, y + height - edge}, {x + width - edge, y + height - edge}
         };
 
-        int[][] sizes = {
-                {edge, edge}, {iW, edge}, {edge, edge},
-                {edge, iH}, {iW, iH}, {edge, iH},
-                {edge, edge}, {iW, edge}, {edge, edge}
-        };
-
-        int[][] tSizes = {
-                {tS, tS}, {tS * iW, tS}, {tS, tS},
-                {tS, tS * iH}, {tS * iW, tS * iH}, {tS, tS * iH},
-                {tS, tS}, {tS * iW, tS}, {tS, tS}
+        int [][] texS =  {
+                {edge, edge}, {partW, edge}, {edge, edge},
+                {edge, partH}, {partW, partH}, {edge, partH},
+                {edge, edge}, {partW, edge}, {edge, edge}
         };
 
         for (int i = 0; i < 9; i++) {
             adaptiveDrawTexture(ctx, texture,
                     positions[i][0], positions[i][1], parts[i][0], parts[i][1],
-                    sizes[i][0], sizes[i][1], tSizes[i][0], tSizes[i][1], color);
+                    texS[i][0], texS[i][1], uSize[i][0], uSize[i][1], textureWidth, textureHeight, color);
         }
     }
 
-    public static void drawResizableBox(GuiGraphics ctx, ResourceLocation texture, int x, int y, int width, int height, int edge, int tS) {
-        drawResizableBox(ctx, texture, x, y, width, height, edge, tS, 0xFFFFFFFF);
+    public static void drawResizableBox(GuiGraphics ctx, ResourceLocation texture,
+                                        int x, int y, int width, int height, int edge, int tS, int color) {
+        drawResizableBox(ctx, texture, x, y, width, height, 0, 0, edge, tS, tS, color);
+    }
+
+        public static void drawResizableBox(GuiGraphics ctx, ResourceLocation texture, int x, int y, int width, int height, int edge, int tS) {
+        drawResizableBox(ctx, texture, x, y, width, height, 0,  0, edge, tS, tS, 0xFFFFFFFF);
     }
 
     public static float clampSpeed(float value) {

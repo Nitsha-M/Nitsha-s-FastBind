@@ -26,7 +26,7 @@ public class MainKeybindSelector extends BedrockButton {
     public MainKeybindSelector(int x, int y, int width, int height) {
         super(TextUtils.translatable("nitsha.binds.advances.noKeyBind").getString(),
                 x, y, width, height, true, () -> {}, 0xFFFFFFFF, 0xFF07938d, 0xFF212121, 0xFFFFFFFF);
-        this.setButtonDirection("_left");
+        this.setButtonDirection(1);
     }
 
     public void setKeyCode(int kC) {

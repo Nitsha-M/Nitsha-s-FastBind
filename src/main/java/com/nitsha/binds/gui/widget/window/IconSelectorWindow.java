@@ -39,8 +39,8 @@ public class IconSelectorWindow extends AbstractContainerEventHandler implements
 
     private static final ResourceLocation ITEMS = Main.id("textures/gui/test/items_4.png");
     private static final ResourceLocation SCROLLER = Main.id("textures/gui/test/scroller.png");
-    private static final ResourceLocation SCROLLER_BTN = Main.id("textures/gui/btns/button_normal.png");
-    private static final ResourceLocation SCROLLER_BTN_HVR = Main.id("textures/gui/btns/button_hover.png");
+    private static final ResourceLocation SCROLLER_BTN = Main.id("textures/gui/btns/scroll_bar_normal.png");
+    private static final ResourceLocation SCROLLER_BTN_HVR = Main.id("textures/gui/btns/scroll_bar_hover.png");
 
     private int width, height, x, y;
 
@@ -95,20 +95,40 @@ public class IconSelectorWindow extends AbstractContainerEventHandler implements
         createButtons();
 
         int catNum = 6;
-        int btnW = (((width + 10)) - ((catNum - 1) * 2)) / catNum;
+
+        int xPos = this.x;
 
         for (int i = 0; i < catNum; i++) {
             int finalI = i;
-            BedrockIconButton cat = new BedrockIconButton(this.x + ((btnW + 2) * i), this.y + this.height + 1, btnW, 20, true, () -> {
+            int catW = (i == 0 || i == catNum - 1) ? 30 : 28;
+            BedrockIconButton cat = new BedrockIconButton(xPos, this.y + this.height + 1, catW, 20, true, () -> {
                 this.currentCategory = categoriesList[finalI];
                 this.scrollOffset = 0;
                 for (BedrockIconButton btn : catBtns) { btn.setPressed(false); }
                 catBtns.get(finalI).setPressed(true);
                 createButtons();
             }, categories[i], 0xFFFFFFFF, 0xFF83CA6f, 0xFF212121, 0xFFFFFFFF);
+
+            xPos += catW;
             if (i == 0) cat.setPressed(true);
+            if (i == 0) cat.setButtonDirection(1);
+            else if (i == catNum - 1) cat.setButtonDirection(2);
+            else cat.setButtonDirection(3);
+
             this.catBtns.add(cat);
             this.children.add(cat);
+        }
+
+        for(int i = 0; i < catNum; i++) {
+            if (i < catNum - 1) {
+                this.catBtns.get(i).setNeighbor(this.catBtns.get(i + 1));
+            }
+            if (i == catNum - 1) {
+                this.catBtns.get(i).setNeighbor(this.catBtns.get(i - 1));
+            }
+            if (i > 0 && i < catNum - 1) {
+                this.catBtns.get(i).setNeighbor2(this.catBtns.get(i - 1));
+            }
         }
     }
 

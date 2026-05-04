@@ -27,6 +27,11 @@ public class BedrockIconTextButton extends BedrockButton {
         this.text = text;
     }
 
+    public BedrockIconTextButton(String iconName, String text, int x, int y, int width, int height, boolean isEnabled, Runnable onClick) {
+        this(iconName, text, x, y, width, height, isEnabled, onClick,
+                0xFFFFFFFF, 0xFF3C8527, 0xFF212121, 0xFFFFFFFF);
+    }
+
     public BedrockIconTextButton(int x, int y, int width, int height, String iconName, String text, boolean isEnabled, Runnable onClick) {
         this(iconName, text, x, y, width, height, isEnabled, onClick,
                 0xFFFFFFFF, 0xFF3C8527, 0xFF212121, 0xFFFFFFFF);

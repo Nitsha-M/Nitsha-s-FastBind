@@ -74,9 +74,9 @@ public class SelectSound extends ModalWindow {
 
         int btnWidth = (this.getWidth() - 8) / 2;
         this.tab1 = new BedrockButton(TextUtils.translatable("nitsha.binds.advances.modals.buttons.minecraft").getString(), 4, this.getHeight() - 25, btnWidth, 20, true, () -> selectTab(0));
-        this.tab1.setButtonDirection("_left");
+        this.tab1.setButtonDirection(1);
         this.tab2 = new BedrockButton(TextUtils.translatable("nitsha.binds.advances.modals.buttons.external").getString(), this.getWidth() - 4 - btnWidth, this.getHeight() - 25, btnWidth, 20, true, () -> selectTab(1));
-        this.tab2.setButtonDirection("_right");
+        this.tab2.setButtonDirection(2);
 
         this.tab1.setNeighbor(this.tab2);
         this.tab2.setNeighbor(this.tab1);

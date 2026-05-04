@@ -49,7 +49,7 @@ public class AdvancedOptions extends AnimatedWindow {
     private final BindsEditor screen;
     private final TexturedButton changeHeight;
 
-    private int currentTab = 0;
+    private static int currentTab = 0;
 
     private ActionsTab actionsTab;
     private IconTab iconTab;
@@ -116,7 +116,7 @@ public class AdvancedOptions extends AnimatedWindow {
         this.addElement(changeHeight);
         this.addElement(tabList);
 
-        openTab(0);
+        openTab(currentTab);
 
         this.open(() -> {
         });

@@ -33,7 +33,7 @@ public class ToastAction extends ActionType<ToastActionData> {
     private static final ResourceLocation ITEMS_SELECTOR_1 = Main.id("textures/gui/test/items_5.png");
     private static final ResourceLocation ITEMS_SELECTOR_2 = Main.id("textures/gui/test/items_6.png");
     private static final ResourceLocation ITEMS_SELECTOR_3 = Main.id("textures/gui/test/items_7.png");
-    private static final ResourceLocation TOAST_BG = Main.id("textures/gui/test/toast_bg.png");
+    private static final ResourceLocation TOAST_BG = Main.id("textures/gui/test/menu_header.png");
 
     private TextField titleField;
     private ItemButton iconSelector;

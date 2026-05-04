@@ -1,5 +1,7 @@
 package com.nitsha.binds.configs.dto.option;
 
+import java.lang.reflect.Field;
+
 public class ModOptionsData {
 
     public boolean holdToOpen = true;
@@ -17,4 +19,17 @@ public class ModOptionsData {
     public int lastPageIndex = 0;
     @HiddenField
     public boolean fullHeightEditor = false;
+
+    public void resetToDefaults() {
+        ModOptionsData defaults = new ModOptionsData();
+        for (Field field : this.getClass().getDeclaredFields()) {
+            if (!field.isAnnotationPresent(HiddenField.class)) {
+                try {
+                    field.set(this, field.get(defaults));
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }

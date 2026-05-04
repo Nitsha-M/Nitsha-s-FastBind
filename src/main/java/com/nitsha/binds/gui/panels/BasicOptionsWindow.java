@@ -140,9 +140,9 @@ public class BasicOptionsWindow extends AnimatedWindow {
         }, ITEMS_EDIT, "");
 
         this.copyBtn = new BedrockIconButton(4, 151, 26, 20, "copy", true, screen::copyBind);
-        this.copyBtn.setButtonDirection("_left");
+        this.copyBtn.setButtonDirection(1);
         this.pasteBtn = new BedrockIconButton(30, 151, 26, 20, "paste", false, screen::pasteBind, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
-        this.pasteBtn.setButtonDirection("_right");
+        this.pasteBtn.setButtonDirection(2);
         if (screen.copied.name.isEmpty()) pasteBtn.setEnabled(false);
 
 
@@ -167,7 +167,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
                 Minecraft.getInstance().keyboardHandler.setClipboard(encodedBind);
             }
         });
-        this.exportBtn.setButtonDirection("_left");
+        this.exportBtn.setButtonDirection(1);
 
         this.importBtn = new BedrockIconButton(111, 151, 26, 20, "import", true, () -> {
             String clipboardText = Minecraft.getInstance().keyboardHandler.getClipboard();
@@ -198,7 +198,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
                 screen.selectBind();
             }
         }, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
-        this.importBtn.setButtonDirection("_right");
+        this.importBtn.setButtonDirection(2);
 
 
         this.copyBtn.setNeighbor(this.pasteBtn);

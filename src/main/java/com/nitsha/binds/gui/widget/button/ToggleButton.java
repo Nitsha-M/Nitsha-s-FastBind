@@ -1,5 +1,6 @@
 package com.nitsha.binds.gui.widget.button;
 
+import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
@@ -91,7 +92,9 @@ public class ToggleButton extends AbstractButton {
         // RenderSystem.alphaFunc(GL11.GL_GREATER, 0.0F);
         //?}
 
-        if (this.isHovered) GUIUtils.drawFill(ctx, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0x0D000000);
+        if (isMouseOver(mouseX, mouseY)) {
+            GUIUtils.drawFill(ctx, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0x0D000000);
+        }
 
         GUIUtils.addText(ctx, name, 0, this.getX() + 4, this.getY() + (this.height / 2), "left", "center", 0xFF212121, false);
 

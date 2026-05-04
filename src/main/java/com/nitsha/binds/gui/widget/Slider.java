@@ -18,10 +18,7 @@ import net.minecraft.client.input.InputWithModifiers;*/
 //? }
 
 public class Slider extends AbstractButton {
-    private ResourceLocation NORMAL = Main.id("textures/gui/btns/bedrock_normal_bottom.png");
-    private final ResourceLocation DISABLE = Main.id("textures/gui/btns/bedrock_disabled_bottom.png");
-    private ResourceLocation PRESSED_NORMAL = Main.id("textures/gui/btns/bedrock_normal_top.png");
-    private final ResourceLocation PRESSED_DISABLE = Main.id("textures/gui/btns/bedrock_disabled_top.png");
+    public ResourceLocation BEDROCK_ATLAS = Main.id("textures/gui/btns/bedrock.png");
 
     private boolean isEnabled = false;
     private boolean isPressed = false;
@@ -34,6 +31,9 @@ public class Slider extends AbstractButton {
     private int btnHoverColor;
     private int textColor;
     private int textHoverColor;
+
+    private int outlineColor;
+    private int outlineHoverColor;
 
     private int sliderOffset = 0;
 
@@ -69,11 +69,12 @@ public class Slider extends AbstractButton {
         this.btnHoverColor = btnHoverColor;
         this.textColor = textColor;
         this.textHoverColor = textHoverColor;
+        setOutlineColor(0xFF000000, GUIUtils.darkenColor(btnHoverColor, 0.4f));
     }
 
-    public void setNormalTextures(ResourceLocation t1, ResourceLocation t2) {
-        NORMAL = t1;
-        PRESSED_NORMAL = t2;
+    public void setOutlineColor(int outlineColor, int outlineHoverColor) {
+        this.outlineColor = outlineColor;
+        this.outlineHoverColor = outlineHoverColor;
     }
 
     public int getX() {
@@ -197,9 +198,10 @@ public class Slider extends AbstractButton {
         int fY = this.getY();
         int fW = this.getWidth();
 
-        int outlineColor = (isHovered || isPressed) ? 0xFFFFFFFF : 0xFFA0A0A0;
-        GUIUtils.drawFill(ctx, fX + 1, fY, fX + getWidth() - 1, fY + sliderH, outlineColor);
-        GUIUtils.drawFill(ctx, fX, fY +  1, fX + getWidth(), fY + sliderH - 1, outlineColor);
+        int oC = (isHovered || isPressed || isInsideKnob(mouseX, mouseY)) ? outlineHoverColor : outlineColor;
+
+        GUIUtils.drawFill(ctx, fX + 1, fY, fX + getWidth() - 1, fY + sliderH, oC);
+        GUIUtils.drawFill(ctx, fX, fY +  1, fX + getWidth(), fY + sliderH - 1, oC);
         GUIUtils.drawFill(ctx, fX + 1, fY + 1, fX + getWidth() - 1, fY + sliderH - 1, 0xFF212121);
 
         // fill line
@@ -210,11 +212,16 @@ public class Slider extends AbstractButton {
         GUIUtils.drawFill(ctx, fX + 1, fY + sliderH - 2, fX + 2, fY + sliderH - 1, 0xFF72A763);
         GUIUtils.drawFill(ctx, fX + 2, fY + sliderH - 2, fX + sliderOffset + 3, fY + sliderH - 1, 0xFF4F913C);
 
-        // Bottom texture
-        GUIUtils.drawResizableBox(ctx, (!isEnabled) ? DISABLE : NORMAL, fX + 1 + sliderOffset, fY, 10, sliderH - 1, 5, 11, ((isInsideKnob(mouseX, mouseY) || isPressed) && isEnabled) ? btnHoverColor : btnColor);
+        int knobColor = ((isInsideKnob(mouseX, mouseY) || isPressed) && isEnabled) ? btnHoverColor : btnColor;
 
-        // Top texture
-        GUIUtils.drawResizableBox(ctx, (!isEnabled) ? PRESSED_DISABLE : PRESSED_NORMAL, fX + 1 + sliderOffset, fY + Math.round(yOffset) - 2, 10, sliderH - 1, 5, 11, ((isInsideKnob(mouseX, mouseY) || isPressed) && isEnabled) ? btnHoverColor : btnColor);
+        GUIUtils.drawResizableBox(ctx, BEDROCK_ATLAS,
+                fX + 1 + sliderOffset + 1, fY + Math.round(yOffset) - 2 + 1, 8, sliderH + 1 - Math.round(yOffset) - 2, 0, 0, 4, 64, 64, knobColor);
+
+        GUIUtils.drawResizableBox(ctx, BEDROCK_ATLAS,
+                fX + 1 + sliderOffset + 1, fY + Math.round(yOffset) - 2 + 1, 8, sliderH + 1 - 4, 9, 0, 4, 64, 64, knobColor);
+
+        GUIUtils.drawResizableBox(ctx, BEDROCK_ATLAS,
+                fX + 1 + sliderOffset, fY + Math.round(yOffset) - 2, 10, sliderH + 1 - Math.round(yOffset), 36, 0, 2, 64, 64, (isInsideKnob(mouseX, mouseY)) ? 0xFFFFFFFF : oC);
 
         int scrollbarColor = (isInsideKnob(mouseX, mouseY) || isPressed) ? 0xFFFFFFFF : 0xFF8B8B8B;
         GUIUtils.drawFill(ctx,

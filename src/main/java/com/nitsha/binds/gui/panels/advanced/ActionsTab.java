@@ -49,7 +49,7 @@ public class ActionsTab extends ContentWindow {
             this.keybind.setKeyCode(0);
             this.keybind.setPressed(false);
         }, 0xFFFFFFFF, 0xFFEF4747, 0xFF262626, 0xFFFFFFFF);
-        this.resetKeybind.setButtonDirection("_right");
+        this.resetKeybind.setButtonDirection(2);
 
         this.keybind.setNeighbor(this.resetKeybind);
         this.resetKeybind.setNeighbor(this.keybind);

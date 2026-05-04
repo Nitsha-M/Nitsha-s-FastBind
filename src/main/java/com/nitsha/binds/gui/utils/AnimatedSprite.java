@@ -21,6 +21,10 @@ public class AnimatedSprite {
 
     private long lastUpdateTime;
     private float timeAccumulator;
+    
+    private int loopPauseMs = 0;
+    private boolean isPaused = false;
+    private long pauseStartTime = 0;
 
     public AnimatedSprite(int width, int height, ResourceLocation texture, int texV, boolean isOpen, int textureU, int minU, int maxU, int step, int frameDelayMs, int textureW, int textureH) {
         this.width = width;
@@ -51,6 +55,7 @@ public class AnimatedSprite {
         this.lastUpdateTime = System.currentTimeMillis();
         this.timeAccumulator = 0;
         this.textureU = 0;
+        this.isPaused = false;
     }
 
     public void stopAnimation() {
@@ -58,6 +63,7 @@ public class AnimatedSprite {
         this.animating = false;
         this.lastUpdateTime = 0;
         this.timeAccumulator = 0;
+        this.isPaused = false;
     }
 
     public void setLoop(boolean loop) {
@@ -66,6 +72,10 @@ public class AnimatedSprite {
 
     public boolean isLooping() {
         return loop;
+    }
+    
+    public void setLoopPause(int pauseMs) {
+        this.loopPauseMs = pauseMs;
     }
 
     public void setColor(int color) {
@@ -83,6 +93,16 @@ public class AnimatedSprite {
         }
 
         long currentTime = System.currentTimeMillis();
+
+        if (isPaused) {
+            if (currentTime - pauseStartTime >= loopPauseMs) {
+                isPaused = false;
+                lastUpdateTime = currentTime;
+                timeAccumulator = 0;
+            } else {
+                return;
+            }
+        }
 
         if (lastUpdateTime == 0) {
             lastUpdateTime = currentTime;
@@ -103,6 +123,12 @@ public class AnimatedSprite {
                 } else {
                     if (loop) {
                         textureU = minU;
+                        if (loopPauseMs > 0) {
+                            isPaused = true;
+                            pauseStartTime = currentTime;
+                            timeAccumulator = 0;
+                            break;
+                        }
                     } else {
                         textureU = maxU;
                         animating = false;
@@ -115,6 +141,12 @@ public class AnimatedSprite {
                 } else {
                     if (loop) {
                         textureU = maxU;
+                        if (loopPauseMs > 0) {
+                            isPaused = true;
+                            pauseStartTime = currentTime;
+                            timeAccumulator = 0;
+                            break;
+                        }
                     } else {
                         textureU = minU;
                         animating = false;

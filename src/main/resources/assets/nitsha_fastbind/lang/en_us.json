@@ -61,12 +61,16 @@
   "nitsha.binds.advances.actions.toastText" : "Toast text",
   "nitsha.binds.advances.actions.typeSomeText" : "Type some text",
 
+  "nitsha.binds.advances.options.resetToDefault" : "ʀᴇsᴇᴛ",
   "nitsha.binds.advances.options.holdToOpen" : "Hold %s to show menu",
   "nitsha.binds.advances.options.openLastPage" : "Reopen last page",
   "nitsha.binds.advances.options.openLastPreset" : "Reopen last preset",
   "nitsha.binds.advances.options.keepMovement" : "Keep moving while open",
   "nitsha.binds.advances.options.closeOnAction" : "Close on action",
   "nitsha.binds.advances.options.showActivationMessage" : "Bind activation message",
+  "nitsha.binds.advances.options.support" : "ᴀɴʏ sᴜᴘᴘᴏʀᴛ ɪs ᴀᴘᴘʀᴇᴄɪᴀᴛᴇᴅ ♥",
+  "nitsha.binds.advances.options.support.patreon" : " ᴘᴀᴛʀᴇᴏɴ",
+  "nitsha.binds.advances.options.support.boosty" : " ʙᴏᴏsᴛʏ",
 
   "nitsha.binds.bindActivate" : "Bind %s activated",
 

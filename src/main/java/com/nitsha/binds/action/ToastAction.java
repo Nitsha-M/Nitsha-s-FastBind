@@ -1,25 +1,19 @@
 package com.nitsha.binds.action;
 
-import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
+import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.*;
-import com.nitsha.binds.gui.widget.button.BedrockIconOptionButton;
-import com.nitsha.binds.gui.widget.button.ItemButton;
+import com.nitsha.binds.guinew.widget.button.BedrockIconOptionButton;
+import com.nitsha.binds.guinew.widget.button.ItemButton;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.FormattedTextUtils;
 import com.nitsha.binds.utils.ToastUtils;
 import net.minecraft.client.Minecraft;
-//? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.MouseButtonInfo;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
-//? }
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Queue;
 import java.util.function.LongConsumer;
@@ -30,10 +24,10 @@ import com.nitsha.binds.configs.dto.actions.AllActionsData.TextFormatData;
 
 public class ToastAction extends ActionType<ToastActionData> {
 
-    private static final ResourceLocation ITEMS_SELECTOR_1 = Main.id("textures/gui/test/items_5.png");
-    private static final ResourceLocation ITEMS_SELECTOR_2 = Main.id("textures/gui/test/items_6.png");
-    private static final ResourceLocation ITEMS_SELECTOR_3 = Main.id("textures/gui/test/items_7.png");
-    private static final ResourceLocation TOAST_BG = Main.id("textures/gui/test/menu_header.png");
+    private static final Identifier ITEMS_SELECTOR_1 = Main.id("textures/gui/test/items_5.png");
+    private static final Identifier ITEMS_SELECTOR_2 = Main.id("textures/gui/test/items_6.png");
+    private static final Identifier ITEMS_SELECTOR_3 = Main.id("textures/gui/test/items_7.png");
+    private static final Identifier TOAST_BG = Main.id("textures/gui/test/menu_header.png");
 
     private TextField titleField;
     private ItemButton iconSelector;
@@ -93,14 +87,14 @@ public class ToastAction extends ActionType<ToastActionData> {
                 TextUtils.translatable("nitsha.binds.advances.actions.toastText").getString()
         );
 
-        this.iconSelector = new ItemButton(x + 5, y + 29, 22, ItemsMapper.getItemStack(data.value.icon), () -> {
+        this.iconSelector = new ItemButton(x + 5, y + 29, 22, ItemsMapper.getItemStack(data.value.icon), getIconSelectorTexture(data.value.toastType), data.value.icon, () -> {
             EventBus.off("selectIcon.result");
             EventBus.on("selectIcon.result", (Object[] d) -> {
                 this.iconSelector.setKey((String) d[0]);
-                this.iconSelector.setIcon(ItemsMapper.getItemStack((String) d[0]));
+                this.iconSelector.setItemStack(ItemsMapper.getItemStack((String) d[0]));
             });
             EventBus.emit("selectIcon.open", null);
-        }, getIconSelectorTexture(data.value.toastType), data.value.icon);
+        });
 
         this.iconStyle = new BedrockIconOptionButton(x + width - 26 - 18, y + 3, 18, 19, () -> {
             data.value.toastType = this.iconStyle.getSelected();
@@ -125,7 +119,7 @@ public class ToastAction extends ActionType<ToastActionData> {
         }
     }
 
-    public ResourceLocation getIconSelectorTexture(String type) {
+    public Identifier getIconSelectorTexture(String type) {
         return switch (type) {
             case "challenge" -> ITEMS_SELECTOR_3;
             case "goal" -> ITEMS_SELECTOR_2;
@@ -154,12 +148,13 @@ public class ToastAction extends ActionType<ToastActionData> {
     }
 
     @Override
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        titleField.renderWidget(ctx, mouseX, mouseY, delta);
-        iconStyle.renderWidget(ctx, mouseX, mouseY, delta);
+    public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        titleField.extractContents(ctx, mouseX, mouseY, delta);
+        iconStyle.onRender(ctx, mouseX, mouseY, delta);
 
         GUIUtils.drawResizableBox(ctx, TOAST_BG, x, y + 24, width, 32, 4, 9);
-        iconSelector.render(ctx, mouseX, mouseY, delta);
+        //$ if >=26.1 'iconSelector.extractRenderState(ctx, mouseX, mouseY, delta);' else 'iconSelector.render(ctx, mouseX, mouseY, delta);'
+        iconSelector.extractRenderState(ctx, mouseX, mouseY, delta);
 
         String advMade = switch (this.iconStyle.getSelected()) {
             case "goal" -> "advancements.toast.goal";
@@ -192,13 +187,13 @@ public class ToastAction extends ActionType<ToastActionData> {
     @Override
     public void reset() {
         titleField.setText("");
-        iconSelector.setIcon(ItemsMapper.getItemStack("minecraft:diamond"));
+        iconSelector.setItemStack(ItemsMapper.getItemStack("minecraft:diamond"));
         iconSelector.setKey("minecraft:diamond");
         iconStyle.setSelected("task");
     }
 
     //? if >=1.21.9 {
-    /*@Override
+    @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
         boolean clicked = titleField.mouseClicked(event, bl) || iconSelector.mouseClicked(event, bl) || iconStyle.mouseClicked(event, bl);
         return clicked;
@@ -212,9 +207,9 @@ public class ToastAction extends ActionType<ToastActionData> {
     @Override
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
         return titleField.charTyped(event);
-    }*/
+    }
     //? } else {
-    @Override
+    /*@Override
     public boolean mouseClicked(double mx, double my, int btn) {
         boolean clicked = titleField.mouseClicked(mx, my, btn) || iconSelector.mouseClicked(mx, my, btn) || iconStyle.mouseClicked(mx, my, btn);
         return clicked;
@@ -229,21 +224,21 @@ public class ToastAction extends ActionType<ToastActionData> {
     public boolean charTyped(char c, int mods) {
         return titleField.charTyped(c, mods);
     }
-    //? }
+    *///? }
 
     //? if >=1.21.9 {
-    /*@Override
+    @Override
     public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
         boolean r = titleField.mouseReleased(event);
         r |= iconStyle.mouseReleased(event);
         return r;
-    }*/
+    }
     //? } else {
-    @Override
+    /*@Override
     public boolean mouseReleased(double mx, double my, int btn) {
         boolean r = titleField.mouseReleased(mx, my, btn);
         r |= iconStyle.mouseReleased(mx, my, btn);
         return r;
     }
-    //? }
+    *///? }
 }

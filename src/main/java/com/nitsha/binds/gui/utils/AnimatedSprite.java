@@ -1,7 +1,7 @@
 package com.nitsha.binds.gui.utils;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 
 public class AnimatedSprite {
     protected int x, y, width, height;
@@ -12,7 +12,7 @@ public class AnimatedSprite {
     private final int frameDelayMs;
     private int color = 0xFFFFFFFF;
     private final int texV;
-    private final ResourceLocation texture;
+    private final Identifier texture;
     private boolean animating = false;
     private boolean isOpen;
     private final int textureW;
@@ -26,7 +26,7 @@ public class AnimatedSprite {
     private boolean isPaused = false;
     private long pauseStartTime = 0;
 
-    public AnimatedSprite(int width, int height, ResourceLocation texture, int texV, boolean isOpen, int textureU, int minU, int maxU, int step, int frameDelayMs, int textureW, int textureH) {
+    public AnimatedSprite(int width, int height, Identifier texture, int texV, boolean isOpen, int textureU, int minU, int maxU, int step, int frameDelayMs, int textureW, int textureH) {
         this.width = width;
         this.height = height;
         this.textureU = textureU;
@@ -44,7 +44,7 @@ public class AnimatedSprite {
         this.timeAccumulator = 0;
     }
 
-    public void render(GuiGraphics ctx) {
+    public void render(GuiGraphicsExtractor ctx) {
         GUIUtils.adaptiveDrawTexture(ctx, texture, this.x, y, textureU, texV, width, height, textureW, textureH, color);
         tick();
     }

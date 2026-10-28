@@ -10,7 +10,7 @@ import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.gui.screen.BindsGUI;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.util.*;
 
@@ -21,8 +21,11 @@ public class BindExecutor {
         Minecraft client = Minecraft.getInstance();
         assert client.player != null;
 
-        if ((client.screen != null && !(client.screen instanceof BindsGUI)) || bind.actions.isEmpty())
-            return;
+        //? >=26.2 {
+         if ((client.gui.screen() != null && !(client.gui.screen() instanceof BindsGUI)) || bind.actions.isEmpty()) return;
+        //? } else {
+        /*if ((client.screen != null && !(client.screen instanceof BindsGUI)) || bind.actions.isEmpty()) return;
+        *///? }
 
         BindTask task = new BindTask(bind, client);
         activeTasks.add(task);
@@ -43,12 +46,12 @@ public class BindExecutor {
             assert client.player != null;
             if (Storage.options.showActivationMessage) {
                 //? if >=26.1 {
-                /*client.player.sendSystemMessage(
-                        TextUtils.translatable("nitsha.binds.bindActivate", "§3" + bind.name + "§r"));*/
+                client.player.sendSystemMessage(
+                        TextUtils.translatable("nitsha.binds.bindActivate", "§3" + bind.name + "§r"));
                 //? } else {
-                client.player.displayClientMessage(
+                /*client.player.displayClientMessage(
                         TextUtils.translatable("nitsha.binds.bindActivate", "§3" + bind.name + "§r"), true);
-                //? }
+                *///? }
             }
         }
 

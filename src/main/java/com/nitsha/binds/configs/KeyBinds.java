@@ -7,11 +7,13 @@ import com.nitsha.binds.gui.screen.BindsGUI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.resources.ResourceLocation;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.resources.Identifier;
+//? if <26.3 {
+/*import org.lwjgl.glfw.GLFW;
+*///? }
 
 //? if fabric {
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 //?} elif neoforge {
 /*import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.bus.api.IEventBus;
@@ -34,31 +36,62 @@ public class KeyBinds {
     public static KeyMapping EDITOR;
 
     //? if <1.21.9 {
-    private static String category = "category.nitsha.binds";
-    //? } else {
-    // private static KeyMapping.Category category = KeyMapping.Category.register(Main.id("keys"));
+    /*private static String category = "category.nitsha.binds";
+    *///? } else {
+     private static KeyMapping.Category category = KeyMapping.Category.register(Main.id("keys"));
     //? }
 
     public static void register() {
         createMappings();
 
         //? if fabric {
-        KeyBindingHelper.registerKeyBinding(BINDS);
-        KeyBindingHelper.registerKeyBinding(EDITOR);
-        KeyBindingHelper.registerKeyBinding(NEXT_PAGE);
-        KeyBindingHelper.registerKeyBinding(PREV_PAGE);
+        KeyMappingHelper.registerKeyMapping(BINDS);
+        KeyMappingHelper.registerKeyMapping(EDITOR);
+        KeyMappingHelper.registerKeyMapping(NEXT_PAGE);
+        KeyMappingHelper.registerKeyMapping(PREV_PAGE);
         //?} elif forge {
-        //? if >=1.19 {
-        /*FMLJavaModLoadingContext.get().getModEventBus().addListener(KeyBinds::onRegisterKeyMappings);*/
+        /*//? if >=1.19 {
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(KeyBinds::onRegisterKeyMappings);
         //? } else {
-        /*registerKeyMappings();*/
+        /^registerKeyMappings();^/
         //? }
-        //?}
+        *///?}
 
         FBLogger.info("Finished registering keybinds");
     }
 
+    //? if >=26.3 {
     private static void createMappings() {
+        BINDS = new KeyMapping(
+                "key.nitsha.binds",
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_F8,
+                category
+        );
+
+        NEXT_PAGE = new KeyMapping(
+                "key.nitsha.next_page",
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_F9,
+                category
+        );
+
+        PREV_PAGE = new KeyMapping(
+                "key.nitsha.prev_page",
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_F7,
+                category
+        );
+
+        EDITOR = new KeyMapping(
+                "key.nitsha.editor",
+                InputConstants.Type.KEYBOARD,
+                InputConstants.UNKNOWN.getValue(),
+                category
+        );
+    }
+    //? } else {
+    /*private static void createMappings() {
         BINDS = new KeyMapping(
                 "key.nitsha.binds",
                 InputConstants.Type.KEYSYM,
@@ -87,6 +120,7 @@ public class KeyBinds {
                 category
         );
     }
+    *///? }
 
     //? if neoforge {
     /*public static void registerNeoForge(IEventBus modEventBus) {
@@ -95,24 +129,47 @@ public class KeyBinds {
     *///?}
 
     //? if neoforge || forge {
-    //? if >=1.19 {
-    /*private static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
+    /*//? if >=1.19 {
+    private static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(BINDS);
         event.register(NEXT_PAGE);
         event.register(PREV_PAGE);
         event.register(EDITOR);
-    }*/
+    }
     //? } else {
-    /*private static void registerKeyMappings() {
+    /^private static void registerKeyMappings() {
         ClientRegistry.registerKeyBinding(BINDS);
         ClientRegistry.registerKeyBinding(NEXT_PAGE);
         ClientRegistry.registerKeyBinding(PREV_PAGE);
         ClientRegistry.registerKeyBinding(EDITOR);
-    }*/
+    }^/
     //? }
-    //?}
+    *///?}
 
+    //? if >=26.2 {
     public static void tick(Minecraft client) {
+        if (BINDS == null || EDITOR == null) {
+            return;
+        }
+        if (BINDS.consumeClick()) {
+            if (BindsGUI.ignoreHoldToOpenOnce) return;
+            if (!(client.gui.screen() instanceof BindsGUI)) {
+                BindsGUI.ignoreHoldToOpenOnce = true;
+                client.gui.setScreen(new BindsGUI());
+            }
+        }
+        //$ if <=26.2 'if (!InputConstants.isKeyDown(client.getWindow(), BINDS.getDefaultKey().getValue())) {' else 'if (!InputConstants.isKeyDown(BINDS.getDefaultKey().getValue())) {'
+        if (!InputConstants.isKeyDown(BINDS.getDefaultKey().getValue())) {
+            BindsGUI.ignoreHoldToOpenOnce = false;
+        }
+        if (EDITOR.consumeClick()) {
+            if (!(client.gui.screen() instanceof BindsGUI)) {
+                client.gui.setScreen(new BindsEditor(client.gui.screen()));
+            }
+        }
+    }
+    //? } else {
+    /*public static void tick(Minecraft client) {
         if (BINDS == null || EDITOR == null) {
             return;
         }
@@ -125,9 +182,9 @@ public class KeyBinds {
         }
         if (!InputConstants.isKeyDown(
                 //? if <1.21.9 {
-                client.getWindow().getWindow()
-                //? } else {
-                // client.getWindow()
+                /^client.getWindow().getWindow()
+                ^///? } else {
+                 client.getWindow()
                 //? }
                 , BINDS.getDefaultKey().getValue())) {
             BindsGUI.ignoreHoldToOpenOnce = false;
@@ -138,4 +195,5 @@ public class KeyBinds {
             }
         }
     }
+    *///? }
 }

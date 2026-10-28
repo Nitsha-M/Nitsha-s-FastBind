@@ -14,9 +14,9 @@ import com.nitsha.binds.gui.widget.window.ScrollableWindow;
 import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.SearchUtil;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Util;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.Map;
 
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;*/
+import net.minecraft.client.input.MouseButtonEvent;
 //? }
 
 public class SelectSound extends ModalWindow {
-    private static final ResourceLocation TAB2_BG = Main.id("textures/gui/test/scroller.png");
-    private static final ResourceLocation RANDOM_SMALL = Main.id("textures/gui/test/random.png");
+    private static final Identifier TAB2_BG = Main.id("textures/gui/test/scroller.png");
+    private static final Identifier RANDOM_SMALL = Main.id("textures/gui/test/random.png");
 
     private final BindsEditor screen;
     private ScrollableWindow soundsList;
@@ -47,8 +47,8 @@ public class SelectSound extends ModalWindow {
     private boolean noResult = false;
     private SmallTextButton resetFilter;
 
-    public SelectSound(BindsEditor screen, int x, int y, int width, int height, ResourceLocation t1,
-                       ResourceLocation t2) {
+    public SelectSound(BindsEditor screen, int x, int y, int width, int height, Identifier t1,
+                       Identifier t2) {
         super(screen, x, y, width, height, t1, t2, "nitsha.binds.advances.modals.selectSound");
         this.screen = screen;
         this.contentHeight = this.getHeight() - 20 - 38;
@@ -87,7 +87,8 @@ public class SelectSound extends ModalWindow {
         });
 
         this.openFolder = new SmallTextButton(TextUtils.translatable("nitsha.binds.advances.modals.buttons.openFolder"), 4, getHeight() - 36, 7, 0x33000000, 0xFF232425, 0xFF232425, 0xFFe7bc1c, btnWidth - 1, "left", RANDOM_SMALL, ()-> {
-            Util.getPlatform().openFile(Storage.SOUNDS_DIR.toFile());
+            //$ if >=26.3 'com.mojang.blaze3d.Blaze3D.openPath(Storage.SOUNDS_DIR);' else 'Util.getPlatform().openFile(Storage.SOUNDS_DIR.toFile());'
+            com.mojang.blaze3d.Blaze3D.openPath(Storage.SOUNDS_DIR);
         });
 
         this.reload.visible = false;
@@ -171,7 +172,7 @@ public class SelectSound extends ModalWindow {
     }
 
     @Override
-    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void renderWindow(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         int adjX = mouseX - this.getX();
         int adjY = mouseY - this.getYOffset();
 
@@ -195,7 +196,7 @@ public class SelectSound extends ModalWindow {
         String query = this.getSearchField().getText().toLowerCase();
 
         if (tab == 0) {
-            for (ResourceLocation key : AudioPlayer.getSortedSounds()) {
+            for (Identifier key : AudioPlayer.getSortedSounds()) {
                 if (!activeFilter.isEmpty()) {
                     String[] parts = key.getPath().split("\\.");
                     String category = key.getPath().contains(".") ? parts[0] : "other";

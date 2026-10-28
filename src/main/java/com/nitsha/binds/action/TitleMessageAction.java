@@ -10,15 +10,17 @@ import com.nitsha.binds.gui.widget.button.TexturedButton;
 import com.nitsha.binds.utils.FormattedTextUtils;
 import net.minecraft.client.Minecraft;
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
+import net.minecraft.client.input.CharacterEvent;
 //? }
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.resources.Identifier;
+//? if <26.3 {
+/*import org.lwjgl.glfw.GLFW;
+*///? }
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +33,10 @@ import com.nitsha.binds.configs.dto.actions.AllActionsData.TextFormatData;
 
 public class TitleMessageAction extends ActionType<TitleMessageActionData> {
 
-    private static final ResourceLocation LEFT        = Main.idSprite("action_left_normal");
-    private static final ResourceLocation LEFT_HOVER  = Main.idSprite("action_left_hover");
-    private static final ResourceLocation RIGHT       = Main.idSprite("action_right_normal");
-    private static final ResourceLocation RIGHT_HOVER = Main.idSprite("action_right_hover");
+    private static final Identifier LEFT        = Main.idSprite("action_left_normal");
+    private static final Identifier LEFT_HOVER  = Main.idSprite("action_left_hover");
+    private static final Identifier RIGHT       = Main.idSprite("action_right_normal");
+    private static final Identifier RIGHT_HOVER = Main.idSprite("action_right_hover");
 
     private static final int VISIBLE_COLORS = 13;
     private static final int FIELD_HEIGHT = 19;
@@ -77,20 +79,29 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
         final MutableComponent finalTitle    = titleComponent;
         final MutableComponent finalSubtitle = subtitleComponent;
 
-        //? if >=1.17 {
+        //? if >=26.2 {
         actions.add(() -> {
             if (client.gui != null) {
+                client.gui.hud.clearTitles();
+                client.gui.hud.setTitle(finalTitle);
+                client.gui.hud.setSubtitle(finalSubtitle);
+                client.gui.hud.setTimes(10, 70, 20);
+            }
+        });
+        //? } else if >=1.17 {
+        /*actions.add(() -> {
+            if (client.gui != null) {
                 //? if >=1.21.4 {
-                // client.gui.clearTitles();
+                 client.gui.clearTitles();
                 //?} else {
-                client.gui.clear();
-                //?}
+                /^client.gui.clear();
+                ^///?}
                 client.gui.setTitle(finalTitle);
                 client.gui.setSubtitle(finalSubtitle);
                 client.gui.setTimes(10, 70, 20);
             }
         });
-        //? } else {
+        *///? } else {
         /*actions.add(() -> {
             if (client.gui != null) {
                 client.gui.setTitles(null, null, 10, 70, 20);
@@ -132,11 +143,11 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
         }
 
         this.leftBtn = GUIUtils.createTexturedBtn(x, colorButtonsY, 9, 9,
-                new ResourceLocation[]{ LEFT, LEFT_HOVER },
+                new Identifier[]{ LEFT, LEFT_HOVER },
                 button -> colorOffset = (colorOffset - 1 + ChatMessageAction.COLORS_DATA.length) % ChatMessageAction.COLORS_DATA.length);
 
         this.rightBtn = GUIUtils.createTexturedBtn(x + width - 9, colorButtonsY, 9, 9,
-                new ResourceLocation[]{ RIGHT, RIGHT_HOVER },
+                new Identifier[]{ RIGHT, RIGHT_HOVER },
                 button -> colorOffset = (colorOffset + 1) % ChatMessageAction.COLORS_DATA.length);
 
         for (int i = 0; i < ChatMessageAction.COLORS_DATA.length; i++) {
@@ -166,9 +177,9 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
     }
 
     @Override
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        titleField.renderWidget(ctx, mouseX, mouseY, delta);
-        subtitleField.renderWidget(ctx, mouseX, mouseY, delta);
+    public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        titleField.extractContents(ctx, mouseX, mouseY, delta);
+        subtitleField.extractContents(ctx, mouseX, mouseY, delta);
 
         for (int i = 0; i < VISIBLE_COLORS; i++) {
             int actualIndex = (colorOffset + i) % ChatMessageAction.COLORS_DATA.length;
@@ -182,13 +193,13 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
             item.setWidth(itemWidth);
             item.setHeight(itemHeight);
 
-            GUIUtils.matricesUtil(ctx, itemOffset, itemOffset, 0, () -> item.renderWidget(ctx, mouseX, mouseY, delta));
+            GUIUtils.matricesUtil(ctx, itemOffset, itemOffset, 0, () -> item.extractContents(ctx, mouseX, mouseY, delta));
         }
 
         leftBtn.setY(colorButtonsY);
         rightBtn.setY(colorButtonsY);
-        leftBtn.renderWidget(ctx, mouseX, mouseY, delta);
-        rightBtn.renderWidget(ctx, mouseX, mouseY, delta);
+        leftBtn.extractContents(ctx, mouseX, mouseY, delta);
+        rightBtn.extractContents(ctx, mouseX, mouseY, delta);
     }
 
     @Override
@@ -226,7 +237,7 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
     }
 
     //? if >=1.21.9 {
-    /*@Override
+    @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
         boolean clicked = titleField.mouseClicked(event, bl) || subtitleField.mouseClicked(event, bl);
         if (leftBtn.mouseClicked(event, bl) || rightBtn.mouseClicked(event, bl)) clicked = true;
@@ -245,9 +256,9 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
     @Override
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
         return titleField.charTyped(event) || subtitleField.charTyped(event);
-    }*/
+    }
     //? } else {
-    @Override
+    /*@Override
     public boolean mouseClicked(double mx, double my, int btn) {
         boolean clicked = titleField.mouseClicked(mx, my, btn)
                 || subtitleField.mouseClicked(mx, my, btn);
@@ -270,18 +281,18 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
         return titleField.charTyped(c, mods)
                 || subtitleField.charTyped(c, mods);
     }
-    //? }
+    *///? }
 
     @Override
     public boolean mouseScrolled(double mx, double my, double amount) {
         if (!isMouseOverColorButtons(mx, my)) return false;
         //? if >=1.21.9 {
-        // com.mojang.blaze3d.platform.Window window = Minecraft.getInstance().getWindow();
+         com.mojang.blaze3d.platform.Window window = Minecraft.getInstance().getWindow();
         //? } else {
-        long window = Minecraft.getInstance().getWindow().getWindow();
-        //? }
-        boolean shift = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT)
-                || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
+        /*long window = Minecraft.getInstance().getWindow().getWindow();
+        *///? }
+        //$ if >=26.3 'boolean shift = InputConstants.isKeyDown(InputConstants.KEY_LSHIFT) || InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);' else 'boolean shift = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT);'
+        boolean shift = InputConstants.isKeyDown(InputConstants.KEY_LSHIFT) || InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);
         if (!shift) return false;
         if (amount > 0) {
             colorOffset = (colorOffset - 1 + ChatMessageAction.COLORS_DATA.length) % ChatMessageAction.COLORS_DATA.length;

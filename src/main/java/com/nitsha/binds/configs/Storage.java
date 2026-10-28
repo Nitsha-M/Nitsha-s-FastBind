@@ -5,10 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.bind.BindHandler;
 import com.nitsha.binds.configs.adapters.ActionAdapter;
+import com.nitsha.binds.configs.adapters.VariableAdapter;
 import com.nitsha.binds.configs.dto.option.ModOptionsData;
 import com.nitsha.binds.configs.dto.preset.ActionData;
 import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.configs.dto.preset.PresetData;
+import com.nitsha.binds.configs.dto.variables.VariableData;
 import com.nitsha.binds.utils.StorageUtils;
 
 import java.io.File;
@@ -23,6 +25,7 @@ public class Storage {
     public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .registerTypeAdapter(ActionData.class, new ActionAdapter())
+            .registerTypeAdapter(VariableData.class, new VariableAdapter())
             .disableHtmlEscaping()
             .create();
 

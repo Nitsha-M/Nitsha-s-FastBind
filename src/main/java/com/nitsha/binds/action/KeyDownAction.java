@@ -4,11 +4,13 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.KeybindSelector;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//? if <26.3 {
+/*import org.lwjgl.glfw.GLFW;
+*///? }
 
 import java.util.Map;
 import java.util.Queue;
@@ -41,18 +43,22 @@ public class KeyDownAction extends ActionType<KeybindActionData> {
         if (keyCode == 0) return;
 
             //? if >=1.21.9 {
-            /*final int finalKeyCode = keyCode;
+            final int finalKeyCode = keyCode;
             actions.add(() -> {
-                InputConstants.Key key = InputConstants.Type.KEYSYM.getOrCreate(finalKeyCode);
+                //? if <26.3 {
+                /*InputConstants.Key key = InputConstants.Type.KEYSYM.getOrCreate(finalKeyCode);
+                *///? } else {
+                InputConstants.Key key = InputConstants.Type.KEYBOARD.getOrCreate(finalKeyCode);
+                //? }
                 KeyMapping.set(key, true);
-            });*/
+            });
             //? } else {
-            int scancode = GLFW.glfwGetKeyScancode(keyCode);
+            /*int scancode = GLFW.glfwGetKeyScancode(keyCode);
             actions.add(() -> {
                 InputConstants.Key key = InputConstants.getKey(keyCode, scancode);
                 KeyMapping.set(key, true);
             });
-            //? }
+            *///? }
     }
 
     @Override
@@ -71,8 +77,8 @@ public class KeyDownAction extends ActionType<KeybindActionData> {
     }
 
     @Override
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        keybind.renderWidget(ctx, mouseX, mouseY, delta);
+    public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        keybind.extractContents(ctx, mouseX, mouseY, delta);
 
         String userLanguage = GUIUtils.getUL();
         if (userLanguage.equals("uk_ua") || userLanguage.equals("ru_ru")) {
@@ -100,7 +106,7 @@ public class KeyDownAction extends ActionType<KeybindActionData> {
     }
 
     //? if >=1.21.9 {
-    /*@Override
+    @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
         return keybind.mouseClicked(event, bl);
     }
@@ -113,9 +119,9 @@ public class KeyDownAction extends ActionType<KeybindActionData> {
     @Override
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
         return keybind.charTyped(event);
-    }*/
+    }
     //? } else {
-    @Override
+    /*@Override
     public boolean mouseClicked(double mx, double my, int btn) {
         return keybind.mouseClicked(mx, my, btn);
     }
@@ -129,5 +135,5 @@ public class KeyDownAction extends ActionType<KeybindActionData> {
     public boolean charTyped(char c, int mods) {
         return keybind.charTyped(c, mods);
     }
-    //? }
+    *///? }
 }

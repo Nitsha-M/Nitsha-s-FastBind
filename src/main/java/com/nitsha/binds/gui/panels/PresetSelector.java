@@ -14,7 +14,7 @@ import com.nitsha.binds.gui.widget.button.SmallTextButton;
 import com.nitsha.binds.utils.Renderable;
 import net.minecraft.client.Minecraft;
 import com.nitsha.binds.utils.RenderUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 //? if >=1.17 {
@@ -22,7 +22,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
@@ -31,25 +31,25 @@ import java.util.List;
 import java.util.UUID;
 
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.InputWithModifiers;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
+import net.minecraft.client.input.CharacterEvent;
 //? }
 
 public class PresetSelector extends AbstractContainerEventHandler implements Renderable /*? if >=1.17 {*/ , NarratableEntry /*?}*/ {
 
-    private static final ResourceLocation BACKGROUND = Main.id("textures/gui/btns/menu.png");
+    private static final Identifier BACKGROUND = Main.id("textures/gui/btns/menu.png");
 
-    private static final ResourceLocation SPRESET = Main.idSprite("select_preset");
-    private static final ResourceLocation SPRESET_HOVER = Main.idSprite("select_preset_hover");
-    private static final ResourceLocation TOP = Main.idSprite("top_normal");
-    private static final ResourceLocation TOP_HOVER = Main.idSprite("top_hover");
-    private static final ResourceLocation BOTTOM = Main.idSprite("bottom_normal");
-    private static final ResourceLocation BOTTOM_HOVER = Main.idSprite("bottom_hover");
+    private static final Identifier SPRESET = Main.idSprite("select_preset");
+    private static final Identifier SPRESET_HOVER = Main.idSprite("select_preset_hover");
+    private static final Identifier TOP = Main.idSprite("top_normal");
+    private static final Identifier TOP_HOVER = Main.idSprite("top_hover");
+    private static final Identifier BOTTOM = Main.idSprite("bottom_normal");
+    private static final Identifier BOTTOM_HOVER = Main.idSprite("bottom_hover");
 
-    private static final ResourceLocation ADD_NEW = Main.id("textures/gui/test/add_new_icon.png");
+    private static final Identifier ADD_NEW = Main.id("textures/gui/test/add_new_icon.png");
 
     private final List<GuiEventListener> children = Lists.<GuiEventListener>newArrayList();
     private final List<Renderable> renderables = Lists.<Renderable>newArrayList();
@@ -94,13 +94,13 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
             GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(BindsEditor.getPresetName(), 13)), 0, 5, 5, "top", "left", 0xFFFFFFFF, false);
         });
 
-        this.addElement(GUIUtils.createTexturedBtn(113, 4, 9, 9, new ResourceLocation[]{SPRESET, SPRESET_HOVER}, button -> {
+        this.addElement(GUIUtils.createTexturedBtn(113, 4, 9, 9, new Identifier[]{SPRESET, SPRESET_HOVER}, button -> {
             openSelector(!isOpen);
         }));
-        this.addElement(GUIUtils.createTexturedBtn(91, 4, 9, 9, new ResourceLocation[]{TOP, TOP_HOVER}, button -> {
+        this.addElement(GUIUtils.createTexturedBtn(91, 4, 9, 9, new Identifier[]{TOP, TOP_HOVER}, button -> {
             screen.setNewPreset(-1);
         }));
-        this.addElement(GUIUtils.createTexturedBtn(102, 4, 9, 9, new ResourceLocation[]{BOTTOM, BOTTOM_HOVER}, button -> {
+        this.addElement(GUIUtils.createTexturedBtn(102, 4, 9, 9, new Identifier[]{BOTTOM, BOTTOM_HOVER}, button -> {
             screen.setNewPreset(1);
         }));
 
@@ -237,10 +237,10 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
 
     @Override
     //? if >=26.1 {
-    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+     public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
     //? } else {
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-    //? }
+    /*public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+    *///? }
         int alphaByte = (int)(alpha * 255.0f) & 0xFF;
         globalColor = (alphaByte << 24) | 0xFFFFFFFF;
 
@@ -256,10 +256,10 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
             Runnable render = () -> {
                 GUIUtils.matricesUtil(ctx, xO, yO, 500, () -> {
                     //? if >=26.1 {
-                    //element.extractRenderState(ctx, mouseX - xO, mouseY - yO, delta);
+                    element.extractRenderState(ctx, mouseX - xO, mouseY - yO, delta);
                     //? } else {
-                    element.render(ctx, mouseX - xO, mouseY - yO, delta);
-                    //? }
+                    /*element.render(ctx, mouseX - xO, mouseY - yO, delta);
+                    *///? }
                 });
             };
             if (element instanceof ScrollableWindow) {
@@ -365,7 +365,7 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
 
     @Override
     //? if >=1.21.9 {
-    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         double mouseX = event.x();
         double mouseY = event.y();
         double adjustedX = mouseX - getX();
@@ -383,9 +383,9 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
         }
 
         return false;
-    }*/
+    }
     //? } else {
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        /*public boolean mouseClicked(double mouseX, double mouseY, int button) {
             double adjustedX = mouseX - getX();
             double adjustedY = mouseY - getY() - yOffset;  // Учитываем смещение
 
@@ -397,11 +397,11 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
 
             return false;
         }
-    //? }
+    *///? }
 
         @Override
         //? if >=1.21.9 {
-        /*public boolean mouseReleased(MouseButtonEvent event) {
+        public boolean mouseReleased(MouseButtonEvent event) {
             boolean released = false;
             double mouseX = event.x();
             double mouseY = event.y();
@@ -420,9 +420,9 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
             }
 
             return released;
-        }*/
+        }
         //? } else {
-        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        /*public boolean mouseReleased(double mouseX, double mouseY, int button) {
             boolean released = false;
             double adjustedX = mouseX - getX();
             double adjustedY = mouseY - getY() - yOffset;
@@ -435,11 +435,11 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
 
             return released;
         }
-        //? }
+        *///? }
 
         @Override
         //? if >=1.21.9 {
-        /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
             boolean dragged = false;
             double mouseX = event.x();
             double mouseY = event.y();
@@ -458,9 +458,9 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
             }
 
             return dragged;
-        }*/
+        }
         //? } else {
-            public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+            /*public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
                 boolean dragged = false;
                 double adjustedX = mouseX - getX();
                 double adjustedY = mouseY - getY() - yOffset;
@@ -473,37 +473,37 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
 
                 return dragged;
             }
-        //? }
+        *///? }
 
         @Override
         //? if >=1.21.9 {
-        /*public boolean keyPressed(KeyEvent event) {
+        public boolean keyPressed(KeyEvent event) {
             for (GuiEventListener child : children()) {
                 if (child.keyPressed(event)) return true;
             }
             return false;
-        }*/
+        }
         //? } else {
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            /*public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
                 for (GuiEventListener child : children()) {
                     if (child.keyPressed(keyCode, scanCode, modifiers)) return true;
                 }
                 return false;
             }
-        //? }
+        *///? }
 
             @Override
         //? if >=1.21.9 {
-        /*public boolean charTyped(CharacterEvent event) {
+        public boolean charTyped(CharacterEvent event) {
             for (GuiEventListener child : children()) {
                 if (child.charTyped(event)) {
                     return true;
                 }
             }
             return false;
-        }*/
+        }
         //? } else {
-            public boolean charTyped(char codePoint, int modifiers) {
+            /*public boolean charTyped(char codePoint, int modifiers) {
                 for (GuiEventListener child : children()) {
                     if (child.charTyped(codePoint, modifiers)) {
                         return true;
@@ -511,6 +511,6 @@ public class PresetSelector extends AbstractContainerEventHandler implements Ren
                 }
                 return false;
             }
-        //? }
+        *///? }
 
 }

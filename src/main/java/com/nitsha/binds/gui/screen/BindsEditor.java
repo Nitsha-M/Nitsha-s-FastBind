@@ -1,7 +1,8 @@
 package com.nitsha.binds.gui.screen;
 
-import com.nitsha.binds.ItemsMapper;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.Main;
+import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.configs.dto.preset.BindData;
 import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.configs.dto.preset.PageData;
@@ -12,45 +13,30 @@ import com.nitsha.binds.gui.modals.SelectKeyEvent;
 import com.nitsha.binds.gui.modals.SelectSound;
 import com.nitsha.binds.gui.panels.*;
 import com.nitsha.binds.gui.widget.*;
-import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.window.ModalWindow;
+import com.nitsha.binds.guinew.panel.AdvancedOptions;
+import com.nitsha.binds.guinew.widget.button.MainKeybindSelector;
+import com.nitsha.binds.multiversions.NitshaCraft;
+import com.nitsha.binds.multiversions.NitshaInput;
+import com.nitsha.binds.multiversions.NitshaScreen;
+import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.RenderUtils;
-//? if fabric {
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-//?}
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import com.nitsha.binds.utils.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.resources.ResourceLocation;
-import org.lwjgl.glfw.GLFW;
-
+import net.minecraft.resources.Identifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import com.nitsha.binds.configs.dto.preset.ActionData;
 
-//? if >=26.1 {
-// import net.minecraft.world.item.ItemStackTemplate;
-//? }
-
-//? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.InputWithModifiers;
-import com.mojang.blaze3d.platform.Window;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
-//? }
-
-public class BindsEditor extends Screen {
-    private static final ResourceLocation BACKGROUND = Main.id("textures/gui/test/editor_bg.png");
-    private static final ResourceLocation BACKGROUND_FLAT = Main.id("textures/gui/test/editor_bg_flat.png");
-    private static final ResourceLocation BACKGROUND_DARK = Main.id("textures/gui/test/editor_bg_dark.png");
-    private static final ResourceLocation BACKGROUND_DARK_FLAT = Main.id("textures/gui/test/editor_bg_dark_flat.png");
+public class BindsEditor extends NitshaScreen {
+    private static final Identifier BACKGROUND = Main.id("textures/gui/test/editor_bg.png");
+    private static final Identifier BACKGROUND_FLAT = Main.id("textures/gui/test/editor_bg_flat.png");
+    private static final Identifier BACKGROUND_DARK = Main.id("textures/gui/test/editor_bg_dark.png");
+    private static final Identifier BACKGROUND_DARK_FLAT = Main.id("textures/gui/test/editor_bg_dark_flat.png");
 
     private final int TEXTURE_WIDTH = 141;
     private final int TEXTURE_HEIGHT = 190;
@@ -80,7 +66,7 @@ public class BindsEditor extends Screen {
     private List<ModalWindow> modalWindows = new ArrayList<>();
 
     public BindsEditor(Screen parent) {
-        super(TextUtils.empty());
+        super();
         this.parent = parent;
     }
 
@@ -325,17 +311,12 @@ public class BindsEditor extends Screen {
         }
 
         if (hasActions || hasName || hasKey) {
-            //? if >=26.1 {
-            // Map.Entry<String, ItemStackTemplate> randomItem = ItemsMapper.getRandomItem();
-            //? } else {
-            Map.Entry<String, ItemStack> randomItem = ItemsMapper.getRandomItem();
-            //? }
-            String newIcon = (randomItem != null ) ? randomItem.getKey() : "minecraft:grass_block";
-            String bindName = !hasName
-                    ? TextUtils.translatable("nitsha.binds.untitled").getString()
-                    : currentName;
-            if (editIconBtnString.equals("minecraft:structure_void"))
-                editIconBtnString =  newIcon;
+            String bindName = hasName ? currentName : TextUtils.translatable("nitsha.binds.untitled").getString();
+
+            if ("minecraft:structure_void".equals(editIconBtnString)) {
+                ItemsMapper.IconEntry randomItem = ItemsMapper.getRandomItem();
+                editIconBtnString = randomItem != null ? randomItem.key() : "minecraft:grass_block";
+            }
 
             BindData newBind = new BindData();
             newBind.index = getActiveBind();
@@ -383,11 +364,7 @@ public class BindsEditor extends Screen {
              }
         }
         selectBind();
-        //? if >=26.1 {
-        // window_BindsList.updateSelected(ItemStackTemplate.fromNonEmptyStack(new ItemStack(Blocks.STRUCTURE_VOID)));
-        //? } else {
-        window_BindsList.updateSelected(new ItemStack(Items.STRUCTURE_VOID));
-        //? }
+        window_BindsList.updateSelected(ItemsMapper.getItemStack("minecraft:structure_void"));
     }
 
     public void copyBind() {
@@ -445,7 +422,7 @@ public class BindsEditor extends Screen {
         BindData currentBind = getCBind();
         
         window_BasicOptions.getBindName().setText(currentBind.name == null ? "" : currentBind.name);
-        window_BasicOptions.getEditIcon().setIcon(ItemsMapper.getItemStack(currentBind.icon));
+        window_BasicOptions.getEditIcon().setItemStack(ItemsMapper.getItemStack(currentBind.icon));
         editIconBtnString = currentBind.icon;
         window_AdvancedOptions.getActionsTab().keybind.setKeyCode(currentBind.keyCode);
         
@@ -468,20 +445,16 @@ public class BindsEditor extends Screen {
 
     // Render
     @Override
-    //? if >=26.1 {
-    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-    //? } else {
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-    //? }
+     public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         //? if >=1.20.2 {
-        /*? if <1.21.6 { */this.renderBackground(ctx, mouseX, mouseY, delta); /*? } */
+        /*? if <1.21.6 { *//*this.renderBackground(ctx, mouseX, mouseY, delta); *//*? } */
         //? } else if >=1.19.4 {
         /* if (this.minecraft.level == null) this.renderBackground(ctx); */
         //? } else {
         /* if (this.minecraft.level == null) this.renderBackground(ctx); */
         //? }
         //? if >=26.1 {
-        /*
+        
         boolean anyModalOpen = false;
         for (ModalWindow m : modalWindows) { if (m.isVisible()) { anyModalOpen = true; break; } }
         
@@ -504,9 +477,9 @@ public class BindsEditor extends Screen {
                     }
                 }
             }
-        }*/
+        }
         //? } else {
-        boolean anyModalOpen = false;
+        /*boolean anyModalOpen = false;
         for (ModalWindow m : modalWindows) { if (m.isVisible()) { anyModalOpen = true; break; } }
         
         for (GuiEventListener element : children()) {
@@ -529,82 +502,32 @@ public class BindsEditor extends Screen {
                 }
             }
         }
+        *///? }
+    }
+
+    @Override
+    protected void onBackground(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        if (this.minecraft.level != null) {
+            return;
+        }
+
+        //? if >=1.20.5 {
+        drawNitshaPanorama(ctx, delta);
+        drawNitshaBlur(ctx, delta);
+        //? } else {
+        /*super.onBackground(ctx, mouseX, mouseY, delta);*/
         //? }
     }
 
-    //? if >=26.1 {
-    /*@Override
-    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        if (this.minecraft.level == null) {
-            //? if >=1.20.5 {
-            this.extractPanorama(context, delta);
-            this.extractBlurredBackground(
-                    //? if >=1.21.6 {
-                    context
-                    //? } else if <=1.21.1 {
-                    // delta
-                    //? }
-            );
-            //?} else {
-            *//* super.renderBackground(context, mouseX, mouseY, delta); *//*
-            //? }
-        }
-    }*/
-    //? } else >=1.20.2 {
-    @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        if (this.minecraft.level == null) {
-            //? if >=1.20.5 {
-            this.renderPanorama(context, delta);
-            this.renderBlurredBackground(
-                    //? if >=1.21.6 {
-                    // context
-                    //? } else if <=1.21.1 {
-                    // delta
-                    //? }
-            );
-            //?} else {
-            /* super.renderBackground(context, mouseX, mouseY, delta); */
-            //? }
-        }
-    }
-    //? }
-
-    //? if >=1.18.2 {
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        NitshaCraft.setScreen(parent);
     }
-    //? } else if >=1.17.1 {
-    /*@Override
-     public void onClose() {
-     this.minecraft.setScreen(parent);
-     }*/
-    //? } else {
-    /*
-     @Override
-     public void onClose() {
-     this.minecraft.setScreen(parent);
-     }
-     */
-    //? }
 
     @Override
     public boolean shouldCloseOnEsc() {
         return true;
     }
-
-    //? if >=1.18.1 {
-    @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
-    //? } else {
-    /*
-    public boolean isPauseScreen() {
-    return false;
-    }
-     *///? }
 
     public void closeEditor() {
         TextField.setFocusedField(null);
@@ -616,275 +539,144 @@ public class BindsEditor extends Screen {
     }
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        double mouseX = event.x();
-        double mouseY = event.y();
+    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
         TextField.setLastClickedWidget(null);
         KeybindSelector.setLastClickedWidget(null);
         MainKeybindSelector.setLastClickedWidget(null);
-        
+
         for (ModalWindow modal : modalWindows) {
             if (modal.isVisible()) {
-                modal.mouseClicked(event, bl);
+                NitshaInput.mouseClicked(List.of(modal), mouseX, mouseY, button);
+
                 if (!modal.isMouseInside(mouseX, mouseY)) {
                     modal.close(() -> {});
                 }
+
                 return true;
             }
         }
-        
+
         if (window_PresetSelector.isMouseInside(mouseX, mouseY)) {
-            window_PresetSelector.mouseClicked(event, bl);
+            NitshaInput.mouseClicked(List.of(window_PresetSelector), mouseX, mouseY, button);
             return true;
         } else if (window_PresetSelector.isOpen()) {
             window_PresetSelector.openSelector(false);
         }
 
         boolean clicked = false;
+
         for (GuiEventListener element : children()) {
-            if (element != window_PresetSelector && element.mouseClicked(event, bl)) {
+            if (element != window_PresetSelector && NitshaInput.mouseClicked(List.of(element), mouseX, mouseY, button)) {
                 clicked = true;
             }
         }
+
         TextField.controlFocus();
         KeybindSelector.controlFocus();
         MainKeybindSelector.controlFocus();
-        return clicked;
-    }*/
-    //? } else {
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        TextField.setLastClickedWidget(null);
-        KeybindSelector.setLastClickedWidget(null);
-        MainKeybindSelector.setLastClickedWidget(null);
-        
-        for (ModalWindow modal : modalWindows) {
-            if (modal.isVisible()) {
-                modal.mouseClicked(mouseX, mouseY, button);
-                if (!modal.isMouseInside(mouseX, mouseY)) {
-                    modal.close(() -> {});
-                }
-                return true;
-            }
-        }
-        
-        if (window_PresetSelector.isMouseInside(mouseX, mouseY)) {
-            window_PresetSelector.mouseClicked(mouseX, mouseY, button);
-            return true;
-        } else if (window_PresetSelector.isOpen()) {
-            window_PresetSelector.openSelector(false);
-        }
-        boolean clicked = false;
-        for (GuiEventListener element : children()) {
-            if (element != window_PresetSelector && element.mouseClicked(mouseX, mouseY, button)) {
-                clicked = true;
-            }
-        }
-        TextField.controlFocus();
-        KeybindSelector.controlFocus();
-        MainKeybindSelector.controlFocus();
+
         return clicked;
     }
-    //? }
-    @Override
-    //? if >=1.21.9 {
-    /*public boolean mouseReleased(MouseButtonEvent event) {
-        boolean released = false;
-        for (GuiEventListener child : children()) {
-            if (child.mouseReleased(event)) {
-                released = true;
-            }
-        }
-        return released;
-    }*/
-    //? } else {
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        boolean released = false;
-        for (GuiEventListener child : children()) {
-            if (child.mouseReleased(mouseX, mouseY, button)) {
-                released = true;
-            }
-        }
-        return released;
-    }
-    //? }
-    @Override
-    //? if >=1.21.9 {
-    /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        boolean dragged = false;
-        for (GuiEventListener child : children()) {
-            if (child.mouseDragged(event, deltaX, deltaY)) {
-                dragged = true;
-            }
-        }
-        return dragged;
-    }*/
-    //? } else {
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        boolean dragged = false;
-        for (GuiEventListener child : children()) {
-            if (child.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
-                dragged = true;
-            }
-        }
-        return dragged;
-    }
-    //? }
 
-    //? if >=1.20.2 {
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+    public boolean onMouseReleased(double mouseX, double mouseY, int button) {
+        return NitshaInput.mouseReleased(children(), mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return NitshaInput.mouseDragged(children(), mouseX, mouseY, button, deltaX, deltaY);
+    }
+
+    @Override
+    public boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         for (ModalWindow modal : modalWindows) {
             if (modal.isVisible()) {
-                modal.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+                NitshaInput.mouseScrolled(List.of(modal), mouseX, mouseY, horizontalAmount, verticalAmount);
                 return true;
             }
         }
-        for (GuiEventListener element : children()) {
-            if (element.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
-                return true;
-            }
-        }
-        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+
+        return NitshaInput.mouseScrolled(children(), mouseX, mouseY, horizontalAmount, verticalAmount);
     }
-    //?} else {
-    /*
-     @Override
-     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        for (ModalWindow modal : modalWindows) {
-            if (modal.isVisible()) {
-                modal.mouseScrolled(mouseX, mouseY, amount);
-                return true;
-            }
-        }
-         for (GuiEventListener element : children()) {
-             if (element.mouseScrolled(mouseX, mouseY, amount)) {
-                return true;
-             }
-         }
-        return super.mouseScrolled(mouseX, mouseY, amount);
-     }
-     *///?}
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean charTyped(CharacterEvent event) {
-        for (GuiEventListener element : children()) {
-            if (element.charTyped(event)) {
-                return true;
-            }
-        }
-        return super.charTyped(event);
-    }*/
-    //? } else {
-    public boolean charTyped(char codePoint, int modifiers) {
-        for (GuiEventListener element : children()) {
-            if (element.charTyped(codePoint, modifiers)) {
-                return true;
-            }
-        }
-        return super.charTyped(codePoint, modifiers);
+    public boolean onCharTyped(int codePoint) {
+        return NitshaInput.charTyped(children(), codePoint);
     }
-    //? }
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean keyPressed(KeyEvent event) {
-    int keyCode = event.key();
-    int scanCode = event.scancode();*/
-    //? } else {
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-    //? }
+    public boolean onKeyPressed(int keyCode, int nativeCode, int modifiers) {
         TextField focusedField = TextField.getFocusedField();
         KeybindSelector focusedKeybind = KeybindSelector.getFocusedField();
         MainKeybindSelector focusedMainKeybind = MainKeybindSelector.getFocusedField();
 
+        boolean escape = keyCode == InputConstants.KEY_ESCAPE;
+        boolean enter = keyCode == InputConstants.KEY_RETURN;
+
         if (focusedField != null) {
-            //? if >=1.21.9 {
-            // if (focusedField.keyPressed(event)) return true;
-            //? } else {
-            if (focusedField.keyPressed(keyCode, scanCode, modifiers)) return true;
-            //? }
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-                if (focusedField.getEscapeEvent() != null) {
-                    focusedField.getEscapeEvent().run();
-                }
-                TextField.setFocusedField(null);
+            if (NitshaInput.keyPressed(List.of(focusedField), keyCode, nativeCode, modifiers)) {
                 return true;
             }
-            if (keyCode == GLFW.GLFW_KEY_ENTER) {
-                if (focusedField.getEnterEvent() != null) {
-                    focusedField.getEnterEvent().run();
+
+            if (escape || enter) {
+                Runnable action = escape ? focusedField.getEscapeEvent() : focusedField.getEnterEvent();
+
+                if (action != null) {
+                    action.run();
                 }
+
                 TextField.setFocusedField(null);
-                return true;
             }
+
             return true;
         }
 
         if (focusedKeybind != null) {
-            //? if >=1.21.9 {
-            // if (focusedKeybind.keyPressed(event)) return true;
-            //? } else {
-            if (focusedKeybind.keyPressed(keyCode, scanCode, modifiers)) return true;
-            //? }
+            if (NitshaInput.keyPressed(List.of(focusedKeybind), keyCode, nativeCode, modifiers)) {
+                return true;
+            }
 
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            if (escape) {
                 KeybindSelector.setFocusedField(null);
                 return true;
             }
         }
 
         if (focusedMainKeybind != null) {
-            //? if >=1.21.9 {
-            // if (focusedMainKeybind.keyPressed(event)) return true;
-            //? } else {
-            if (focusedMainKeybind.keyPressed(keyCode, scanCode, modifiers)) return true;
-            //? }
+            if (NitshaInput.keyPressed(List.of(focusedMainKeybind), keyCode, nativeCode, modifiers)) {
+                return true;
+            }
 
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            if (escape) {
                 MainKeybindSelector.setFocusedField(null);
                 return true;
             }
         }
 
-        for (ModalWindow modal : modalWindows) {
-            if (modal.isVisible()) {
-                if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+        if (escape) {
+            for (ModalWindow modal : modalWindows) {
+                if (modal.isVisible()) {
                     modal.close(() -> {});
                     return true;
                 }
             }
-        }
 
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             closeEditor();
+            onClose();
+            return true;
         }
 
-        //? if fabric {
-        if (keyCode == KeyBindingHelper.getBoundKeyOf(KeyBinds.PREV_PAGE).getValue()) {
-            //?} else {
-            /*
-             if (keyCode == KeyBinds.PREV_PAGE.getKey().getValue()) {
-             *///?}
+        if (NitshaInput.matchesKey(KeyBinds.PREV_PAGE, keyCode, nativeCode)) {
             setNewPage(-1);
             return true;
         }
 
-        //? if fabric {
-        if (keyCode == KeyBindingHelper.getBoundKeyOf(KeyBinds.NEXT_PAGE).getValue()) {
-            //?} else {
-            /*
-             if (keyCode == KeyBinds.NEXT_PAGE.getKey().getValue()) {
-             *///?}
+        if (NitshaInput.matchesKey(KeyBinds.NEXT_PAGE, keyCode, nativeCode)) {
             setNewPage(1);
             return true;
         }
 
-        //? if >=1.21.9 {
-        // return super.keyPressed(event);
-        //? } else {
-        return super.keyPressed(keyCode, scanCode, modifiers);
-        //? }
+        return super.onKeyPressed(keyCode, nativeCode, modifiers);
     }
 }

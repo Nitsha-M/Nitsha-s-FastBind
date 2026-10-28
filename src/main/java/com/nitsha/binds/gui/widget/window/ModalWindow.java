@@ -3,25 +3,20 @@ package com.nitsha.binds.gui.widget.window;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.TextField;
+import com.nitsha.binds.guinew.widget.window.AnimatedWindow;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.resources.ResourceLocation;
-
-//? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
-//? }
+import net.minecraft.resources.Identifier;
 
 public class ModalWindow extends AnimatedWindow {
 
-    private static final ResourceLocation CLOSE = Main.idSprite("close_modal");
-    private static final ResourceLocation CLOSE_HOVER = Main.idSprite("close_modal_hover");
-    private static final ResourceLocation SEARCH = Main.idSprite("search_modal");
-    private static final ResourceLocation SEARCH_HOVER = Main.idSprite("search_modal_hover");
+    private static final Identifier CLOSE = Main.idSprite("close_modal");
+    private static final Identifier CLOSE_HOVER = Main.idSprite("close_modal_hover");
+    private static final Identifier SEARCH = Main.idSprite("search_modal");
+    private static final Identifier SEARCH_HOVER = Main.idSprite("search_modal_hover");
 
     private final BindsEditor screen;
     private AbstractWidget closeBtn;
@@ -38,8 +33,8 @@ public class ModalWindow extends AnimatedWindow {
     private boolean needSearch = false;
     private boolean searchMode = false;
 
-    public ModalWindow(BindsEditor screen, int x, int y, int width, int height, ResourceLocation t1,
-                          ResourceLocation t2, String title) {
+    public ModalWindow(BindsEditor screen, int x, int y, int width, int height, Identifier t1,
+                          Identifier t2, String title) {
         super(x, y, width, height, t1, t2, 0);
         this.screen = screen;
         this.bgAlphaTarget = 0f;
@@ -51,7 +46,7 @@ public class ModalWindow extends AnimatedWindow {
             }
         }, 1);
 
-        this.closeBtn = GUIUtils.createTexturedBtn(width - 17, 5, 11, 11, new ResourceLocation[]{CLOSE, CLOSE_HOVER}, button -> {
+        this.closeBtn = GUIUtils.createTexturedBtn(width - 17, 5, 11, 11, new Identifier[]{CLOSE, CLOSE_HOVER}, button -> {
             if (searchMode) {
                 this.searchField.setText("");
             } else {
@@ -73,7 +68,7 @@ public class ModalWindow extends AnimatedWindow {
         this.searchField.setEscapeEvent(() -> setSearchMode(false));
         this.searchField.setClickOutEvent(() -> setSearchMode(false));
 
-        this.searchBtn = GUIUtils.createTexturedBtn(width - 17 - 11 - 2, 5, 11, 11, new ResourceLocation[]{SEARCH, SEARCH_HOVER}, button -> {
+        this.searchBtn = GUIUtils.createTexturedBtn(width - 17 - 11 - 2, 5, 11, 11, new Identifier[]{SEARCH, SEARCH_HOVER}, button -> {
             setSearchMode(true);
         });
 
@@ -106,7 +101,7 @@ public class ModalWindow extends AnimatedWindow {
     }
 
     @Override
-    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void renderWindow(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         int adjX = mouseX - this.getX();
         int adjY = mouseY - this.getYOffset();
 

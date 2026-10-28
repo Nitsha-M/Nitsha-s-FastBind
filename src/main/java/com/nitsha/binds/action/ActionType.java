@@ -2,15 +2,17 @@ package com.nitsha.binds.action;
 
 import com.nitsha.binds.configs.dto.preset.ActionData;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 
-public abstract class ActionType<T extends ActionData> {
+public abstract class ActionType<T extends ActionData> implements GuiEventListener {
 
     protected Runnable heightChangeListener;
+    private boolean focused;
 
     public void setHeightChangeListener(Runnable listener) {
         this.heightChangeListener = listener;
@@ -30,25 +32,33 @@ public abstract class ActionType<T extends ActionData> {
 
     public abstract void init(int x, int y, int width, T value);
 
-    public abstract void render(GuiGraphics ctx, int mouseX, int mouseY, float delta);
+    public abstract void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta);
 
     public abstract T getValue();
 
     public abstract void reset();
 
+    public void setFocused(boolean focused) {
+        this.focused = focused;
+    }
+
+    public boolean isFocused() {
+        return focused;
+    }
+
     //? if >=1.21.9 {
-    /*public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) { return false; }
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) { return false; }
     public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) { return false; }
     public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double deltaX, double deltaY) { return false; }
     public boolean keyPressed(net.minecraft.client.input.KeyEvent event) { return false; }
-    public boolean charTyped(net.minecraft.client.input.CharacterEvent event) { return false; }*/
+    public boolean charTyped(net.minecraft.client.input.CharacterEvent event) { return false; }
     //? } else {
-    public boolean mouseClicked(double mx, double my, int btn) { return false; }
+    /*public boolean mouseClicked(double mx, double my, int btn) { return false; }
     public boolean mouseReleased(double mx, double my, int btn) { return false; }
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) { return false; }
     public boolean keyPressed(int key, int scan, int mods) { return false; }
     public boolean charTyped(char c, int mods) { return false; }
-    //? }
+    *///? }
     public boolean mouseScrolled(double mx, double my, double amount) { return false; }
 
     public boolean isMouseOverColorButtons(double mouseX, double mouseY) { return false; }

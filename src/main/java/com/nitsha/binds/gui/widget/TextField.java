@@ -1,12 +1,13 @@
 package com.nitsha.binds.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -14,25 +15,27 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.Util;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
+//? if <26.3 {
+/*import org.lwjgl.glfw.GLFW;
+*///? }
 
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?} else {
-/*import com.mojang.blaze3d.vertex.PoseStack;*/
+/*import net.minecraft.client.gui.GuiGraphicsExtractor;*/
 //? }
 
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.InputWithModifiers;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
+import net.minecraft.client.input.CharacterEvent;
 //? }
 
 import java.util.*;
@@ -46,8 +49,8 @@ public class TextField extends AbstractButton {
     private Runnable clickOutEvent;
     private Runnable typingEvent;
 
-    private static final ResourceLocation NORMAL = Main.id("textures/gui/test/text_field_normal.png");
-    private static final ResourceLocation FOCUS = Main.id("textures/gui/test/text_field_focus.png");
+    private static final Identifier NORMAL = Main.id("textures/gui/test/text_field_normal.png");
+    private static final Identifier FOCUS = Main.id("textures/gui/test/text_field_focus.png");
 
     private final Font font;
     private String text = "";
@@ -230,7 +233,25 @@ public class TextField extends AbstractButton {
     }
 
     // Misc
-    //? if >=1.21.9 {
+    //? if >=26.3 {
+     public static boolean hasControlDown() {
+        if (Util.getPlatform() == Util.OS.OSX) {
+            return InputConstants.isKeyDown(InputConstants.KEY_LGUI) ||
+                   InputConstants.isKeyDown(InputConstants.KEY_RGUI);
+        } else {
+            return InputConstants.isKeyDown(InputConstants.KEY_LCONTROL) ||
+                   InputConstants.isKeyDown(InputConstants.KEY_RCONTROL);
+        }
+    }
+    public static boolean hasShiftDown() {
+        return InputConstants.isKeyDown(InputConstants.KEY_LSHIFT) ||
+               InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);
+    }
+    public static boolean hasAltDown() {
+        return InputConstants.isKeyDown(InputConstants.KEY_LALT) ||
+               InputConstants.isKeyDown(InputConstants.KEY_RALT);
+    }
+    //? } else if >=1.21.9 {
     /* public static boolean hasControlDown() {
         Window handle = Minecraft.getInstance().getWindow();
         if (Util.getPlatform() == Util.OS.OSX) {
@@ -252,7 +273,7 @@ public class TextField extends AbstractButton {
                InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_ALT);
     }*/
     //? } else {
-        public static boolean hasControlDown() {
+        /*public static boolean hasControlDown() {
             return Screen.hasControlDown();
         }
         public static boolean hasShiftDown() {
@@ -261,10 +282,10 @@ public class TextField extends AbstractButton {
         public static boolean hasAltDown() {
             return Screen.hasAltDown();
         }
-    //? }
+    *///? }
 
     //? if >=1.21.9 {
-    /*public static boolean isCut(int i) {
+    public static boolean isCut(int i) {
         return i == 88 && hasControlDown() && !hasShiftDown() && !hasAltDown();
     }
     public static boolean isPaste(int i) {
@@ -275,9 +296,9 @@ public class TextField extends AbstractButton {
     }
     public static boolean isSelectAll(int i) {
         return i == 65 && hasControlDown() && !hasShiftDown() && !hasAltDown();
-    }*/
+    }
     //? } else {
-        public static boolean isCut(int i) {
+        /*public static boolean isCut(int i) {
             return Screen.isCut(i);
         }
         public static boolean isPaste(int i) {
@@ -289,7 +310,7 @@ public class TextField extends AbstractButton {
         public static boolean isSelectAll(int i) {
             return Screen.isSelectAll(i);
         }
-    //? }
+    *///? }
 
     public void setStyle(int styleCode, int position) {
         if (position < 0 || position > text.length())
@@ -809,10 +830,10 @@ public class TextField extends AbstractButton {
     }
 
     @Override
-    public void onPress() {}
+    public void onPress(InputWithModifiers inputWithModifiers) {}
 
     @Override
-    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void extractContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         if (!visible) return;
         if (multiline) {
             renderMultiline(ctx, mouseX, mouseY, delta);
@@ -863,12 +884,12 @@ public class TextField extends AbstractButton {
 
                 Component styledText = TextUtils.literal(segment.text).setStyle(segment.style);
                 //? if >=26.1 {
-                // ctx.text(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
+                 ctx.text(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
                 //? } else if >=1.20 {
-                ctx.drawString(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
-                //? } else {
+                /*ctx.drawString(this.font, styledText, renderX, renderY, 0xFFFFFFFF, true);
+                *///? } else {
                 /*ctx.pushPose();
-                 this.font.drawShadow((PoseStack)ctx, styledText, renderX, renderY, 0xFFFFFFFF);
+                 this.font.drawShadow((GuiGraphicsExtractor)ctx, styledText, renderX, renderY, 0xFFFFFFFF);
                  ctx.popPose();*/
                 //? }
 
@@ -904,7 +925,7 @@ public class TextField extends AbstractButton {
         }
     }
 
-    private void renderMultiline(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    private void renderMultiline(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         this.isHovered = isMouseOver(mouseX, mouseY);
         GUIUtils.drawResizableBox(
                 ctx,
@@ -939,12 +960,12 @@ public class TextField extends AbstractButton {
                     if (segment.text.isEmpty()) continue;
                     Component styledText = TextUtils.literal(segment.text).setStyle(segment.style);
                     //? if >=26.1 {
-                    // ctx.text(this.font, styledText, segX, renderY, 0xFFFFFFFF, true);
+                     ctx.text(this.font, styledText, segX, renderY, 0xFFFFFFFF, true);
                     //? } else if >=1.20 {
-                    ctx.drawString(this.font, styledText, segX, renderY, 0xFFFFFFFF, true);
-                    //? } else {
+                    /*ctx.drawString(this.font, styledText, segX, renderY, 0xFFFFFFFF, true);
+                    *///? } else {
                     /*ctx.pushPose();
-                     this.font.drawShadow((PoseStack)ctx, styledText, segX, renderY, 0xFFFFFFFF);
+                     this.font.drawShadow((GuiGraphicsExtractor)ctx, styledText, segX, renderY, 0xFFFFFFFF);
                      ctx.popPose();*/
                     //? }
                     segX += font.width(styledText);
@@ -979,7 +1000,7 @@ public class TextField extends AbstractButton {
         }
     }
 
-    private void animatedPlaceholder(GuiGraphics ctx) {
+    private void animatedPlaceholder(GuiGraphicsExtractor ctx) {
         float scaleFocused = 0.5f;
         float scaleUnfocused = 1f;
 
@@ -1062,6 +1083,14 @@ public class TextField extends AbstractButton {
         return focusedField;
     }
 
+    @Override
+    public void setFocused(boolean focused) {
+        super.setFocused(focused);
+        //? if >=26.3 {
+        Minecraft.getInstance().onTextInputFocusChange(this, focused);
+        //? }
+    }
+
     public static void setFocusedField(TextField ff) {
         if (focusedField != null) {
             focusedField.setFocused(false);
@@ -1105,7 +1134,7 @@ public class TextField extends AbstractButton {
 
     @Override
     //? if >=1.21.9 {
-    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         double mouseX = event.x();
         double mouseY = event.y();
         if (isMouseOver(mouseX, mouseY)) {
@@ -1122,9 +1151,9 @@ public class TextField extends AbstractButton {
             }
         }
         return false;
-    }*/
+    }
     //? } else {
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    /*public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (isMouseOver(mouseX, mouseY)) {
             setLastClickedWidget(this);
             setFocusedField(this);
@@ -1140,7 +1169,7 @@ public class TextField extends AbstractButton {
         }
         return false;
     }
-    //? }
+    *///? }
 
     private int getIndexByCoords(double mouseX, double mouseY) {
         if (multiline) {
@@ -1206,18 +1235,23 @@ public class TextField extends AbstractButton {
     //? }
 
     @Override
-    //? if >=1.21.9 {
+    //? if >=26.3 {
+    public boolean keyPressed(KeyEvent event) {
+    int keyCode = event.key();
+    int scanCode = event.shortcutKey();
+    //? } else if >=1.21.9 {
     /*public boolean keyPressed(KeyEvent event) {
     int keyCode = event.key();
     int scanCode = event.scancode();*/
     //? } else {
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-    //? }
+    /*public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    *///? }
         if (!isFocused())
             return false;
 
         switch (keyCode) {
-            case GLFW.GLFW_KEY_LEFT:
+            //$ if >=26.3 'case InputConstants.KEY_LEFT:' else 'case GLFW.GLFW_KEY_LEFT:'
+            case InputConstants.KEY_LEFT:
                 if (hasControlDown()) {
                     this.setCursor(this.getWordSkipPosition(-1), hasShiftDown());
                 } else {
@@ -1225,7 +1259,8 @@ public class TextField extends AbstractButton {
                 }
                 return true;
 
-            case GLFW.GLFW_KEY_RIGHT:
+            //$ if >=26.3 'case InputConstants.KEY_RIGHT:' else 'case GLFW.GLFW_KEY_RIGHT:'
+            case InputConstants.KEY_RIGHT:
                 if (hasControlDown()) {
                     this.setCursor(this.getWordSkipPosition(1), hasShiftDown());
                 } else {
@@ -1233,7 +1268,8 @@ public class TextField extends AbstractButton {
                 }
                 return true;
 
-            case GLFW.GLFW_KEY_UP:
+            //$ if >=26.3 'case InputConstants.KEY_UP:' else 'case GLFW.GLFW_KEY_UP:'
+            case InputConstants.KEY_UP:
                 if (multiline) {
                     int cursorLineIdx = getLineForOffset(this.selectionStart);
                     if (cursorLineIdx > 0) {
@@ -1253,7 +1289,8 @@ public class TextField extends AbstractButton {
                 }
                 return false;
 
-            case GLFW.GLFW_KEY_DOWN:
+            //$ if >=26.3 'case InputConstants.KEY_DOWN:' else 'case GLFW.GLFW_KEY_DOWN:'
+            case InputConstants.KEY_DOWN:
                 if (multiline) {
                     int cursorLineIdx = getLineForOffset(this.selectionStart);
                     if (cursorLineIdx < cachedLines.size() - 1) {
@@ -1273,24 +1310,30 @@ public class TextField extends AbstractButton {
                 }
                 return false;
 
-            case GLFW.GLFW_KEY_HOME:
+            //$ if >=26.3 'case InputConstants.KEY_HOME:' else 'case GLFW.GLFW_KEY_HOME:'
+            case InputConstants.KEY_HOME:
                 this.setCursorToStart(hasShiftDown());
                 return true;
 
-            case GLFW.GLFW_KEY_END:
+            //$ if >=26.3 'case InputConstants.KEY_END:' else 'case GLFW.GLFW_KEY_END:'
+            case InputConstants.KEY_END:
                 this.setCursorToEnd(hasShiftDown());
                 return true;
 
-            case GLFW.GLFW_KEY_BACKSPACE:
+            //$ if >=26.3 'case InputConstants.KEY_BACKSPACE:' else 'case GLFW.GLFW_KEY_BACKSPACE:'
+            case InputConstants.KEY_BACKSPACE:
                 this.erase(-1);
                 return true;
 
-            case GLFW.GLFW_KEY_DELETE:
+            //$ if >=26.3 'case InputConstants.KEY_DELETE:' else 'case GLFW.GLFW_KEY_DELETE:'
+            case InputConstants.KEY_DELETE:
                 this.erase(1);
                 return true;
 
-            case GLFW.GLFW_KEY_ENTER:
-            case GLFW.GLFW_KEY_KP_ENTER:
+            //$ if >=26.3 'case InputConstants.KEY_RETURN:' else 'case GLFW.GLFW_KEY_ENTER:'
+            case InputConstants.KEY_RETURN:
+            //$ if >=26.3 'case InputConstants.KEY_NUMPADENTER:' else 'case GLFW.GLFW_KEY_KP_ENTER:'
+            case InputConstants.KEY_NUMPADENTER:
                 setFocusedField(null);
                 this.setFocused(false);
                 if (this.enterEvent != null) {
@@ -1298,7 +1341,8 @@ public class TextField extends AbstractButton {
                 }
                 return true;
 
-            case GLFW.GLFW_KEY_ESCAPE:
+            //$ if >=26.3 'case InputConstants.KEY_ESCAPE:' else 'case GLFW.GLFW_KEY_ESCAPE:'
+            case InputConstants.KEY_ESCAPE:
                 setFocusedField(null);
                 this.setFocused(false);
                 if (this.escapeEvent != null) {
@@ -1328,7 +1372,7 @@ public class TextField extends AbstractButton {
 
     @Override
     //? if >=1.21.9 {
-    /*public boolean charTyped(CharacterEvent event) {
+    public boolean charTyped(CharacterEvent event) {
         if (!isFocused())
             return false;
         char c = (char) event.codepoint();
@@ -1337,9 +1381,9 @@ public class TextField extends AbstractButton {
         }
         this.write(Character.toString(c));
         return true;
-    }*/
+    }
     //? } else {
-    public boolean charTyped(char c, int modifiers) {
+    /*public boolean charTyped(char c, int modifiers) {
         if (!isFocused())
             return false;
         if (Character.isISOControl(c)) {
@@ -1348,5 +1392,5 @@ public class TextField extends AbstractButton {
         this.write(Character.toString(c));
         return true;
     }
-    //? }
+    *///? }
 }

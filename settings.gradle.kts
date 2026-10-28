@@ -37,45 +37,40 @@ stonecutter {
         val loaders_1_1 = listOf("fabric")
         val loaders_2 = listOf("fabric", "neoforge")
 
-        mc("26.1", loaders = loaders_2)
+        mc("26.3", loaders = loaders_1_1)
+    //    mc("26.2", loaders = loaders_2)
+    //    mc("26.1", loaders = loaders_2)
         // 1.21
-//        mc("1.21.11", loaders = loaders_2)
-        mc("1.21.11", loaders = loaders_2)
-        mc("1.21.10", loaders = loaders_2)
-        mc("1.21.8", loaders = loaders_2)
-//        mc("1.21.7", loaders = loaders_2)
-//        mc("1.21.6", loaders = loaders_2)
-        mc("1.21.5", loaders = loaders_2)
-        mc("1.21.4", loaders = loaders_2)
-        mc("1.21.3", loaders = loaders_2)
-//        mc("1.21.2", loaders = loaders_2)
-        mc("1.21.1", loaders = loaders_2)
+    //    mc("1.21.11", loaders = loaders_2)
+    //    mc("1.21.10", loaders = loaders_2)
+    //    mc("1.21.8", loaders = loaders_2)
+    //    mc("1.21.5", loaders = loaders_2)
+    //    mc("1.21.4", loaders = loaders_2)
+    //    mc("1.21.3", loaders = loaders_2)
+    //    mc("1.21.1", loaders = loaders_2)
 
         // 1.20
-        mc("1.20.6", loaders = loaders_2)
-        mc("1.20.4", loaders = loaders_2)
-        mc("1.20.2", loaders = loaders_1_1)
-        mc("1.20.1", loaders = loaders_1)
+//        mc("1.20.6", loaders = loaders_2)
+//        mc("1.20.4", loaders = loaders_2)
+//        mc("1.20.2", loaders = loaders_1_1)
+//        mc("1.20.1", loaders = loaders_1)
 
         // 1.19
-        mc("1.19.4", loaders = loaders_1)
-        mc("1.19.3", loaders = loaders_1)
-        mc("1.19.2", loaders = loaders_1)
-//        mc("1.19.1", loaders = loaders_1)
-        mc("1.19", loaders = loaders_1)
+//        mc("1.19.4", loaders = loaders_1)
+//        mc("1.19.3", loaders = loaders_1)
+//        mc("1.19.2", loaders = loaders_1)
+//        mc("1.19", loaders = loaders_1)
 
         // 1.18
-        mc("1.18.2", loaders = loaders_1)
-//        mc("1.18.1", loaders = loaders_1)
-//        mc("1.18", loaders = loaders_1)
+//        mc("1.18.2", loaders = loaders_1)
 
         // 1.17
-        mc("1.17.1", loaders = loaders_1)
+//        mc("1.17.1", loaders = loaders_1)
 
         // 1.16
-        mc("1.16.5", loaders = loaders_1_1)
+//        mc("1.16.5", loaders = loaders_1_1)
 
-        vcsVersion = "1.21.3-fabric"
+        vcsVersion = "26.3-fabric"
     }
 }
 

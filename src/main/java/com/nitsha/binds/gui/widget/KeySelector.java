@@ -2,22 +2,18 @@ package com.nitsha.binds.gui.widget;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.button.BedrockButton;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
-
-//? if >=1.21.9 {
-/*import net.minecraft.client.input.InputWithModifiers;*/
-//? }
+import com.nitsha.binds.guinew.widget.button.BedrockButton;
+import com.nitsha.binds.multiversions.TextUtils;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 
 public abstract class KeySelector extends BedrockButton {
 
-    private static final ResourceLocation SELECT = Main.id("textures/gui/btns/select_icon.png");
+    private static final Identifier SELECT = Main.id("textures/gui/btns/select_icon.png");
     private String selectedItem = "";
 
     public KeySelector(int x, int y, int width, int height, Runnable onRelease) {
-        super("", x, y, width, height, true, onRelease);
+        super(TextUtils.empty(), x, y, width, height, true, onRelease);
         updateName();
     }
 
@@ -36,8 +32,8 @@ public abstract class KeySelector extends BedrockButton {
     }
 
     @Override
-    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        super.renderWidget(ctx, mouseX, mouseY, delta);
+    public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        super.onRender(ctx, mouseX, mouseY, delta);
 
         boolean isHovered = isMouseOver(mouseX, mouseY);
         GUIUtils.adaptiveDrawTexture(ctx, SELECT, this.getX() + 4, this.getY() + 7 + Math.round(this.getOffsetY()), 0, 0, 6, 5, 6, 5, (isHovered || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor());
@@ -45,7 +41,7 @@ public abstract class KeySelector extends BedrockButton {
 
     protected void updateName() {
         if (selectedItem.isEmpty()) {
-            setName(TextUtils.translatable("nitsha.binds.advances.noSelectedKeyItem").getString());
+            setText(TextUtils.translatable("nitsha.binds.advances.noSelectedKeyItem"));
         }
     };
 }

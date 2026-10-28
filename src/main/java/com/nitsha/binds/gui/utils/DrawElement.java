@@ -1,11 +1,11 @@
 package com.nitsha.binds.gui.utils;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public class DrawElement {
     @FunctionalInterface
     public interface Drawer {
-        void draw(GuiGraphics ctx, float mouseX, float mouseY);
+        void draw(GuiGraphicsExtractor ctx, float mouseX, float mouseY);
     }
 
     private final Drawer drawer;
@@ -14,7 +14,7 @@ public class DrawElement {
         this.drawer = drawer;
     }
 
-    public void render(GuiGraphics ctx, float mouseX, float mouseY) {
+    public void render(GuiGraphicsExtractor ctx, float mouseX, float mouseY) {
         drawer.draw(ctx, mouseX, mouseY);
     }
 }

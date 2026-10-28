@@ -10,11 +10,9 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class ModMenuApiImpl implements ModMenuApi
 {
-	//? if <26.1 {
 	@Override
 	public ConfigScreenFactory<?> getModConfigScreenFactory() {
-		return parent -> new BindsEditor(parent);
+		return BindsEditor::new;
 	}
-	//? }
 }
 //? }

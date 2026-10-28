@@ -6,7 +6,7 @@ import com.nitsha.binds.configs.*;
 import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.KeepMovementHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 //? if fabric {
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -48,17 +48,17 @@ public class Main {
         tickClient(client);
     }
     //? } elif neoforge {
-    //? if >1.20.4 {
-    /*public static void onClientTickEvent(ClientTickEvent.Post event) {
+    /*//? if >1.20.4 {
+    public static void onClientTickEvent(ClientTickEvent.Post event) {
         tickClient(Minecraft.getInstance());
-    }*/
+    }
     //? } else {
-    /*public static void onClientTickEvent(TickEvent.ClientTickEvent event) {
+    /^public static void onClientTickEvent(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         tickClient(Minecraft.getInstance());
-    }*/
+    }^/
     //? }
-    //? } elif forge {
+    *///? } elif forge {
     /*@SubscribeEvent
     public static void onClientTickEvent(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
@@ -75,20 +75,20 @@ public class Main {
     }
 
     //? if >=1.21 {
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
     //?} else if >=1.20 {
-    /*public static ResourceLocation id(String path) {
-        return new ResourceLocation(MOD_ID, path);
+    /*public static Identifier id(String path) {
+        return new Identifier(MOD_ID, path);
     }
     *///?} else {
-    /*public static ResourceLocation id(String path) {
-        return new ResourceLocation(MOD_ID, path);
+    /*public static Identifier id(String path) {
+        return new Identifier(MOD_ID, path);
     }
     *///?}
 
-    public static ResourceLocation idSprite(String path) {
+    public static Identifier idSprite(String path) {
         //? if >=1.20.2 {
         return id(path);
         //?} else {

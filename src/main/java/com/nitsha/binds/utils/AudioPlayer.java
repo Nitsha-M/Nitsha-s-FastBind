@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -83,7 +83,7 @@ public class AudioPlayer {
         stopChannel(channel);
         onFinishCallbacks[channel] = onFinish;
 
-        ResourceLocation sound = ResourceLocation.fromNamespaceAndPath(namespace, soundName);
+        Identifier sound = Identifier.fromNamespaceAndPath(namespace, soundName);
         sounds[channel] = new SimpleSoundInstance(sound, SoundSource.MASTER, volume, pitch,
                 SoundInstance.createUnseededRandom(), false, 0,
                 SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true);
@@ -189,25 +189,25 @@ public class AudioPlayer {
         }
     }
 
-    public static List<ResourceLocation> getSortedSounds() {
+    public static List<Identifier> getSortedSounds() {
         //? if >=1.19.3 {
-        Set<ResourceLocation> keys = BuiltInRegistries.SOUND_EVENT.keySet();
+        Set<Identifier> keys = BuiltInRegistries.SOUND_EVENT.keySet();
         //?} else {
-        /* Set<ResourceLocation> keys = net.minecraft.core.Registry.SOUND_EVENT.keySet(); */
+        /* Set<Identifier> keys = net.minecraft.core.Registry.SOUND_EVENT.keySet(); */
         //?}
-        List<ResourceLocation> sorted = new ArrayList<>(keys);
+        List<Identifier> sorted = new ArrayList<>(keys);
         sorted.sort((a, b) -> a.toString().compareToIgnoreCase(b.toString()));
         return sorted;
     }
 
     public static List<String> getSoundCategories() {
         //? if >=1.19.3 {
-        Set<ResourceLocation> keys = BuiltInRegistries.SOUND_EVENT.keySet();
+        Set<Identifier> keys = BuiltInRegistries.SOUND_EVENT.keySet();
         //?} else {
-        /* Set<ResourceLocation> keys = net.minecraft.core.Registry.SOUND_EVENT.keySet(); */
+        /* Set<Identifier> keys = net.minecraft.core.Registry.SOUND_EVENT.keySet(); */
         //?}
         Set<String> categories = new TreeSet<>();
-        for (ResourceLocation rl : keys) {
+        for (Identifier rl : keys) {
             String path = rl.getPath();
             int dotIndex = path.indexOf('.');
             if (dotIndex != -1) {
@@ -220,7 +220,7 @@ public class AudioPlayer {
     }
 
     public static SoundEvent getSoundByName(String name) {
-        ResourceLocation rs = ResourceLocation.parse(name);
+        Identifier rs = Identifier.parse(name);
         //? if >1.20.1 {
         return BuiltInRegistries.SOUND_EVENT.getValue(rs);
         //?} else {

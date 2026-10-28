@@ -7,38 +7,34 @@ import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.list.KeyEventItem;
 import com.nitsha.binds.gui.widget.window.ModalWindow;
 import com.nitsha.binds.gui.widget.window.ScrollableWindow;
+import com.nitsha.binds.guinew.utils.Textures;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.SearchUtil;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-//? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;*/
-//? }
-
 public class SelectKeyEvent extends ModalWindow {
-    private static final ResourceLocation TAB2_BG = Main.id("textures/gui/test/scroller.png");
 
     private final BindsEditor screen;
     private ScrollableWindow eventsList;
 
-    public SelectKeyEvent(BindsEditor screen, int x, int y, int width, int height, ResourceLocation t1,
-                          ResourceLocation t2) {
+    public SelectKeyEvent(BindsEditor screen, int x, int y, int width, int height, Identifier t1,
+                          Identifier t2) {
         super(screen, x, y, width, height, t1, t2, "nitsha.binds.advances.modals.selectKeyEvent");
         this.screen = screen;
 
         this.setNeedSearch(true);
 
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            GUIUtils.drawResizableBox(ctx, TAB2_BG, 4, 20, this.getWidth() - 8, this.getHeight() - 27, 1, 3);
+            GUIUtils.drawResizableBox(ctx, Textures.INNER_BG, 4, 20, this.getWidth() - 8, this.getHeight() - 27, 1, 3);
         });
 
         this.eventsList = new ScrollableWindow(5, 21, 5, 21, getWidth() - 10, getHeight() - 29, false);
@@ -48,8 +44,9 @@ public class SelectKeyEvent extends ModalWindow {
 
         generateList();
     }
+
     @Override
-    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void renderWindow(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         int adjX = mouseX - this.getX();
         int adjY = mouseY - this.getYOffset();
 
@@ -113,18 +110,18 @@ public class SelectKeyEvent extends ModalWindow {
 
     private String getCategoryKey(KeyMapping key) {
         //? if >=1.21.9 {
-        /*return key.getCategory().label().getString();*/
+        return key.getCategory().label().getString();
         //? } else {
-        return key.getCategory();
-        //? }
+        /*return key.getCategory();
+        *///? }
     }
 
     private Component getCategoryLabel(String category) {
         //? if >=1.21.9 {
-        /*return TextUtils.literal(category);*/
+        return TextUtils.literal(category);
         //? } else {
-        return TextUtils.translatable(category);
-        //? }
+        /*return TextUtils.translatable(category);
+        *///? }
     }
 
     @Override

@@ -6,7 +6,7 @@ import com.nitsha.binds.gui.utils.DrawElement;
 import com.nitsha.binds.utils.RenderUtils;
 import net.minecraft.client.Minecraft;
 import com.nitsha.binds.utils.Renderable;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 //? if >=1.17 {
@@ -15,16 +15,18 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
+//? if <26.3 {
+/*import org.lwjgl.glfw.GLFW;
+*///? }
 
 import java.util.ArrayList;
 import java.util.List;
 
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
+import net.minecraft.client.input.CharacterEvent;
 //? }
 
 public class ScrollableWindow extends AbstractContainerEventHandler
@@ -169,14 +171,14 @@ public class ScrollableWindow extends AbstractContainerEventHandler
     }
 
     //? if >=26.1 {
-    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+     public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
     //? } else {
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        //? }
+    /*public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        *///? }
         renderWindow(ctx, mouseX, mouseY, delta);
     }
 
-    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void renderWindow(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         if (!isVisible()) return;
         smoothScrollOffset = Mth.lerp(0.2f, smoothScrollOffset, targetScrollOffset);
         if (Math.abs(smoothScrollOffset - targetScrollOffset) < 0.5f) smoothScrollOffset = targetScrollOffset;
@@ -199,7 +201,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
         GUIUtils.matricesUtil(ctx, aX, aY, 1, () -> {
             drawElements.forEach(element -> element.render(ctx, mX, mY));
             //? if >=26.1 {
-            /*for (GuiEventListener child : children) {
+            for (GuiEventListener child : children) {
                 if (child instanceof net.minecraft.client.gui.components.AbstractWidget w) {
                     if (horizontal) {
                         if (w.getX() + w.getWidth() < smoothScrollOffset || w.getX() > smoothScrollOffset + this.width) continue;
@@ -213,9 +215,9 @@ public class ScrollableWindow extends AbstractContainerEventHandler
                     Renderable r = RenderUtils.wrapRenderable(child);
                     if (r != null) { r.extractRenderState(ctx, mX, mY, delta); renderStats[0]++; }
                 }
-            }*/
+            }
             //? } else {
-            for (GuiEventListener child : children) {
+            /*for (GuiEventListener child : children) {
                 if (child instanceof net.minecraft.client.gui.components.AbstractWidget w) {
                     if (horizontal) {
                         if (w.getX() + w.getWidth() < smoothScrollOffset || w.getX() > smoothScrollOffset + this.width) continue;
@@ -230,7 +232,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
                     if (r != null) { r.render(ctx, mX, mY, delta); renderStats[0]++; }
                 }
             }
-            //? }
+            *///? }
         });
 
         GUIUtils.matricesUtil(ctx, 0, 0, 500, () -> {
@@ -320,12 +322,12 @@ public class ScrollableWindow extends AbstractContainerEventHandler
         if (!isMouseInside(mouseX, mouseY))
             return false;
         //? if >=1.21.9 {
-        // Window window = Minecraft.getInstance().getWindow();
+         Window window = Minecraft.getInstance().getWindow();
         //? } else {
-        long window = Minecraft.getInstance().getWindow().getWindow();
-        //? }
-        boolean shift = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT)
-                || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
+        /*long window = Minecraft.getInstance().getWindow().getWindow();
+        *///? }
+        //$ if >=26.3 'boolean shift = InputConstants.isKeyDown(InputConstants.KEY_LSHIFT) || InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);' else 'boolean shift = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT);'
+        boolean shift = InputConstants.isKeyDown(InputConstants.KEY_LSHIFT) || InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);
         int scrollSpeed = (shift) ? 40 : 20;
         targetScrollOffset = Mth.clamp(targetScrollOffset - ((int) amount * scrollSpeed), 0, maxScroll);
 
@@ -367,7 +369,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
 
     @Override
     //? if >=1.21.9 {
-    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         if (!isVisible()) return false;
         double mouseX = event.x();
         double mouseY = event.y();
@@ -383,7 +385,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
 
         boolean clicked = false;
 
-        if (button == 0 && isInsideScrollbar(mouseX, mouseY)) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && isInsideScrollbar(mouseX, mouseY)) {
             isDraggingScrollbar = true;
             dragStartY = (int) mouseY;
             dragStartScrollOffset = targetScrollOffset;
@@ -394,7 +396,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
             for (GuiEventListener element : new ArrayList<>(this.children())) {
                 if (element.mouseClicked(adjustedEvent, bl)) {
                     this.setFocused(element);
-                    if (button == 0) {
+                    if (button == InputConstants.MOUSE_BUTTON_LEFT) {
                         this.setDragging(true);
                     }
                     clicked = true;
@@ -402,16 +404,16 @@ public class ScrollableWindow extends AbstractContainerEventHandler
             }
         }
         return clicked;
-    }*/
+    }
     //? } else {
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        /*public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (!isVisible()) return false;
             int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
             int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
 
             boolean clicked = false;
 
-            if (button == 0 && isInsideScrollbar(mouseX, mouseY)) {
+            if (button == InputConstants.MOUSE_BUTTON_LEFT && isInsideScrollbar(mouseX, mouseY)) {
                 isDraggingScrollbar = true;
                 dragStartY = horizontal ? (int) mouseX : (int) mouseY;
                 dragStartScrollOffset = targetScrollOffset;
@@ -430,7 +432,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
                     }
                     if (element.mouseClicked(mouseX - aX, mouseY - aY, button)) {
                         this.setFocused(element);
-                        if (button == 0) {
+                        if (button == InputConstants.MOUSE_BUTTON_LEFT) {
                             this.setDragging(true);
                         }
                         clicked = true;
@@ -440,31 +442,31 @@ public class ScrollableWindow extends AbstractContainerEventHandler
 
             return clicked;
         }
-    //? }
+    *///? }
 
     @Override
     //? if >=1.21.9 {
-    /*public boolean mouseReleased(MouseButtonEvent event) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         if (!isVisible()) return false;
         double mouseX = event.x();
         double mouseY = event.y();
         int button = event.buttonInfo().button();
         int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
         int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
-        if (button == 0 && isDraggingScrollbar) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && isDraggingScrollbar) {
             isDraggingScrollbar = false;
         }
         for (GuiEventListener child : new ArrayList<>(children)) {
                 child.mouseReleased(new MouseButtonEvent(mouseX - aX, mouseY - aY, event.buttonInfo()));
         }
         return false;
-    }*/
+    }
     //? } else {
-        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        /*public boolean mouseReleased(double mouseX, double mouseY, int button) {
             if (!isVisible()) return false;
             int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
             int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
-            if (button == 0 && isDraggingScrollbar) {
+            if (button == InputConstants.MOUSE_BUTTON_LEFT && isDraggingScrollbar) {
                 isDraggingScrollbar = false;
             }
             for (GuiEventListener child : new ArrayList<>(children)) {
@@ -480,11 +482,11 @@ public class ScrollableWindow extends AbstractContainerEventHandler
             }
             return false;
         }
-    //? }
+    *///? }
 
         @Override
     //? if >=1.21.9 {
-    /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
         if (!isVisible()) return false;
         double mouseX = event.x();
         double mouseY = event.y();
@@ -501,7 +503,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
 
         boolean clicked = false;
 
-        if (isDraggingScrollbar && button == 0) {
+        if (isDraggingScrollbar && button == InputConstants.MOUSE_BUTTON_LEFT) {
             int trackHeight = height - 2;
             int scrollArea = trackHeight - barSize;
 
@@ -519,16 +521,16 @@ public class ScrollableWindow extends AbstractContainerEventHandler
             }
         }
         return clicked;
-    }*/
+    }
     //? } else {
-        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        /*public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
             if (!isVisible()) return false;
             int aX = (this.horizontal) ? this.getX() - scrollOffset : this.getX();
             int aY = (!this.horizontal) ? this.getY() - scrollOffset : this.getY();
 
             boolean clicked = false;
 
-            if (isDraggingScrollbar && button == 0) {
+            if (isDraggingScrollbar && button == InputConstants.MOUSE_BUTTON_LEFT) {
                 int trackSize = horizontal ? width : height;
                 int trackActiveBound = trackSize - 2;
                 int scrollArea = trackActiveBound - barSize;
@@ -556,20 +558,20 @@ public class ScrollableWindow extends AbstractContainerEventHandler
             }
             return clicked;
         }
-    //? }
+    *///? }
 
         @Override
     //? if >=1.21.9 {
-    /*public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(KeyEvent event) {
         if (!isVisible()) return false;
         for (GuiEventListener child : this.children) {
             if (child.keyPressed(event))
                 return true;
         }
         return super.keyPressed(event);
-    }*/
+    }
     //? } else {
-        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        /*public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
             if (!isVisible()) return false;
             for (GuiEventListener child : this.children) {
                 if (child.keyPressed(keyCode, scanCode, modifiers))
@@ -577,11 +579,11 @@ public class ScrollableWindow extends AbstractContainerEventHandler
             }
             return super.keyPressed(keyCode, scanCode, modifiers);
         }
-    //? }
+    *///? }
 
         @Override
     //? if >=1.21.9 {
-    /*public boolean charTyped(CharacterEvent event) {
+    public boolean charTyped(CharacterEvent event) {
         if (!isVisible()) return false;
         for (GuiEventListener child : new ArrayList<>(children)) {
             if (child.charTyped(event)) {
@@ -589,9 +591,9 @@ public class ScrollableWindow extends AbstractContainerEventHandler
             }
         }
         return super.charTyped(event);
-    }*/
+    }
     //? } else {
-        public boolean charTyped(char codePoint, int modifiers) {
+        /*public boolean charTyped(char codePoint, int modifiers) {
             if (!isVisible()) return false;
             for (GuiEventListener child : new ArrayList<>(children)) {
                 if (child.charTyped(codePoint, modifiers)) {
@@ -600,7 +602,7 @@ public class ScrollableWindow extends AbstractContainerEventHandler
             }
             return super.charTyped(codePoint, modifiers);
         }
-    //? }
+    *///? }
 
     //? if >=1.17 {
     @Override

@@ -5,7 +5,7 @@ package com.nitsha.binds.gui.utils;
 import com.nitsha.binds.gui.widget.button.TexturedButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 //? if <1.20 {
 /*import net.minecraft.client.gui.GuiComponent;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -15,11 +15,10 @@ import net.minecraft.client.renderer.*;
         import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 //? if >=1.21.6 {
-/*import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.renderer.RenderPipelines;
-*///?}
+//?}
 //? if <1.21.5 {
 //?}
 //? if >=1.19.3 {
@@ -29,7 +28,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 
 
 //? if >=26.1 {
-// import net.minecraft.world.item.ItemStackTemplate;
+ import net.minecraft.world.item.ItemStackTemplate;
 //? }
 
 public class GUIUtils {
@@ -63,29 +62,27 @@ public class GUIUtils {
         return (a << 24) | ((int)(r * factor) << 16) | ((int)(g * factor) << 8) | (int)(b * factor);
     }
 
-    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY) {
+    public static void addText(GuiGraphicsExtractor ctx, Component text, int width, int offsetX, int offsetY) {
         addText(ctx, text, width, offsetX, offsetY, "left", "top", 0xFFFFFFFF, true);
     }
 
-    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign) {
+    public static void addText(GuiGraphicsExtractor ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign) {
         addText(ctx, text, width, offsetX, offsetY, hAlign, vAlign, 0xFFFFFFFF, true);
     }
 
-    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY, int color) {
+    public static void addText(GuiGraphicsExtractor ctx, Component text, int width, int offsetX, int offsetY, int color) {
         addText(ctx, text, width, offsetX, offsetY, "left", "top", color, true);
     }
 
-    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY, int color, String hAlign, String vAlign) {
+    public static void addText(GuiGraphicsExtractor ctx, Component text, int width, int offsetX, int offsetY, int color, String hAlign, String vAlign) {
         addText(ctx, text, width, offsetX, offsetY, hAlign, vAlign, color, true);
     }
 
-    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color) {
+    public static void addText(GuiGraphicsExtractor ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color) {
         addText(ctx, text, width, offsetX, offsetY, hAlign, vAlign, color, true);
     }
 
-    // ---------------- Универсальный метод ----------------
-
-    public static void addText(GuiGraphics ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color, boolean shadow) {
+    public static void addText(GuiGraphicsExtractor ctx, Component text, int width, int offsetX, int offsetY, String hAlign, String vAlign, int color, boolean shadow) {
         if (text == null || text.getString().isBlank()) return;
         Font font = MC.font;
         int chWidth = font.width(text);
@@ -118,10 +115,10 @@ public class GUIUtils {
         }
 
         //? if >=26.1 {
-        // ctx.text(font, text, alignCoordX, alignCoordY, color, shadow);
+         ctx.text(font, text, alignCoordX, alignCoordY, color, shadow);
         //? } else if >=1.20 {
-        ctx.drawString(font, text, alignCoordX, alignCoordY, color, shadow);
-        //?} else {
+        /*ctx.drawString(font, text, alignCoordX, alignCoordY, color, shadow);
+        *///?} else {
         /*ctx.pushPose();
         if (shadow) {
             font.drawShadow(ctx, text, alignCoordX, alignCoordY, color);
@@ -132,13 +129,13 @@ public class GUIUtils {
         *///?}
     }
 
-    public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(GuiGraphicsExtractor ctx, Identifier texture, int x, int y, int u, int v,
                                            int width, int height, int uWidth, int uHeight, int textureWidth, int textureHeight, int color) {
         //? if >=1.21.6 {
-        /*ctx.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, uWidth, uHeight, textureWidth, textureHeight, color);
-        *///?} else if >1.21.1 {
-        ctx.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, uWidth, uHeight, textureWidth, textureHeight, color);
-        //?} else if >=1.20 {
+        ctx.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, uWidth, uHeight, textureWidth, textureHeight, color);
+        //?} else if >1.21.1 {
+        /*ctx.blit(RenderType::guiTextured, texture, x, y, width, height, u, v, uWidth, uHeight, textureWidth, textureHeight, color);
+        *///?} else if >=1.20 {
         /*RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         float red = ((color >> 16) & 0xFF) / 255.0f;
@@ -146,7 +143,7 @@ public class GUIUtils {
         float blue = (color & 0xFF) / 255.0f;
         float alpha = ((color >> 24) & 0xFF) / 255.0f;
         RenderSystem.setShaderColor(red, green, blue, alpha);
-        ctx.blit(texture, x, y, 0, u, v, width, height, uWidth, uHeight, textureWidth, textureHeight);
+        ctx.blit(texture, x, y, width, height, u, v, uWidth, uHeight, textureWidth, textureHeight);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableBlend();
         *///?} else if >=1.17 {
@@ -171,8 +168,8 @@ public class GUIUtils {
         GuiComponent.blit(
             ctx,
             x, y,
-            u, v,
             width, height,
+            u, v,
             uWidth, uHeight,
             textureWidth,
             textureHeight
@@ -195,8 +192,8 @@ public class GUIUtils {
         GuiComponent.blit(
                 ctx,
                 x, y,
-                u, v,
                 width, height,
+                u, v,
                 uWidth, uHeight,
                 textureWidth, textureHeight
         );
@@ -206,34 +203,34 @@ public class GUIUtils {
         *///?}
     }
 
-    public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(GuiGraphicsExtractor ctx, Identifier texture, int x, int y, int u, int v,
                                            int width, int height, int textureWidth, int textureHeight, int color) {
         adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, width, height, textureWidth, textureHeight, color);
     }
 
-    public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(GuiGraphicsExtractor ctx, Identifier texture, int x, int y, int u, int v,
                                            int width, int height, int textureWidth, int textureHeight) {
         adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, width, height, textureWidth, textureHeight, 0xFFFFFFFF);
     }
 
-    public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(GuiGraphicsExtractor ctx, Identifier texture, int x, int y, int u, int v,
                                            int width, int height, int textureWidth) {
         adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, width, height, textureWidth, textureWidth, 0xFFFFFFFF);
     }
 
-    public static void adaptiveDrawTexture(GuiGraphics ctx, ResourceLocation texture, int x, int y, int u, int v,
+    public static void adaptiveDrawTexture(GuiGraphicsExtractor ctx, Identifier texture, int x, int y, int u, int v,
                                            int width, int height) {
         adaptiveDrawTexture(ctx, texture, x, y, u, v, width, height, width, height, 256, 256, 0xFFFFFFFF);
     }
 
     public static TexturedButton createTexturedBtn(int x, int y, int width, int height,
-                                                   ResourceLocation[] textures, Button.OnPress onClick) {
+                                                   Identifier[] textures, Button.OnPress onClick) {
         return new TexturedButton(x, y, width, height, textures[0], textures[1], onClick);
     }
 
     // ------------------- RESIZABLE BOX -------------------
 
-    public static void drawResizableBox(GuiGraphics ctx, ResourceLocation texture,
+    public static void drawResizableBox(GuiGraphicsExtractor ctx, Identifier texture,
                                         int x, int y, int width, int height, int uOffset, int vOffset, int edge, int textureWidth, int textureHeight, int color) {
         int partW = width - edge * 2;
         int partH = height - edge * 2;
@@ -269,12 +266,12 @@ public class GUIUtils {
         }
     }
 
-    public static void drawResizableBox(GuiGraphics ctx, ResourceLocation texture,
+    public static void drawResizableBox(GuiGraphicsExtractor ctx, Identifier texture,
                                         int x, int y, int width, int height, int edge, int tS, int color) {
         drawResizableBox(ctx, texture, x, y, width, height, 0, 0, edge, tS, tS, color);
     }
 
-        public static void drawResizableBox(GuiGraphics ctx, ResourceLocation texture, int x, int y, int width, int height, int edge, int tS) {
+    public static void drawResizableBox(GuiGraphicsExtractor ctx, Identifier texture, int x, int y, int width, int height, int edge, int tS) {
         drawResizableBox(ctx, texture, x, y, width, height, 0,  0, edge, tS, tS, 0xFFFFFFFF);
     }
 
@@ -282,19 +279,19 @@ public class GUIUtils {
         return Mth.clamp(value, 0.001f, 1.0f);
     }
 
-    public static void matricesUtil(GuiGraphics ctx, float x, float y, int zIndex, Runnable action) {
+    public static void matricesUtil(GuiGraphicsExtractor ctx, float x, float y, int zIndex, Runnable action) {
         //? if >=1.21.6 {
-        /*ctx.pose().pushMatrix();
+        ctx.pose().pushMatrix();
         ctx.pose().translate(x, y);
         action.run();
         ctx.pose().popMatrix();
-        *///?} else if >=1.20 {
-        ctx.pose().pushPose();
+        //?} else if >=1.20 {
+        /*ctx.pose().pushPose();
         ctx.pose().translate(x, y, zIndex);
         action.run();
         ctx.pose().translate(-x, -y, 0);
         ctx.pose().popPose();
-        //?} else {
+        *///?} else {
         /*ctx.pushPose();
         ctx.translate(x, y, zIndex);
         action.run();
@@ -303,15 +300,15 @@ public class GUIUtils {
         *///?}
     }
 
-    public static void customScissor(GuiGraphics ctx, int x, int y, int width, int height, Runnable action) {
+    public static void customScissor(GuiGraphicsExtractor ctx, int x, int y, int width, int height, Runnable action) {
         //? if >=1.21.6 {
-        /*ctx.enableScissor(0, 0, 10000, 10000);
+        ctx.enableScissor(0, 0, 10000, 10000);
         ctx.pose().pushMatrix();
         ctx.enableScissor(x, y, x + width, y + height);
         action.run();
         ctx.disableScissor();
         ctx.pose().popMatrix();
-        ctx.disableScissor();*/
+        ctx.disableScissor();
         //? } else if >=1.21.4 {
         /*ctx.enableScissor(0, 0, 10000, 10000);
         ctx.pose().pushPose();
@@ -321,14 +318,14 @@ public class GUIUtils {
         ctx.pose().popPose();
         ctx.disableScissor();
         *///?} else if >=1.20 {
-        ctx.enableScissor(0, 0, 10000, 10000);
+        /*ctx.enableScissor(0, 0, 10000, 10000);
         ctx.pose().pushPose();
         ctx.enableScissor(x, y, x + width, y + height);
         action.run();
         ctx.disableScissor();
         ctx.pose().popPose();
         ctx.disableScissor();
-        //?} else {
+        *///?} else {
         /*
         Window window = Minecraft.getInstance().getWindow();
         int i = window.getHeight();
@@ -348,18 +345,18 @@ public class GUIUtils {
         //?}
     }
 
-    public static void matricesScale(GuiGraphics ctx, float scale, Runnable action) {
+    public static void matricesScale(GuiGraphicsExtractor ctx, float scale, Runnable action) {
         //? if >=1.21.6 {
-        /*ctx.pose().pushMatrix();
+        ctx.pose().pushMatrix();
         ctx.pose().scale(scale, scale);
         action.run();
         ctx.pose().popMatrix();
-        *///?} else if >=1.20 {
-        ctx.pose().pushPose();
+        //?} else if >=1.20 {
+        /*ctx.pose().pushPose();
         ctx.pose().scale(scale, scale, 1.0f);
         action.run();
         ctx.pose().popPose();
-        //?} else {
+        *///?} else {
         /*ctx.pushPose();
         ctx.scale(scale, scale, 1.0f);
         action.run();
@@ -369,7 +366,7 @@ public class GUIUtils {
 
     // Draw
 
-    public static void drawFill(GuiGraphics ctx, int x1, int y1, int x2, int y2, int color) {
+    public static void drawFill(GuiGraphicsExtractor ctx, int x1, int y1, int x2, int y2, int color) {
         //? if >=1.20 {
         ctx.fill(x1, y1, x2, y2, color);
         //?} else {
@@ -378,26 +375,26 @@ public class GUIUtils {
     }
 
     //? if >=26.1 {
-    /*public static void drawItem(GuiGraphics ctx, ItemStackTemplate stack, int x, int y, float scale) {
+    public static void drawItem(GuiGraphicsExtractor ctx, ItemStackTemplate stack, int x, int y, float scale) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
         ctx.item(stack.create(), x, y);
     }
 
-    public static void drawItem(GuiGraphics ctx, ItemStackTemplate stack, int x, int y) {
+    public static void drawItem(GuiGraphicsExtractor ctx, ItemStackTemplate stack, int x, int y) {
         drawItem(ctx, stack, x, y, 1);
     }
-    */
+    
     //? } else {
-    public static void drawItem(GuiGraphics ctx, ItemStack stack, int x, int y, float scale) {
+    /*public static void drawItem(GuiGraphicsExtractor ctx, ItemStack stack, int x, int y, float scale) {
         //? if >=1.20 {
         ctx.renderItem(stack, x, y);
         //? } else if >=1.19.4 {
-        /*ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+        /^ItemEntityRenderer itemRenderer = Minecraft.getInstance().getItemEntityRenderer();
         itemRenderer.renderGuiItem(ctx, stack, x, y);
-        *///? } else if >=1.17 {
-        /*Minecraft client = Minecraft.getInstance();
-        ItemRenderer itemRenderer = client.getItemRenderer();
+        ^///? } else if >=1.17 {
+        /^Minecraft client = Minecraft.getInstance();
+        ItemEntityRenderer itemRenderer = client.getItemEntityRenderer();
         ctx.pushPose();
         ctx.translate((float)x, (float)y, 150.0F);
         ctx.translate(8.0F, 8.0F, 0.0F);
@@ -418,17 +415,17 @@ public class GUIUtils {
         boolean bl = !model.usesBlockLight();
         if (bl) Lighting.setupForFlatItems();
 
-        PoseStack matrixStack = RenderSystem.getModelViewStack();
+        GuiGraphicsExtractor matrixStack = RenderSystem.getModelViewStack();
         matrixStack.pushPose();
         //? if >=1.18 {
-        matrixStack.mulPoseMatrix(((PoseStack) ctx).last().pose());
+        matrixStack.mulPoseMatrix(((GuiGraphicsExtractor) ctx).last().pose());
         RenderSystem.applyModelViewMatrix();
         //? } else {
-        matrixStack.mulPoseMatrix(((PoseStack) ctx).last().pose());
+        matrixStack.mulPoseMatrix(((GuiGraphicsExtractor) ctx).last().pose());
         RenderSystem.applyModelViewMatrix();
         //? }
 
-        itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, new PoseStack(), immediate, 15728880, OverlayTexture.NO_OVERLAY, model);
+        itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, new GuiGraphicsExtractor(), immediate, 15728880, OverlayTexture.NO_OVERLAY, model);
         immediate.endBatch();
         RenderSystem.enableDepthTest();
         if (bl) Lighting.setupFor3DItems();
@@ -436,16 +433,16 @@ public class GUIUtils {
         ctx.popPose();
         matrixStack.popPose();
         RenderSystem.applyModelViewMatrix();
-        *///? } else {
-        /*Minecraft client = Minecraft.getInstance();
-        ItemRenderer itemRenderer = client.getItemRenderer();
+        ^///? } else {
+        /^Minecraft client = Minecraft.getInstance();
+        ItemEntityRenderer itemRenderer = client.getItemEntityRenderer();
         RenderSystem.pushMatrix();
         RenderSystem.enableRescaleNormal();
         RenderSystem.enableAlphaTest();
         RenderSystem.defaultAlphaFunc();
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.multMatrix(((PoseStack) ctx).last().pose());
+        RenderSystem.multMatrix(((GuiGraphicsExtractor) ctx).last().pose());
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.translatef((float)x, (float)y, 150.0F);
         RenderSystem.translatef(8.0F, 8.0F, 0.0F);
@@ -456,7 +453,7 @@ public class GUIUtils {
         boolean bl = !model.usesBlockLight();
         if (bl) Lighting.setupForFlatItems();
 
-        PoseStack matrixStack = new PoseStack();
+        GuiGraphicsExtractor matrixStack = new GuiGraphicsExtractor();
 
         itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, matrixStack, immediate, 15728880, OverlayTexture.NO_OVERLAY, model);
         immediate.endBatch();
@@ -466,13 +463,13 @@ public class GUIUtils {
         RenderSystem.disableAlphaTest();
         RenderSystem.disableRescaleNormal();
         RenderSystem.popMatrix();
-        *///? }
+        ^///? }
     }
 
-    public static void drawItem(GuiGraphics ctx, ItemStack stack, int x, int y) {
+    public static void drawItem(GuiGraphicsExtractor ctx, ItemStack stack, int x, int y) {
         drawItem(ctx, stack, x, y, 1);
     }
-    //? }
+    *///? }
 
 
 

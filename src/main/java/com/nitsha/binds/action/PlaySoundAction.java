@@ -2,14 +2,16 @@ package com.nitsha.binds.action;
 
 import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.*;
-import com.nitsha.binds.gui.widget.button.BedrockIconButton;
+import com.nitsha.binds.gui.widget.KeySelector;
 import com.nitsha.binds.gui.widget.button.SmallToggleButton;
+import com.nitsha.binds.guinew.utils.Textures;
+import com.nitsha.binds.guinew.widget.Slider;
+import com.nitsha.binds.guinew.widget.button.BedrockIconButton;
+import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.EventBus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,15 +19,15 @@ import java.util.List;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.InputWithModifiers;*/
+import net.minecraft.client.input.InputWithModifiers;
 //? }
 
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.InputWithModifiers;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
+import net.minecraft.client.input.CharacterEvent;
 //? }
 
 import com.nitsha.binds.configs.dto.actions.AllActionsData.PlaySoundActionData;
@@ -116,7 +118,7 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         };
         this.selector.setSelectedItem(savedKey);
 
-        this.playButton = new BedrockIconButton(x + width - 18, y + 24, 18, 20, "sound_play", true, () -> {
+        this.playButton = new BedrockIconButton(x + width - 18, y + 24, 18, 20, Textures.ICON_SOUND_PLAY, true, () -> {
             if (this.selector.getSelectedItem().isEmpty()) return;
             AudioPlayer.previewSound(9, this.selector.getSelectedItem(), this.volumeSlider.getValue(), this.pitchSlider.getValue(), this.isExternal, () -> play(true), () -> play(false), () -> play(false));
         });
@@ -143,15 +145,15 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
     public void play(boolean status) {
         if (status) {
             this.playButton.setColors(0xFFfac70c, 0xFFfcd02f, 0xFFFFFFFF, 0xFFFFFFFF);
-            this.playButton.setIcon("sound_pause");
+            this.playButton.setIcon(Textures.ICON_SOUND_PAUSE);
         } else {
             this.playButton.setColors(0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF);
-            this.playButton.setIcon("sound_play");
+            this.playButton.setIcon(Textures.ICON_SOUND_PLAY);
         }
     }
 
     @Override
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.playSound"), 0,
                 x + 2, y + 12, "left", "center", 0xFF212121, false);
 
@@ -171,11 +173,11 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.toSuper(String.valueOf(this.pitchSlider.getValue()))), 0,
                 x + width - 70 - 2, y + 69, "right", "center", 0xFF212121, false);
 
-        selector.renderWidget(ctx, mouseX, mouseY, delta);
-        volumeSlider.renderWidget(ctx, mouseX, mouseY, delta);
-        pitchSlider.renderWidget(ctx, mouseX, mouseY, delta);
-        playButton.renderWidget(ctx, mouseX, mouseY, delta);
-        slotBtns.forEach(btn -> btn.renderWidget(ctx, mouseX, mouseY, delta));
+        selector.extractContents(ctx, mouseX, mouseY, delta);
+        volumeSlider.onRender(ctx, mouseX, mouseY, delta);
+        pitchSlider.onRender(ctx, mouseX, mouseY, delta);
+        playButton.onRender(ctx, mouseX, mouseY, delta);
+        slotBtns.forEach(btn -> btn.extractContents(ctx, mouseX, mouseY, delta));
     }
 
     @Override
@@ -221,7 +223,7 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
     }
 
     //? if >=1.21.9 {
-    /*@Override
+    @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
         boolean r = selector.mouseClicked(event, bl) || volumeSlider.mouseClicked(event, bl) || pitchSlider.mouseClicked(event, bl) || playButton.mouseClicked(event, bl);
         for (SmallToggleButton b : slotBtns) {
@@ -240,9 +242,9 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
         boolean r = selector.charTyped(event);
         return r;
-    }*/
+    }
     //? } else {
-    @Override
+    /*@Override
     public boolean mouseClicked(double mx, double my, int btn) {
         boolean r = selector.mouseClicked(mx, my, btn) || volumeSlider.mouseClicked(mx, my, btn) || pitchSlider.mouseClicked(mx, my, btn) || playButton.mouseClicked(mx, my, btn);
         for (SmallToggleButton b : slotBtns) {
@@ -262,19 +264,19 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         boolean r = selector.charTyped(c, mods);
         return r;
     }
-    //? }
+    *///? }
 
     //? if >=1.21.9 {
-    /*@Override
+    @Override
     public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
         boolean r = selector.mouseReleased(event);
         r |= volumeSlider.mouseReleased(event);
         r |= pitchSlider.mouseReleased(event);
         r |= playButton.mouseReleased(event);
         return r;
-    }*/
+    }
     //? } else {
-    @Override
+    /*@Override
     public boolean mouseReleased(double mx, double my, int btn) {
         boolean r = selector.mouseReleased(mx, my, btn);
         r |= volumeSlider.mouseReleased(mx, my, btn);
@@ -282,23 +284,23 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
         r |= playButton.mouseReleased(mx, my, btn);
         return r;
     }
-    //? }
+    *///? }
 
     //? if >=1.21.9 {
-    /*@Override
+    @Override
     public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double deltaX, double deltaY) {
         boolean r = selector.mouseDragged(event, deltaX, deltaY);
         r |= volumeSlider.mouseDragged(event, deltaX, deltaY);
         r |= pitchSlider.mouseDragged(event, deltaX, deltaY);
         return r;
-    }*/
+    }
     //? } else {
-    @Override
+    /*@Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         boolean r = selector.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         r |= volumeSlider.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         r |= pitchSlider.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         return r;
     }
-    //? }
+    *///? }
 }

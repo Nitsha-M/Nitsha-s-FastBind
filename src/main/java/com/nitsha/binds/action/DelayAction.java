@@ -1,17 +1,17 @@
 package com.nitsha.binds.action;
 
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.TextField;
-import net.minecraft.Util;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
+import net.minecraft.client.input.CharacterEvent;
 //? }
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
@@ -69,9 +69,9 @@ public class DelayAction extends ActionType<DelayActionData> {
     }
 
     @Override
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        field.renderWidget(ctx, mouseX, mouseY, delta);
-        GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.delayDesс"), 0,
+    public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        field.extractContents(ctx, mouseX, mouseY, delta);
+        RenderUtils.drawText(ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.advances.actions.delayDesс")), 0,
                 x + 2, y + 8, "top", "left", 0xFF212121, false);
     }
 
@@ -88,35 +88,18 @@ public class DelayAction extends ActionType<DelayActionData> {
 
     @Override public void reset() { field.setText("100"); }
 
-    //? if >=1.21.9 {
-    /*@Override
-    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         return field.mouseClicked(event, bl);
     }
 
     @Override
-    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+    public boolean keyPressed(KeyEvent event) {
         return field.keyPressed(event);
     }
 
     @Override
-    public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
+    public boolean charTyped(CharacterEvent event) {
         return field.charTyped(event);
-    }*/
-    //? } else {
-    @Override
-    public boolean mouseClicked(double mx, double my, int btn) {
-        return field.mouseClicked(mx, my, btn);
     }
-
-    @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        return field.keyPressed(key, scan, mods);
-    }
-
-    @Override
-    public boolean charTyped(char c, int mods) {
-        return field.charTyped(c, mods);
-    }
-    //? }
 }

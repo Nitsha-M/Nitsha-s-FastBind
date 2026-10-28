@@ -5,7 +5,7 @@ import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
@@ -13,14 +13,16 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.AbstractButton;
 import com.nitsha.binds.gui.widget.button.BedrockButton;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
+//? if <26.3 {
+/*import org.lwjgl.glfw.GLFW;
+*///? }
 
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.InputWithModifiers;
-import net.minecraft.client.input.KeyEvent;*/
+import net.minecraft.client.input.KeyEvent;
 //? }
 
 public class KeybindSelector extends BedrockButton {
@@ -37,7 +39,8 @@ public class KeybindSelector extends BedrockButton {
         this.keyCode = kC;
         this.baseName = (kC == 0)
                 ? TextUtils.translatable("nitsha.binds.advances.noKeyBind").getString()
-                : InputConstants.Type.KEYSYM.getOrCreate(kC).getDisplayName().getString();
+                //$ if >=26.3 ': InputConstants.Type.KEYBOARD.getOrCreate(kC).getDisplayName().getString();' else ': InputConstants.Type.KEYSYM.getOrCreate(kC).getDisplayName().getString();'
+                : InputConstants.Type.KEYBOARD.getOrCreate(kC).getDisplayName().getString();
         updateName();
     }
 
@@ -83,28 +86,41 @@ public class KeybindSelector extends BedrockButton {
     }
 
     @Override
-    public void onPress() {
+    public void onPress(InputWithModifiers inputWithModifiers) {
         setLastClickedWidget(this);
         setFocusedField(this);
         this.setPressed(true);
         this.setFocused(true);
     }
 
+
     @Override
-    //? if >=1.21.9 {
-    /*public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+    //? if >=26.3 {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
         if (focusedKeybind != null) {
             int keyCode = event.key();
-            int newKey = (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE) ? 0 : keyCode;
+            int newKey = (keyCode == InputConstants.KEY_ESCAPE) ? 0 : keyCode;
             focusedKeybind.setPressed(false);
             focusedKeybind.setKeyCode(newKey);
             KeybindSelector.setFocusedField(null);
-            if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE) return true;
+            if (keyCode == InputConstants.KEY_ESCAPE) return true;
+        }
+        return super.keyPressed(event);
+    }
+    //? } else if >=1.21.9 {
+    /*public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        if (focusedKeybind != null) {
+            int keyCode = event.key();
+            int newKey = (keyCode == GLFW.GLFW_KEY_ESCAPE) ? 0 : keyCode;
+            focusedKeybind.setPressed(false);
+            focusedKeybind.setKeyCode(newKey);
+            KeybindSelector.setFocusedField(null);
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE) return true;
         }
         return super.keyPressed(event);
     }*/
     //? } else {
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    /*public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (focusedKeybind != null) {
             int newKey = (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE) ? 0 : keyCode;
             focusedKeybind.setPressed(false);
@@ -114,5 +130,5 @@ public class KeybindSelector extends BedrockButton {
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
-    //? }
+    *///? }
 }

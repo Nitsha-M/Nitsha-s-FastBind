@@ -1,7 +1,7 @@
 package com.nitsha.binds.gui.panels;
 
-import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
+import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.configs.dto.preset.BindData;
 import com.nitsha.binds.configs.dto.preset.PageData;
@@ -9,23 +9,20 @@ import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.*;
-import com.nitsha.binds.gui.widget.button.BedrockIconButton;
-import com.nitsha.binds.gui.widget.button.ItemButton;
-import com.nitsha.binds.gui.widget.window.AnimatedWindow;
+import com.nitsha.binds.guinew.utils.Textures;
+import com.nitsha.binds.guinew.widget.button.BedrockIconButton;
+import com.nitsha.binds.guinew.widget.button.ItemButton;
+import com.nitsha.binds.guinew.widget.window.AnimatedWindow;
+import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.utils.CodecUtil;
 import com.nitsha.binds.utils.EasterEgg;
-import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.resources.Identifier;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-//? if >=1.21.9 {
-// import net.minecraft.client.input.MouseButtonEvent;
-//? }
 
 public class BasicOptionsWindow extends AnimatedWindow {
     private TextField bindNameField;
@@ -35,14 +32,14 @@ public class BasicOptionsWindow extends AnimatedWindow {
     private BedrockIconButton importBtn;
     private BedrockIconButton exportBtn;
 
-    private static final ResourceLocation ITEMS_EDIT = Main.id("textures/gui/test/items_1.png");
-    private static final ResourceLocation CAT_MENU = Main.id("textures/gui/cat_menu.png");
-    private static final ResourceLocation CAT_SPRITE = Main.id("textures/gui/cat_sprite.png");
-    private static final ResourceLocation CAT_EYES = Main.id("textures/gui/cat_eyes.png");
-    private static final ResourceLocation CAT_MEOW1 = Main.id("textures/gui/cat_meow_0.png");
-    private static final ResourceLocation CAT_MEOW2 = Main.id("textures/gui/cat_meow_1.png");
+    private static final Identifier ITEMS_EDIT = Main.id("textures/gui/test/items_1.png");
+    private static final Identifier CAT_MENU = Main.id("textures/gui/cat_menu.png");
+    private static final Identifier CAT_SPRITE = Main.id("textures/gui/cat_sprite.png");
+    private static final Identifier CAT_EYES = Main.id("textures/gui/cat_eyes.png");
+    private static final Identifier CAT_MEOW1 = Main.id("textures/gui/cat_meow_0.png");
+    private static final Identifier CAT_MEOW2 = Main.id("textures/gui/cat_meow_1.png");
 
-    public BasicOptionsWindow(BindsEditor screen, float x, int y, float width, int height, ResourceLocation t1, ResourceLocation t2, int delay) {
+    public BasicOptionsWindow(BindsEditor screen, float x, int y, float width, int height, Identifier t1, Identifier t2, int delay) {
         super(x, y, width, height, t1, t2, delay);
         initUI(screen);
     }
@@ -63,7 +60,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
     private boolean deleteConfirmShown = false;
 
     private ScreenTooltip tooltip;
-    private Map<AbstractButton, String> tooltips = new LinkedHashMap<>();
+    private Map<AbstractWidget, String> tooltips = new LinkedHashMap<>();
 
     private void initUI(BindsEditor screen) {
         Font textRenderer = Minecraft.getInstance().font;
@@ -103,9 +100,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
             GUIUtils.matricesUtil(ctx, 0, 0, 50, () -> {
                 GUIUtils.adaptiveDrawTexture(ctx, CAT_MENU, 4, 165, 0, 0, 126, 26, 126, 26);
                 GUIUtils.addText(
-                        ctx, TextUtils.translatable("nitsha.binds.autosave"), 0,
-                        4,
-                        178,
+                        ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.autosave")), 0, 4, 178,
                         "left", "center", 0xFF7f7f7f, false);
                 int eyeCenterX = 105;
                 int eyeCenterY = 175;
@@ -135,18 +130,18 @@ public class BasicOptionsWindow extends AnimatedWindow {
         }, 1);
 
         this.bindNameField = new TextField(textRenderer, 4, 126, 105, 20, 20, "", TextUtils.translatable("nitsha.binds.name").getString());
-        this.editIconBtn = new ItemButton(111, 123, ItemsMapper.getItemStack(BindsEditor.getCBind().icon), () -> {
+        this.editIconBtn = new ItemButton(111, 123, ItemsMapper.getItemStack(BindsEditor.getCBind().icon), ITEMS_EDIT, "", () -> {
             screen.getAdvancedOptionsWindow().selectTab(1);
-        }, ITEMS_EDIT, "");
+        });
 
-        this.copyBtn = new BedrockIconButton(4, 151, 26, 20, "copy", true, screen::copyBind);
+        this.copyBtn = new BedrockIconButton(4, 151, 26, 20, Textures.ICON_COPY, true, screen::copyBind);
         this.copyBtn.setButtonDirection(1);
-        this.pasteBtn = new BedrockIconButton(30, 151, 26, 20, "paste", false, screen::pasteBind, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
+        this.pasteBtn = new BedrockIconButton(30, 151, 26, 20, Textures.ICON_PASTE, false, screen::pasteBind, 0xFF0569CE, 0xFF0776E6, 0xFFFFFFFF, 0xFFFFFFFF);
         this.pasteBtn.setButtonDirection(2);
         if (screen.copied.name.isEmpty()) pasteBtn.setEnabled(false);
 
 
-        this.deleteBtn = new BedrockIconButton(58, 151, 25, 20, "delete", false, ()-> {
+        this.deleteBtn = new BedrockIconButton(58, 151, 25, 20, Textures.ICON_DELETE, false, ()-> {
             if (deleteConfirmShown) {
                 screen.deleteBind();
                 confirm(false);
@@ -156,7 +151,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
             }
         }, 0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF);
 
-        this.exportBtn = new BedrockIconButton(85, 151, 26, 20, "export", true, () -> {
+        this.exportBtn = new BedrockIconButton(85, 151, 26, 20, Textures.ICON_EXPORT, true, () -> {
             screen.saveBind();
 
             BindData currentBind = BindsEditor.getCBind();
@@ -169,7 +164,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
         });
         this.exportBtn.setButtonDirection(1);
 
-        this.importBtn = new BedrockIconButton(111, 151, 26, 20, "import", true, () -> {
+        this.importBtn = new BedrockIconButton(111, 151, 26, 20, Textures.ICON_IMPORT, true, () -> {
             String clipboardText = Minecraft.getInstance().keyboardHandler.getClipboard();
 
             BindData importedBind = CodecUtil.importFromText(clipboardText, BindData.class);
@@ -253,10 +248,10 @@ public class BasicOptionsWindow extends AnimatedWindow {
         deleteConfirmShown = status;
         if (status) {
             deleteBtn.setColors(0xFFfac70c, 0xFFfcd02f, 0xFFFFFFFF, 0xFFFFFFFF);
-            deleteBtn.setIcon("confirm");
+            deleteBtn.setIcon(Textures.ICON_CONFIRM);
         } else {
             deleteBtn.setColors(0xFFEF4747, 0xFFFF7272, 0xFFFFFFFF, 0xFFFFFFFF);
-            deleteBtn.setIcon("delete");
+            deleteBtn.setIcon(Textures.ICON_DELETE);
         }
     }
 
@@ -265,49 +260,15 @@ public class BasicOptionsWindow extends AnimatedWindow {
     }
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        if (!this.isVisible()) return false;
+    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
+        if (!isVisible()) return false;
 
-        double mouseX = event.x();
-        double mouseY = event.y();
-        double adjustedX = mouseX - getX();
-        double adjustedY = mouseY - getYOffset();
-
-        MouseButtonEvent adjustedEvent = new MouseButtonEvent(
-                adjustedX,
-                adjustedY,
-                event.buttonInfo()
-        );
-
-        for (GuiEventListener child : children()) {
-            if (child.mouseClicked(adjustedEvent, bl)) return true;
-        }
-
-        if (catEasterEgg.handleClick(isInsideCat(mouseX, mouseY, 94, 171, 45, 16))) {
+        if (super.onMouseClicked(mouseX, mouseY, button)) {
             return true;
         }
 
-        return super.mouseClicked(event, bl);
-    }*/
-    //? } else {
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (!this.isVisible()) return false;
-
-        double adjustedX = mouseX - getX();
-        double adjustedY = mouseY - getYOffset();
-
-        for (GuiEventListener child : children()) {
-            if (child.mouseClicked(adjustedX, adjustedY, button)) return true;
-        }
-
-        if (catEasterEgg.handleClick(isInsideCat(mouseX, mouseY, 94, 171, 45, 16))) {
-            return true;
-        }
-
-        return super.mouseClicked(mouseX, mouseY, button);
+        return catEasterEgg.handleClick(isInsideCat(mouseX, mouseY, 94, 171, 45, 16));
     }
-    //? }
 
     @Override
     public void tick() {
@@ -325,7 +286,7 @@ public class BasicOptionsWindow extends AnimatedWindow {
                 }
             }
         });
-        if (tooltips.keySet().stream().noneMatch(AbstractButton::isHovered)) {
+        if (tooltips.keySet().stream().noneMatch(AbstractWidget::isHovered)) {
             tooltip.visible = false;
             tooltip.setText("");
         }

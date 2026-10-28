@@ -4,7 +4,7 @@ import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.TextField;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -77,11 +77,11 @@ public class LoopAction extends ActionType<LoopActionData> {
     }
 
     @Override
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.loop"), 0,
                 x + 2, y + 8, "top", "left", 0xFF212121, false);
-        actionsField.renderWidget(ctx, mouseX, mouseY, delta);
-        countField.renderWidget(ctx, mouseX, mouseY, delta);
+        actionsField.extractContents(ctx, mouseX, mouseY, delta);
+        countField.extractContents(ctx, mouseX, mouseY, delta);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class LoopAction extends ActionType<LoopActionData> {
     }
 
     //? if >=1.21.9 {
-    /*@Override
+    @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
         return countField.mouseClicked(event, bl) || actionsField.mouseClicked(event, bl);
     }
@@ -112,9 +112,9 @@ public class LoopAction extends ActionType<LoopActionData> {
     @Override
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
         return countField.charTyped(event) || actionsField.charTyped(event);
-    }*/
+    }
     //? } else {
-    @Override
+    /*@Override
     public boolean mouseClicked(double mx, double my, int btn) {
         return countField.mouseClicked(mx, my, btn) || actionsField.mouseClicked(mx, my, btn);
     }
@@ -128,5 +128,5 @@ public class LoopAction extends ActionType<LoopActionData> {
     public boolean charTyped(char c, int mods) {
         return countField.charTyped(c, mods) || actionsField.charTyped(c, mods);
     }
-    //? }
+    *///? }
 }

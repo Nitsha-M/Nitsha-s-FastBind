@@ -8,7 +8,9 @@
   "mixins": [],
   "client": [
     "KeyMappingAccessor",
-    "KeyMappingIsDownMixin"
+    "KeyMappingIsDownMixin",
+    "CreativeModeTabPreviewAccessor",
+    "PreviewHolderComponentsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

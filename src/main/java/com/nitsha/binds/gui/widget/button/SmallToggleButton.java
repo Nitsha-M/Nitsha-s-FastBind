@@ -1,7 +1,7 @@
 package com.nitsha.binds.gui.widget.button;
 
 import com.nitsha.binds.gui.utils.GUIUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 public class SmallToggleButton extends SmallTextButton {
@@ -27,7 +27,7 @@ public class SmallToggleButton extends SmallTextButton {
     }
 
     @Override
-    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void extractContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         this.isHovered = isMouseOver(mouseX, mouseY);
 
         GUIUtils.drawResizableBox(ctx, isActiveState() ? getHoverTexture() : getNormalTexture(), getX(), getY(), getWidth(), getHeight(), 2, 5, isActiveState() ? hoverColor : color);

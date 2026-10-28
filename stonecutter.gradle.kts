@@ -7,7 +7,7 @@ plugins {
     id("dev.isxander.modstitch.base") version modstitchVersion apply false
 }
 
-stonecutter active "1.21.3-fabric" /* [SC] DO NOT EDIT */
+stonecutter active "26.3-fabric" /* [SC] DO NOT EDIT */
 
 allprojects {
     repositories {

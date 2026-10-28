@@ -1,59 +1,37 @@
 package com.nitsha.binds.gui.screen;
 
-import com.nitsha.binds.Main;
+import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.bind.BindExecutor;
 import com.nitsha.binds.configs.KeyBinds;
-import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.configs.dto.preset.BindData;
 import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
 import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.widget.button.ItemButton;
-import com.nitsha.binds.gui.utils.TextUtils;
-//? if fabric {
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-//? }
+import com.nitsha.binds.guinew.utils.Textures;
+import com.nitsha.binds.guinew.widget.button.ItemButton;
+import com.nitsha.binds.multiversions.*;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import com.mojang.blaze3d.platform.InputConstants;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-//? if >=26.1 {
-// import net.minecraft.world.item.ItemStackTemplate;
-//? }
-
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.InputWithModifiers;
-import com.mojang.blaze3d.platform.Window;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
+
 //? }
 
-public class BindsGUI extends Screen {
-    // Textures
-    private static final ResourceLocation EDIT_BTN = Main.idSprite("edit");
-    private static final ResourceLocation EDIT_BTN_HOVER = Main.idSprite("edit_hover");
-    private static final ResourceLocation ITEMS_SELECTOR = Main.id("textures/gui/test/items_3.png");
-    private static final ResourceLocation MENU_BG = Main.id("textures/gui/test/menu_bg.png");
-    private static final ResourceLocation MENU_HEADER = Main.id("textures/gui/test/menu_header.png");
-    private static final ResourceLocation CAT = Main.id("textures/gui/cat_2.png");
-    private static final ResourceLocation CAT_SPRITE = Main.id("textures/gui/cat_sprite_2.png");
-    private static final ResourceLocation CAT_EYES = Main.id("textures/gui/cat_eyes.png");
+public class BindsGUI extends NitshaScreen {
 
     private final List<ItemButton> itemButtons = new ArrayList<>();
     private String displayText = TextUtils.translatable("nitsha.binds.list").getString();
@@ -77,7 +55,7 @@ public class BindsGUI extends Screen {
     public int currentPageIndex = 0;
 
     public BindsGUI() {
-        super(TextUtils.empty());
+        super();
     }
 
     protected void init() {
@@ -122,17 +100,13 @@ public class BindsGUI extends Screen {
         this.centerY = (this.height - 106) / 2 - 21;
 
         AbstractWidget configBtn = GUIUtils.createTexturedBtn(centerX + 57, centerY + 93, 10, 10,
-                new ResourceLocation[] { EDIT_BTN, EDIT_BTN_HOVER }, b -> {
-                    minecraft.setScreen(new BindsEditor(null));
+                new Identifier[] {  Textures.EDIT_BTN, Textures.EDIT_BTN_HOVER }, b -> {
+                    NitshaCraft.setScreen(new BindsEditor(null));
                 });
 
-        //? if >=1.17 {
-        this.addRenderableWidget(configBtn);
-        //? } else {
-        /* this.addButton(configBtn); */
-        //? }
+        this.addNWidget(configBtn);
 
-        this.catTail = new AnimatedSprite(14, 12, CAT_SPRITE, 0, false, 0, 0, 490, 14, 60, 504, 12);
+        this.catTail = new AnimatedSprite(14, 12, Textures.CAT_SPRITE, 0, false, 0, 0, 490, 14, 60, 504, 12);
         if (Storage.options.easterEgg) {
             this.catTail.setLoop(true);
             this.catTail.setPosition(centerX + 101, centerY + 9);
@@ -143,19 +117,15 @@ public class BindsGUI extends Screen {
     }
 
     @Override
-    //? if >=26.1 {
-    // public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-    //? } else {
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-    //? }
+     public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         if (!this.checkForClose()) {
-            GUIUtils.drawResizableBox(ctx, MENU_BG, centerX, centerY, MENU_WIDTH, 106, 3, 7);
-            GUIUtils.drawResizableBox(ctx, MENU_HEADER, centerX, centerY, MENU_WIDTH, 22, 4, 9);
+            RenderUtils.drawResizableBox(ctx, Textures.MENU_BG, centerX, centerY, MENU_WIDTH, 106, 3, 7);
+            RenderUtils.drawResizableBox(ctx, Textures.MENU_HEADER, centerX, centerY, MENU_WIDTH, 22, 4, 9);
 
-            GUIUtils.addText(ctx, TextUtils.literal(displayText), 0, centerX + 5, centerY + 7);
+            RenderUtils.drawText(ctx, TextUtils.literal(displayText), 0, centerX + 5, centerY + 7);
 
             int totalPages = this.activePreset.pages.size();
-            GUIUtils.addText(ctx,
+            RenderUtils.drawText(ctx,
                     TextUtils.literal((this.currentPageIndex + 1) + "/" + totalPages).withStyle(ChatFormatting.GRAY), MENU_WIDTH,
                     centerX + MENU_WIDTH - 5, centerY + 7, "right", "top");
 
@@ -166,12 +136,12 @@ public class BindsGUI extends Screen {
             if (isInside(mouseX, mouseY, centerX + 70, centerY + 92, 51, 12))
                 rAC = 0xFFE7BC1C;
 
-            GUIUtils.addText(ctx, leftArrow, 125, centerX + 52, centerY + 94, "right", "top");
-            GUIUtils.addText(ctx, rightArrow, 125, centerX + 72, centerY + 94, "left", "top");
+            RenderUtils.drawText(ctx, leftArrow, 125, centerX + 52, centerY + 94, "right", "top");
+            RenderUtils.drawText(ctx, rightArrow, 125, centerX + 72, centerY + 94, "left", "top");
 
-            GUIUtils.addText(ctx, TextUtils.literal("⏴"), 125, centerX + 48 - font.width(textLEFT), centerY + 94,
+            RenderUtils.drawText(ctx, TextUtils.literal("⏴"), 125, centerX + 48 - font.width(textLEFT), centerY + 94,
                     "right", "top", lAC);
-            GUIUtils.addText(ctx, TextUtils.literal("⏵"), 125, centerX + 76 + font.width(textRIGHT), centerY + 94,
+            RenderUtils.drawText(ctx, TextUtils.literal("⏵"), 125, centerX + 76 + font.width(textRIGHT), centerY + 94,
                     "left", "top", rAC);
 
             // Пресеты
@@ -182,25 +152,25 @@ public class BindsGUI extends Screen {
             if (isInside(mouseX, mouseY, centerX + MENU_WIDTH - 22, centerY - 20, 22, 18))
                 rC = 0xFFE7BC1C;
 
-            GUIUtils.drawResizableBox(ctx, MENU_BG, centerX, centerY - 20, MENU_WIDTH, 18, 3, 7);
-            GUIUtils.addText(ctx, TextUtils.literal("⏴"), 0, centerX + 5, centerY - 15, lC);
-            GUIUtils.addText(ctx, TextUtils.literal("⏵"), MENU_WIDTH, centerX + MENU_WIDTH - 5, centerY - 15, "right",
+            RenderUtils.drawResizableBox(ctx, Textures.MENU_BG, centerX, centerY - 20, MENU_WIDTH, 18, 3, 7);
+            RenderUtils.drawText(ctx, TextUtils.literal("⏴"), 0, centerX + 5, centerY - 15, lC);
+            RenderUtils.drawText(ctx, TextUtils.literal("⏵"), MENU_WIDTH, centerX + MENU_WIDTH - 5, centerY - 15, "right",
                     "top", rC);
 
             String full = this.activePreset.name;
 
             if (full.length() < 15) {
-                GUIUtils.addText(ctx, TextUtils.literal(full).withStyle(ChatFormatting.AQUA), MENU_WIDTH, centerX,
+                RenderUtils.drawText(ctx, TextUtils.literal(full).withStyle(ChatFormatting.AQUA), MENU_WIDTH, centerX,
                         centerY - 15, "center", "top");
             } else {
-                GUIUtils.addText(ctx,
+                RenderUtils.drawText(ctx,
                         TextUtils.literal(GUIUtils.truncateString(full, 15)).withStyle(ChatFormatting.AQUA), MENU_WIDTH,
                         centerX + 22, centerY - 15);
             }
 
             if (Storage.options.easterEgg) {
-                GUIUtils.matricesUtil(ctx, 0, 0, 5, () -> {
-                    GUIUtils.adaptiveDrawTexture(ctx, CAT, centerX + 77, centerY, 0, 0, 35, 26, 35, 26);
+                RenderUtils.matricesUtil(ctx, 0, 0, 5, () -> {
+                    RenderUtils.drawTexture(ctx, Textures.CAT, centerX + 77, centerY, 0, 0, 35, 26, 35, 26);
                     int eyeCenterX = centerX + 84;
                     int eyeCenterY = centerY + 10;
                     float maxOffsetX = 1.4f;
@@ -215,8 +185,8 @@ public class BindsGUI extends Screen {
                     eyeDx += (targetDx - eyeDx) * 0.2f;
                     eyeDy += (targetDy - eyeDy) * 0.2f;
 
-                    GUIUtils.matricesUtil(ctx, eyeDx, eyeDy, 0, () -> {
-                        GUIUtils.adaptiveDrawTexture(ctx, CAT_EYES,
+                    RenderUtils.matricesUtil(ctx, eyeDx, eyeDy, 0, () -> {
+                        RenderUtils.drawTexture(ctx, Textures.CAT_EYES,
                                 eyeCenterX, eyeCenterY,
                                 0, 0, 8, 6, 8, 6);
                     });
@@ -225,24 +195,9 @@ public class BindsGUI extends Screen {
                 });
             }
 
-            //? if >=26.1 {
-            // super.extractRenderState(ctx, mouseX, mouseY, delta);
-            //? } else {
-            super.render(ctx, mouseX, mouseY, delta);
-            //? }
+             super.onRender(ctx, mouseX, mouseY, delta);
         }
     }
-
-    //? if >=1.21 {
-    @Override
-    //? }
-    //? if >=26.1 {
-    /*public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-    }*/
-    //? } else >=1.20.2 {
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-    }
-    //? }
 
     public static int getCurrentPreset() {
         return 0;
@@ -250,118 +205,72 @@ public class BindsGUI extends Screen {
 
     public void generateButtons(int startX, int startY) {
         for (ItemButton button : itemButtons) {
-            //? if >=1.17 {
-            this.removeWidget(button);
-            //? } else {
-            /*this.children().remove(button);
-             this.buttons.remove(button);*/
-            //? }
+            removeNWidget(button);
         }
+
         itemButtons.clear();
-        if (this.activePreset != null && this.currentPageIndex < this.activePreset.pages.size()) {
-            PageData page = this.activePreset.pages.get(this.currentPageIndex);
 
-            for (int slot = 0; slot < 8; slot++) {
+        if (activePreset == null || currentPageIndex < 0 || currentPageIndex >= activePreset.pages.size()) {
+            return;
+        }
 
-                int currentX = startX + (slot % 4) * 31;
-                int currentY = startY + (slot / 4) * 31;
+        PageData page = activePreset.pages.get(currentPageIndex);
 
-                BindData foundBind = null;
-                if (page.binds != null) {
-                    for (BindData b : page.binds) {
-                        if (b.index == slot) {
-                            foundBind = b;
-                            break;
-                        }
+        for (int slot = 0; slot < 8; slot++) {
+            int currentX = startX + (slot % 4) * 31;
+            int currentY = startY + (slot / 4) * 31;
+
+            BindData foundBind = null;
+
+            if (page.binds != null) {
+                for (BindData bind : page.binds) {
+                    if (bind.index == slot) {
+                        foundBind = bind;
+                        break;
                     }
                 }
-
-                ItemButton button;
-                if (foundBind != null) {
-                    BindData finalFoundBind = foundBind;
-                    button = createBtn(GUIUtils.truncateString(foundBind.name, 12),
-                            ItemsMapper.getItemStack(foundBind.icon), currentX, currentY, () -> {
-                                BindExecutor.startBind(finalFoundBind);
-                                if (Storage.options.closeOnAction) {
-                                    BindsGUI.ignoreHoldToOpenOnce = true;
-                                    minecraft.setScreen(null);
-                                }
-                            });
-                } else {
-                    BindData dummyBind = new BindData();
-                    dummyBind.index = slot;
-                    button = createBtn(TextUtils.translatable("nitsha.binds.empty").getString(), ItemsMapper.getItemStack("minecraft:structure_void"),
-                            currentX, currentY, () -> {});
-                }
-                itemButtons.add(button);
-
-                //? if >=1.17 {
-                this.addRenderableWidget(button);
-                //? } else {
-                /* this.addButton(button); */
-                //? }
             }
+
+            ItemButton button;
+
+            if (foundBind != null) {
+                BindData bind = foundBind;
+
+                Runnable runBind = () -> {
+                    BindExecutor.startBind(bind);
+
+                    if (Storage.options.closeOnAction) {
+                        BindsGUI.ignoreHoldToOpenOnce = true;
+                        NitshaCraft.setScreen(null);
+                    }
+                };
+
+                button = createBtn(GUIUtils.truncateString(bind.name, 12), ItemsMapper.getItemStack(bind.icon), currentX, currentY, runBind);
+            } else {
+                button = createBtn(TextUtils.translatable("nitsha.binds.empty").getString(), ItemsMapper.getItemStack("minecraft:structure_void"), currentX, currentY, () -> {});
+            }
+
+            itemButtons.add(button);
+            addNWidget(button);
         }
     }
 
-
-    //? if >=26.1 {
-    // private ItemButton createBtn(String text, ItemStackTemplate icon, int x, int y, Bind bind) {
-    //? } else {
     private ItemButton createBtn(String text, ItemStack icon, int x, int y, Runnable onClick) {
-    //? }
-        return new ItemButton(x, y, icon, onClick, ITEMS_SELECTOR, "") {
-            //? if >1.20.2 {
+        return new ItemButton(x, y, icon, Textures.ITEMS_SELECTOR, "", onClick) {
             @Override
-            public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-                super.renderWidget(ctx, mouseX, mouseY, delta);
-                if (this.isHovered) {
+            public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+                super.onRender(ctx, mouseX, mouseY, delta);
+
+                if (isHovered()) {
                     displayText = text;
                 }
             }
-            //? } else if >=1.20 {
-            /*@Override
-            public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-                super.renderWidget(ctx, mouseX, mouseY, delta);
-                if (this.isHovered) {
-                    displayText = text;
-                }
-            }*/
-            //? } else if >=1.19.4 {
-            /*@Override
-            public void renderWidget(PoseStack ctx, int mouseX, int mouseY, float delta) {
-                super.renderWidget(ctx, mouseX, mouseY, delta);
-                if (this.isHovered) {
-                    displayText = text;
-                }
-            }*/
-            //? } else {
-            /*@Override
-            public void renderButton(PoseStack ctx, int mouseX, int mouseY, float delta) {
-                super.renderButton(ctx, mouseX, mouseY, delta);
-                if (this.isHovered) {
-                    displayText = text;
-                }
-            }*/
-            //? }
         };
     }
-
     @Override
     public boolean shouldCloseOnEsc() {
         return true;
     }
-
-    //? if >=1.18.1 {
-    @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
-    //? } else {
-    /*public boolean isPauseScreen() {
-        return false;
-    }*/
-    //? }
 
     @Override
     public void onClose() {
@@ -376,20 +285,8 @@ public class BindsGUI extends Screen {
             return false;
         }
 
-        //? if >=1.21.9 {
-        // Window handle = this.minecraft.getWindow();
-        //? } else {
-        long handle = this.minecraft.getWindow().getWindow();
-        //? }
-
-        //? if fabric {
-        if (!InputConstants.isKeyDown(handle,
-                KeyBindingHelper.getBoundKeyOf(KeyBinds.BINDS).getValue())) {
-            //? } else {
-            /*if (!InputConstants.isKeyDown(handle,
-            KeyBinds.BINDS.getDefaultKey().getValue())) {*/
-            //? }
-            minecraft.setScreen(null);
+        if (!NitshaInput.isKeyDown(KeyBinds.BINDS)) {
+            NitshaCraft.setScreen(null);
             return true;
         }
         return false;
@@ -464,15 +361,13 @@ public class BindsGUI extends Screen {
         }
     }
 
-
     public static boolean isInside(double mouseX, double mouseY, int x, int y, int width, int height) {
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
 
     private boolean handleClick(double mouseX, double mouseY, int x, int y, int width, int height, Runnable action) {
         if (isInside(mouseX, mouseY, x, y, width, height)) {
-            Minecraft.getInstance().getSoundManager().play(
-                    SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             action.run();
             return true;
         }
@@ -480,159 +375,79 @@ public class BindsGUI extends Screen {
     }
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        double mouseX = event.x();
-        double mouseY = event.y();
+    protected boolean onMouseClicked(double mouseX, double mouseY, int button) {
         if (handleClick(mouseX, mouseY, centerX + 3, centerY + 92, 51, 12, () -> updatePage(-1))) return true;
         if (handleClick(mouseX, mouseY, centerX + 70, centerY + 92, 51, 12, () -> updatePage(1))) return true;
         if (handleClick(mouseX, mouseY, centerX, centerY - 20, 22, 18, () -> updatePreset(-1))) return true;
         if (handleClick(mouseX, mouseY, centerX + MENU_WIDTH - 22, centerY - 20, 22, 18, () -> updatePreset(1))) return true;
 
-        if (this.matchesMouse(KeyBinds.PREV_PAGE, event)) {
+        if (NitshaInput.matchesMouse(KeyBinds.PREV_PAGE, button)) {
             updatePage(-1);
             return true;
         }
 
-        if (this.matchesMouse(KeyBinds.NEXT_PAGE, event)) {
+        if (NitshaInput.matchesMouse(KeyBinds.NEXT_PAGE, button)) {
             updatePage(1);
             return true;
         }
 
-        return super.mouseClicked(event, bl);
-    }*/
-    //? } else {
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (handleClick(mouseX, mouseY, centerX + 3, centerY + 92, 51, 12, () -> updatePage(-1)))
-            return true;
-        if (handleClick(mouseX, mouseY, centerX + 70, centerY + 92, 51, 12, () -> updatePage(1)))
-            return true;
-        if (handleClick(mouseX, mouseY, centerX, centerY - 20, 22, 18, () -> updatePreset(-1)))
-            return true;
-        if (handleClick(mouseX, mouseY, centerX + MENU_WIDTH - 22, centerY - 20, 22, 18, () -> updatePreset(1)))
-            return true;
-
-        if (this.matchesMouse(KeyBinds.PREV_PAGE, button)) {
-            updatePage(-1);
-            return true;
-        }
-
-        if (this.matchesMouse(KeyBinds.NEXT_PAGE, button)) {
-            updatePage(1);
-            return true;
-        }
-
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.onMouseClicked(mouseX, mouseY, button);
     }
-    //? }
-
-    //? if >=1.20.2 {
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (isInside(mouseX, mouseY, centerX, centerY - 20, 125, 18)) {
-            int direction = verticalAmount > 0 ? -1 : 1;
-            updatePreset(direction);
-            Minecraft.getInstance().getSoundManager().play(
-                    SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
-            return true;
-        }
-        if (isInside(mouseX, mouseY, centerX, centerY, MENU_WIDTH, 106)) {
-            int direction = verticalAmount > 0 ? -1 : 1;
-            updatePage(direction);
-            Minecraft.getInstance().getSoundManager().play(
-                    SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
-            return true;
-        }
-        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
-    }
-    //? } else {
-    /*@Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (isInside(mouseX, mouseY, centerX, centerY - 20, 125, 18)) {
-            int direction = amount > 0 ? -1 : 1;
-            updatePreset(direction);
-            Minecraft.getInstance().getSoundManager().play(
-            SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
-            return true;
-        }
-        if (isInside(mouseX, mouseY, centerX, centerY, MENU_WIDTH, 106)) {
-            int direction = amount > 0 ? -1 : 1;
-            updatePage(direction);
-            Minecraft.getInstance().getSoundManager().play(
-            SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
-            return true;
-        }
-        return super.mouseScrolled(mouseX, mouseY, amount);
-    }*/
-    //? }
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean keyPressed(KeyEvent event) {
-    int keyCode = event.key();
-    int scanCode = event.scancode();*/
-    //? } else {
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-    //? }
-        if ((this.matchesKey(KeyBinds.BINDS, keyCode, scanCode) && !Storage.options.holdToOpen && !ignoreHoldToOpenOnce) ||
-                keyCode == GLFW.GLFW_KEY_ESCAPE) {
+    protected boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (verticalAmount == 0.0) {
+            return super.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        }
+
+        int direction = verticalAmount > 0 ? -1 : 1;
+
+        if (isInside(mouseX, mouseY, centerX, centerY - 20, 125, 18)) {
+            updatePreset(direction);
+        } else if (isInside(mouseX, mouseY, centerX, centerY, MENU_WIDTH, 106)) {
+            updatePage(direction);
+        } else {
+            return super.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        }
+
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.6F));
+
+        return true;
+    }
+
+    @Override
+    protected boolean onKeyPressed(int keyCode, int nativeCode, int modifiers) {
+        if ((NitshaInput.matchesKey(KeyBinds.BINDS, keyCode, nativeCode) && !Storage.options.holdToOpen && !ignoreHoldToOpenOnce) || keyCode == InputConstants.KEY_ESCAPE) {
             ignoreHoldToOpenOnce = false;
-            minecraft.setScreen(null);
+            NitshaCraft.setScreen(null);
             return true;
         }
 
-        if (this.matchesKey(KeyBinds.PREV_PAGE, keyCode, scanCode)) {
+        if (NitshaInput.matchesKey(KeyBinds.PREV_PAGE, keyCode, nativeCode)) {
             updatePage(-1);
             return true;
         }
 
-        if (this.matchesKey(KeyBinds.NEXT_PAGE, keyCode, scanCode)) {
+        if (NitshaInput.matchesKey(KeyBinds.NEXT_PAGE, keyCode, nativeCode)) {
             updatePage(1);
             return true;
         }
 
-        if (keyCode >= GLFW.GLFW_KEY_1 && keyCode <= GLFW.GLFW_KEY_9) {
-            int index = keyCode - GLFW.GLFW_KEY_1;
+        if (keyCode >= InputConstants.KEY_1 && keyCode <= InputConstants.KEY_9) {
+            int index = keyCode - InputConstants.KEY_1;
             setPreset(index);
             return true;
         }
 
-        //? if >=1.21.9 {
-        // return super.keyPressed(event);
-        //? } else {
-        return super.keyPressed(keyCode, scanCode, modifiers);
-        //? }
-    }
-
-    private boolean matchesKey(KeyMapping key, int keyCode, int scanCode) {
-        //? if >=1.21.9 {
-        // return key.matches(new KeyEvent(keyCode, scanCode, 0));
-        //? } else {
-        return key.matches(keyCode, scanCode);
-        //? }
-    }
-
-    //? if >=1.21.9 {
-    //  private boolean matchesMouse(KeyMapping key, MouseButtonEvent event) {
-    // return key.matchesMouse(event);
-    //? } else {
-    private boolean matchesMouse(KeyMapping key, int button) {
-        return key.matchesMouse(button);
-    //? }
+        return super.onKeyPressed(keyCode, nativeCode, modifiers);
     }
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean keyReleased(KeyEvent event) {
+    protected boolean onKeyReleased(InputConstants.Key key, int modifiers) {
         if (Storage.options.keepMovement) {
-            InputConstants.Key key = InputConstants.getKey(event);
             KeyMapping.set(key, false);
         }
-        return super.keyReleased(event);
-    }*/
-    //? } else {
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return super.keyReleased(keyCode, scanCode, modifiers);
+
+        return super.onKeyReleased(key, modifiers);
     }
-    //? }
 }

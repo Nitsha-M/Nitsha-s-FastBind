@@ -1,747 +1,333 @@
 package com.nitsha.binds;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.*;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.nbt.CompoundTag;
-//? if >=1.20.5 {
-import net.minecraft.world.item.component.BlockItemStateProperties;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.core.Holder;
-//? }
-//? if >=1.19.3 {
-import net.minecraft.core.Holder;
+import com.nitsha.binds.mixin.CreativeModeTabPreviewAccessor;
+import com.nitsha.binds.preview.PreviewComponentContext;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Stream;
+
+import net.fabricmc.fabric.impl.resource.pack.ModResourcePackCreator;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.core.Holder;
+import net.minecraft.core.LayeredRegistryAccess;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentInitializers;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-//? } else {
-// import net.minecraft.world.item.alchemy.PotionUtils;
-//?}
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.RegistryDataLoader;
+import net.minecraft.server.RegistryLayer;
+import net.minecraft.server.ReloadableServerRegistries;
+import net.minecraft.server.WorldLoader;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.ServerPacksSource;
+import net.minecraft.tags.TagLoader;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.level.block.entity.PotDecorations;
+import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.world.level.validation.DirectoryValidator;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 
-import java.util.*;
-//? if >=26.1 {
-// import net.minecraft.world.item.ItemStackTemplate;
-// import net.minecraft.core.component.DataComponentPatch;
-//? }
-
-//? if <1.19.3 {
-// import net.minecraft.core.Registry;
-//?}
-
-//? if <26.1 {
 public class ItemsMapper {
-    public static final Map<String, ItemStack> itemStackMap = new LinkedHashMap<>();
-    public static final Map<String, Map<String, ItemStack>> categories = new HashMap<>();
 
-    private static final ItemStack standart = new ItemStack(Blocks.STRUCTURE_VOID);
-    private static final ItemStack notFound = new ItemStack(Blocks.BARRIER);
+    private static final Set<Item> SINGLE_ICON_ITEMS = Set.of(Items.PAINTING, Items.GOAT_HORN);
+    private static Map<Item, DataComponentMap> itemComponents = Map.of();
+    private static Map<String, List<IconEntry>> categories = Map.of();
+    private static Map<String, ItemStackTemplate> iconsByKey = Map.of();
+    private static List<IconEntry> randomItems = List.of();
 
-    private static List<String> cachedKeys = null;
-    private static final Random random = new Random();
-
-    static {
-        addCategory("foods", cat_POTIONS());
-
-        getAllItems();
+    public record IconEntry(String key, ItemStackTemplate icon) {
     }
 
-    public static void getAllItems() {
-        Minecraft mc = Minecraft.getInstance();
+    public static void initialize() {
+        Executor executor = Runnable::run;
 
-        //? if >=1.19.4 {
-        HolderLookup.Provider registryAccess;
+        DirectoryValidator validator = new DirectoryValidator(path -> false);
+        PackRepository packs = new PackRepository(new ServerPacksSource(validator), new ModResourcePackCreator(PackType.SERVER_DATA));
+        WorldLoader.PackConfig config = new WorldLoader.PackConfig(packs, WorldDataConfiguration.DEFAULT, false, true);
 
-        if (mc.level != null) {
-            registryAccess = mc.level.registryAccess();
-        } else {
-            registryAccess = mc.getConnection() != null
-                    ? mc.getConnection().registryAccess()
-                    : RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
-        }
+        try (var resources = config.createResourceManager().getSecond()) {
+            LayeredRegistryAccess<RegistryLayer> layers = RegistryLayer.createRegistryAccess();
 
-        CreativeModeTab.ItemDisplayParameters displayParams = new CreativeModeTab.ItemDisplayParameters(
-                FeatureFlags.VANILLA_SET,
-                true,
-                registryAccess
-        );
-        //?}
+            RegistryAccess.Frozen staticRegistries = layers.getLayer(RegistryLayer.STATIC);
+            List<Registry.PendingTags<?>> tags = TagLoader.loadTagsForExistingRegistries(resources, staticRegistries);
+            List<HolderLookup.RegistryLookup<?>> staticLookups = TagLoader.buildUpdatedLookups(staticRegistries, tags);
 
-        //? if >=1.20 {
-        List<ResourceKey<CreativeModeTab>> orderedTabs = List.of(
-                CreativeModeTabs.NATURAL_BLOCKS,
-                CreativeModeTabs.BUILDING_BLOCKS,
-                CreativeModeTabs.FUNCTIONAL_BLOCKS,
-                CreativeModeTabs.REDSTONE_BLOCKS,
-                CreativeModeTabs.COLORED_BLOCKS,
-                CreativeModeTabs.SPAWN_EGGS,
-                CreativeModeTabs.TOOLS_AND_UTILITIES,
-                CreativeModeTabs.COMBAT,
-                CreativeModeTabs.FOOD_AND_DRINKS,
-                CreativeModeTabs.INGREDIENTS,
-                CreativeModeTabs.OP_BLOCKS
-        );
+            RegistryAccess.Frozen worldRegistries = RegistryDataLoader.load(resources, staticLookups, DynamicRegistries.getWorldRegistries(), executor).join();
+            List<HolderLookup.RegistryLookup<?>> worldLookups = Stream.concat(staticLookups.stream(), worldRegistries.listRegistries()).toList();
+            RegistryAccess.Frozen dimensions = RegistryDataLoader.load(resources, worldLookups, RegistryDataLoader.DIMENSION_REGISTRIES, executor).join();
+            layers = layers.replaceFrom(RegistryLayer.WORLD, worldRegistries, dimensions);
 
-        for (ResourceKey<CreativeModeTab> tabKey : orderedTabs) {
-            //? if >=1.21.2 {
-            Optional<Holder.Reference<CreativeModeTab>> holder = BuiltInRegistries.CREATIVE_MODE_TAB.get(tabKey);
-            if (holder.isEmpty()) continue;
-            CreativeModeTab tab = holder.get().value();
-            //?} else {
-            /*Holder<CreativeModeTab> holder = BuiltInRegistries.CREATIVE_MODE_TAB.getHolderOrThrow(tabKey);
-            CreativeModeTab tab = holder.value();*/
-            //?}
+            ReloadableServerRegistries.LoadResult loaded = ReloadableServerRegistries.reload(layers, tags, resources, executor).join();
+            HolderLookup.Provider registries = loaded.lookupWithUpdatedTags();
 
-            if (tab == null) continue;
-            if (tabKey == null || tab.getType() != CreativeModeTab.Type.CATEGORY) continue;
+            Map<Item, DataComponentMap> prepared = new HashMap<>();
 
-            try {
-                tab.buildContents(displayParams);
-            } catch (Exception e) {
-                System.out.println("ERROR building contents: " + e.getMessage());
-                e.printStackTrace();
-                continue;
-            }
+            var pendingComponents = BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.build(registries);
 
-            if (tab.getDisplayItems().isEmpty()) continue;
-            Map<String, ItemStack> categoryMap = new LinkedHashMap<>();
-
-            for (ItemStack stack : tab.getDisplayItems()) {
-                ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-                if (id != null) {
-                    String key = id.toString();
-                    String path = id.getPath();
-                    String namespace = id.getNamespace();
-                    if (!namespace.equals("minecraft") || path.equals("air") || path.equals("structure_void") || path.equals("structure_block") || path.equals("barrier") || path.equals("light"))
-                        continue;
-                    categoryMap.put(key, stack.copy());
-                }
-            }
-
-            String ourCategory = mapCreativeTabToOurCategory(tabKey);
-
-            if (!categoryMap.isEmpty()) {
-                addCategory(ourCategory, categoryMap);
-            }
-        }
-        //?} else if >=1.19.3 {
-        /*List<CreativeModeTab> orderedTabs = List.of(
-                CreativeModeTabs.NATURAL_BLOCKS,
-                CreativeModeTabs.BUILDING_BLOCKS,
-                CreativeModeTabs.FUNCTIONAL_BLOCKS,
-                CreativeModeTabs.REDSTONE_BLOCKS,
-                CreativeModeTabs.COLORED_BLOCKS,
-                CreativeModeTabs.SPAWN_EGGS,
-                CreativeModeTabs.TOOLS_AND_UTILITIES,
-                CreativeModeTabs.COMBAT,
-                CreativeModeTabs.FOOD_AND_DRINKS,
-                CreativeModeTabs.INGREDIENTS,
-                CreativeModeTabs.OP_BLOCKS
-        );
-
-        for (CreativeModeTab tab : orderedTabs) {
-            if (tab == null) continue;
-            if (tab.getType() != CreativeModeTab.Type.CATEGORY) continue;
-            Collection<ItemStack> items = tab.getDisplayItems();
-            if (items.isEmpty()) {
-                try {
-                    //? if >=1.19.4 {
-                    tab.buildContents(displayParams);
-                    //? } else {
-                    tab.buildContents(FeatureFlags.VANILLA_SET, true);
-                    //? }
-                    items = tab.getDisplayItems();
-                } catch (Exception e) {
+            for (var pending : pendingComponents) {
+                if (!pending.key().equals(Registries.ITEM)) {
                     continue;
                 }
+
+                pending.forEach((holder, components) -> {
+                    prepared.put((Item) holder.value(), components);
+                });
             }
-            if (items.isEmpty()) continue;
-            Map<String, ItemStack> categoryMap = new LinkedHashMap<>();
-            for (ItemStack stack : items) {
-                ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-                if (id != null) {
-                    String key = id.toString();
-                    String path = id.getPath();
-                    String namespace = id.getNamespace();
-                    if (!namespace.equals("minecraft") || path.equals("air") || path.equals("structure_void") ||
-                            path.equals("structure_block") || path.equals("barrier"))
-                        continue;
-                    categoryMap.put(key, stack.copy());
-                }
-            }
-            String ourCategory = mapCreativeTabToOurCategory_1_19_3(tab);
-            if (!categoryMap.isEmpty()) {
-                addCategory(ourCategory, categoryMap);
-            }
-        }*/
-        //? } else {
-        /*List<CreativeModeTab> orderedTabs = List.of(
-                CreativeModeTab.TAB_BUILDING_BLOCKS,
-                CreativeModeTab.TAB_DECORATIONS,
-                CreativeModeTab.TAB_REDSTONE,
-                CreativeModeTab.TAB_TRANSPORTATION,
-                CreativeModeTab.TAB_MISC,
-                CreativeModeTab.TAB_TOOLS,
-                CreativeModeTab.TAB_COMBAT,
-                CreativeModeTab.TAB_BREWING,
-                CreativeModeTab.TAB_FOOD,
-                CreativeModeTab.TAB_MATERIALS
-        );
-        for (CreativeModeTab tab : orderedTabs) {
-            if (tab == null) continue;
 
-            NonNullList<ItemStack> items = NonNullList.create();
-            tab.fillItemList(items);
+            itemComponents = Map.copyOf(prepared);
+            categories = buildCategories(registries, pendingComponents);
 
-            if (items.isEmpty()) continue;
+            Map<String, ItemStackTemplate> preparedIcons = new HashMap<>();
+            List<IconEntry> preparedRandomItems = new ArrayList<>();
 
-            Map<String, ItemStack> categoryMap = new LinkedHashMap<>();
-
-            for (ItemStack stack : items) {
-                ResourceLocation id = Registry.ITEM.getKey(stack.getItem());
-                if (id != null) {
-                    String key = id.toString();
-                    String path = id.getPath();
-                    String namespace = id.getNamespace();
-                    if (!namespace.equals("minecraft") || path.equals("air") || path.equals("structure_void") ||
-                            path.equals("structure_block") || path.equals("barrier"))
-                        continue;
-                    categoryMap.put(key, stack.copy());
+            for (List<IconEntry> entries : categories.values()) {
+                for (IconEntry entry : entries) {
+                    preparedIcons.put(entry.key(), entry.icon());
+                    preparedRandomItems.add(entry);
                 }
             }
 
-            String ourCategory = mapCreativeTabToOurCategory_1_19_2(tab);
+            for (Item item : BuiltInRegistries.ITEM) {
+                if (item == Items.AIR) continue;
 
-            if (!categoryMap.isEmpty()) {
-                addCategory(ourCategory, categoryMap);
-            }
-        }*/
-        //? }
+                String key = BuiltInRegistries.ITEM.getKey(item).toString();
 
-        Map<String, ItemStack> moddedItems = new LinkedHashMap<>();
-        //? if >=1.18 {
-        for (int level = 0; level <= 15; level++) {
-            moddedItems.put("minecraft:light_" + level, getLightBlock(level));
-        }
-        //? }
-
-        //? if >=1.17 {
-        /*moddedItems.put("minecraft:light_0", getLightBlock(0));*/
-        //? }
-        //? if >=1.19.3 {
-        for (Item item : BuiltInRegistries.ITEM) {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
-        //?} else {
-        /*for (Item item : Registry.ITEM) {
-            ResourceLocation id = Registry.ITEM.getKey(item);*/
-        //? }
-            if (id != null && !id.getNamespace().equals("minecraft")) {
-                moddedItems.put(id.toString(), new ItemStack(item));
-            }
-            //? if <1.19.3 {
-            /*if (id != null && id.getNamespace().equals("minecraft")) {
-                String path = id.getPath();
-                if (path.equals("command_block") || path.equals("chain_command_block") ||
-                    path.equals("repeating_command_block") || path.equals("jigsaw") ||
-                    path.equals("structure_block") ||
-                    path.equals("debug_stick") || path.equals("knowledge_book")) {
-                    moddedItems.put(id.toString(), new ItemStack(item));
+                if (!preparedIcons.containsKey(key)) {
+                    preparedIcons.put(key, ItemStackTemplate.fromNonEmptyStack(createIcon(item)));
                 }
-            }*/
-            //?}
-        }
+            }
 
-        if (!moddedItems.isEmpty()) {
-            addCategory("mods", moddedItems);
+            iconsByKey = Map.copyOf(preparedIcons);
+            randomItems = List.copyOf(preparedRandomItems);
         }
     }
 
-    //? if >=1.19.3 {
-    private static String mapCreativeTabToOurCategory(ResourceKey<CreativeModeTab> tabKey) {
-        if (tabKey.equals(CreativeModeTabs.NATURAL_BLOCKS) ||
-                tabKey.equals(CreativeModeTabs.BUILDING_BLOCKS) ||
-                tabKey.equals(CreativeModeTabs.FUNCTIONAL_BLOCKS) ||
-                tabKey.equals(CreativeModeTabs.REDSTONE_BLOCKS)) {
+    private static Map<String, List<IconEntry>> buildCategories(HolderLookup.Provider registries, List<DataComponentInitializers.PendingComponents<?>> pendingComponents) {
+        Map<String, List<IconEntry>> prepared = new LinkedHashMap<>();
+        Map<Item, List<IconEntry>> variants = new HashMap<>();
+        Map<Holder<?>, DataComponentMap> previewComponents = new HashMap<>();
+
+        for (String category : List.of("blocks", "tools", "colored", "foods", "gold", "mods")) {
+            prepared.put(category, new ArrayList<>());
+        }
+
+        for (var pending : pendingComponents) {
+            pending.forEach((holder, components) -> {
+                previewComponents.put(holder, components);
+            });
+        }
+
+        PreviewComponentContext.run(previewComponents, () -> {
+            CreativeModeTab.ItemDisplayParameters parameters = new CreativeModeTab.ItemDisplayParameters(FeatureFlags.VANILLA_SET, true, registries);
+            List<ResourceKey<CreativeModeTab>> orderedTabs = List.of(CreativeModeTabs.NATURAL_BLOCKS, CreativeModeTabs.BUILDING_BLOCKS, CreativeModeTabs.FUNCTIONAL_BLOCKS, CreativeModeTabs.REDSTONE_BLOCKS, CreativeModeTabs.COLORED_BLOCKS, CreativeModeTabs.SPAWN_EGGS, CreativeModeTabs.TOOLS_AND_UTILITIES, CreativeModeTabs.COMBAT, CreativeModeTabs.FOOD_AND_DRINKS, CreativeModeTabs.INGREDIENTS, CreativeModeTabs.OP_BLOCKS);
+
+            for (ResourceKey<CreativeModeTab> tabKey : orderedTabs) {
+                CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(tabKey).orElseThrow().value();
+                String category = categoryForTab(tabKey);
+                CreativeModeTab.Output output = (stack, visibility) -> {
+                    if (stack.isEmpty() || visibility == CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY || !stack.getItem().isEnabled(parameters.enabledFeatures())) {
+                        return;
+                    }
+
+                    Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+
+                    if (!id.getNamespace().equals("minecraft") || stack.is(Items.STRUCTURE_VOID) || stack.is(Items.STRUCTURE_BLOCK) || stack.is(Items.BARRIER) || stack.is(Items.LIGHT)) {
+                        return;
+                    }
+
+                    addIcon(prepared.get(category), variants, stack);
+                };
+
+                CreativeModeTab.DisplayItemsGenerator generator = ((CreativeModeTabPreviewAccessor) tab).nitsha$getDisplayItemsGenerator();
+                generator.accept(parameters, output);
+            }
+
+            for (int level = 0; level <= 15; level++) {
+                ItemStack light = createIcon(Items.LIGHT);
+                light.set(DataComponents.BLOCK_STATE, new net.minecraft.world.item.component.BlockItemStateProperties(Map.of("level", Integer.toString(level))));
+                ItemStackTemplate template = ItemStackTemplate.fromNonEmptyStack(light);
+                prepared.get("mods").add(new IconEntry("minecraft:light_" + level, template));
+            }
+
+            for (Item item : BuiltInRegistries.ITEM) {
+                if (!BuiltInRegistries.ITEM.getKey(item).getNamespace().equals("minecraft")) {
+                    addIcon(prepared.get("mods"), variants, createIcon(item));
+                }
+            }
+        });
+
+        return removeCategoryDuplicates(prepared);
+    }
+
+    private static Map<String, List<IconEntry>> removeCategoryDuplicates(Map<String, List<IconEntry>> prepared) {
+        List<String> priority = List.of("colored", "foods", "tools", "gold", "mods", "blocks");
+        Map<Item, String> owners = new HashMap<>();
+        Map<String, Map<String, IconEntry>> unique = new LinkedHashMap<>();
+
+        for (String category : prepared.keySet()) {
+            unique.put(category, new LinkedHashMap<>());
+        }
+
+        for (String category : priority) {
+            for (IconEntry entry : prepared.get(category)) {
+                owners.putIfAbsent(entry.icon().item().value(), category);
+            }
+        }
+
+        for (String category : priority) {
+            for (IconEntry entry : prepared.get(category)) {
+                String owner = owners.get(entry.icon().item().value());
+                unique.get(owner).putIfAbsent(entry.key(), entry);
+            }
+        }
+
+        Map<String, List<IconEntry>> result = new LinkedHashMap<>();
+        unique.forEach((category, entries) -> {
+            result.put(category, List.copyOf(entries.values()));
+        });
+        return Collections.unmodifiableMap(result);
+    }
+
+    private static String categoryForTab(ResourceKey<CreativeModeTab> tab) {
+        if (tab.equals(CreativeModeTabs.NATURAL_BLOCKS) || tab.equals(CreativeModeTabs.BUILDING_BLOCKS) || tab.equals(CreativeModeTabs.FUNCTIONAL_BLOCKS) || tab.equals(CreativeModeTabs.REDSTONE_BLOCKS)) {
             return "blocks";
         }
 
-        if (tabKey.equals(CreativeModeTabs.COLORED_BLOCKS) ||
-            tabKey.equals(CreativeModeTabs.SPAWN_EGGS)) {
+        if (tab.equals(CreativeModeTabs.COLORED_BLOCKS) || tab.equals(CreativeModeTabs.SPAWN_EGGS)) {
             return "colored";
         }
 
-        if (tabKey.equals(CreativeModeTabs.TOOLS_AND_UTILITIES) ||
-                tabKey.equals(CreativeModeTabs.COMBAT)) {
+        if (tab.equals(CreativeModeTabs.TOOLS_AND_UTILITIES) || tab.equals(CreativeModeTabs.COMBAT)) {
             return "tools";
         }
 
-        if (tabKey.equals(CreativeModeTabs.FOOD_AND_DRINKS)) {
+        if (tab.equals(CreativeModeTabs.FOOD_AND_DRINKS)) {
             return "foods";
         }
 
-        if (tabKey.equals(CreativeModeTabs.INGREDIENTS)) {
+        if (tab.equals(CreativeModeTabs.INGREDIENTS)) {
             return "gold";
-        }
-
-        if (tabKey.equals(CreativeModeTabs.OP_BLOCKS)) {
-            return "mods";
         }
 
         return "mods";
     }
 
-    //? }
+    private static void addIcon(List<IconEntry> category, Map<Item, List<IconEntry>> variants, ItemStack source) {
+        ItemStack icon = SINGLE_ICON_ITEMS.contains(source.getItem()) ? createIcon(source.getItem()) : createIcon(source);
+        ItemStackTemplate template = ItemStackTemplate.fromNonEmptyStack(icon);
+        List<IconEntry> itemVariants = variants.computeIfAbsent(source.getItem(), item -> new ArrayList<>());
+        IconEntry entry = null;
 
-    //? if >=1.19.3 && <1.20 {
-    /*private static String mapCreativeTabToOurCategory_1_19_3(CreativeModeTab tabKey) {
-        if (tabKey.equals(CreativeModeTabs.NATURAL_BLOCKS) ||
-                tabKey.equals(CreativeModeTabs.BUILDING_BLOCKS) ||
-                tabKey.equals(CreativeModeTabs.FUNCTIONAL_BLOCKS) ||
-                tabKey.equals(CreativeModeTabs.REDSTONE_BLOCKS)) {
-            return "blocks";
+        for (IconEntry variant : itemVariants) {
+            if (variant.icon().equals(template)) {
+                entry = variant;
+                break;
+            }
         }
 
-        if (tabKey.equals(CreativeModeTabs.COLORED_BLOCKS) ||
-            tabKey.equals(CreativeModeTabs.SPAWN_EGGS)) {
-            return "colored";
+        if (entry == null) {
+            String id = BuiltInRegistries.ITEM.getKey(source.getItem()).toString();
+            String key = itemVariants.isEmpty() ? id : id + "#" + itemVariants.size();
+            entry = new IconEntry(key, template);
+            itemVariants.add(entry);
         }
 
-        if (tabKey.equals(CreativeModeTabs.TOOLS_AND_UTILITIES) ||
-                tabKey.equals(CreativeModeTabs.COMBAT)) {
-            return "tools";
+        if (!category.contains(entry)) {
+            category.add(entry);
         }
-
-        if (tabKey.equals(CreativeModeTabs.FOOD_AND_DRINKS)) {
-            return "foods";
-        }
-
-        if (tabKey.equals(CreativeModeTabs.INGREDIENTS)) {
-            return "gold";
-        }
-
-        if (tabKey.equals(CreativeModeTabs.OP_BLOCKS)) {
-            return "mods";
-        }
-
-        return "mods";
-    }
-    *///?}
-
-    //? if <1.19.3 {
-    /*private static String mapCreativeTabToOurCategory_1_19_2(CreativeModeTab tab) {
-        if (tab.equals(CreativeModeTab.TAB_BUILDING_BLOCKS) ||
-                tab.equals(CreativeModeTab.TAB_REDSTONE)) {
-            return "blocks";
-        }
-        if (tab.equals(CreativeModeTab.TAB_DECORATIONS)) {
-            return "colored";
-        }
-        if (tab.equals(CreativeModeTab.TAB_TOOLS) ||
-                tab.equals(CreativeModeTab.TAB_COMBAT) ||
-                tab.equals(CreativeModeTab.TAB_TRANSPORTATION)) {
-            return "tools";
-        }
-        if (tab.equals(CreativeModeTab.TAB_FOOD) ||
-                tab.equals(CreativeModeTab.TAB_BREWING)) {
-            return "foods";
-        }
-        if (tab.equals(CreativeModeTab.TAB_MISC)) {
-            return "gold";
-        }
-        return "mods";
-    }
-    *///?}
-
-    //? if >=1.20.5 {
-    public static ItemStack getLightBlock(int level) {
-        ItemStack stack = new ItemStack(Items.LIGHT);
-        Map<String, String> properties = new HashMap<>();
-        properties.put("level", String.valueOf(level));
-        stack.set(DataComponents.BLOCK_STATE, new BlockItemStateProperties(properties));
-        return stack;
-    }
-    //?} else if >=1.17 {
-    /*public static ItemStack getLightBlock(int level) {
-        ItemStack stack = new ItemStack(Items.LIGHT);
-        CompoundTag tag = stack.getOrCreateTag();
-        CompoundTag blockStateTag = new CompoundTag();
-        blockStateTag.putString("level", String.valueOf(level));
-        tag.put("BlockStateTag", blockStateTag);
-        return stack;
-    }*/
-    //?}
-
-    private static Map<String, ItemStack> cat_POTIONS() {
-        Map<String, ItemStack> map = new LinkedHashMap<>();
-        map.put("minecraft:night_vision", getPotionItem(Potions.NIGHT_VISION, Items.POTION));
-        map.put("minecraft:invisible", getPotionItem(Potions.INVISIBILITY, Items.POTION));
-        map.put("minecraft:leaping", getPotionItem(Potions.LEAPING, Items.POTION));
-        map.put("minecraft:fire_resistance", getPotionItem(Potions.FIRE_RESISTANCE, Items.POTION));
-        map.put("minecraft:swiftness", getPotionItem(Potions.SWIFTNESS, Items.POTION));
-        map.put("minecraft:slowness", getPotionItem(Potions.SLOWNESS, Items.POTION));
-        map.put("minecraft:turtle_master", getPotionItem(Potions.TURTLE_MASTER, Items.POTION));
-        map.put("minecraft:water_breathing", getPotionItem(Potions.WATER_BREATHING, Items.POTION));
-        map.put("minecraft:healing", getPotionItem(Potions.HEALING, Items.POTION));
-        map.put("minecraft:harming", getPotionItem(Potions.HARMING, Items.POTION));
-        map.put("minecraft:poison", getPotionItem(Potions.POISON, Items.POTION));
-        map.put("minecraft:regeneration", getPotionItem(Potions.REGENERATION, Items.POTION));
-        map.put("minecraft:strength", getPotionItem(Potions.STRENGTH, Items.POTION));
-        map.put("minecraft:weakness", getPotionItem(Potions.WEAKNESS, Items.POTION));
-        map.put("minecraft:luck", getPotionItem(Potions.LUCK, Items.POTION));
-        //? if >1.20.4 {
-        map.put("minecraft:wind_charged", getPotionItem(Potions.WIND_CHARGED, Items.POTION));
-        map.put("minecraft:weaving", getPotionItem(Potions.WEAVING, Items.POTION));
-        map.put("minecraft:oozing", getPotionItem(Potions.OOZING, Items.POTION));
-        map.put("minecraft:infested", getPotionItem(Potions.INFESTED, Items.POTION));
-        //?}
-        map.put("minecraft:night_vision_splash_potion", getPotionItem(Potions.NIGHT_VISION, Items.SPLASH_POTION));
-        map.put("minecraft:invisible_splash_potion", getPotionItem(Potions.INVISIBILITY, Items.SPLASH_POTION));
-        map.put("minecraft:leaping_splash_potion", getPotionItem(Potions.LEAPING, Items.SPLASH_POTION));
-        map.put("minecraft:fire_resistance_splash_potion", getPotionItem(Potions.FIRE_RESISTANCE, Items.SPLASH_POTION));
-        map.put("minecraft:swiftness_splash_potion", getPotionItem(Potions.SWIFTNESS, Items.SPLASH_POTION));
-        map.put("minecraft:slowness_splash_potion", getPotionItem(Potions.SLOWNESS, Items.SPLASH_POTION));
-        map.put("minecraft:turtle_master_splash_potion", getPotionItem(Potions.TURTLE_MASTER, Items.SPLASH_POTION));
-        map.put("minecraft:water_breathing_splash_potion", getPotionItem(Potions.WATER_BREATHING, Items.SPLASH_POTION));
-        map.put("minecraft:healing_splash_potion", getPotionItem(Potions.HEALING, Items.SPLASH_POTION));
-        map.put("minecraft:harming_splash_potion", getPotionItem(Potions.HARMING, Items.SPLASH_POTION));
-        map.put("minecraft:poison_splash_potion", getPotionItem(Potions.POISON, Items.SPLASH_POTION));
-        map.put("minecraft:regeneration_splash_potion", getPotionItem(Potions.REGENERATION, Items.SPLASH_POTION));
-        map.put("minecraft:strength_splash_potion", getPotionItem(Potions.STRENGTH, Items.SPLASH_POTION));
-        map.put("minecraft:weakness_splash_potion", getPotionItem(Potions.WEAKNESS, Items.SPLASH_POTION));
-        map.put("minecraft:luck_splash_potion", getPotionItem(Potions.LUCK, Items.SPLASH_POTION));
-        //? if >1.20.4 {
-        map.put("minecraft:wind_charged_splash_potion", getPotionItem(Potions.WIND_CHARGED, Items.SPLASH_POTION));
-        map.put("minecraft:weaving_splash_potion", getPotionItem(Potions.WEAVING, Items.SPLASH_POTION));
-        map.put("minecraft:oozing_splash_potion", getPotionItem(Potions.OOZING, Items.SPLASH_POTION));
-        map.put("minecraft:infested_splash_potion", getPotionItem(Potions.INFESTED, Items.SPLASH_POTION));
-        //?}
-
-        map.put("minecraft:night_vision_lingering_potion", getPotionItem(Potions.NIGHT_VISION, Items.LINGERING_POTION));
-        map.put("minecraft:invisible_lingering_potion", getPotionItem(Potions.INVISIBILITY, Items.LINGERING_POTION));
-        map.put("minecraft:leaping_lingering_potion", getPotionItem(Potions.LEAPING, Items.LINGERING_POTION));
-        map.put("minecraft:fire_resistance_lingering_potion", getPotionItem(Potions.FIRE_RESISTANCE, Items.LINGERING_POTION));
-        map.put("minecraft:swiftness_lingering_potion", getPotionItem(Potions.SWIFTNESS, Items.LINGERING_POTION));
-        map.put("minecraft:slowness_lingering_potion", getPotionItem(Potions.SLOWNESS, Items.LINGERING_POTION));
-        map.put("minecraft:turtle_master_lingering_potion", getPotionItem(Potions.TURTLE_MASTER, Items.LINGERING_POTION));
-        map.put("minecraft:water_breathing_lingering_potion", getPotionItem(Potions.WATER_BREATHING, Items.LINGERING_POTION));
-        map.put("minecraft:healing_lingering_potion", getPotionItem(Potions.HEALING, Items.LINGERING_POTION));
-        map.put("minecraft:harming_lingering_potion", getPotionItem(Potions.HARMING, Items.LINGERING_POTION));
-        map.put("minecraft:poison_lingering_potion", getPotionItem(Potions.POISON, Items.LINGERING_POTION));
-        map.put("minecraft:regeneration_lingering_potion", getPotionItem(Potions.REGENERATION, Items.LINGERING_POTION));
-        map.put("minecraft:strength_lingering_potion", getPotionItem(Potions.STRENGTH, Items.LINGERING_POTION));
-        map.put("minecraft:weakness_lingering_potion", getPotionItem(Potions.WEAKNESS, Items.LINGERING_POTION));
-        map.put("minecraft:luck_lingering_potion", getPotionItem(Potions.LUCK, Items.LINGERING_POTION));
-        //? if >1.20.4 {
-        map.put("minecraft:wind_charged_lingering_potion", getPotionItem(Potions.WIND_CHARGED, Items.LINGERING_POTION));
-        map.put("minecraft:weaving_lingering_potion", getPotionItem(Potions.WEAVING, Items.LINGERING_POTION));
-        map.put("minecraft:oozing_lingering_potion", getPotionItem(Potions.OOZING, Items.LINGERING_POTION));
-        map.put("minecraft:infested_lingering_potion", getPotionItem(Potions.INFESTED, Items.LINGERING_POTION));
-        //?}
-        return map;
     }
 
-    private static void addCategory(String category, Map<String, ItemStack> map) {
-        itemStackMap.putAll(map);
-
-        categories.computeIfAbsent(category, k -> new LinkedHashMap<>()).putAll(map);
-    }
-
-    //? if >=1.20.5 {
-    public static ItemStack getPotionItem(Holder<Potion> potion, Item baseItem) {
-        ItemStack stack = new ItemStack(baseItem);
-        stack.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
-        return stack;
-    }
-    //?} else if >=1.19.3 {
-    /*public static ItemStack getPotionItem(Potion potion, Item baseItem) {
-        ItemStack stack = new ItemStack(baseItem);
-        CompoundTag tag = new CompoundTag();
-        tag.putString("Potion", BuiltInRegistries.POTION.getKey(potion).toString());
-        stack.setTag(tag);
-        return stack;
-    }
-    *///?} else {
-    /*public static ItemStack getPotionItem(Potion potion, Item baseItem) {
-        ItemStack stack = new ItemStack(baseItem);
-        PotionUtils.setPotion(stack, potion);
-        return stack;
-    }
-    *///?}
-
-    public static ItemStack getItemStack(String name) {
-        if (!name.contains(":")) {
-            name = "minecraft:" + name.toLowerCase();
-        }
-        return itemStackMap.getOrDefault(name, (name.equals("minecraft:structure_void")) ? standart : notFound);
-    }
-
-    public static int getItemStackIndex(String name) {
-        int index = 0;
-        for (String key : itemStackMap.keySet()) {
-            if (key.equals(name)) return index;
-            index++;
-        }
-        index = 0;
-        for (String key : itemStackMap.keySet()) {
-            if (key.equals("NOT_FOUND")) return index;
-            index++;
-        }
-        return -1;
-    }
-
-    public static Map.Entry<String, ItemStack> getRandomItem() {
-        if (itemStackMap.isEmpty()) {
-            return null;
-        }
-
-        if (cachedKeys == null || cachedKeys.size() != itemStackMap.size()) {
-            cachedKeys = new ArrayList<>(itemStackMap.keySet());
-        }
-
-        String randomKey = cachedKeys.get(random.nextInt(cachedKeys.size()));
-        return new AbstractMap.SimpleEntry<>(randomKey, itemStackMap.get(randomKey).copy());
-    }
-
-}
-//? } else {
-/*
-public class ItemsMapper {
-    private static final Map<String, ItemStackTemplate> itemStackMap = new LinkedHashMap<>();
-    private static final Map<String, Map<String, ItemStackTemplate>> categories = new HashMap<>();
-    private static final ItemStackTemplate standart = new ItemStackTemplate(Items.STRUCTURE_VOID);
-    private static final ItemStackTemplate notFound = new ItemStackTemplate(Items.BARRIER);
-    private static List<String> cachedKeys = null;
-    private static final Random random = new Random();
-    private static boolean isInitialized = false;
-    public static void initializeIfNeeded() {
-        if (isInitialized) return;
-
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null) return;
-        isInitialized = true;
-        addCategory("foods", cat_POTIONS());
-        getAllItems();
-    }
-    public static Map<String, ItemStackTemplate> getItemStackMap() {
-        initializeIfNeeded();
-        return itemStackMap;
-    }
-    public static Map<String, Map<String, ItemStackTemplate>> getCategories() {
-        initializeIfNeeded();
+    public static Map<String, List<IconEntry>> getCategories() {
         return categories;
     }
-    public static void getAllItems() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null) return;
 
-        HolderLookup.Provider registryAccess = mc.level.registryAccess();
-        CreativeModeTab.ItemDisplayParameters displayParams = new CreativeModeTab.ItemDisplayParameters(
-                FeatureFlags.VANILLA_SET,
-                true,
-                registryAccess
-        );
-        List<ResourceKey<CreativeModeTab>> orderedTabs = List.of(
-                CreativeModeTabs.NATURAL_BLOCKS,
-                CreativeModeTabs.BUILDING_BLOCKS,
-                CreativeModeTabs.FUNCTIONAL_BLOCKS,
-                CreativeModeTabs.REDSTONE_BLOCKS,
-                CreativeModeTabs.COLORED_BLOCKS,
-                CreativeModeTabs.SPAWN_EGGS,
-                CreativeModeTabs.TOOLS_AND_UTILITIES,
-                CreativeModeTabs.COMBAT,
-                CreativeModeTabs.FOOD_AND_DRINKS,
-                CreativeModeTabs.INGREDIENTS,
-                CreativeModeTabs.OP_BLOCKS
-        );
-        for (ResourceKey<CreativeModeTab> tabKey : orderedTabs) {
-            Optional<Holder.Reference<CreativeModeTab>> holder = BuiltInRegistries.CREATIVE_MODE_TAB.get(tabKey);
-            if (holder.isEmpty()) continue;
+    public static Map<Item, DataComponentMap> getItemComponents() {
+        return itemComponents;
+    }
 
-            CreativeModeTab tab = holder.get().value();
-            if (tab == null || tab.getType() != CreativeModeTab.Type.CATEGORY) continue;
-            try {
-                tab.buildContents(displayParams);
-            } catch (Exception e) {
-                continue;
-            }
-            if (tab.getDisplayItems().isEmpty()) continue;
-            Map<String, ItemStackTemplate> categoryMap = new LinkedHashMap<>();
-            for (ItemStack stack : tab.getDisplayItems()) {
-                Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-                if (id != null) {
-                    String key = id.toString();
-                    String path = id.getPath();
-                    String namespace = id.getNamespace();
-                    if (!namespace.equals("minecraft") || path.equals("air") || path.equals("structure_void") || path.equals("structure_block") || path.equals("barrier") || path.equals("light")) {
-                        continue;
-                    }
-                    categoryMap.put(key, ItemStackTemplate.fromNonEmptyStack(stack));
-                }
-            }
-            String ourCategory = mapCreativeTabToOurCategory(tabKey);
-            if (!categoryMap.isEmpty()) {
-                addCategory(ourCategory, categoryMap);
-            }
+    public static ItemStack createIcon(Item item) {
+        DataComponentMap components = itemComponents.get(item);
+
+        if (components == null) {
+            throw new IllegalStateException("Компоненты не подготовлены: " + BuiltInRegistries.ITEM.getKey(item));
         }
-        Map<String, ItemStackTemplate> moddedItems = new LinkedHashMap<>();
-        for (int level = 0; level <= 15; level++) {
-            moddedItems.put("minecraft:light_" + level, getLightBlock(level));
-        }
-        for (Item item : BuiltInRegistries.ITEM) {
-            Identifier id = BuiltInRegistries.ITEM.getKey(item);
-            if (id != null && !id.getNamespace().equals("minecraft")) {
-                moddedItems.put(id.toString(), new ItemStackTemplate(item));
-            }
-        }
-        if (!moddedItems.isEmpty()) {
-            addCategory("mods", moddedItems);
+
+        ItemStack icon = new ItemStack(Holder.direct(item, components), 1);
+        prepareNestedIcons(icon);
+        return icon;
+    }
+
+    public static ItemStack createIcon(ItemStack source) {
+        ItemStack icon = createIcon(source.getItem());
+        icon.applyComponents(source.getComponentsPatch());
+        prepareNestedIcons(icon);
+        return icon;
+    }
+
+    public static ItemStack createIcon(ItemStackTemplate template) {
+        ItemStack icon = createIcon(template.item().value());
+        icon.applyComponents(template.components());
+        prepareNestedIcons(icon);
+        return icon;
+    }
+
+    private static void prepareNestedIcons(ItemStack icon) {
+        PotDecorations decorations = icon.get(DataComponents.POT_DECORATIONS);
+
+        if (decorations != null) {
+            PotDecorations previewDecorations = new PotDecorations(decorations.back().map(ItemsMapper::createPreviewTemplate), decorations.left().map(ItemsMapper::createPreviewTemplate), decorations.right().map(ItemsMapper::createPreviewTemplate), decorations.front().map(ItemsMapper::createPreviewTemplate));
+            icon.set(DataComponents.POT_DECORATIONS, previewDecorations);
         }
     }
-    private static String mapCreativeTabToOurCategory(ResourceKey<CreativeModeTab> tabKey) {
-        if (tabKey.equals(CreativeModeTabs.NATURAL_BLOCKS) ||
-            tabKey.equals(CreativeModeTabs.BUILDING_BLOCKS) ||
-            tabKey.equals(CreativeModeTabs.FUNCTIONAL_BLOCKS) ||
-            tabKey.equals(CreativeModeTabs.REDSTONE_BLOCKS)) {
-            return "blocks";
-        }
-        if (tabKey.equals(CreativeModeTabs.COLORED_BLOCKS) ||
-            tabKey.equals(CreativeModeTabs.SPAWN_EGGS)) {
-            return "colored";
-        }
-        if (tabKey.equals(CreativeModeTabs.TOOLS_AND_UTILITIES) ||
-            tabKey.equals(CreativeModeTabs.COMBAT)) {
-            return "tools";
-        }
-        if (tabKey.equals(CreativeModeTabs.FOOD_AND_DRINKS)) {
-            return "foods";
-        }
-        if (tabKey.equals(CreativeModeTabs.INGREDIENTS)) {
-            return "gold";
-        }
-        return "mods";
-    }
-    public static ItemStackTemplate getLightBlock(int level) {
-        Map<String, String> properties = new HashMap<>();
-        properties.put("level", String.valueOf(level));
-        DataComponentPatch patch = DataComponentPatch.builder()
-                .set(DataComponents.BLOCK_STATE, new BlockItemStateProperties(properties))
-                .build();
-        return new ItemStackTemplate(Items.LIGHT, patch);
-    }
-    private static Map<String, ItemStackTemplate> cat_POTIONS() {
-        Map<String, ItemStackTemplate> map = new LinkedHashMap<>();
 
-        map.put("minecraft:night_vision", getPotionItem(Potions.NIGHT_VISION, Items.POTION));
-        map.put("minecraft:invisible", getPotionItem(Potions.INVISIBILITY, Items.POTION));
-        map.put("minecraft:leaping", getPotionItem(Potions.LEAPING, Items.POTION));
-        map.put("minecraft:fire_resistance", getPotionItem(Potions.FIRE_RESISTANCE, Items.POTION));
-        map.put("minecraft:swiftness", getPotionItem(Potions.SWIFTNESS, Items.POTION));
-        map.put("minecraft:slowness", getPotionItem(Potions.SLOWNESS, Items.POTION));
-        map.put("minecraft:turtle_master", getPotionItem(Potions.TURTLE_MASTER, Items.POTION));
-        map.put("minecraft:water_breathing", getPotionItem(Potions.WATER_BREATHING, Items.POTION));
-        map.put("minecraft:healing", getPotionItem(Potions.HEALING, Items.POTION));
-        map.put("minecraft:harming", getPotionItem(Potions.HARMING, Items.POTION));
-        map.put("minecraft:poison", getPotionItem(Potions.POISON, Items.POTION));
-        map.put("minecraft:regeneration", getPotionItem(Potions.REGENERATION, Items.POTION));
-        map.put("minecraft:strength", getPotionItem(Potions.STRENGTH, Items.POTION));
-        map.put("minecraft:weakness", getPotionItem(Potions.WEAKNESS, Items.POTION));
-        map.put("minecraft:luck", getPotionItem(Potions.LUCK, Items.POTION));
+    private static ItemStackTemplate createPreviewTemplate(ItemStackTemplate template) {
+        Item item = template.item().value();
+        DataComponentMap components = itemComponents.get(item);
 
-        map.put("minecraft:wind_charged", getPotionItem(Potions.WIND_CHARGED, Items.POTION));
-        map.put("minecraft:weaving", getPotionItem(Potions.WEAVING, Items.POTION));
-        map.put("minecraft:oozing", getPotionItem(Potions.OOZING, Items.POTION));
-        map.put("minecraft:infested", getPotionItem(Potions.INFESTED, Items.POTION));
-
-        map.put("minecraft:night_vision_splash_potion", getPotionItem(Potions.NIGHT_VISION, Items.SPLASH_POTION));
-        map.put("minecraft:invisible_splash_potion", getPotionItem(Potions.INVISIBILITY, Items.SPLASH_POTION));
-        map.put("minecraft:leaping_splash_potion", getPotionItem(Potions.LEAPING, Items.SPLASH_POTION));
-        map.put("minecraft:fire_resistance_splash_potion", getPotionItem(Potions.FIRE_RESISTANCE, Items.SPLASH_POTION));
-        map.put("minecraft:swiftness_splash_potion", getPotionItem(Potions.SWIFTNESS, Items.SPLASH_POTION));
-        map.put("minecraft:slowness_splash_potion", getPotionItem(Potions.SLOWNESS, Items.SPLASH_POTION));
-        map.put("minecraft:turtle_master_splash_potion", getPotionItem(Potions.TURTLE_MASTER, Items.SPLASH_POTION));
-        map.put("minecraft:water_breathing_splash_potion", getPotionItem(Potions.WATER_BREATHING, Items.SPLASH_POTION));
-        map.put("minecraft:healing_splash_potion", getPotionItem(Potions.HEALING, Items.SPLASH_POTION));
-        map.put("minecraft:harming_splash_potion", getPotionItem(Potions.HARMING, Items.SPLASH_POTION));
-        map.put("minecraft:poison_splash_potion", getPotionItem(Potions.POISON, Items.SPLASH_POTION));
-        map.put("minecraft:regeneration_splash_potion", getPotionItem(Potions.REGENERATION, Items.SPLASH_POTION));
-        map.put("minecraft:strength_splash_potion", getPotionItem(Potions.STRENGTH, Items.SPLASH_POTION));
-        map.put("minecraft:weakness_splash_potion", getPotionItem(Potions.WEAKNESS, Items.SPLASH_POTION));
-        map.put("minecraft:luck_splash_potion", getPotionItem(Potions.LUCK, Items.SPLASH_POTION));
-
-        map.put("minecraft:wind_charged_splash_potion", getPotionItem(Potions.WIND_CHARGED, Items.SPLASH_POTION));
-        map.put("minecraft:weaving_splash_potion", getPotionItem(Potions.WEAVING, Items.SPLASH_POTION));
-        map.put("minecraft:oozing_splash_potion", getPotionItem(Potions.OOZING, Items.SPLASH_POTION));
-        map.put("minecraft:infested_splash_potion", getPotionItem(Potions.INFESTED, Items.SPLASH_POTION));
-        map.put("minecraft:night_vision_lingering_potion", getPotionItem(Potions.NIGHT_VISION, Items.LINGERING_POTION));
-        map.put("minecraft:invisible_lingering_potion", getPotionItem(Potions.INVISIBILITY, Items.LINGERING_POTION));
-        map.put("minecraft:leaping_lingering_potion", getPotionItem(Potions.LEAPING, Items.LINGERING_POTION));
-        map.put("minecraft:fire_resistance_lingering_potion", getPotionItem(Potions.FIRE_RESISTANCE, Items.LINGERING_POTION));
-        map.put("minecraft:swiftness_lingering_potion", getPotionItem(Potions.SWIFTNESS, Items.LINGERING_POTION));
-        map.put("minecraft:slowness_lingering_potion", getPotionItem(Potions.SLOWNESS, Items.LINGERING_POTION));
-        map.put("minecraft:turtle_master_lingering_potion", getPotionItem(Potions.TURTLE_MASTER, Items.LINGERING_POTION));
-        map.put("minecraft:water_breathing_lingering_potion", getPotionItem(Potions.WATER_BREATHING, Items.LINGERING_POTION));
-        map.put("minecraft:healing_lingering_potion", getPotionItem(Potions.HEALING, Items.LINGERING_POTION));
-        map.put("minecraft:harming_lingering_potion", getPotionItem(Potions.HARMING, Items.LINGERING_POTION));
-        map.put("minecraft:poison_lingering_potion", getPotionItem(Potions.POISON, Items.LINGERING_POTION));
-        map.put("minecraft:regeneration_lingering_potion", getPotionItem(Potions.REGENERATION, Items.LINGERING_POTION));
-        map.put("minecraft:strength_lingering_potion", getPotionItem(Potions.STRENGTH, Items.LINGERING_POTION));
-        map.put("minecraft:weakness_lingering_potion", getPotionItem(Potions.WEAKNESS, Items.LINGERING_POTION));
-        map.put("minecraft:luck_lingering_potion", getPotionItem(Potions.LUCK, Items.LINGERING_POTION));
-
-        map.put("minecraft:wind_charged_lingering_potion", getPotionItem(Potions.WIND_CHARGED, Items.LINGERING_POTION));
-        map.put("minecraft:weaving_lingering_potion", getPotionItem(Potions.WEAVING, Items.LINGERING_POTION));
-        map.put("minecraft:oozing_lingering_potion", getPotionItem(Potions.OOZING, Items.LINGERING_POTION));
-        map.put("minecraft:infested_lingering_potion", getPotionItem(Potions.INFESTED, Items.LINGERING_POTION));
-
-        return map;
-    }
-    private static void addCategory(String category, Map<String, ItemStackTemplate> map) {
-        itemStackMap.putAll(map);
-        categories.computeIfAbsent(category, k -> new LinkedHashMap<>()).putAll(map);
-    }
-    public static ItemStackTemplate getPotionItem(Holder<Potion> potion, Item baseItem) {
-        DataComponentPatch patch = DataComponentPatch.builder()
-                .set(DataComponents.POTION_CONTENTS, new PotionContents(potion))
-                .build();
-        return new ItemStackTemplate(baseItem, patch);
-    }
-    public static ItemStackTemplate getItemStack(String name) {
-        initializeIfNeeded();
-        if (!name.contains(":")) {
-            name = "minecraft:" + name.toLowerCase();
+        if (components == null) {
+            throw new IllegalStateException("Компоненты вложенного предмета не подготовлены: " + BuiltInRegistries.ITEM.getKey(item));
         }
-        return itemStackMap.getOrDefault(name, (name.equals("minecraft:structure_void")) ? standart : notFound);
+
+        return new ItemStackTemplate(Holder.direct(item, components), template.count(), template.components());
     }
-    public static int getItemStackIndex(String name) {
-        initializeIfNeeded();
-        int index = 0;
-        for (String key : itemStackMap.keySet()) {
-            if (key.equals(name)) return index;
-            index++;
+
+    public static ItemStack getItemStack(String key) {
+        ItemStackTemplate icon = key == null ? null : iconsByKey.get(key);
+
+        if (icon != null) {
+            return createIcon(icon);
         }
-        index = 0;
-        for (String key : itemStackMap.keySet()) {
-            if (key.equals("NOT_FOUND")) return index;
-            index++;
+
+        Identifier id = key == null ? null : Identifier.tryParse(key);
+        icon = id == null ? null : iconsByKey.get(id.toString());
+
+        if (icon != null) {
+            return createIcon(icon);
         }
-        return -1;
+
+        return id != null && id.equals(BuiltInRegistries.ITEM.getKey(Items.AIR)) ? ItemStack.EMPTY : createIcon(Items.BARRIER);
     }
-    public static Map.Entry<String, ItemStackTemplate> getRandomItem() {
-        initializeIfNeeded();
-        if (itemStackMap.isEmpty()) return null;
-        if (cachedKeys == null || cachedKeys.size() != itemStackMap.size()) {
-            cachedKeys = new ArrayList<>(itemStackMap.keySet());
-        }
-        String randomKey = cachedKeys.get(random.nextInt(cachedKeys.size()));
-        return new AbstractMap.SimpleEntry<>(randomKey, itemStackMap.get(randomKey));
+
+    public static IconEntry getRandomItem() {
+        return randomItems.isEmpty() ? null : randomItems.get(ThreadLocalRandom.current().nextInt(randomItems.size()));
     }
 }
-
- */
-//? }

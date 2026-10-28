@@ -7,28 +7,28 @@ import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.utils.AudioPlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
+import net.minecraft.client.input.CharacterEvent;
 //? }
 
 public class SoundItem extends AbstractButton {
 
-    private static final ResourceLocation NORMAL = Main.id("textures/gui/btns/smallbtn_normal.png");
-    private static final ResourceLocation PLAY_NORMAL = Main.id("textures/gui/sprites/play_normal.png");
-    private static final ResourceLocation PLAY_HOVER = Main.id("textures/gui/sprites/play_hover.png");
-    private static final ResourceLocation PAUSE_NORMAL = Main.id("textures/gui/sprites/pause_normal.png");
-    private static final ResourceLocation PAUSE_HOVER = Main.id("textures/gui/sprites/pause_hover.png");
+    private static final Identifier NORMAL = Main.id("textures/gui/btns/smallbtn_normal.png");
+    private static final Identifier PLAY_NORMAL = Main.id("textures/gui/sprites/play_normal.png");
+    private static final Identifier PLAY_HOVER = Main.id("textures/gui/sprites/play_hover.png");
+    private static final Identifier PAUSE_NORMAL = Main.id("textures/gui/sprites/pause_normal.png");
+    private static final Identifier PAUSE_HOVER = Main.id("textures/gui/sprites/pause_hover.png");
 
     private final int index;
     private final int x, y;
@@ -63,12 +63,12 @@ public class SoundItem extends AbstractButton {
     }
 
     @Override
-    public void onPress() {
+    public void onPress(InputWithModifiers inputWithModifiers) {
 
     }
 
     @Override
-    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void extractContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         if (index % 2 == 0)
             GUIUtils.drawFill(ctx, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x4DFFFFFF);
         if (isMouseOver(mouseX, mouseY))
@@ -108,7 +108,7 @@ public class SoundItem extends AbstractButton {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY) {
+    public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl) {
         Minecraft.getInstance().getSoundManager().play(
                 SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         this.parent.onSelect(value);
@@ -132,7 +132,7 @@ public class SoundItem extends AbstractButton {
 
     @Override
     //? if >=1.21.9 {
-    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         double mouseX = event.x();
         double mouseY = event.y();
         int button = event.buttonInfo().button();
@@ -143,16 +143,16 @@ public class SoundItem extends AbstractButton {
         }
 
         return super.mouseClicked(event, bl);
-    }*/
+    }
     //? } else {
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    /*public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (isMouseInsidePlayBtn(mouseX, mouseY)) {
             AudioPlayer.previewSound(9, this.value, 1.0f, 1.0f, this.isExternal, () -> play(true), () -> play(false), () -> play(false));
             return false;
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
-    //? }
+    *///? }
 
     private void play(boolean status) {
         isPlaying = status;

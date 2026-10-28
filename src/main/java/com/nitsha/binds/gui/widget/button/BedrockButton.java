@@ -1,6 +1,7 @@
 package com.nitsha.binds.gui.widget.button;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.utils.DrawElement;
@@ -8,24 +9,24 @@ import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
 import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import java.util.List;
 
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.InputWithModifiers;*/
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.InputWithModifiers;
 //? }
 
 public class BedrockButton extends AbstractButton {
 
-    public ResourceLocation BEDROCK_ATLAS = Main.id("textures/gui/btns/bedrock.png");
+    public Identifier BEDROCK_ATLAS = Main.id("textures/gui/btns/bedrock.png");
 
     private final Runnable onClick;
 
@@ -141,18 +142,18 @@ public class BedrockButton extends AbstractButton {
     }
 
     @Override
-    public void onPress() {
+    public void onPress(InputWithModifiers inputWithModifiers) {
         if (isEnabled) isPressed = true;
     }
 
     @Override
     //? if >=1.21.9 {
-    // public void onRelease(MouseButtonEvent event) {
-    //  if (isMouseOver(event.x(), event.y()) && isEnabled && isPressed) this.onClick.run();
+     public void onRelease(MouseButtonEvent event) {
+      if (isMouseOver(event.x(), event.y()) && isEnabled && isPressed) this.onClick.run();
     //? } else {
-    public void onRelease(double mouseX, double mouseY) {
+    /*public void onRelease(double mouseX, double mouseY) {
         if (isMouseOver(mouseX, mouseY) && isEnabled && isPressed) this.onClick.run();
-    //? }
+    *///? }
         if (!isToggle) isPressed = false;
     }
 
@@ -194,7 +195,7 @@ public class BedrockButton extends AbstractButton {
     }
 
     @Override
-    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void extractContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         boolean isHovered = isMouseOver(mouseX, mouseY);
         Font font = Minecraft.getInstance().font;
         int textWidth = font.width(name);
@@ -210,7 +211,7 @@ public class BedrockButton extends AbstractButton {
         int xOff = 0;
         int wOff = 0;
 
-        int oC = ((isHovered || isPressed) && isEnabled) ? outlineHoverColor : outlineColor;
+        int oC = (isHovered || isPressed) ? outlineHoverColor : outlineColor;
 
         if (neighbor != null) {
             wOff = 1;
@@ -266,35 +267,35 @@ public class BedrockButton extends AbstractButton {
 
     @Override
     //? if >=1.21.9 {
-    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         if (!this.isEnabled() || !this.visible) return false;
         return super.mouseClicked(event, bl);
-    }*/
+    }
     //? } else {
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    /*public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!this.isEnabled() || !this.visible) return false;
         return super.mouseClicked(mouseX, mouseY, button);
     }
-    //? }
+    *///? }
 
     @Override
     //? if >=1.21.9 {
-    /*public boolean mouseReleased(MouseButtonEvent event) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         if (!this.isEnabled() || !this.visible) return false;
-        if (event.button() == 0 && isPressed) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && isPressed) {
             onRelease(event);
             return true;
         }
         return false;
-    }*/
+    }
     //? } else {
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    /*public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (!this.isEnabled() || !this.visible) return false;
-        if (button == 0 && isPressed) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && isPressed) {
             onRelease(mouseX, mouseY);
             return true;
         }
         return false;
     }
-    //? }
+    *///? }
 }

@@ -3,46 +3,39 @@ package com.nitsha.binds.gui.widget.list;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.action.ActionType;
-import com.nitsha.binds.gui.panels.AdvancedOptions;
-import com.nitsha.binds.gui.panels.advanced.ActionsTab;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.TextField;
 import com.nitsha.binds.gui.widget.button.TexturedButton;
-import net.minecraft.client.gui.GuiGraphics;
-//? if >=1.17 {
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-//?}
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.resources.ResourceLocation;
-
-//? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.InputWithModifiers;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
-//? }
+import com.nitsha.binds.guinew.panel.advanced.ActionsTab;
+import com.nitsha.binds.multiversions.NitshaAbstractWidget;
+import com.nitsha.binds.multiversions.NitshaInput;
+import com.nitsha.binds.multiversions.RenderUtils;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 
 import com.nitsha.binds.configs.dto.preset.ActionData;
 
-public class ActionItem extends AbstractButton {
+import java.util.List;
+
+public class ActionItem extends NitshaAbstractWidget {
 
     private final TexturedButton topBtn;
     private final TexturedButton bottomBtn;
     private final TexturedButton resetBtn;
     private final TexturedButton deleteBtn;
 
-    private static final ResourceLocation TOP            = Main.idSprite("action_top_normal");
-    private static final ResourceLocation TOP_HOVER      = Main.idSprite("action_top_hover");
-    private static final ResourceLocation BOTTOM         = Main.idSprite("action_bottom_normal");
-    private static final ResourceLocation BOTTOM_HOVER   = Main.idSprite("action_bottom_hover");
-    private static final ResourceLocation RESET          = Main.idSprite("action_reset_normal");
-    private static final ResourceLocation RESET_HOVER    = Main.idSprite("action_reset_hover");
-    private static final ResourceLocation DELETE         = Main.idSprite("action_delete_normal");
-    private static final ResourceLocation DELETE_HOVER   = Main.idSprite("action_delete_hover");
-    private static final ResourceLocation ARROW_DISABLED = Main.id("textures/gui/test/arrow_disabled.png");
+    private static final Identifier TOP            = Main.idSprite("action_top_normal");
+    private static final Identifier TOP_HOVER      = Main.idSprite("action_top_hover");
+    private static final Identifier BOTTOM         = Main.idSprite("action_bottom_normal");
+    private static final Identifier BOTTOM_HOVER   = Main.idSprite("action_bottom_hover");
+    private static final Identifier RESET          = Main.idSprite("action_reset_normal");
+    private static final Identifier RESET_HOVER    = Main.idSprite("action_reset_hover");
+    private static final Identifier DELETE         = Main.idSprite("action_delete_normal");
+    private static final Identifier DELETE_HOVER   = Main.idSprite("action_delete_hover");
+    private static final Identifier ARROW_DISABLED = Main.id("textures/gui/test/arrow_disabled.png");
 
     private final int index;
     private final int x, y;
@@ -63,24 +56,24 @@ public class ActionItem extends AbstractButton {
         this.action.init(x, y, width, value);
 
         this.topBtn = GUIUtils.createTexturedBtn(x + width - 9, y + 3, 9, 9,
-                new ResourceLocation[]{ TOP, TOP_HOVER },
+                new Identifier[]{ TOP, TOP_HOVER },
                 button -> { if (index > 0) parent.moveAction(index, -1); });
 
         this.bottomBtn = GUIUtils.createTexturedBtn(x + width - 9, y + 13, 9, 9,
-                new ResourceLocation[]{ BOTTOM, BOTTOM_HOVER },
+                new Identifier[]{ BOTTOM, BOTTOM_HOVER },
                 button -> { if (BindsEditor.getCBind().actions.size() != index + 1) parent.moveAction(index, 1); });
 
         this.resetBtn = GUIUtils.createTexturedBtn(x + width - 25, y + 3, 15, 9,
-                new ResourceLocation[]{ RESET, RESET_HOVER },
+                new Identifier[]{ RESET, RESET_HOVER },
                 button -> action.reset());
 
         this.deleteBtn = GUIUtils.createTexturedBtn(x + width - 25, y + 13, 15, 9,
-                new ResourceLocation[]{ DELETE, DELETE_HOVER },
+                new Identifier[]{ DELETE, DELETE_HOVER },
                 button -> parent.removeAction(index));
     }
 
     public int getX() { return this.x; }
-    public int getY() { return super.getY(); } // using super.getY() to allow dynamic movement
+    public int getY() { return super.getY(); }
 
     @Override
     public void setY(int y) {
@@ -114,143 +107,70 @@ public class ActionItem extends AbstractButton {
     }
 
     @Override
-    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         if (index % 2 == 1)
-            GUIUtils.drawFill(ctx, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x4DFFFFFF);
+            RenderUtils.drawFill(ctx, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x4DFFFFFF);
 
-        this.resetBtn.renderWidget(ctx, mouseX, mouseY, delta);
-        this.deleteBtn.renderWidget(ctx, mouseX, mouseY, delta);
-        GUIUtils.adaptiveDrawTexture(ctx, ARROW_DISABLED, getX() + getWidth() - 9, getY() + 3, 0, 0, 9, 19, 9, 19);
+        this.resetBtn.extractContents(ctx, mouseX, mouseY, delta);
+        this.deleteBtn.extractContents(ctx, mouseX, mouseY, delta);
+        RenderUtils.drawTexture(ctx, ARROW_DISABLED, getX() + getWidth() - 9, getY() + 3, 0, 0, 9, 19, 9, 19);
 
         int aS = BindsEditor.getCBind().actions.size();
         if (aS > 0) {
             if (index > 0)
-                this.topBtn.renderWidget(ctx, mouseX, mouseY, delta);
+                this.topBtn.extractContents(ctx, mouseX, mouseY, delta);
             if (index != (aS - 1))
-                this.bottomBtn.renderWidget(ctx, mouseX, mouseY, delta);
+                this.bottomBtn.extractContents(ctx, mouseX, mouseY, delta);
         }
 
         action.render(ctx, mouseX, mouseY, delta);
 
-        GUIUtils.drawFill(ctx, getX() - 3, getY() + 8, getX() - 1, getY() + getHeight() - 8, action.getLineColor());
+        RenderUtils.drawFill(ctx, getX() - 3, getY() + 8, getX() - 1, getY() + getHeight() - 8, action.getLineColor());
     }
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        if (isMouseOverColorButtons(event.x(), event.y())) {
-            com.nitsha.binds.gui.widget.TextField.setBlockFocus();
-        }
-        boolean clicked = action.mouseClicked(event, bl);
-        if (this.deleteBtn.mouseClicked(event, bl)) clicked = true;
-        if (this.bottomBtn.mouseClicked(event, bl)) clicked = true;
-        if (this.resetBtn.mouseClicked(event, bl))  clicked = true;
-        if (this.topBtn.mouseClicked(event, bl))    clicked = true;
-        return clicked;
-    }*/
-    //? } else {
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
         if (isMouseOverColorButtons(mouseX, mouseY)) {
             TextField.setBlockFocus();
         }
-        boolean clicked = action.mouseClicked(mouseX, mouseY, button);
-        if (this.deleteBtn.mouseClicked(mouseX, mouseY, button)) clicked = true;
-        if (this.bottomBtn.mouseClicked(mouseX, mouseY, button)) clicked = true;
-        if (this.resetBtn.mouseClicked(mouseX, mouseY, button))  clicked = true;
-        if (this.topBtn.mouseClicked(mouseX, mouseY, button))    clicked = true;
+
+        boolean clicked = false;
+
+        for (GuiEventListener element : List.of(action, deleteBtn, bottomBtn, resetBtn, topBtn)) {
+            if (NitshaInput.mouseClicked(List.of(element), mouseX, mouseY, button)) {
+                clicked = true;
+            }
+        }
+
         return clicked;
     }
-    //? }
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean mouseReleased(MouseButtonEvent event) {
-        boolean clicked = action.mouseReleased(event);
-        if (this.deleteBtn.mouseReleased(event)) clicked = true;
-        if (this.bottomBtn.mouseReleased(event)) clicked = true;
-        if (this.resetBtn.mouseReleased(event))  clicked = true;
-        if (this.topBtn.mouseReleased(event))    clicked = true;
-        return clicked;
-    }*/
-    //? } else {
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        boolean clicked = action.mouseReleased(mouseX, mouseY, button);
-        if (this.deleteBtn.mouseReleased(mouseX, mouseY, button)) clicked = true;
-        if (this.bottomBtn.mouseReleased(mouseX, mouseY, button)) clicked = true;
-        if (this.resetBtn.mouseReleased(mouseX, mouseY, button))  clicked = true;
-        if (this.topBtn.mouseReleased(mouseX, mouseY, button))    clicked = true;
-        return clicked;
+    public boolean onMouseReleased(double mouseX, double mouseY, int button) {
+        return NitshaInput.mouseReleased(List.of(action, deleteBtn, bottomBtn, resetBtn, topBtn), mouseX, mouseY, button);
     }
-    //? }
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        boolean clicked = action.mouseDragged(event, deltaX, deltaY);
-        if (this.deleteBtn.mouseDragged(event, deltaX, deltaY)) clicked = true;
-        if (this.bottomBtn.mouseDragged(event, deltaX, deltaY)) clicked = true;
-        if (this.resetBtn.mouseDragged(event, deltaX, deltaY))  clicked = true;
-        if (this.topBtn.mouseDragged(event, deltaX, deltaY))    clicked = true;
-        return clicked;
-    }*/
-    //? } else {
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        boolean clicked = action.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-        if (this.deleteBtn.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) clicked = true;
-        if (this.bottomBtn.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) clicked = true;
-        if (this.resetBtn.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))  clicked = true;
-        if (this.topBtn.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))    clicked = true;
-        return clicked;
+    public boolean onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return NitshaInput.mouseDragged(List.of(action, deleteBtn, bottomBtn, resetBtn, topBtn), mouseX, mouseY, button, deltaX, deltaY);
     }
-    //? }
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean keyPressed(KeyEvent event) {
-        return action.keyPressed(event) || super.keyPressed(event);
-    }*/
-    //? } else {
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return action.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean onKeyPressed(int keyCode, int nativeCode, int modifiers) {
+        return NitshaInput.keyPressed(List.of(action), keyCode, nativeCode, modifiers) || super.onKeyPressed(keyCode, nativeCode, modifiers);
     }
-    //? }
 
     @Override
-    //? if >=1.21.9 {
-    /*public boolean charTyped(CharacterEvent event) {
-        return action.charTyped(event) || super.charTyped(event);
-    }*/
-    //? } else {
-    public boolean charTyped(char codePoint, int modifiers) {
-        return action.charTyped(codePoint, modifiers) || super.charTyped(codePoint, modifiers);
+    public boolean onCharTyped(int codePoint) {
+        return NitshaInput.charTyped(List.of(action), codePoint) || super.onCharTyped(codePoint);
     }
-    //? }
 
-    //? if >=1.20.2 {
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (action.mouseScrolled(mouseX, mouseY, verticalAmount)) return true;
-        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    public boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (action.mouseScrolled(mouseX, mouseY, verticalAmount)) {
+            return true;
+        }
+
+        return super.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
-    //? } else {
-    /*@Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (action.mouseScrolled(mouseX, mouseY, amount)) return true;
-        return super.mouseScrolled(mouseX, mouseY, amount);
-    }*/
-    //? }
-
-    @Override
-    public void playDownSound(SoundManager soundManager) {}
-
-    @Override
-    public void onPress() {}
-
-    //? if >=1.19.3 {
-    @Override
-    protected void updateWidgetNarration(NarrationElementOutput builder) {}
-    //? } else if >=1.17 {
-    /*@Override
-    public void updateNarration(NarrationElementOutput builder) {}*/
-    //? }
 }

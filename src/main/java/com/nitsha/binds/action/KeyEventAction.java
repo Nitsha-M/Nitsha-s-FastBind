@@ -1,29 +1,18 @@
 package com.nitsha.binds.action;
 
 import com.nitsha.binds.Main;import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.*;
-import com.nitsha.binds.gui.widget.button.BedrockIconOptionButton;
+import com.nitsha.binds.guinew.widget.button.BedrockIconOptionButton;
 import com.nitsha.binds.mixin.KeyMappingAccessor;
+import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.utils.EventBus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.Queue;
 import java.util.function.LongConsumer;
-//? if >=1.21.9 {
-/*import net.minecraft.client.input.InputWithModifiers;*/
-//? }
-
-//? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.InputWithModifiers;
-import com.mojang.blaze3d.platform.Window;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
-//? }
 
 import com.nitsha.binds.configs.dto.actions.AllActionsData.KeyEventActionData;
 
@@ -72,7 +61,7 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
         });
 
         if (mode.equals(MODE_HOLD)) {
-            actions.add(() -> setWaitUntil.accept(net.minecraft.Util.getMillis() + finalHoldMs));
+            actions.add(() -> setWaitUntil.accept(net.minecraft.util.Util.getMillis() + finalHoldMs));
         }
 
         actions.add(() -> {
@@ -105,7 +94,7 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
                     Component name = TextUtils.translatable(KeyMappingAccessor.binds$getAll().get(this.getSelectedItem()).getName());
                     int maxWidth = this.width - 8;
                     int avgCharWidth = 7;
-                    setName(GUIUtils.truncateString(name.getString(), maxWidth / avgCharWidth));
+                    setText(TextUtils.literal(GUIUtils.truncateString(name.getString(), maxWidth / avgCharWidth)));
                 }
             }
         };
@@ -146,7 +135,7 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
     }
 
     @Override
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         String userLanguage = GUIUtils.getUL();
         if (userLanguage.equals("ja_jp") || userLanguage.equals("uk_ua")) {
             GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent_1"), 0,
@@ -157,9 +146,9 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
             GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent"), 0,
                     x + 2, y + 8, "top", "left", 0xFF212121, false);
         }
-        selector.renderWidget(ctx, mouseX, mouseY, delta);
-        msField.renderWidget(ctx, mouseX, mouseY, delta);
-        modeButton.renderWidget(ctx, mouseX, mouseY, delta);
+        selector.onRender(ctx, mouseX, mouseY, delta);
+        msField.extractContents(ctx, mouseX, mouseY, delta);
+        modeButton.onRender(ctx, mouseX, mouseY, delta);
     }
 
     @Override
@@ -178,7 +167,7 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
     }
 
     //? if >=1.21.9 {
-    /*@Override
+    @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
         boolean r = selector.mouseClicked(event, bl) || modeButton.mouseClicked(event, bl);
         if (msField != null) r |= msField.mouseClicked(event, bl);
@@ -197,9 +186,9 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
         boolean r = selector.charTyped(event);
         if (msField != null) r |= msField.charTyped(event);
         return r;
-    }*/
+    }
     //? } else {
-    @Override
+    /*@Override
     public boolean mouseClicked(double mx, double my, int btn) {
         boolean r = selector.mouseClicked(mx, my, btn) || modeButton.mouseClicked(mx, my, btn);
         if (msField != null) r |= msField.mouseClicked(mx, my, btn);
@@ -219,21 +208,21 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
         if (msField != null) r |= msField.charTyped(c, mods);
         return r;
     }
-    //? }
+    *///? }
 
     //? if >=1.21.9 {
-    /*@Override
+    @Override
     public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
         boolean r = selector.mouseReleased(event);
         r |= modeButton.mouseReleased(event);
         return r;
-    }*/
+    }
     //? } else {
-    @Override
+    /*@Override
     public boolean mouseReleased(double mx, double my, int btn) {
         boolean r = selector.mouseReleased(mx, my, btn);
         r |= modeButton.mouseReleased(mx, my, btn);
         return r;
     }
-    //? }
+    *///? }
 }

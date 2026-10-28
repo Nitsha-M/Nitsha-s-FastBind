@@ -11,19 +11,19 @@ import com.nitsha.binds.gui.widget.window.ScrollableWindow;
 import com.nitsha.binds.gui.widget.TextField;
 import com.nitsha.binds.gui.widget.button.TexturedButton;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 //? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 //?}
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 //? if >=1.21.9 {
-/*import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.InputWithModifiers;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;*/
+import net.minecraft.client.input.CharacterEvent;
 //? }
 
 public class PresetListItem extends AbstractButton {
@@ -37,17 +37,17 @@ public class PresetListItem extends AbstractButton {
     private final TexturedButton deleteConfBtn;
     private final TexturedButton moveTop;
     private final TexturedButton moveBottom;
-    private static final ResourceLocation EDIT = Main.idSprite("editpreset_normal");
-    private static final ResourceLocation EDIT_HOVER = Main.idSprite("editpreset_hover");
-    private static final ResourceLocation SAVE = Main.idSprite("savepreset_normal");
-    private static final ResourceLocation SAVE_HOVER = Main.idSprite("savepreset_hover");
-    private static final ResourceLocation DELETE = Main.idSprite("delete_small_normal");
-    private static final ResourceLocation DELETE_HOVER = Main.idSprite("delete_small_hover");
-    private static final ResourceLocation TOP = Main.idSprite("top_normal");
-    private static final ResourceLocation TOP_HOVER = Main.idSprite("top_hover");
-    private static final ResourceLocation BOTTOM = Main.idSprite("bottom_normal");
-    private static final ResourceLocation BOTTOM_HOVER = Main.idSprite("bottom_hover");
-    private static final ResourceLocation ARROW_DISABLED = Main.id("textures/gui/test/arrow_disabled.png");
+    private static final Identifier EDIT = Main.idSprite("editpreset_normal");
+    private static final Identifier EDIT_HOVER = Main.idSprite("editpreset_hover");
+    private static final Identifier SAVE = Main.idSprite("savepreset_normal");
+    private static final Identifier SAVE_HOVER = Main.idSprite("savepreset_hover");
+    private static final Identifier DELETE = Main.idSprite("delete_small_normal");
+    private static final Identifier DELETE_HOVER = Main.idSprite("delete_small_hover");
+    private static final Identifier TOP = Main.idSprite("top_normal");
+    private static final Identifier TOP_HOVER = Main.idSprite("top_hover");
+    private static final Identifier BOTTOM = Main.idSprite("bottom_normal");
+    private static final Identifier BOTTOM_HOVER = Main.idSprite("bottom_hover");
+    private static final Identifier ARROW_DISABLED = Main.id("textures/gui/test/arrow_disabled.png");
 
 
     private boolean isEditing = false;
@@ -71,7 +71,7 @@ public class PresetListItem extends AbstractButton {
         this.newNameField.setEnterEvent(this::savePreset);
         this.newNameField.setEscapeEvent(this::stopEditing);
         this.newNameField.setAnimatedPlaceholder(false);
-        this.editBtn = GUIUtils.createTexturedBtn(x + 111, y + 7, 9, 9, new ResourceLocation[]{EDIT, EDIT_HOVER}, button -> {
+        this.editBtn = GUIUtils.createTexturedBtn(x + 111, y + 7, 9, 9, new Identifier[]{EDIT, EDIT_HOVER}, button -> {
             for (PresetListItem item : parent.getItems()) {
                 if (item.isEditing()) {
                     item.stopEditing();
@@ -81,11 +81,11 @@ public class PresetListItem extends AbstractButton {
             this.newNameField.setFocus();
         });
 
-        this.deleteBtn = GUIUtils.createTexturedBtn(x + 101, y + 7, 9, 9, new ResourceLocation[]{DELETE, DELETE_HOVER}, button -> {
+        this.deleteBtn = GUIUtils.createTexturedBtn(x + 101, y + 7, 9, 9, new Identifier[]{DELETE, DELETE_HOVER}, button -> {
             deleteConfirmationTime = System.currentTimeMillis();
         });
 
-        this.deleteConfBtn = GUIUtils.createTexturedBtn(x + 91, y + 7, 9, 9, new ResourceLocation[]{SAVE, SAVE_HOVER}, button -> {
+        this.deleteConfBtn = GUIUtils.createTexturedBtn(x + 91, y + 7, 9, 9, new Identifier[]{SAVE, SAVE_HOVER}, button -> {
             java.util.List<PresetData> sorted = Storage.getSortedPresets();
             int totalPresets = sorted.size();
             int currentPreset = sorted.indexOf(BindsEditor.activePreset);
@@ -113,15 +113,15 @@ public class PresetListItem extends AbstractButton {
             parent.generatePresetsList();
         });
 
-        this.saveBtn = GUIUtils.createTexturedBtn(x + 111, y + 7, 9, 9, new ResourceLocation[]{SAVE, SAVE_HOVER}, button -> {
+        this.saveBtn = GUIUtils.createTexturedBtn(x + 111, y + 7, 9, 9, new Identifier[]{SAVE, SAVE_HOVER}, button -> {
             savePreset();
         });
 
-        this.moveTop = GUIUtils.createTexturedBtn(x + 3, y + 2, 9, 9, new ResourceLocation[]{TOP, TOP_HOVER}, button -> {
+        this.moveTop = GUIUtils.createTexturedBtn(x + 3, y + 2, 9, 9, new Identifier[]{TOP, TOP_HOVER}, button -> {
             movePreset(-1);
         });
 
-        this.moveBottom = GUIUtils.createTexturedBtn(x + 3, y + 12, 9, 9, new ResourceLocation[]{BOTTOM, BOTTOM_HOVER}, button -> {
+        this.moveBottom = GUIUtils.createTexturedBtn(x + 3, y + 12, 9, 9, new Identifier[]{BOTTOM, BOTTOM_HOVER}, button -> {
             movePreset(1);
         });
     }
@@ -170,7 +170,7 @@ public class PresetListItem extends AbstractButton {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY) {
+    public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl) {
         if (!isEditing) {
             parent.screen.selectPreset(index);
             parent.openSelector(false);
@@ -197,14 +197,14 @@ public class PresetListItem extends AbstractButton {
     }
 
     @Override
-    public void onPress() {}
+    public void onPress(InputWithModifiers inputWithModifiers) {}
 
     @Override
-    public void renderWidget(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+    public void extractContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         if (index > 0) GUIUtils.drawFill(ctx, getX() + 3, getY(), getX() + getWidth() - 3, getY() + 1, 0xFF555555);
         if (isEditing) {
-            this.newNameField.renderWidget(ctx, mouseX, mouseY, delta);
-            this.saveBtn.renderWidget(ctx, mouseX, mouseY, delta);
+            this.newNameField.extractContents(ctx, mouseX, mouseY, delta);
+            this.saveBtn.extractContents(ctx, mouseX, mouseY, delta);
         } else {
             int nameX = 15;
             int maxLength = (isDeleteConfirmation()) ? 12 : 13;
@@ -218,19 +218,19 @@ public class PresetListItem extends AbstractButton {
             if (this.isHovered && parent.isOpen() && index != currentPreset) GUIUtils.drawFill(ctx, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x0DFFFFFF);
             if (index == currentPreset) GUIUtils.drawFill(ctx, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x1A4AFF00);
             GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(this.name, maxLength)), 0, getX() + nameX, getY() + 1 + (getHeight() / 2), "left", "center",0xFFFFFFFF, false);
-            this.editBtn.renderWidget(ctx, mouseX, mouseY, delta);
-            this.deleteBtn.renderWidget(ctx, mouseX, mouseY, delta);
+            this.editBtn.extractContents(ctx, mouseX, mouseY, delta);
+            this.deleteBtn.extractContents(ctx, mouseX, mouseY, delta);
             if (Storage.getSortedPresets().size() > 1) {
-                if (index > 0) this.moveTop.renderWidget(ctx, mouseX, mouseY, delta);
-                if (index < Storage.getSortedPresets().size() - 1) this.moveBottom.renderWidget(ctx, mouseX, mouseY, delta);
+                if (index > 0) this.moveTop.extractContents(ctx, mouseX, mouseY, delta);
+                if (index < Storage.getSortedPresets().size() - 1) this.moveBottom.extractContents(ctx, mouseX, mouseY, delta);
             }
-            if (isDeleteConfirmation()) this.deleteConfBtn.renderWidget(ctx, mouseX, mouseY, delta);
+            if (isDeleteConfirmation()) this.deleteConfBtn.extractContents(ctx, mouseX, mouseY, delta);
         }
     }
 
     @Override
     //? if >=1.21.9 {
-    /*public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
         if (!parent.isOpen()) return false;
 
         if (isEditing) {
@@ -250,9 +250,9 @@ public class PresetListItem extends AbstractButton {
             }
         }
         return super.mouseClicked(event, bl);
-    }*/
+    }
     //? } else {
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        /*public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (!parent.isOpen()) return false;
 
             if (isEditing) {
@@ -273,33 +273,33 @@ public class PresetListItem extends AbstractButton {
             }
             return super.mouseClicked(mouseX, mouseY, button);
         }
-    //? }
+    *///? }
 
         @Override
     //? if >=1.21.9 {
-    /*public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(KeyEvent event) {
         if (!parent.isOpen() || !isEditing) return false;
         return newNameField.keyPressed(event);
-    }*/
+    }
     //? } else {
-        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        /*public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
             if (!parent.isOpen() || !isEditing) return false;
             return newNameField.keyPressed(keyCode, scanCode, modifiers);
         }
-    //? }
+    *///? }
 
         @Override
     //? if >=1.21.9 {
-    /*public boolean charTyped(CharacterEvent event) {
+    public boolean charTyped(CharacterEvent event) {
         if (!parent.isOpen() || !isEditing) return false;
         return newNameField.charTyped(event);
-    }*/
+    }
     //? } else {
-        public boolean charTyped(char codePoint, int modifiers) {
+        /*public boolean charTyped(char codePoint, int modifiers) {
             if (!parent.isOpen() || !isEditing) return false;
             return newNameField.charTyped(codePoint, modifiers);
         }
-    //? }
+    *///? }
 
     //? if >=1.19.3 {
     @Override

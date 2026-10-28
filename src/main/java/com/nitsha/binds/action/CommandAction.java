@@ -3,7 +3,7 @@ package com.nitsha.binds.action;
 import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.TextField;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
@@ -74,8 +74,8 @@ public class CommandAction extends ActionType<CommandActionData> {
     }
 
     @Override
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        field.renderWidget(ctx, mouseX, mouseY, delta);
+    public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        field.extractContents(ctx, mouseX, mouseY, delta);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class CommandAction extends ActionType<CommandActionData> {
     }
 
     //? if >=1.21.9 {
-    /*@Override
+    @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
         return field.mouseClicked(event, bl);
     }
@@ -104,9 +104,9 @@ public class CommandAction extends ActionType<CommandActionData> {
     @Override
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
         return field.charTyped(event);
-    }*/
+    }
     //? } else {
-    @Override
+    /*@Override
     public boolean mouseClicked(double mx, double my, int btn) {
         return field.mouseClicked(mx, my, btn);
     }
@@ -120,7 +120,7 @@ public class CommandAction extends ActionType<CommandActionData> {
     public boolean charTyped(char c, int mods) {
         return field.charTyped(c, mods);
     }
-    //? }
+    *///? }
 
     @Override
     public boolean mouseScrolled(double mx, double my, double amount) {

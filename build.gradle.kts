@@ -18,6 +18,8 @@ class VersionDefinition(vararg pairs: Pair<String, String>) {
 
 // Fabric API
 val fabricApiVersion = VersionDefinition(
+    "26.3" to "0.165.0+26.3",
+    "26.2" to "0.160.0+26.2",
     "26.1" to "0.144.0+26.1",
     // 1.21.x
     "1.21.11" to "0.141.3+1.21.11",
@@ -59,6 +61,8 @@ val fabricApiVersion = VersionDefinition(
 
 // Mod Menu
 val modMenuVersion = VersionDefinition(
+    "26.3" to "21.0.0",
+    "26.2" to "20.0.3",
     "26.1" to "18.0.0-alpha.6",
     // 1.21.x
     "1.21.11" to "17.0.0-beta.2",
@@ -76,7 +80,7 @@ val modMenuVersion = VersionDefinition(
     // 1.20.x
     "1.20.6" to "10.0.0",
     "1.20.5" to "10.0.0",
-    "1.20.4" to "9.2.0",
+    "1.20.4" to "9.0.0",
     "1.20.3" to "9.0.0",
     "1.20.2" to "8.0.1",
     "1.20.1" to "7.2.2",
@@ -100,6 +104,8 @@ val modMenuVersion = VersionDefinition(
 
 // NeoForge (только для 1.20.2+)
 val neoForgeVersion = VersionDefinition(
+    "26.3" to "26.3.0.37-beta",
+    "26.2" to "26.2.0.57",
     "26.1" to "26.1.0.1-beta",
     // 1.21.x
     "1.21.11" to "21.11.38-beta",
@@ -152,6 +158,8 @@ val forgeDependenciesVersion = mapOf(
 )
 
 val neoforgeDependenciesVersion = mapOf(
+    "26.3" to "26.3.0.37-beta",
+    "26.2" to "26.2.0.57",
     "26.1" to "26.1.0.1-beta",
     "1.21.11" to "21.11.0-beta",
     "1.21.10" to "21.9.0-beta",
@@ -235,6 +243,8 @@ val parchmentVersion = VersionDefinition(
 
 val additionalVersions = mapOf(
     // 1.21.x
+    "26.3" to emptyList(),
+    "26.2" to emptyList(),
     "26.1" to listOf("26.1.1", "26.1.2"),
     "1.21.11" to emptyList(),
     "1.21.10" to listOf("1.21.9"),
@@ -322,7 +332,8 @@ val loader: String = name.split("-")[1]
 config["loader"] = loader
 
 val fabric_loader = when {
-    stonecutter.eval(minecraft_version, ">=21.6") -> "0.18.4"
+    stonecutter.eval(minecraft_version, ">=26.3") -> "0.19.5"
+    stonecutter.eval(minecraft_version, ">=26.1") -> "0.18.4"
     stonecutter.eval(minecraft_version, ">=1.21.11") -> "0.18.4"
     stonecutter.eval(minecraft_version, ">=1.21.9") -> "0.17.2"
     else -> "0.16.14"
@@ -417,7 +428,7 @@ config["mnd"] = if (loader == "neoforge") "" else "mandatory = true"
 config["mfd"] = if (loader == "neoforge") neoforge_dep_ver else forge_dep_ver
 
 val java_version = when {
-    stonecutter.eval(minecraft_version, ">=21.6") -> 25
+    stonecutter.eval(minecraft_version, ">=26.1") -> 25
     stonecutter.eval(minecraft_version, ">=1.20.5") -> 21
     stonecutter.eval(minecraft_version, ">=1.18") -> 17
     else -> 16
@@ -513,6 +524,7 @@ modstitch {
             runConfigs.configureEach {
                 ideConfigGenerated(true)
                 vmArgs.add("-Dmixin.debug.export=true")
+                programArgs("--width", "1920", "--height", "1000")
             }
         }
     }

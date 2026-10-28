@@ -1,29 +1,26 @@
 package com.nitsha.binds.gui.panels;
 
-import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.Main;
+import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.configs.dto.preset.BindData;
 import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
 import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.widget.window.AnimatedWindow;
-import com.nitsha.binds.gui.widget.button.ItemButton;
-import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.button.SmallTextButton;
+import com.nitsha.binds.guinew.widget.button.ItemButton;
+import com.nitsha.binds.guinew.widget.button.SmallTextButton;
+import com.nitsha.binds.guinew.widget.window.AnimatedWindow;
+import com.nitsha.binds.multiversions.NitshaCraft;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.ChatFormatting;
-import net.minecraft.resources.ResourceLocation;
-
-//? if >=26.1 {
-// import net.minecraft.world.item.ItemStackTemplate;
-//? }
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,21 +33,21 @@ public class BindsList extends AnimatedWindow {
     private AbstractWidget closeBtn;
 
     // Textures
-    private static final ResourceLocation FRAME = Main.id("textures/gui/test/frame.png");
-    private static final ResourceLocation ARROW_SPRITE = Main.id("textures/gui/test/arrow_animation.png");
-    private static final ResourceLocation ARROW_SPRITE_LEFT = Main.id("textures/gui/test/arrow_animation_left.png");
-    private static final ResourceLocation ARROW_L = Main.idSprite("arrow_left");
-    private static final ResourceLocation ARROW_L_HOVER = Main.idSprite("arrow_left_hover");
-    private static final ResourceLocation ARROW_R = Main.idSprite("arrow_right");
-    private static final ResourceLocation ARROW_R_HOVER = Main.idSprite("arrow_right_hover");
-    private static final ResourceLocation CLOSE = Main.idSprite("close");
-    private static final ResourceLocation CLOSE_HOVER = Main.idSprite("close_hover");
-    private static final ResourceLocation ITEMS_SELECTOR = Main.id("textures/gui/test/items_2.png");
-    private static final ResourceLocation DELETE_SMALL = Main.id("textures/gui/test/delete_small_icon.png");
-    private static final ResourceLocation SURE_SMALL = Main.id("textures/gui/test/sure_small.png");
-    private static final ResourceLocation ADD_NEW = Main.id("textures/gui/test/add_new_icon.png");
+    private static final Identifier FRAME = Main.id("textures/gui/test/frame.png");
+    private static final Identifier ARROW_SPRITE = Main.id("textures/gui/test/arrow_animation.png");
+    private static final Identifier ARROW_SPRITE_LEFT = Main.id("textures/gui/test/arrow_animation_left.png");
+    private static final Identifier ARROW_L = Main.idSprite("arrow_left");
+    private static final Identifier ARROW_L_HOVER = Main.idSprite("arrow_left_hover");
+    private static final Identifier ARROW_R = Main.idSprite("arrow_right");
+    private static final Identifier ARROW_R_HOVER = Main.idSprite("arrow_right_hover");
+    private static final Identifier CLOSE = Main.idSprite("close");
+    private static final Identifier CLOSE_HOVER = Main.idSprite("close_hover");
+    private static final Identifier ITEMS_SELECTOR = Main.id("textures/gui/test/items_2.png");
+    private static final Identifier DELETE_SMALL = Main.id("textures/gui/test/delete_small_icon.png");
+    private static final Identifier SURE_SMALL = Main.id("textures/gui/test/sure_small.png");
+    private static final Identifier ADD_NEW = Main.id("textures/gui/test/add_new_icon.png");
 
-    private static final ResourceLocation SEPARATOR = Main.id("textures/gui/separator.png");
+    private static final Identifier SEPARATOR = Main.id("textures/gui/separator.png");
 
     private final List<ItemButton> buttons = new ArrayList<>();
 
@@ -60,29 +57,25 @@ public class BindsList extends AnimatedWindow {
     private long deleteConfirmationTime = 0;
     private boolean deleteConfirmShown = false;
 
-    public BindsList(BindsEditor screen, float x, int y, float width, int height, ResourceLocation t1, ResourceLocation t2, int delay) {
+    public BindsList(BindsEditor screen, float x, int y, float width, int height, Identifier t1, Identifier t2, int delay) {
         super(x, y, width, height, t1, t2, delay);
         this.screen = screen;
         initUI(screen);
     }
 
     private void initUI(BindsEditor screen) {
-        this.leftA = GUIUtils.createTexturedBtn(-19, 43, 11, 11, new ResourceLocation[]{ARROW_L, ARROW_L_HOVER}, button -> {
+        this.leftA = GUIUtils.createTexturedBtn(-19, 43, 11, 11, new Identifier[]{ARROW_L, ARROW_L_HOVER}, button -> {
             screen.setNewPage(-1);
             confirm(false);
         });
-        this.rightA = GUIUtils.createTexturedBtn(141, 43, 11, 11, new ResourceLocation[]{ARROW_R, ARROW_R_HOVER}, button -> {
+        this.rightA = GUIUtils.createTexturedBtn(141, 43, 11, 11, new Identifier[]{ARROW_R, ARROW_R_HOVER}, button -> {
             screen.setNewPage(1);
             confirm(false);
         });
 
-        this.closeBtn = GUIUtils.createTexturedBtn(110, 7, 16, 16, new ResourceLocation[]{CLOSE, CLOSE_HOVER}, button -> {
+        this.closeBtn = GUIUtils.createTexturedBtn(110, 7, 16, 16, new Identifier[]{CLOSE, CLOSE_HOVER}, button -> {
             screen.closeEditor();
-            //? if >=1.17.1 {
-            Minecraft.getInstance().setScreen((Screen)null);
-            //?} else {
-            /*Minecraft.getInstance().setScreen((Screen)null);*/
-            //?}
+            NitshaCraft.setScreen(null);
         });
 
         this.rightBtn = new AnimatedSprite(22, 15, ARROW_SPRITE, 0, false, 0, 0, 220, 22, 20, 242, 15);
@@ -91,34 +84,28 @@ public class BindsList extends AnimatedWindow {
         this.rightBtn.setPosition(131, 42);
 
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            //? if >=1.20 {
-            GuiGraphics c = (GuiGraphics) ctx;
-            //?} else {
-            /*PoseStack c = (PoseStack) ctx;
-             *///?}
-            GUIUtils.adaptiveDrawTexture(ctx, FRAME, 4, 4, 0, 0, 125, 90, 125 , 90);
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.configure"), 141, 8, 11);
+            RenderUtils.drawTexture(ctx, FRAME, 4, 4, 0, 0, 125, 90, 125, 90);
+            RenderUtils.drawText(ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.configure")), 141, 8, 11);
 
-            MutableComponent page = TextUtils.translatable("nitsha.binds.page");
-            MutableComponent currentPage = TextUtils.literal(GUIUtils.toSuper(String.valueOf(BindsEditor.getCurrentPage() + 1)));
-            MutableComponent totalPage = TextUtils.literal(GUIUtils.toSuper(String.valueOf(
-                    BindsEditor.activePreset != null
-                            ? BindsEditor.activePreset.pages.size()
-                            : 1
-            )));
-            int pWidth = Minecraft.getInstance().font.width(page);
-            int сPWidth = Minecraft.getInstance().font.width(currentPage);
-            int tPWidth = Minecraft.getInstance().font.width(totalPage);
+            int pageCount = BindsEditor.activePreset != null ? BindsEditor.activePreset.pages.size() : 1;
 
-            GUIUtils.addText(ctx, page, 126, 4, 96, "left", "top", 0xFFFFFFFF, false);
-            GUIUtils.addText(ctx, totalPage.withStyle(style -> style.withColor(ChatFormatting.GRAY)), 125, 129, 98, "right", "top");
-            GUIUtils.adaptiveDrawTexture(ctx, SEPARATOR, 129 - tPWidth - 4, 98, 0, 0, 3, 6, 3, 6);
-            GUIUtils.addText(ctx, currentPage.withStyle(style -> style.withColor(ChatFormatting.GRAY)), 125, 129 - tPWidth - 4, 98, "right", "top");
+            MutableComponent page = TextUtils.small(TextUtils.translatable("nitsha.binds.page"));
+            MutableComponent currentPage = TextUtils.small(TextUtils.literal(String.valueOf(BindsEditor.getCurrentPage() + 1))).withStyle(ChatFormatting.GRAY);
+            MutableComponent totalPage = TextUtils.small(TextUtils.literal(String.valueOf(pageCount))).withStyle(ChatFormatting.GRAY);
 
-            GUIUtils.drawFill(c, pWidth + 6, 100, getWidth() - 6 - сPWidth - tPWidth - 4, 101, 0xFF555555);
+            int pageWidth = Minecraft.getInstance().font.width(page);
+            int currentPageWidth = Minecraft.getInstance().font.width(currentPage);
+            int totalPageWidth = Minecraft.getInstance().font.width(totalPage);
 
-            rightBtn.render(c);
-            leftBtn.render(c);
+            RenderUtils.drawText(ctx, page, 126, 4, 96, "left", "top", 0xFFFFFFFF, false);
+            RenderUtils.drawText(ctx, totalPage, 125, 129, 98, "right", "top", 0xFFFFFFFF, false);
+            RenderUtils.drawTexture(ctx, SEPARATOR, 129 - totalPageWidth - 4, 98, 0, 0, 3, 6, 3, 6);
+            RenderUtils.drawText(ctx, currentPage, 125, 129 - totalPageWidth - 4, 98, "right", "top", 0xFFFFFFFF, false);
+
+            RenderUtils.drawFill(ctx, pageWidth + 6, 100, getWidth() - 6 - currentPageWidth - totalPageWidth - 4, 101, 0xFF555555);
+
+            rightBtn.render(ctx);
+            leftBtn.render(ctx);
         });
 
         this.deleteBtn = new SmallTextButton(TextUtils.translatable("nitsha.binds.delete"), 4, 107, 0xFF790e06, 61, "left", DELETE_SMALL, ()-> {
@@ -192,13 +179,9 @@ public class BindsList extends AnimatedWindow {
         return System.currentTimeMillis() - deleteConfirmationTime < 5000;
     }
 
-    //? if >=26.1 {
-    // public void updateSelected(ItemStackTemplate  icon) {
-    //? } else {
-    public void updateSelected(ItemStack icon) {
-    //? }
+     public void updateSelected(ItemStack icon) {
         int aB = (int) Math.floor((double) BindsEditor.getActiveBind() / 8);
-        if (aB == BindsEditor.getCurrentPage()) buttons.get(BindsEditor.getActiveBind() - (8 * aB)).setIcon(icon);
+        if (aB == BindsEditor.getCurrentPage()) buttons.get(BindsEditor.getActiveBind() - (8 * aB)).setItemStack(icon);
     }
 
     public void generateButtons(int startX, int startY) {
@@ -228,15 +211,17 @@ public class BindsList extends AnimatedWindow {
 
             ItemButton[] buttonHolder = new ItemButton[1];
 
-            buttonHolder[0] = new ItemButton(currentX, currentY, ItemsMapper.getItemStack(currentBind.icon), () -> {
+            buttonHolder[0] = new ItemButton(currentX, currentY, ItemsMapper.getItemStack(currentBind.icon), ITEMS_SELECTOR, "", () -> {
                 screen.saveBind();
+
                 for (ItemButton btn : buttons) {
                     btn.setSelected(false);
                 }
+
                 BindsEditor.setActiveBind(bindIndex);
                 buttonHolder[0].setSelected(true);
                 screen.selectBind();
-            }, ITEMS_SELECTOR, "");
+            });
 
             ItemButton button = buttonHolder[0];
 
@@ -258,8 +243,8 @@ public class BindsList extends AnimatedWindow {
     }
 
     @Override
-    public void renderWindow(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        GUIUtils.matricesUtil(ctx, 0, 0, 2, () -> {
+    public void renderWindow(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        RenderUtils.matricesUtil(ctx, 0, 0, 2, () -> {
             super.renderWindow(ctx, mouseX, mouseY, delta);
         });
     }

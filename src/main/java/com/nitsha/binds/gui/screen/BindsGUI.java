@@ -8,9 +8,9 @@ import com.nitsha.binds.configs.dto.preset.BindData;
 import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.guinew.utils.Textures;
-import com.nitsha.binds.guinew.widget.button.ItemButton;
+import com.nitsha.binds.gui.widget.button.TexturedButton;
+import com.nitsha.binds.gui.utils.Textures;
+import com.nitsha.binds.gui.widget.button.ItemButton;
 import com.nitsha.binds.multiversions.*;
 
 import net.minecraft.client.Minecraft;
@@ -22,14 +22,10 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
-import net.minecraft.resources.Identifier;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.List;
-//? if >=1.21.9 {
-
-//? }
 
 public class BindsGUI extends NitshaScreen {
 
@@ -68,7 +64,7 @@ public class BindsGUI extends NitshaScreen {
         String savedId = Storage.options.lastPresetId;
         if (Storage.options.openLastPreset && !savedId.isEmpty() && Storage.PRESET_REGISTRY.containsKey(savedId)) {
             this.activePreset = Storage.PRESET_REGISTRY.get(savedId);
-            this.activePresetIndex = this.activePreset.index;
+            this.activePresetIndex = allPresets.indexOf(this.activePreset);
         } else {
             this.activePreset = allPresets.get(0);
         }
@@ -87,11 +83,11 @@ public class BindsGUI extends NitshaScreen {
             this.currentPageIndex = 0;
 
         this.textLEFT = "[ "
-                + GUIUtils.truncateString(
+                + RenderUtils.truncateString(
                         TextUtils.translatable(KeyBinds.PREV_PAGE.getTranslatedKeyMessage().getString()).getString(), 4)
                 + " ]";
         this.textRIGHT = "[ "
-                + GUIUtils.truncateString(
+                + RenderUtils.truncateString(
                         TextUtils.translatable(KeyBinds.NEXT_PAGE.getTranslatedKeyMessage().getString()).getString(), 4)
                 + " ]";
         this.leftArrow = TextUtils.literal(textLEFT).withStyle(ChatFormatting.AQUA);
@@ -99,10 +95,9 @@ public class BindsGUI extends NitshaScreen {
         this.centerX = (this.width - MENU_WIDTH) / 2;
         this.centerY = (this.height - 106) / 2 - 21;
 
-        AbstractWidget configBtn = GUIUtils.createTexturedBtn(centerX + 57, centerY + 93, 10, 10,
-                new Identifier[] {  Textures.EDIT_BTN, Textures.EDIT_BTN_HOVER }, b -> {
-                    NitshaCraft.setScreen(new BindsEditor(null));
-                });
+        AbstractWidget configBtn = new TexturedButton(centerX + 57, centerY + 93, 10, 10, Textures.EDIT_BTN, Textures.EDIT_BTN_HOVER, b -> {
+            NitshaCraft.setScreen(new BindsEditor(null));
+        });
 
         this.addNWidget(configBtn);
 
@@ -164,7 +159,7 @@ public class BindsGUI extends NitshaScreen {
                         centerY - 15, "center", "top");
             } else {
                 RenderUtils.drawText(ctx,
-                        TextUtils.literal(GUIUtils.truncateString(full, 15)).withStyle(ChatFormatting.AQUA), MENU_WIDTH,
+                        TextUtils.literal(RenderUtils.truncateString(full, 15)).withStyle(ChatFormatting.AQUA), MENU_WIDTH,
                         centerX + 22, centerY - 15);
             }
 
@@ -199,10 +194,6 @@ public class BindsGUI extends NitshaScreen {
         }
     }
 
-    public static int getCurrentPreset() {
-        return 0;
-    }
-
     public void generateButtons(int startX, int startY) {
         for (ItemButton button : itemButtons) {
             removeNWidget(button);
@@ -215,10 +206,11 @@ public class BindsGUI extends NitshaScreen {
         }
 
         PageData page = activePreset.pages.get(currentPageIndex);
+        int slotCount = activePreset.columns * activePreset.rows;
 
-        for (int slot = 0; slot < 8; slot++) {
-            int currentX = startX + (slot % 4) * 31;
-            int currentY = startY + (slot / 4) * 31;
+        for (int slot = 0; slot < slotCount; slot++) {
+            int currentX = startX + (slot % activePreset.columns) * 31;
+            int currentY = startY + (slot / activePreset.columns) * 31;
 
             BindData foundBind = null;
 
@@ -245,7 +237,7 @@ public class BindsGUI extends NitshaScreen {
                     }
                 };
 
-                button = createBtn(GUIUtils.truncateString(bind.name, 12), ItemsMapper.getItemStack(bind.icon), currentX, currentY, runBind);
+                button = createBtn(RenderUtils.truncateString(bind.name, 12), ItemsMapper.getItemStack(bind.icon), currentX, currentY, runBind);
             } else {
                 button = createBtn(TextUtils.translatable("nitsha.binds.empty").getString(), ItemsMapper.getItemStack("minecraft:structure_void"), currentX, currentY, () -> {});
             }

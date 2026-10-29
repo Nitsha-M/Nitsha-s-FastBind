@@ -1,6 +1,6 @@
 package com.nitsha.binds.configs.dto.preset;
 
-import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;

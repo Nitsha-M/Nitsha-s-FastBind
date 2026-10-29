@@ -1,8 +1,7 @@
-package com.nitsha.binds.guinew.widget.button;
+package com.nitsha.binds.gui.widget.button;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.multiversions.NitshaAbstractWidget;
 import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
@@ -48,7 +47,7 @@ public class ToggleButton extends NitshaAbstractWidget {
             firstRender = false;
         } else {
             float targetPointX = toggled ? tX + 10 : tX;
-            pointX = Mth.lerp(GUIUtils.clampSpeed(speed * delta), pointX, targetPointX);
+            pointX = Mth.lerp(RenderUtils.clampSpeed(speed * delta), pointX, targetPointX);
         }
 
         //? <1.17 {
@@ -62,7 +61,7 @@ public class ToggleButton extends NitshaAbstractWidget {
         RenderUtils.drawText(ctx, name, 0, this.getX() + 4, this.getY() + (this.height / 2), "left", "center", 0xFF212121, false);
 
         // Button
-        GUIUtils.adaptiveDrawTexture(ctx, TEXTURE, tX, tY, 0, 0, 23, 12, 256, 256);
+        RenderUtils.drawTexture(ctx, TEXTURE, tX, tY, 0, 0, 23, 12, 256, 256);
 
         // Point
         RenderUtils.drawTexture(ctx, TEXTURE, Math.round(pointX), tY - 1, 0, 12, 13, 12, 256, 256);

@@ -1,10 +1,10 @@
-package com.nitsha.binds.guinew.panel.advanced;
+package com.nitsha.binds.gui.panels.advanced;
 
 import com.nitsha.binds.ItemsMapper;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.nitsha.binds.guinew.utils.Textures;
-import com.nitsha.binds.guinew.widget.button.SmallTextButton;
-import com.nitsha.binds.guinew.widget.window.IconSelectorWindow;
+import com.nitsha.binds.gui.utils.Textures;
+import com.nitsha.binds.gui.widget.button.SmallTextButton;
+import com.nitsha.binds.gui.widget.window.IconSelectorWindow;
 import com.nitsha.binds.multiversions.NitshaContainer;
 import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;

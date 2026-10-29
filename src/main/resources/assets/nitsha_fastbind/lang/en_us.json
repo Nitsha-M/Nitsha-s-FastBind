@@ -1,5 +1,6 @@
 {
   "nitsha.localization.__credit" : "Nitsha",
+  "nitsha.modmenu.boosty": "Boosty",
   "category.nitsha.binds" : "Nitsha's FastBind",
   "key.category.nitsha_fastbind.keys" : "Nitsha's FastBind",
   "key.nitsha.binds" : "FastBind Menu",
@@ -69,8 +70,9 @@
   "nitsha.binds.advances.options.closeOnAction" : "Close on action",
   "nitsha.binds.advances.options.showActivationMessage" : "Bind activation message",
   "nitsha.binds.advances.options.support" : "any support is appreciated ♥",
-  "nitsha.binds.advances.options.support.patreon" : " patreon",
-  "nitsha.binds.advances.options.support.boosty" : " boosty",
+  "nitsha.binds.advances.options.support.patreon" : "patreon",
+  "nitsha.binds.advances.options.support.boosty" : "boosty",
+  "nitsha.binds.advances.options.wiki" : "wiki",
 
   "nitsha.binds.bindActivate" : "Bind %s activated",
 

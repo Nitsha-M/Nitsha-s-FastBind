@@ -1,6 +1,6 @@
 package com.nitsha.binds.gui.widget.button;
 
-import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.multiversions.RenderUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
@@ -27,15 +27,11 @@ public class SmallToggleButton extends SmallTextButton {
     }
 
     @Override
-    public void extractContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        this.isHovered = isMouseOver(mouseX, mouseY);
+    protected void renderContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        boolean activeState = isActiveState();
 
-        GUIUtils.drawResizableBox(ctx, isActiveState() ? getHoverTexture() : getNormalTexture(), getX(), getY(), getWidth(), getHeight(), 2, 5, isActiveState() ? hoverColor : color);
+        RenderUtils.drawResizableBox(ctx, activeState ? getHoverTexture() : getNormalTexture(), getX(), getY(), getWidth(), getHeight(), 2, 5, activeState ? hoverColor : color);
 
-        GUIUtils.addText(ctx, toggleName, 0,
-                this.getX() + (width / 2) + textOffsetX,
-                this.getY() + (this.height / 2) + textOffsetY,
-                "center", "center",
-                isActiveState() ? hoverTextColor : textColor, false);
+        RenderUtils.drawText(ctx, toggleName, 0, getX() + (getWidth() / 2) + textOffsetX, getY() + (getHeight() / 2) + textOffsetY, "center", "center", activeState ? hoverTextColor : textColor, false);
     }
 }

@@ -41,7 +41,6 @@ public class LegacyMigrator {
                 if (oldPresets != null) {
                     for (int i = 0; i < oldPresets.size(); i++) {
                         PresetData p = oldPresets.get(i);
-                        p.index = i;
                         if (p.id == null || p.id.isEmpty()) {
                             p.id = UUID.randomUUID().toString();
                         }

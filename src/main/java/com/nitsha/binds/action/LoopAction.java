@@ -1,18 +1,15 @@
 package com.nitsha.binds.action;
 
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.TextField;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 
 import com.nitsha.binds.configs.dto.actions.AllActionsData.LoopActionData;
-import com.nitsha.binds.configs.dto.actions.AllActionsData.LoopInnerData;
 
 public class LoopAction extends ActionType<LoopActionData> {
 
@@ -78,10 +75,10 @@ public class LoopAction extends ActionType<LoopActionData> {
 
     @Override
     public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.loop"), 0,
+        RenderUtils.drawText(ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.advances.actions.loop")), 0,
                 x + 2, y + 8, "top", "left", 0xFF212121, false);
-        actionsField.extractContents(ctx, mouseX, mouseY, delta);
-        countField.extractContents(ctx, mouseX, mouseY, delta);
+        actionsField.onRender(ctx, mouseX, mouseY, delta);
+        countField.onRender(ctx, mouseX, mouseY, delta);
     }
 
     @Override

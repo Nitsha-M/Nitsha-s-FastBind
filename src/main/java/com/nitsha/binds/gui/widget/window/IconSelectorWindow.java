@@ -1,11 +1,10 @@
-package com.nitsha.binds.guinew.widget.window;
+package com.nitsha.binds.gui.widget.window;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.nitsha.binds.Main;
 import com.nitsha.binds.ItemsMapper;
-import com.nitsha.binds.guinew.utils.Textures;
-import com.nitsha.binds.guinew.widget.button.BedrockIconButton;
-import com.nitsha.binds.guinew.widget.button.ItemButton;
+import com.nitsha.binds.gui.utils.Textures;
+import com.nitsha.binds.gui.widget.button.BedrockIconButton;
+import com.nitsha.binds.gui.widget.button.ItemButton;
 import com.nitsha.binds.multiversions.NitshaContainer;
 import com.nitsha.binds.multiversions.RenderUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -22,9 +21,6 @@ import java.util.function.BiConsumer;
 
 public class IconSelectorWindow extends NitshaContainer {
 
-    private static final Identifier SCROLLER = Main.id("textures/gui/test/scroller.png");
-    private static final Identifier SCROLLER_BTN = Main.id("textures/gui/btns/scroll_bar_normal.png");
-    private static final Identifier SCROLLER_BTN_HVR = Main.id("textures/gui/btns/scroll_bar_hover.png");
     private static final int COLUMNS = 9;
     private static final int VISIBLE_ROWS = 8;
 
@@ -159,10 +155,10 @@ public class IconSelectorWindow extends NitshaContainer {
         int scrollbarX = getWidth() + 1;
         int scrollbarY = 1 + scrollBarOffset;
         boolean hovered = mouseX >= scrollbarX && mouseX <= scrollbarX + 8 && mouseY >= scrollbarY && mouseY <= scrollbarY + barSize;
-        Identifier texture = hovered || isDraggingScrollbar ? SCROLLER_BTN_HVR : SCROLLER_BTN;
+        Identifier texture = hovered || isDraggingScrollbar ? Textures.SCROLLER_BTN_HVR : Textures.SCROLLER_BTN;
         int color = hovered || isDraggingScrollbar ? 0xFFFFFFFF : 0xFF8B8B8B;
 
-        RenderUtils.drawResizableBox(ctx, SCROLLER, getWidth(), 0, 10, getHeight(), 1, 3);
+        RenderUtils.drawResizableBox(ctx, Textures.INNER_BG, getWidth(), 0, 10, getHeight(), 1, 3);
         RenderUtils.drawResizableBox(ctx, texture, scrollbarX, scrollbarY, 8, barSize, 3, 7);
 
         for (int offset = -2; offset <= 2; offset += 2) {

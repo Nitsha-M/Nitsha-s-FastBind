@@ -7,10 +7,10 @@ import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.guinew.widget.button.ItemButton;
-import com.nitsha.binds.guinew.widget.button.SmallTextButton;
-import com.nitsha.binds.guinew.widget.window.AnimatedWindow;
+import com.nitsha.binds.gui.widget.button.TexturedButton;
+import com.nitsha.binds.gui.widget.button.ItemButton;
+import com.nitsha.binds.gui.widget.button.SmallTextButton;
+import com.nitsha.binds.gui.widget.window.AnimatedWindow;
 import com.nitsha.binds.multiversions.NitshaCraft;
 import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
@@ -64,16 +64,16 @@ public class BindsList extends AnimatedWindow {
     }
 
     private void initUI(BindsEditor screen) {
-        this.leftA = GUIUtils.createTexturedBtn(-19, 43, 11, 11, new Identifier[]{ARROW_L, ARROW_L_HOVER}, button -> {
+        this.leftA = new TexturedButton(-19, 43, 11, 11, ARROW_L, ARROW_L_HOVER, button -> {
             screen.setNewPage(-1);
             confirm(false);
         });
-        this.rightA = GUIUtils.createTexturedBtn(141, 43, 11, 11, new Identifier[]{ARROW_R, ARROW_R_HOVER}, button -> {
+        this.rightA = new TexturedButton(141, 43, 11, 11, ARROW_R, ARROW_R_HOVER, button -> {
             screen.setNewPage(1);
             confirm(false);
         });
 
-        this.closeBtn = GUIUtils.createTexturedBtn(110, 7, 16, 16, new Identifier[]{CLOSE, CLOSE_HOVER}, button -> {
+        this.closeBtn = new TexturedButton(110, 7, 16, 16, CLOSE, CLOSE_HOVER, button -> {
             screen.closeEditor();
             NitshaCraft.setScreen(null);
         });
@@ -98,9 +98,9 @@ public class BindsList extends AnimatedWindow {
             int totalPageWidth = Minecraft.getInstance().font.width(totalPage);
 
             RenderUtils.drawText(ctx, page, 126, 4, 96, "left", "top", 0xFFFFFFFF, false);
-            RenderUtils.drawText(ctx, totalPage, 125, 129, 98, "right", "top", 0xFFFFFFFF, false);
+            RenderUtils.drawText(ctx, totalPage, 125, 129, 96, "right", "top", 0xFFFFFFFF, false);
             RenderUtils.drawTexture(ctx, SEPARATOR, 129 - totalPageWidth - 4, 98, 0, 0, 3, 6, 3, 6);
-            RenderUtils.drawText(ctx, currentPage, 125, 129 - totalPageWidth - 4, 98, "right", "top", 0xFFFFFFFF, false);
+            RenderUtils.drawText(ctx, currentPage, 125, 129 - totalPageWidth - 4, 96, "right", "top", 0xFFFFFFFF, false);
 
             RenderUtils.drawFill(ctx, pageWidth + 6, 100, getWidth() - 6 - currentPageWidth - totalPageWidth - 4, 101, 0xFF555555);
 

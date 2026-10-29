@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 
 public class ModOptionsData {
 
+    public int guiScale = 2;
     public boolean holdToOpen = true;
     public boolean openLastPage = true;
     public boolean openLastPreset = true;

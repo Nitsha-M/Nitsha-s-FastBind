@@ -2,18 +2,14 @@ package com.nitsha.binds.action;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.button.SmallTextButton;
 import com.nitsha.binds.gui.widget.TextField;
 import com.nitsha.binds.gui.widget.button.TexturedButton;
+import com.nitsha.binds.gui.widget.button.SmallTextButton;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.utils.FormattedTextUtils;
 import net.minecraft.client.Minecraft;
 //? if >=1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.MouseButtonInfo;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;
 //? }
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -132,12 +128,10 @@ public class ChatMessageAction extends ActionType<ChatMessageActionData> {
             loadFormattedText(this.field, data.value);
         }
 
-        this.leftBtn = GUIUtils.createTexturedBtn(x, colorButtonsY, 9, 9,
-                new Identifier[]{ LEFT, LEFT_HOVER },
+        this.leftBtn = new TexturedButton(x, colorButtonsY, 9, 9, LEFT, LEFT_HOVER,
                 button -> colorOffset = (colorOffset - 1 + COLORS_DATA.length) % COLORS_DATA.length);
 
-        this.rightBtn = GUIUtils.createTexturedBtn(x + width - 9, colorButtonsY, 9, 9,
-                new Identifier[]{ RIGHT, RIGHT_HOVER },
+        this.rightBtn = new TexturedButton(x + width - 9, colorButtonsY, 9, 9, RIGHT, RIGHT_HOVER,
                 button -> colorOffset = (colorOffset + 1) % COLORS_DATA.length);
 
         for (int i = 0; i < COLORS_DATA.length; i++) {
@@ -178,7 +172,7 @@ public class ChatMessageAction extends ActionType<ChatMessageActionData> {
 
     @Override
     public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        field.extractContents(ctx, mouseX, mouseY, delta);
+        field.onRender(ctx, mouseX, mouseY, delta);
 
         for (int i = 0; i < VISIBLE_COLORS; i++) {
             int actualIndex = (colorOffset + i) % COLORS_DATA.length;
@@ -192,13 +186,13 @@ public class ChatMessageAction extends ActionType<ChatMessageActionData> {
             item.setWidth(itemWidth);
             item.setHeight(itemHeight);
 
-            GUIUtils.matricesUtil(ctx, itemOffset, itemOffset, 0, () -> item.extractContents(ctx, mouseX, mouseY, delta));
+            RenderUtils.matricesUtil(ctx, itemOffset, itemOffset, 0, () -> item.onRender(ctx, mouseX, mouseY, delta));
         }
 
         leftBtn.setY(colorButtonsY);
         rightBtn.setY(colorButtonsY);
-        leftBtn.extractContents(ctx, mouseX, mouseY, delta);
-        rightBtn.extractContents(ctx, mouseX, mouseY, delta);
+        leftBtn.onRender(ctx, mouseX, mouseY, delta);
+        rightBtn.onRender(ctx, mouseX, mouseY, delta);
     }
 
     @Override

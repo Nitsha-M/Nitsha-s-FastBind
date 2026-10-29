@@ -1,59 +1,55 @@
 package com.nitsha.binds.gui.widget;
 
-import com.nitsha.binds.Main;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.nitsha.binds.gui.widget.button.BedrockButton;
+import com.nitsha.binds.multiversions.NitshaInput;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-//? if >=1.17 {
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-//?}
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.components.AbstractButton;
-import com.nitsha.binds.gui.widget.button.BedrockButton;
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
-//? if <26.3 {
-/*import org.lwjgl.glfw.GLFW;
-*///? }
-
-//? if >=1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.InputWithModifiers;
-import net.minecraft.client.input.KeyEvent;
-//? }
+import net.minecraft.network.chat.MutableComponent;
 
 public class KeybindSelector extends BedrockButton {
-    private static KeybindSelector focusedKeybind = null;
+    private static KeybindSelector focusedKeybind;
+    private static GuiEventListener lastClickedWidget;
+
     private int keyCode;
     private String baseName = TextUtils.translatable("nitsha.binds.advances.noKeyBind").getString();
 
     public KeybindSelector(int x, int y, int width, int height) {
-        super("", x, y, width, height, true, () -> {}, 0xFFFFFFFF, 0xFF07938d, 0xFF212121, 0xFFFFFFFF);
+        super(TextUtils.empty(), x, y, width, height, true, () -> {}, 0xFFFFFFFF, 0xFF07938D, 0xFF212121, 0xFFFFFFFF);
         updateName();
     }
 
-    public void setKeyCode(int kC) {
-        this.keyCode = kC;
-        this.baseName = (kC == 0)
-                ? TextUtils.translatable("nitsha.binds.advances.noKeyBind").getString()
-                //$ if >=26.3 ': InputConstants.Type.KEYBOARD.getOrCreate(kC).getDisplayName().getString();' else ': InputConstants.Type.KEYSYM.getOrCreate(kC).getDisplayName().getString();'
-                : InputConstants.Type.KEYBOARD.getOrCreate(kC).getDisplayName().getString();
+    public void setKeyCode(int keyCode) {
+        this.keyCode = keyCode;
+        baseName = keyCode == 0 ? TextUtils.translatable("nitsha.binds.advances.noKeyBind").getString() : NitshaInput.getKeyName(keyCode);
         updateName();
+    }
+
+    public int getKeyCode() {
+        return keyCode;
     }
 
     private void updateName() {
-        int maxSymbols = (this.getWidth() / 7) - (isPressed() ? 4 : 0);
-        String cName = calculateName(this.baseName, (isPressed()) ? "> " + this.baseName + " <" : this.baseName, maxSymbols);
-        String fName = (isPressed()) ? "> " + cName + " <" : cName;
-        this.setName(fName);
-    }
+        Font font = Minecraft.getInstance().font;
+        String prefix = isPressed() ? "> " : "";
+        String suffix = isPressed() ? " <" : "";
+        int availableWidth = Math.max(0, getWidth() - 8 - font.width(TextUtils.small(TextUtils.literal(prefix + suffix))));
+        MutableComponent name = TextUtils.small(TextUtils.literal(baseName));
+        String displayName = baseName;
 
-    private String calculateName(String insideName, String fullName, int max) {
-        int textCut = Math.min(fullName.length(), max);
-        return GUIUtils.truncateString(insideName, textCut);
+        if (font.width(name) > availableWidth) {
+            int ellipsisWidth = font.width(TextUtils.small(TextUtils.literal("...")));
+
+            if (ellipsisWidth <= availableWidth) {
+                displayName = font.substrByWidth(name, availableWidth - ellipsisWidth).getString() + "...";
+            } else {
+                displayName = font.substrByWidth(name, availableWidth).getString();
+            }
+        }
+
+        setText(TextUtils.small(TextUtils.literal(prefix + displayName + suffix)));
     }
 
     @Override
@@ -62,73 +58,50 @@ public class KeybindSelector extends BedrockButton {
         updateName();
     }
 
-    public int getKeyCode() { return this.keyCode; }
-
-    public static KeybindSelector getFocusedField() { return focusedKeybind; }
-
-    public static void setFocusedField(KeybindSelector fK) {
-        if (focusedKeybind != null) focusedKeybind.setPressed(false);
-        focusedKeybind = fK;
+    public static KeybindSelector getFocusedField() {
+        return focusedKeybind;
     }
 
-    private static GuiEventListener lastClickedWidget = null;
+    public static void setFocusedField(KeybindSelector selector) {
+        if (focusedKeybind != null && focusedKeybind != selector) {
+            focusedKeybind.setPressed(false);
+            focusedKeybind.setFocused(false);
+        }
+
+        focusedKeybind = selector;
+    }
 
     public static void setLastClickedWidget(GuiEventListener widget) {
         lastClickedWidget = widget;
     }
 
     public static void controlFocus() {
-        if (focusedKeybind == null) return;
-        if (lastClickedWidget == focusedKeybind) return;
-        focusedKeybind.setFocused(false);
-        focusedKeybind.setPressed(false);
-        focusedKeybind = null;
+        if (focusedKeybind != null && lastClickedWidget != focusedKeybind) {
+            setFocusedField(null);
+        }
     }
 
     @Override
-    public void onPress(InputWithModifiers inputWithModifiers) {
+    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
+        if (!active || !super.onMouseClicked(mouseX, mouseY, button)) {
+            return false;
+        }
+
         setLastClickedWidget(this);
         setFocusedField(this);
-        this.setPressed(true);
-        this.setFocused(true);
+        setPressed(true);
+        setFocused(true);
+        return true;
     }
-
 
     @Override
-    //? if >=26.3 {
-    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
-        if (focusedKeybind != null) {
-            int keyCode = event.key();
-            int newKey = (keyCode == InputConstants.KEY_ESCAPE) ? 0 : keyCode;
-            focusedKeybind.setPressed(false);
-            focusedKeybind.setKeyCode(newKey);
-            KeybindSelector.setFocusedField(null);
-            if (keyCode == InputConstants.KEY_ESCAPE) return true;
+    public boolean onKeyPressed(int keyCode, int nativeCode, int modifiers) {
+        if (focusedKeybind != this || !active || !visible || !isEnabled()) {
+            return super.onKeyPressed(keyCode, nativeCode, modifiers);
         }
-        return super.keyPressed(event);
+
+        setKeyCode(keyCode == InputConstants.KEY_ESCAPE ? 0 : keyCode);
+        setFocusedField(null);
+        return true;
     }
-    //? } else if >=1.21.9 {
-    /*public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
-        if (focusedKeybind != null) {
-            int keyCode = event.key();
-            int newKey = (keyCode == GLFW.GLFW_KEY_ESCAPE) ? 0 : keyCode;
-            focusedKeybind.setPressed(false);
-            focusedKeybind.setKeyCode(newKey);
-            KeybindSelector.setFocusedField(null);
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE) return true;
-        }
-        return super.keyPressed(event);
-    }*/
-    //? } else {
-    /*public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (focusedKeybind != null) {
-            int newKey = (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE) ? 0 : keyCode;
-            focusedKeybind.setPressed(false);
-            focusedKeybind.setKeyCode(newKey);
-            KeybindSelector.setFocusedField(null);
-            if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE) return true;
-        }
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-    *///? }
 }

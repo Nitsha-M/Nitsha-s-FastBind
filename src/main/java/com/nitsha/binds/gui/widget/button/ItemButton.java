@@ -1,8 +1,8 @@
-package com.nitsha.binds.guinew.widget.button;
+package com.nitsha.binds.gui.widget.button;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.guinew.utils.Textures;
+import com.nitsha.binds.multiversions.TextUtils;
+import com.nitsha.binds.gui.utils.Textures;
 import com.nitsha.binds.multiversions.NitshaAbstractWidget;
 import com.nitsha.binds.multiversions.RenderUtils;
 import net.minecraft.client.Minecraft;

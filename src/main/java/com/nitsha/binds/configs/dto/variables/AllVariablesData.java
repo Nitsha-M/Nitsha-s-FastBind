@@ -10,6 +10,7 @@ public class AllVariablesData {
         }
         @Override public Object getValue() { return value; }
     }
+
     public class BooleanVariableData extends VariableData {
         public boolean value;
         public BooleanVariableData(String name, boolean value) {
@@ -18,6 +19,7 @@ public class AllVariablesData {
         }
         @Override public Object getValue() { return value; }
     }
+
     public class FloatVariableData extends VariableData {
         public float value;
         public FloatVariableData(String name, float value) {
@@ -26,6 +28,7 @@ public class AllVariablesData {
         }
         @Override public Object getValue() { return value; }
     }
+
     public class StringVariableData extends VariableData {
         public String value;
         public StringVariableData(String name, String value) {

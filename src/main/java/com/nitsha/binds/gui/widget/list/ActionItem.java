@@ -4,11 +4,10 @@ import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.action.ActionType;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.gui.widget.TextField;
 import com.nitsha.binds.gui.widget.button.TexturedButton;
-import com.nitsha.binds.guinew.panel.advanced.ActionsTab;
+import com.nitsha.binds.gui.panels.advanced.ActionsTab;
 import com.nitsha.binds.multiversions.NitshaAbstractWidget;
 import com.nitsha.binds.multiversions.NitshaInput;
 import com.nitsha.binds.multiversions.RenderUtils;
@@ -55,20 +54,16 @@ public class ActionItem extends NitshaAbstractWidget {
         }
         this.action.init(x, y, width, value);
 
-        this.topBtn = GUIUtils.createTexturedBtn(x + width - 9, y + 3, 9, 9,
-                new Identifier[]{ TOP, TOP_HOVER },
+        this.topBtn = new TexturedButton(x + width - 9, y + 3, 9, 9, TOP, TOP_HOVER,
                 button -> { if (index > 0) parent.moveAction(index, -1); });
 
-        this.bottomBtn = GUIUtils.createTexturedBtn(x + width - 9, y + 13, 9, 9,
-                new Identifier[]{ BOTTOM, BOTTOM_HOVER },
+        this.bottomBtn = new TexturedButton(x + width - 9, y + 13, 9, 9, BOTTOM, BOTTOM_HOVER,
                 button -> { if (BindsEditor.getCBind().actions.size() != index + 1) parent.moveAction(index, 1); });
 
-        this.resetBtn = GUIUtils.createTexturedBtn(x + width - 25, y + 3, 15, 9,
-                new Identifier[]{ RESET, RESET_HOVER },
+        this.resetBtn = new TexturedButton(x + width - 25, y + 3, 15, 9, RESET, RESET_HOVER,
                 button -> action.reset());
 
-        this.deleteBtn = GUIUtils.createTexturedBtn(x + width - 25, y + 13, 15, 9,
-                new Identifier[]{ DELETE, DELETE_HOVER },
+        this.deleteBtn = new TexturedButton(x + width - 25, y + 13, 15, 9, DELETE, DELETE_HOVER,
                 button -> parent.removeAction(index));
     }
 
@@ -111,16 +106,16 @@ public class ActionItem extends NitshaAbstractWidget {
         if (index % 2 == 1)
             RenderUtils.drawFill(ctx, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x4DFFFFFF);
 
-        this.resetBtn.extractContents(ctx, mouseX, mouseY, delta);
-        this.deleteBtn.extractContents(ctx, mouseX, mouseY, delta);
+        this.resetBtn.onRender(ctx, mouseX, mouseY, delta);
+        this.deleteBtn.onRender(ctx, mouseX, mouseY, delta);
         RenderUtils.drawTexture(ctx, ARROW_DISABLED, getX() + getWidth() - 9, getY() + 3, 0, 0, 9, 19, 9, 19);
 
         int aS = BindsEditor.getCBind().actions.size();
         if (aS > 0) {
             if (index > 0)
-                this.topBtn.extractContents(ctx, mouseX, mouseY, delta);
+                this.topBtn.onRender(ctx, mouseX, mouseY, delta);
             if (index != (aS - 1))
-                this.bottomBtn.extractContents(ctx, mouseX, mouseY, delta);
+                this.bottomBtn.onRender(ctx, mouseX, mouseY, delta);
         }
 
         action.render(ctx, mouseX, mouseY, delta);

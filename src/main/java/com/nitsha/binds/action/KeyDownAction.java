@@ -1,18 +1,12 @@
 package com.nitsha.binds.action;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.KeybindSelector;
-import net.minecraft.util.Util;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-//? if <26.3 {
-/*import org.lwjgl.glfw.GLFW;
-*///? }
-
-import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 
@@ -42,23 +36,15 @@ public class KeyDownAction extends ActionType<KeybindActionData> {
         int keyCode = data.value;
         if (keyCode == 0) return;
 
-            //? if >=1.21.9 {
-            final int finalKeyCode = keyCode;
-            actions.add(() -> {
-                //? if <26.3 {
-                /*InputConstants.Key key = InputConstants.Type.KEYSYM.getOrCreate(finalKeyCode);
-                *///? } else {
-                InputConstants.Key key = InputConstants.Type.KEYBOARD.getOrCreate(finalKeyCode);
-                //? }
-                KeyMapping.set(key, true);
-            });
-            //? } else {
-            /*int scancode = GLFW.glfwGetKeyScancode(keyCode);
-            actions.add(() -> {
-                InputConstants.Key key = InputConstants.getKey(keyCode, scancode);
-                KeyMapping.set(key, true);
-            });
-            *///? }
+        final int finalKeyCode = keyCode;
+        actions.add(() -> {
+            //? if <26.3 {
+            /*InputConstants.Key key = InputConstants.Type.KEYSYM.getOrCreate(finalKeyCode);
+            *///? } else {
+            InputConstants.Key key = InputConstants.Type.KEYBOARD.getOrCreate(finalKeyCode);
+            //? }
+            KeyMapping.set(key, true);
+        });
     }
 
     @Override
@@ -78,16 +64,17 @@ public class KeyDownAction extends ActionType<KeybindActionData> {
 
     @Override
     public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        keybind.extractContents(ctx, mouseX, mouseY, delta);
+        //$ if >=26.1 'keybind.extractRenderState(ctx, mouseX, mouseY, delta);' else 'keybind.render(ctx, mouseX, mouseY, delta);'
+        keybind.extractRenderState(ctx, mouseX, mouseY, delta);
 
-        String userLanguage = GUIUtils.getUL();
+        String userLanguage = RenderUtils.getUL();
         if (userLanguage.equals("uk_ua") || userLanguage.equals("ru_ru")) {
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyDown_1"), 0,
+            RenderUtils.drawText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyDown_1"), 0,
                     x + 2, y + 4, "top", "left", 0xFF212121, false);
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.key"), 0,
+            RenderUtils.drawText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.key"), 0,
                     x + 2, y + 12, "top", "left", 0xFF212121, false);
         } else {
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyDown"), 0,
+            RenderUtils.drawText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyDown"), 0,
                     x + 2, y + 8, "top", "left", 0xFF212121, false);
         }
     }

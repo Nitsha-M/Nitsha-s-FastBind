@@ -1,8 +1,8 @@
 package com.nitsha.binds.action;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.gui.widget.KeybindSelector;
 import net.minecraft.util.Util;
 import net.minecraft.client.KeyMapping;
@@ -94,16 +94,17 @@ public class KeyPressAction extends ActionType<KeybindActionData> {
 
     @Override
     public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        keybind.extractContents(ctx, mouseX, mouseY, delta);
+        //$ if >=26.1 'keybind.extractRenderState(ctx, mouseX, mouseY, delta);' else 'keybind.render(ctx, mouseX, mouseY, delta);'
+        keybind.extractRenderState(ctx, mouseX, mouseY, delta);
 
-        String userLanguage = GUIUtils.getUL();
+        String userLanguage = RenderUtils.getUL();
         if (userLanguage.equals("uk_ua") || userLanguage.equals("ru_ru")) {
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.pressKey_1"), 0,
+            RenderUtils.drawText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.pressKey_1"), 0,
                     x + 2, y + 4, "top", "left", 0xFF212121, false);
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.key"), 0,
+            RenderUtils.drawText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.key"), 0,
                     x + 2, y + 12, "top", "left", 0xFF212121, false);
         } else {
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.pressKey"), 0,
+            RenderUtils.drawText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.pressKey"), 0,
                     x + 2, y + 8, "top", "left", 0xFF212121, false);
         }
     }

@@ -1,12 +1,12 @@
 package com.nitsha.binds.utils;
 
 import com.nitsha.binds.configs.dto.actions.AllActionsData;
-import com.nitsha.binds.gui.utils.TextUtils;
-import net.minecraft.ChatFormatting;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -68,30 +68,38 @@ public class FormattedTextUtils {
     }
 
     public static MutableComponent buildFormattedComponent(Map<String, Object> formattedText) {
-        String text = (String) formattedText.get("text");
+        if (formattedText == null || !(formattedText.get("text") instanceof String text) || text.isEmpty()) {
+            return TextUtils.empty();
+        }
+
+        if (!(formattedText.get("marks") instanceof List<?> rawMarks)) {
+            return TextUtils.literal(text);
+        }
+
+        List<Map<?, ?>> marks = new ArrayList<>();
+
+        for (Object entry : rawMarks) {
+            if (entry instanceof Map<?, ?> mark && mark.get("pos") instanceof Number && mark.get("style") instanceof Number) {
+                int pos = ((Number) mark.get("pos")).intValue();
+
+                if (pos >= 0 && pos <= text.length()) {
+                    marks.add(mark);
+                }
+            }
+        }
+
+        marks.sort((a, b) -> Integer.compare(((Number) a.get("pos")).intValue(), ((Number) b.get("pos")).intValue()));
+
         MutableComponent message = TextUtils.empty();
-
-        if (text == null || text.isEmpty()) return message;
-        if (!formattedText.containsKey("marks")) return TextUtils.literal(text);
-
-        List<Map<String, Object>> marks = (List<Map<String, Object>>) formattedText.get("marks");
-        if (marks.isEmpty()) return TextUtils.literal(text);
-
-        marks.sort((a, b) -> {
-            int posA = ((Number) a.get("pos")).intValue();
-            int posB = ((Number) b.get("pos")).intValue();
-            return Integer.compare(posA, posB);
-        });
-
         Style currentStyle = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
         int lastPos = 0;
 
-        for (Map<String, Object> markData : marks) {
-            int pos = ((Number) markData.get("pos")).intValue();
-            int styleCode = ((Number) markData.get("style")).intValue();
+        for (Map<?, ?> mark : marks) {
+            int pos = ((Number) mark.get("pos")).intValue();
+            int styleCode = ((Number) mark.get("style")).intValue();
 
-            if (pos > lastPos && pos <= text.length()) {
-                message = message.append(TextUtils.literal(text.substring(lastPos, pos)).setStyle(currentStyle));
+            if (pos > lastPos) {
+                message.append(TextUtils.literal(text.substring(lastPos, pos)).setStyle(currentStyle));
             }
 
             currentStyle = applyStyleCode(styleCode, currentStyle);
@@ -99,7 +107,7 @@ public class FormattedTextUtils {
         }
 
         if (lastPos < text.length()) {
-            message = message.append(TextUtils.literal(text.substring(lastPos)).setStyle(currentStyle));
+            message.append(TextUtils.literal(text.substring(lastPos)).setStyle(currentStyle));
         }
 
         return message;

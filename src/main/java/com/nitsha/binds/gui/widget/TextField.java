@@ -2,45 +2,22 @@ package com.nitsha.binds.gui.widget;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.multiversions.NitshaAbstractWidget;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.Mth;
-//? if <26.3 {
-/*import org.lwjgl.glfw.GLFW;
-*///? }
-
-//? if >=1.17 {
-import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-//?} else {
-/*import net.minecraft.client.gui.GuiGraphicsExtractor;*/
-//? }
-
-//? if >=1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.InputWithModifiers;
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;
-//? }
-
 import java.util.*;
 
-public class TextField extends AbstractButton {
+public class TextField extends NitshaAbstractWidget {
     private static TextField focusedField = null;
 
     private final boolean isNumerical;
@@ -70,8 +47,6 @@ public class TextField extends AbstractButton {
     private boolean phInit = false;
 
     private boolean isAnimatedPlaceholder = true;
-
-    private int x, y, width, height;
 
     private boolean multiline = false;
     private int maxLines = 1;
@@ -119,13 +94,8 @@ public class TextField extends AbstractButton {
 
     private final List<FormatMark> formatMarks = new ArrayList<>();
 
-    public TextField(Font font, int x, int y, int width, int height, int length, String text, String placeholder,
-            boolean isNumerical) {
+    public TextField(Font font, int x, int y, int width, int height, int length, String text, String placeholder, boolean isNumerical) {
         super(x, y, width, height, TextUtils.literal(text));
-        this.width = width;
-        this.height = height;
-        this.x = x;
-        this.y = y;
         this.font = font;
         this.text = String.valueOf(text);
         this.placeholder = TextUtils.literal(placeholder);
@@ -137,25 +107,8 @@ public class TextField extends AbstractButton {
         this(font, x, y, width, height, length, text, placeholder, false);
     }
 
-    public int getX() { return x; }
-    public int getY() { return y; }
-    public int getWidth() { return width; }
-    public int getHeight() { return height; }
-
     public void setRenderBackground(boolean renderBackground) {
         this.renderBackground = renderBackground;
-    }
-
-    @Override
-    public void setX(int x) {
-        super.setX(x);
-        this.x = x;
-    }
-
-    @Override
-    public void setY(int y) {
-        super.setY(y);
-        this.y = y;
     }
 
     public void configureMultiline(boolean multiline, int maxLines) {
@@ -232,9 +185,7 @@ public class TextField extends AbstractButton {
         isAnimatedPlaceholder = animated;
     }
 
-    // Misc
-    //? if >=26.3 {
-     public static boolean hasControlDown() {
+    public static boolean hasControlDown() {
         if (Util.getPlatform() == Util.OS.OSX) {
             return InputConstants.isKeyDown(InputConstants.KEY_LGUI) ||
                    InputConstants.isKeyDown(InputConstants.KEY_RGUI);
@@ -251,66 +202,19 @@ public class TextField extends AbstractButton {
         return InputConstants.isKeyDown(InputConstants.KEY_LALT) ||
                InputConstants.isKeyDown(InputConstants.KEY_RALT);
     }
-    //? } else if >=1.21.9 {
-    /* public static boolean hasControlDown() {
-        Window handle = Minecraft.getInstance().getWindow();
-        if (Util.getPlatform() == Util.OS.OSX) {
-            return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_SUPER) ||
-                   InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_SUPER);
-        } else {
-            return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_CONTROL) ||
-                   InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_CONTROL);
-        }
-    }
-    public static boolean hasShiftDown() {
-        Window handle = Minecraft.getInstance().getWindow();
-        return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_SHIFT) ||
-               InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_SHIFT);
-    }
-    public static boolean hasAltDown() {
-        Window handle = Minecraft.getInstance().getWindow();
-        return InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_LEFT_ALT) ||
-               InputConstants.isKeyDown(handle, GLFW.GLFW_KEY_RIGHT_ALT);
-    }*/
-    //? } else {
-        /*public static boolean hasControlDown() {
-            return Screen.hasControlDown();
-        }
-        public static boolean hasShiftDown() {
-            return Screen.hasShiftDown();
-        }
-        public static boolean hasAltDown() {
-            return Screen.hasAltDown();
-        }
-    *///? }
 
-    //? if >=1.21.9 {
     public static boolean isCut(int i) {
-        return i == 88 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+        return i == InputConstants.KEY_X && hasControlDown() && !hasShiftDown() && !hasAltDown();
     }
     public static boolean isPaste(int i) {
-        return i == 86 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+        return i == InputConstants.KEY_V && hasControlDown() && !hasShiftDown() && !hasAltDown();
     }
     public static boolean isCopy(int i) {
-        return i == 67 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+        return i == InputConstants.KEY_C && hasControlDown() && !hasShiftDown() && !hasAltDown();
     }
     public static boolean isSelectAll(int i) {
-        return i == 65 && hasControlDown() && !hasShiftDown() && !hasAltDown();
+        return i == InputConstants.KEY_A && hasControlDown() && !hasShiftDown() && !hasAltDown();
     }
-    //? } else {
-        /*public static boolean isCut(int i) {
-            return Screen.isCut(i);
-        }
-        public static boolean isPaste(int i) {
-            return Screen.isPaste(i);
-        }
-        public static boolean isCopy(int i) {
-            return Screen.isCopy(i);
-        }
-        public static boolean isSelectAll(int i) {
-            return Screen.isSelectAll(i);
-        }
-    *///? }
 
     public void setStyle(int styleCode, int position) {
         if (position < 0 || position > text.length())
@@ -830,10 +734,7 @@ public class TextField extends AbstractButton {
     }
 
     @Override
-    public void onPress(InputWithModifiers inputWithModifiers) {}
-
-    @Override
-    public void extractContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+    public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         if (!visible) return;
         if (multiline) {
             renderMultiline(ctx, mouseX, mouseY, delta);
@@ -841,7 +742,7 @@ public class TextField extends AbstractButton {
         }
         this.isHovered = isMouseOver(mouseX, mouseY);
         if (this.renderBackground) {
-            GUIUtils.drawResizableBox(
+            RenderUtils.drawResizableBox(
                     ctx,
                     (this.isFocused() || isHovered) ? FOCUS : NORMAL,
                     getX(), getY(), getWidth(), getHeight(),
@@ -871,7 +772,7 @@ public class TextField extends AbstractButton {
                 int selX1 = getX() + 4 + styledWidth(this.firstCharacterIndex, this.firstCharacterIndex + relativeSelStart);
                 int selX2 = getX() + 4 + styledWidth(this.firstCharacterIndex, this.firstCharacterIndex + relativeSelEnd);
 
-                GUIUtils.drawFill(ctx, selX1, renderY, selX2, renderY + 8, 0x8033AAFF);
+                RenderUtils.drawFill(ctx, selX1, renderY, selX2, renderY + 8, 0x8033AAFF);
             }
         }
 
@@ -904,14 +805,14 @@ public class TextField extends AbstractButton {
         if (isFocused() && cursorVisible && shouldBlink) {
             String beforeCursor = visibleText.substring(0, cursorPos);
             int cursorX = getX() + 4 + styledWidth(this.firstCharacterIndex, this.firstCharacterIndex + cursorPos);
-            GUIUtils.drawFill(ctx, cursorX, renderY, cursorX + 1, renderY + 8, 0xFFFFFFFF);
+            RenderUtils.drawFill(ctx, cursorX, renderY, cursorX + 1, renderY + 8, 0xFFFFFFFF);
         }
 
         if (isAnimatedPlaceholder) {
             animatedPlaceholder(ctx);
         } else {
             if (!isFocused() && getText().isEmpty()) {
-                GUIUtils.addText(
+                RenderUtils.drawText(
                         ctx,
                         TextUtils.literal(this.placeholder.getString()),
                         0,
@@ -925,16 +826,22 @@ public class TextField extends AbstractButton {
         }
     }
 
+    private int getMultilineTextY() {
+        int visibleLines = Math.max(1, Math.min(cachedLines.size(), maxLines));
+        int textHeight = (visibleLines - 1) * 11 + 8;
+        return getY() + (getHeight() - textHeight) / 2;
+    }
+
     private void renderMultiline(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         this.isHovered = isMouseOver(mouseX, mouseY);
-        GUIUtils.drawResizableBox(
+        RenderUtils.drawResizableBox(
                 ctx,
                 (this.isFocused() || isHovered) ? FOCUS : NORMAL,
                 getX(), getY(), getWidth(), getHeight(),
                 3, 7);
 
         int renderX = getX() + 4;
-        int renderY = this.getY() + 4;
+        int renderY = getMultilineTextY();
         
         int visibleLines = Math.min(cachedLines.size(), maxLines);
         
@@ -949,7 +856,7 @@ public class TextField extends AbstractButton {
                 if (selStart < selEnd) {
                     int wStart = styledWidth(line.startIndex, selStart);
                     int wEnd = styledWidth(line.startIndex, selEnd);
-                    GUIUtils.drawFill(ctx, renderX + wStart, renderY, renderX + wEnd, renderY + 11, 0x8033AAFF);
+                    RenderUtils.drawFill(ctx, renderX + wStart, renderY, renderX + wEnd, renderY + 11, 0x8033AAFF);
                 }
             }
 
@@ -976,7 +883,7 @@ public class TextField extends AbstractButton {
             if (isFocused() && getLineForOffset(this.selectionStart) == lineIdx && shouldBlink) {
                 int cursorPosInLine = this.selectionStart - line.startIndex;
                 int cursorX = renderX + styledWidth(line.startIndex, line.startIndex + cursorPosInLine);
-                GUIUtils.drawFill(ctx, cursorX, renderY - 1, cursorX + 1, renderY + 9, 0xFFFFFFFF);
+                RenderUtils.drawFill(ctx, cursorX, renderY - 1, cursorX + 1, renderY + 9, 0xFFFFFFFF);
             }
 
             renderY += 11;
@@ -986,12 +893,12 @@ public class TextField extends AbstractButton {
             animatedPlaceholder(ctx);
         } else {
             if (!isFocused() && getText().isEmpty()) {
-                GUIUtils.addText(
+                RenderUtils.drawText(
                         ctx,
                         TextUtils.literal(this.placeholder.getString()),
                         0,
                         getX() + 4,
-                        getY() + 4,
+                        getMultilineTextY(),
                         "top",
                         "left",
                         0xFFAAAAAA,
@@ -1027,7 +934,7 @@ public class TextField extends AbstractButton {
         phTextY = Mth.lerp(smooth, phTextY, wantTextY);
         phBoxY = Mth.lerp(smooth, phBoxY, wantBoxY);
 
-        if (!phInit || Math.abs(phTextX) > 100) { // reset if absolute coordinates were cached
+        if (!phInit || Math.abs(phTextX) > 100) {
             phInit = true;
             phScale = wantScale;
             phTextX = wantTextX;
@@ -1045,16 +952,15 @@ public class TextField extends AbstractButton {
         int rectBottom = getY() + 1;
         int outlineColor = (isFocused() || isHovered) ? 0xFFFFFFFF : 0xFFA0A0A0;
 
-        GUIUtils.drawFill(ctx, rectLeft + 1, rectTop, rectRight - 1, rectBottom - 1, outlineColor);
-        GUIUtils.drawFill(ctx, rectLeft, rectTop + 1, rectRight, rectBottom - 1, outlineColor);
-        GUIUtils.drawFill(ctx, rectLeft - 1, (animatedPlaceholder) ? rectTop + 2 : rectTop + 1, rectRight + 1,
-                rectBottom - 1, outlineColor);
+        RenderUtils.drawFill(ctx, rectLeft + 1, rectTop, rectRight - 1, rectBottom - 1, outlineColor);
+        RenderUtils.drawFill(ctx, rectLeft, rectTop + 1, rectRight, rectBottom - 1, outlineColor);
+        RenderUtils.drawFill(ctx, rectLeft - 1, (animatedPlaceholder) ? rectTop + 2 : rectTop + 1, rectRight + 1, rectBottom - 1, outlineColor);
 
-        GUIUtils.drawFill(ctx, rectLeft + 1, rectTop + 1, rectRight - 1, rectBottom, 0xFF000000);
-        GUIUtils.drawFill(ctx, rectLeft, rectTop + 2, rectRight, rectBottom, 0xFF000000);
+        RenderUtils.drawFill(ctx, rectLeft + 1, rectTop + 1, rectRight - 1, rectBottom, 0xFF000000);
+        RenderUtils.drawFill(ctx, rectLeft, rectTop + 2, rectRight, rectBottom, 0xFF000000);
 
-        GUIUtils.matricesScale(ctx, phScale, () -> {
-            GUIUtils.addText(
+        RenderUtils.matricesScale(ctx, phScale, () -> {
+            RenderUtils.drawText(
                     ctx,
                     TextUtils.literal(this.placeholder.getString()),
                     0,
@@ -1101,7 +1007,7 @@ public class TextField extends AbstractButton {
     public void setFocus() {
         setLastClickedWidget(this);
         setFocusedField(this);
-        super.setFocused(true);
+        this.setFocused(true);
         this.setCursorToEnd(false);
     }
 
@@ -1132,48 +1038,9 @@ public class TextField extends AbstractButton {
         focusedField = null;
     }
 
-    @Override
-    //? if >=1.21.9 {
-    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        double mouseX = event.x();
-        double mouseY = event.y();
-        if (isMouseOver(mouseX, mouseY)) {
-            setLastClickedWidget(this);
-            setFocusedField(this);
-            this.setFocused(true);
-
-            this.setCursor(getIndexByCoords(mouseX, mouseY), hasShiftDown());
-
-            return true;
-        } else {
-            if (this.getClickOutEvent() != null) {
-                this.getClickOutEvent().run();
-            }
-        }
-        return false;
-    }
-    //? } else {
-    /*public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (isMouseOver(mouseX, mouseY)) {
-            setLastClickedWidget(this);
-            setFocusedField(this);
-            this.setFocused(true);
-
-            this.setCursor(getIndexByCoords(mouseX, mouseY), hasShiftDown());
-
-            return true;
-        } else {
-            if (this.getClickOutEvent() != null) {
-                this.getClickOutEvent().run();
-            }
-        }
-        return false;
-    }
-    *///? }
-
     private int getIndexByCoords(double mouseX, double mouseY) {
         if (multiline) {
-            int lineClick = (int) ((mouseY - (this.getY() + 4)) / 11);
+            int lineClick = (int) Math.floor((mouseY - getMultilineTextY()) / 11);
             int actualLine = scrollLines + lineClick;
             if (actualLine >= 0 && actualLine < cachedLines.size()) {
                 LineInfo line = cachedLines.get(actualLine);
@@ -1201,56 +1068,47 @@ public class TextField extends AbstractButton {
         }
     }
 
-    //? if >=1.20.2 {
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (multiline && isMouseOver(mouseX, mouseY) && cachedLines.size() > maxLines) {
-            scrollLines = Mth.clamp(scrollLines - (int)Math.signum(verticalAmount), 0, cachedLines.size() - maxLines);
+    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
+        if (!active || !visible || button != InputConstants.MOUSE_BUTTON_LEFT) {
+            return false;
+        }
+
+        if (isMouseOver(mouseX, mouseY)) {
+            setLastClickedWidget(this);
+            setFocusedField(this);
+            this.setFocused(true);
+            this.setCursor(getIndexByCoords(mouseX, mouseY), hasShiftDown());
             return true;
         }
+
+        if (isFocused() && getClickOutEvent() != null) {
+            getClickOutEvent().run();
+        }
+
         return false;
     }
-    //? } else {
-    /*@Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+
+    @Override
+    public boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (!active || !visible || verticalAmount == 0.0) {
+            return false;
+        }
+
         if (multiline && isMouseOver(mouseX, mouseY) && cachedLines.size() > maxLines) {
-            scrollLines = Mth.clamp(scrollLines - (int)Math.signum(amount), 0, cachedLines.size() - maxLines);
+            scrollLines = Mth.clamp(scrollLines - (int) Math.signum(verticalAmount), 0, cachedLines.size() - maxLines);
             return true;
         }
+
         return false;
-    }*/
-    //? }
-
-    @Override
-    public void playDownSound(SoundManager soundManager) {
     }
 
-    //? if >=1.19.3 {
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput builder) {
-    }
-    //? } else if >=1.17 {
-    /*@Override
-    public void updateNarration(NarrationElementOutput builder) { }*/
-    //? }
-
-    @Override
-    //? if >=26.3 {
-    public boolean keyPressed(KeyEvent event) {
-    int keyCode = event.key();
-    int scanCode = event.shortcutKey();
-    //? } else if >=1.21.9 {
-    /*public boolean keyPressed(KeyEvent event) {
-    int keyCode = event.key();
-    int scanCode = event.scancode();*/
-    //? } else {
-    /*public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-    *///? }
+    public boolean onKeyPressed(int keyCode, int nativeCode, int modifiers) {
         if (!isFocused())
             return false;
 
         switch (keyCode) {
-            //$ if >=26.3 'case InputConstants.KEY_LEFT:' else 'case GLFW.GLFW_KEY_LEFT:'
             case InputConstants.KEY_LEFT:
                 if (hasControlDown()) {
                     this.setCursor(this.getWordSkipPosition(-1), hasShiftDown());
@@ -1259,7 +1117,6 @@ public class TextField extends AbstractButton {
                 }
                 return true;
 
-            //$ if >=26.3 'case InputConstants.KEY_RIGHT:' else 'case GLFW.GLFW_KEY_RIGHT:'
             case InputConstants.KEY_RIGHT:
                 if (hasControlDown()) {
                     this.setCursor(this.getWordSkipPosition(1), hasShiftDown());
@@ -1268,7 +1125,6 @@ public class TextField extends AbstractButton {
                 }
                 return true;
 
-            //$ if >=26.3 'case InputConstants.KEY_UP:' else 'case GLFW.GLFW_KEY_UP:'
             case InputConstants.KEY_UP:
                 if (multiline) {
                     int cursorLineIdx = getLineForOffset(this.selectionStart);
@@ -1289,7 +1145,6 @@ public class TextField extends AbstractButton {
                 }
                 return false;
 
-            //$ if >=26.3 'case InputConstants.KEY_DOWN:' else 'case GLFW.GLFW_KEY_DOWN:'
             case InputConstants.KEY_DOWN:
                 if (multiline) {
                     int cursorLineIdx = getLineForOffset(this.selectionStart);
@@ -1310,29 +1165,23 @@ public class TextField extends AbstractButton {
                 }
                 return false;
 
-            //$ if >=26.3 'case InputConstants.KEY_HOME:' else 'case GLFW.GLFW_KEY_HOME:'
             case InputConstants.KEY_HOME:
                 this.setCursorToStart(hasShiftDown());
                 return true;
 
-            //$ if >=26.3 'case InputConstants.KEY_END:' else 'case GLFW.GLFW_KEY_END:'
             case InputConstants.KEY_END:
                 this.setCursorToEnd(hasShiftDown());
                 return true;
 
-            //$ if >=26.3 'case InputConstants.KEY_BACKSPACE:' else 'case GLFW.GLFW_KEY_BACKSPACE:'
             case InputConstants.KEY_BACKSPACE:
                 this.erase(-1);
                 return true;
 
-            //$ if >=26.3 'case InputConstants.KEY_DELETE:' else 'case GLFW.GLFW_KEY_DELETE:'
             case InputConstants.KEY_DELETE:
                 this.erase(1);
                 return true;
 
-            //$ if >=26.3 'case InputConstants.KEY_RETURN:' else 'case GLFW.GLFW_KEY_ENTER:'
             case InputConstants.KEY_RETURN:
-            //$ if >=26.3 'case InputConstants.KEY_NUMPADENTER:' else 'case GLFW.GLFW_KEY_KP_ENTER:'
             case InputConstants.KEY_NUMPADENTER:
                 setFocusedField(null);
                 this.setFocused(false);
@@ -1341,7 +1190,6 @@ public class TextField extends AbstractButton {
                 }
                 return true;
 
-            //$ if >=26.3 'case InputConstants.KEY_ESCAPE:' else 'case GLFW.GLFW_KEY_ESCAPE:'
             case InputConstants.KEY_ESCAPE:
                 setFocusedField(null);
                 this.setFocused(false);
@@ -1371,26 +1219,12 @@ public class TextField extends AbstractButton {
     }
 
     @Override
-    //? if >=1.21.9 {
-    public boolean charTyped(CharacterEvent event) {
-        if (!isFocused())
-            return false;
-        char c = (char) event.codepoint();
-        if (Character.isISOControl(c)) {
+    public boolean onCharTyped(int codePoint) {
+        if (!isFocused() || Character.isISOControl(codePoint)) {
             return false;
         }
-        this.write(Character.toString(c));
+
+        this.write(new String(Character.toChars(codePoint)));
         return true;
     }
-    //? } else {
-    /*public boolean charTyped(char c, int modifiers) {
-        if (!isFocused())
-            return false;
-        if (Character.isISOControl(c)) {
-            return false;
-        }
-        this.write(Character.toString(c));
-        return true;
-    }
-    *///? }
 }

@@ -4,13 +4,11 @@ import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.screen.BindsGUI;
+import com.nitsha.binds.multiversions.NitshaCraft;
+import com.nitsha.binds.multiversions.NitshaInput;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.resources.Identifier;
-//? if <26.3 {
-/*import org.lwjgl.glfw.GLFW;
-*///? }
 
 //? if fabric {
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -60,7 +58,6 @@ public class KeyBinds {
         FBLogger.info("Finished registering keybinds");
     }
 
-    //? if >=26.3 {
     private static void createMappings() {
         BINDS = new KeyMapping(
                 "key.nitsha.binds",
@@ -90,37 +87,6 @@ public class KeyBinds {
                 category
         );
     }
-    //? } else {
-    /*private static void createMappings() {
-        BINDS = new KeyMapping(
-                "key.nitsha.binds",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F8,
-                category
-        );
-
-        NEXT_PAGE = new KeyMapping(
-                "key.nitsha.next_page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F9,
-                category
-        );
-
-        PREV_PAGE = new KeyMapping(
-                "key.nitsha.prev_page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F7,
-                category
-        );
-
-        EDITOR = new KeyMapping(
-                "key.nitsha.editor",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
-                category
-        );
-    }
-    *///? }
 
     //? if neoforge {
     /*public static void registerNeoForge(IEventBus modEventBus) {
@@ -146,54 +112,22 @@ public class KeyBinds {
     //? }
     *///?}
 
-    //? if >=26.2 {
     public static void tick(Minecraft client) {
         if (BINDS == null || EDITOR == null) {
             return;
         }
-        if (BINDS.consumeClick()) {
-            if (BindsGUI.ignoreHoldToOpenOnce) return;
-            if (!(client.gui.screen() instanceof BindsGUI)) {
-                BindsGUI.ignoreHoldToOpenOnce = true;
-                client.gui.setScreen(new BindsGUI());
-            }
+
+        if (BINDS.consumeClick() && !BindsGUI.ignoreHoldToOpenOnce && !(NitshaCraft.getScreen() instanceof BindsGUI)) {
+            BindsGUI.ignoreHoldToOpenOnce = true;
+            NitshaCraft.setScreen(new BindsGUI());
         }
-        //$ if <=26.2 'if (!InputConstants.isKeyDown(client.getWindow(), BINDS.getDefaultKey().getValue())) {' else 'if (!InputConstants.isKeyDown(BINDS.getDefaultKey().getValue())) {'
-        if (!InputConstants.isKeyDown(BINDS.getDefaultKey().getValue())) {
+
+        if (!NitshaInput.isKeyDown(BINDS)) {
             BindsGUI.ignoreHoldToOpenOnce = false;
         }
-        if (EDITOR.consumeClick()) {
-            if (!(client.gui.screen() instanceof BindsGUI)) {
-                client.gui.setScreen(new BindsEditor(client.gui.screen()));
-            }
+
+        if (EDITOR.consumeClick() && !(NitshaCraft.getScreen() instanceof BindsGUI)) {
+            NitshaCraft.setScreen(new BindsEditor(NitshaCraft.getScreen()));
         }
     }
-    //? } else {
-    /*public static void tick(Minecraft client) {
-        if (BINDS == null || EDITOR == null) {
-            return;
-        }
-        if (BINDS.consumeClick()) {
-            if (BindsGUI.ignoreHoldToOpenOnce) return;
-            if (!(client.screen instanceof BindsGUI)) {
-                BindsGUI.ignoreHoldToOpenOnce = true;
-                client.setScreen(new BindsGUI());
-            }
-        }
-        if (!InputConstants.isKeyDown(
-                //? if <1.21.9 {
-                /^client.getWindow().getWindow()
-                ^///? } else {
-                 client.getWindow()
-                //? }
-                , BINDS.getDefaultKey().getValue())) {
-            BindsGUI.ignoreHoldToOpenOnce = false;
-        }
-        if (EDITOR.consumeClick()) {
-            if (!(client.screen instanceof BindsGUI)) {
-                client.setScreen(new BindsEditor(client.screen));
-            }
-        }
-    }
-    *///? }
 }

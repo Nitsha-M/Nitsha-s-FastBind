@@ -1,9 +1,8 @@
-package com.nitsha.binds.guinew.widget;
+package com.nitsha.binds.gui.widget;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.guinew.utils.Textures;
+import com.nitsha.binds.gui.utils.Textures;
 import com.nitsha.binds.multiversions.NitshaAbstractWidget;
 import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
@@ -56,7 +55,7 @@ public class Slider extends NitshaAbstractWidget {
         this.btnHoverColor = btnHoverColor;
         this.textColor = textColor;
         this.textHoverColor = textHoverColor;
-        setOutlineColor(0xFF000000, GUIUtils.darkenColor(btnHoverColor, 0.4f));
+        setOutlineColor(0xFF000000, RenderUtils.darkenColor(btnHoverColor, 0.4f));
     }
 
     public void setOutlineColor(int outlineColor, int outlineHoverColor) {
@@ -129,7 +128,7 @@ public class Slider extends NitshaAbstractWidget {
         this.isHovered = isMouseOver(mouseX, mouseY);
 
         targetOffset = (isPressed) ? 2 : 0;
-        yOffset = Mth.lerp(GUIUtils.clampSpeed(speed * delta), yOffset, targetOffset);
+        yOffset = Mth.lerp(RenderUtils.clampSpeed(speed * delta), yOffset, targetOffset);
         if (Math.abs(yOffset - targetOffset) < 0.001f) yOffset = targetOffset;
 
         int fX = this.getX();
@@ -150,18 +149,18 @@ public class Slider extends NitshaAbstractWidget {
         RenderUtils.drawFill(ctx, fX + 1, fY + sliderH - 2, fX + 2, fY + sliderH - 1, 0xFF72A763);
         RenderUtils.drawFill(ctx, fX + 2, fY + sliderH - 2, fX + sliderOffset + 3, fY + sliderH - 1, 0xFF4F913C);
 
-        int knobColor = ((isInsideKnob(mouseX, mouseY) || isPressed) && isEnabled) ? btnHoverColor : btnColor;
+        renderDivisions(ctx);
 
-        RenderUtils.drawResizableBox(ctx, Textures.BEDROCK_ATLAS,
-                fX + 1 + sliderOffset + 1, fY + Math.round(yOffset) - 2 + 1, 8, sliderH + 1 - Math.round(yOffset) - 2, 0, 0, 4, 64, 64, knobColor);
+        boolean knobHighlighted = isInsideKnob(mouseX, mouseY) || isPressed;
+        int knobColor = (knobHighlighted && isEnabled) ? btnHoverColor : btnColor;
+        int knobX = fX + sliderOffset;
+        int knobY = fY + Math.round(yOffset) - 2;
 
-        RenderUtils.drawResizableBox(ctx, Textures.BEDROCK_ATLAS,
-                fX + 1 + sliderOffset + 1, fY + Math.round(yOffset) - 2 + 1, 8, sliderH + 1 - 4, 9, 0, 4, 64, 64, knobColor);
+        RenderUtils.drawResizableBox(ctx, Textures.BEDROCK_ATLAS, knobX + 1, knobY + 1, 10, sliderH - Math.round(yOffset), 0, 0, 4, 64, 64, knobColor);
+        RenderUtils.drawResizableBox(ctx, Textures.BEDROCK_ATLAS, knobX + 1, knobY + 1, 10, sliderH - 2, 9, 0, 4, 64, 64, knobColor);
+        RenderUtils.drawResizableBox(ctx, Textures.BEDROCK_ATLAS, knobX, knobY, 12, sliderH + 2 - Math.round(yOffset), 36, 0, 2, 64, 64, knobHighlighted ? 0xFFFFFFFF : oC);
 
-        RenderUtils.drawResizableBox(ctx, Textures.BEDROCK_ATLAS,
-                fX + 1 + sliderOffset, fY + Math.round(yOffset) - 2, 10, sliderH + 1 - Math.round(yOffset), 36, 0, 2, 64, 64, (isInsideKnob(mouseX, mouseY)) ? 0xFFFFFFFF : oC);
-
-        int scrollbarColor = (isInsideKnob(mouseX, mouseY) || isPressed) ? 0xFFFFFFFF : 0xFF8B8B8B;
+        int scrollbarColor = knobHighlighted ? 0xFFFFFFFF : 0xFF8B8B8B;
         RenderUtils.drawFill(ctx,
                 fX + 1 + sliderOffset + 3,
                 fY + Math.round(yOffset) + 2,
@@ -171,9 +170,9 @@ public class Slider extends NitshaAbstractWidget {
 
         RenderUtils.drawFill(ctx,
                 fX + 1 + sliderOffset + 3,
-                fY + Math.round(yOffset) + 4,
-                fX + 1 + sliderOffset + 7,
                 fY + Math.round(yOffset) + 5,
+                fX + 1 + sliderOffset + 7,
+                fY + Math.round(yOffset) + 6,
                 scrollbarColor);
 //
 //        RenderUtils.drawFill(ctx,
@@ -184,11 +183,14 @@ public class Slider extends NitshaAbstractWidget {
 //                scrollbarColor);
     }
 
+    protected void renderDivisions(GuiGraphicsExtractor ctx) {
+    }
+
     public boolean isInsideKnob(double mouseX, double mouseY) {
-        int knobWidth = 10;
-        int knobHeight = this.height + 1;
-        int knobY = this.getY() - 2;
-        int knobX = this.getX() + 1 + sliderOffset;
+        int knobWidth = 12;
+        int knobHeight = this.height + 2 - Math.round(yOffset);
+        int knobY = this.getY() + Math.round(yOffset) - 2;
+        int knobX = this.getX() + sliderOffset;
         return mouseX >= knobX && mouseX <= knobX + knobWidth && mouseY >= knobY && mouseY <= knobY + knobHeight;
     }
 

@@ -25,7 +25,6 @@ import net.minecraft.client.input.CharacterEvent;
 public class NitshaContainer extends AbstractContainerEventHandler implements Renderable /*? if >=1.17 {*/ , NarratableEntry /*?}*/ {
 
     private final List<GuiEventListener> children = new ArrayList<>();
-    private final Map<GuiEventListener, Renderable> renderables = new HashMap<>();
     private final List<DrawElement> drawElementsBottom = new ArrayList<>();
     private final List<DrawElement> drawElementsTop = new ArrayList<>();
 
@@ -135,12 +134,6 @@ public class NitshaContainer extends AbstractContainerEventHandler implements Re
         if (children.contains(element)) return;
 
         children.add(element);
-
-        Renderable renderable = com.nitsha.binds.utils.RenderUtils.wrapRenderable(element);
-
-        if (renderable != null) {
-            renderables.put(element, renderable);
-        }
     }
 
     public void removeElement(GuiEventListener element) {
@@ -150,7 +143,6 @@ public class NitshaContainer extends AbstractContainerEventHandler implements Re
         }
 
         children.remove(element);
-        renderables.remove(element);
     }
 
     public void removeElementsOfType(Class<?> type) {
@@ -167,7 +159,6 @@ public class NitshaContainer extends AbstractContainerEventHandler implements Re
         setFocused(null);
         setDragging(false);
         children.clear();
-        renderables.clear();
         drawElementsBottom.clear();
         drawElementsTop.clear();
     }
@@ -219,11 +210,7 @@ public class NitshaContainer extends AbstractContainerEventHandler implements Re
         });
 
         for (GuiEventListener child : children) {
-            Renderable renderable = renderables.get(child);
-
-            if (renderable != null) {
-                renderChild(ctx, child, renderable, contentX, contentY, localX, localY, delta);
-            }
+            renderChild(ctx, child, contentX, contentY, localX, localY, delta);
         }
 
         RenderUtils.matricesUtil(ctx, contentX, contentY, 2, () -> {
@@ -236,13 +223,9 @@ public class NitshaContainer extends AbstractContainerEventHandler implements Re
     protected void renderBackground(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
     }
 
-    protected void renderChild(GuiGraphicsExtractor ctx, GuiEventListener child, Renderable renderable, int contentX, int contentY, int mouseX, int mouseY, float delta) {
+    protected void renderChild(GuiGraphicsExtractor ctx, GuiEventListener child, int contentX, int contentY, int mouseX, int mouseY, float delta) {
         RenderUtils.matricesUtil(ctx, contentX, contentY, 2, () -> {
-            //? if >=26.1 {
-            renderable.extractRenderState(ctx, mouseX, mouseY, delta);
-            //? } else {
-            /*renderable.render(ctx, mouseX, mouseY, delta);*/
-            //? }
+            RenderUtils.renderElement(ctx, child, mouseX, mouseY, delta);
         });
     }
 
@@ -355,7 +338,7 @@ public class NitshaContainer extends AbstractContainerEventHandler implements Re
     protected boolean onMouseReleased(double mouseX, double mouseY, int button) {
         if (!isVisible()) return false;
 
-        return NitshaInput.mouseReleased(children, mouseX - getContentX(), mouseY - getContentY(), button, mouseModifiers);
+        return NitshaInput.mouseReleased(new ArrayList<>(children), mouseX - getContentX(), mouseY - getContentY(), button, mouseModifiers);
     }
 
     protected boolean onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {

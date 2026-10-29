@@ -8,7 +8,7 @@ import com.nitsha.binds.configs.dto.preset.ActionData;
 import com.nitsha.binds.configs.dto.preset.BindData;
 import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.gui.screen.BindsGUI;
-import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Util;
 

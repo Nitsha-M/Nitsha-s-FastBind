@@ -1,11 +1,8 @@
-package com.nitsha.binds.guinew.widget.window;
+package com.nitsha.binds.gui.widget.window;
 
 import com.nitsha.binds.Main;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.widget.window.ScrollableWindow;
 import com.nitsha.binds.multiversions.NitshaContainer;
 import com.nitsha.binds.multiversions.RenderUtils;
-import com.nitsha.binds.utils.Renderable;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.Identifier;
@@ -175,6 +172,7 @@ public class AnimatedWindow extends NitshaContainer {
     }
 
     private void animateValues(float lerpFactor) {
+        float previousY = y;
         width = Mth.lerp(lerpFactor, width, targetWidth);
         height = Mth.lerp(lerpFactor, height, targetHeight);
         x = Mth.lerp(lerpFactor, x, targetX);
@@ -195,6 +193,8 @@ public class AnimatedWindow extends NitshaContainer {
         if (Math.abs(y - targetY) < 0.1F) {
             y = targetY;
         }
+
+        baseYOffset += y - previousY;
     }
 
     private void updateAnimationState(float lerpFactor) {
@@ -262,8 +262,11 @@ public class AnimatedWindow extends NitshaContainer {
 
     @Override
     public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        tick();
+        updateLayout();
+
         int alphaByte = Mth.clamp(Math.round(alpha * 255.0F), 0, 255);
-        globalColor = (alphaByte << 24) | 0x00FFFFFF;
+        globalColor = 0xFFFFFFFF;
 
         if (delayMs <= 0 && isVisible()) {
             RenderUtils.matricesUtil(ctx, getX(), Math.round(baseYOffset), 1, () -> {
@@ -272,8 +275,9 @@ public class AnimatedWindow extends NitshaContainer {
 
             super.onRender(ctx, mouseX, mouseY, delta);
         }
+    }
 
-        tick();
+    protected void updateLayout() {
     }
 
     @Override
@@ -282,17 +286,15 @@ public class AnimatedWindow extends NitshaContainer {
     }
 
     @Override
-    protected void renderChild(GuiGraphicsExtractor ctx, GuiEventListener child, Renderable renderable, int contentX, int contentY, int mouseX, int mouseY, float delta) {
-        if (child instanceof ScrollableWindow) {
-            ScrollableWindow window = (ScrollableWindow) child;
-
-            GUIUtils.customScissor(ctx, contentX + window.getX(), contentY + window.getY(), window.getWidth(), window.getHeight(), () -> {
-                super.renderChild(ctx, child, renderable, contentX, contentY, mouseX, mouseY, delta);
+    protected void renderChild(GuiGraphicsExtractor ctx, GuiEventListener child, int contentX, int contentY, int mouseX, int mouseY, float delta) {
+        if (child instanceof ScrollableWindow window) {
+            RenderUtils.customScissor(ctx, contentX + window.getX(), contentY + window.getY(), window.getWidth(), window.getHeight(), () -> {
+                super.renderChild(ctx, child, contentX, contentY, mouseX, mouseY, delta);
             });
 
             return;
         }
 
-        super.renderChild(ctx, child, renderable, contentX, contentY, mouseX, mouseY, delta);
+        super.renderChild(ctx, child, contentX, contentY, mouseX, mouseY, delta);
     }
 }

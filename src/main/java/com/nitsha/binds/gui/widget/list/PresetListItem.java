@@ -1,34 +1,25 @@
 package com.nitsha.binds.gui.widget.list;
 
-import com.nitsha.binds.Main;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.gui.panels.PresetSelector;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.window.ScrollableWindow;
 import com.nitsha.binds.gui.widget.TextField;
 import com.nitsha.binds.gui.widget.button.TexturedButton;
+import com.nitsha.binds.gui.utils.Textures;
+import com.nitsha.binds.multiversions.NitshaAbstractWidget;
+import com.nitsha.binds.multiversions.NitshaInput;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.AbstractButton;
-//? if >=1.17 {
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-//?}
-import net.minecraft.resources.Identifier;
 
-//? if >=1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.InputWithModifiers;
-import com.mojang.blaze3d.platform.Window;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;
-//? }
+import java.util.List;
 
-public class PresetListItem extends AbstractButton {
+public class PresetListItem extends NitshaAbstractWidget {
+
     private final PresetSelector parent;
-    private final ScrollableWindow scrollableList;
     private final TextField newNameField;
 
     private final TexturedButton editBtn;
@@ -37,41 +28,26 @@ public class PresetListItem extends AbstractButton {
     private final TexturedButton deleteConfBtn;
     private final TexturedButton moveTop;
     private final TexturedButton moveBottom;
-    private static final Identifier EDIT = Main.idSprite("editpreset_normal");
-    private static final Identifier EDIT_HOVER = Main.idSprite("editpreset_hover");
-    private static final Identifier SAVE = Main.idSprite("savepreset_normal");
-    private static final Identifier SAVE_HOVER = Main.idSprite("savepreset_hover");
-    private static final Identifier DELETE = Main.idSprite("delete_small_normal");
-    private static final Identifier DELETE_HOVER = Main.idSprite("delete_small_hover");
-    private static final Identifier TOP = Main.idSprite("top_normal");
-    private static final Identifier TOP_HOVER = Main.idSprite("top_hover");
-    private static final Identifier BOTTOM = Main.idSprite("bottom_normal");
-    private static final Identifier BOTTOM_HOVER = Main.idSprite("bottom_hover");
-    private static final Identifier ARROW_DISABLED = Main.id("textures/gui/test/arrow_disabled.png");
-
 
     private boolean isEditing = false;
     private String name;
-    private int index;
-
-    private int x, y;
+    private final String presetId;
+    private final int index;
 
     private long deleteConfirmationTime = 0;
 
-    public PresetListItem(PresetSelector parent, ScrollableWindow scrollableList, String name, int x, int y, int width, int height, int index) {
+    public PresetListItem(PresetSelector parent, PresetData preset, int x, int y, int width, int height, int index) {
         super(x, y, width, height, TextUtils.empty());
         this.parent = parent;
-        this.scrollableList = scrollableList;
-        this.name = name;
+        this.presetId = preset.id;
+        this.name = preset.name;
         this.index = index;
-        this.x = x;
-        this.y = y;
 
         this.newNameField = new TextField(Minecraft.getInstance().font, x + 3, y + 3, width - 20,height - 5, 40, name,"Preset name");
         this.newNameField.setEnterEvent(this::savePreset);
         this.newNameField.setEscapeEvent(this::stopEditing);
         this.newNameField.setAnimatedPlaceholder(false);
-        this.editBtn = GUIUtils.createTexturedBtn(x + 111, y + 7, 9, 9, new Identifier[]{EDIT, EDIT_HOVER}, button -> {
+        this.editBtn = new TexturedButton(x + 111, y + 7, 9, 9, Textures.EDIT, Textures.EDIT_HOVER, button -> {
             for (PresetListItem item : parent.getItems()) {
                 if (item.isEditing()) {
                     item.stopEditing();
@@ -81,99 +57,43 @@ public class PresetListItem extends AbstractButton {
             this.newNameField.setFocus();
         });
 
-        this.deleteBtn = GUIUtils.createTexturedBtn(x + 101, y + 7, 9, 9, new Identifier[]{DELETE, DELETE_HOVER}, button -> {
+        this.deleteBtn = new TexturedButton(x + 101, y + 7, 9, 9, Textures.DELETE, Textures.DELETE_HOVER, button -> {
             deleteConfirmationTime = System.currentTimeMillis();
         });
 
-        this.deleteConfBtn = GUIUtils.createTexturedBtn(x + 91, y + 7, 9, 9, new Identifier[]{SAVE, SAVE_HOVER}, button -> {
-            java.util.List<PresetData> sorted = Storage.getSortedPresets();
-            int totalPresets = sorted.size();
-            int currentPreset = sorted.indexOf(BindsEditor.activePreset);
+        this.deleteConfBtn = new TexturedButton(x + 91, y + 7, 9, 9,Textures.SAVE, Textures.SAVE_HOVER, button -> {
+            String selectedId = BindsEditor.activePresetId;
 
-            if (totalPresets <= 1) return;
-
-            PresetData pd = sorted.get(index);
-            Storage.PRESET_REGISTRY.remove(pd.id);
-            Storage.PRESETS_DIR.resolve(pd.id + Storage.FILE_EXT).toFile().delete();
-            
-            sorted = Storage.getSortedPresets();
-            for (int i = 0; i < sorted.size(); i++) {
-                sorted.get(i).index = i;
-                Storage.savePreset(sorted.get(i), sorted.get(i).id);
+            if (Storage.deletePreset(presetId)) {
+                parent.screen.selectPreset(selectedId);
+                parent.generatePresetsList();
             }
-
-            if (index < currentPreset) {
-                parent.screen.selectPreset(currentPreset - 1);
-            } else if (index == currentPreset) {
-                parent.screen.selectPreset(Math.max(0, currentPreset - 1));
-            } else {
-                parent.screen.selectPreset(currentPreset);
-            }
-
-            parent.generatePresetsList();
         });
 
-        this.saveBtn = GUIUtils.createTexturedBtn(x + 111, y + 7, 9, 9, new Identifier[]{SAVE, SAVE_HOVER}, button -> {
+        this.saveBtn = new TexturedButton(x + 111, y + 7, 9, 9, Textures.SAVE, Textures.SAVE_HOVER, button -> {
             savePreset();
         });
 
-        this.moveTop = GUIUtils.createTexturedBtn(x + 3, y + 2, 9, 9, new Identifier[]{TOP, TOP_HOVER}, button -> {
+        this.moveTop = new TexturedButton(x + 3, y + 2, 9, 9, Textures.ICON_SMALL_TOP, Textures.ICON_SMALL_TOP_HOVER, button -> {
             movePreset(-1);
         });
 
-        this.moveBottom = GUIUtils.createTexturedBtn(x + 3, y + 12, 9, 9, new Identifier[]{BOTTOM, BOTTOM_HOVER}, button -> {
+        this.moveBottom = new TexturedButton(x + 3, y + 12, 9, 9, Textures.ICON_SMALL_BOTTOM, Textures.ICON_SMALL_BOTTOM_HOVER, button -> {
             movePreset(1);
         });
     }
 
-    public void movePreset(int dir) {
-        int index = this.index;
-        int last = Storage.getSortedPresets().size() - 1;
-        if (dir == -1 && index == 0) return;
-        if (dir == 1 && index == last) return;
-
-        int scrollOffset = scrollableList.getScrollOffset();
-
-        int newIndex = index + dir;
-        int currentSelected = Storage.getSortedPresets().indexOf(BindsEditor.activePreset);
-
-        java.util.List<PresetData> sorted = Storage.getSortedPresets();
-        PresetData a = sorted.get(index);
-        PresetData b = sorted.get(newIndex);
-        int tempPos = a.index;
-        a.index = b.index;
-        b.index = tempPos;
-        Storage.savePreset(a, a.id);
-        Storage.savePreset(b, b.id);
-        this.index = newIndex;
-
-        if (currentSelected == index) {
-            parent.screen.selectPreset(newIndex);
-        } else if (currentSelected == newIndex) {
-            parent.screen.selectPreset(index);
-        }
+    public void movePreset(int direction) {
+        Storage.movePreset(presetId, direction);
         parent.generatePresetsList();
-        scrollableList.setScrollOffset(scrollOffset);
-    }
-
-    public int getX() {
-        return this.x;
-    }
-
-    public int getY() {
-        return this.y;
     }
 
     public void stopEditing() {
         isEditing = false;
         this.newNameField.setText(this.name);
-    }
 
-    @Override
-    public void onClick(MouseButtonEvent mouseButtonEvent, boolean bl) {
-        if (!isEditing) {
-            parent.screen.selectPreset(index);
-            parent.openSelector(false);
+        if (TextField.getFocusedField() == newNameField) {
+            TextField.setFocusedField(null);
         }
     }
 
@@ -188,23 +108,29 @@ public class PresetListItem extends AbstractButton {
     public void savePreset() {
         isEditing = false;
         String getName = this.newNameField.getText();
-        String newName = (getName.isEmpty()) ? "Preset " +  (index + 1) : getName;
-        PresetData pd = Storage.getSortedPresets().get(this.index);
+        String newName = getName.isBlank() ? TextUtils.translatable("nitsha.binds.default.newPreset").getString() : getName;
+        PresetData pd = Storage.PRESET_REGISTRY.get(presetId);
+        if (pd == null) {
+            return;
+        }
         pd.name = newName;
         Storage.savePreset(pd, pd.id);
         this.newNameField.setText(newName);
         this.name = newName;
+
+        if (TextField.getFocusedField() == newNameField) {
+            TextField.setFocusedField(null);
+        }
     }
 
     @Override
-    public void onPress(InputWithModifiers inputWithModifiers) {}
+    public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        super.onRender(ctx, mouseX, mouseY, delta);
 
-    @Override
-    public void extractContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        if (index > 0) GUIUtils.drawFill(ctx, getX() + 3, getY(), getX() + getWidth() - 3, getY() + 1, 0xFF555555);
+        if (index > 0) RenderUtils.drawFill(ctx, getX() + 3, getY(), getX() + getWidth() - 3, getY() + 1, 0xFF555555);
         if (isEditing) {
-            this.newNameField.extractContents(ctx, mouseX, mouseY, delta);
-            this.saveBtn.extractContents(ctx, mouseX, mouseY, delta);
+            this.newNameField.onRender(ctx, mouseX, mouseY, delta);
+            this.saveBtn.onRender(ctx, mouseX, mouseY, delta);
         } else {
             int nameX = 15;
             int maxLength = (isDeleteConfirmation()) ? 12 : 13;
@@ -212,102 +138,72 @@ public class PresetListItem extends AbstractButton {
                 nameX = 3;
                 maxLength = (isDeleteConfirmation()) ? 13 : 14;
             } else {
-                GUIUtils.adaptiveDrawTexture(ctx, ARROW_DISABLED, getX() + 3, getY() + 2, 0, 0, 9, 19, 9, 19);
+                RenderUtils.drawTexture(ctx, Textures.ARROW_DISABLED, getX() + 3, getY() + 2, 0, 0, 9, 19, 9, 19);
             }
             int currentPreset = Storage.getSortedPresets().indexOf(BindsEditor.activePreset);
-            if (this.isHovered && parent.isOpen() && index != currentPreset) GUIUtils.drawFill(ctx, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x0DFFFFFF);
-            if (index == currentPreset) GUIUtils.drawFill(ctx, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x1A4AFF00);
-            GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(this.name, maxLength)), 0, getX() + nameX, getY() + 1 + (getHeight() / 2), "left", "center",0xFFFFFFFF, false);
-            this.editBtn.extractContents(ctx, mouseX, mouseY, delta);
-            this.deleteBtn.extractContents(ctx, mouseX, mouseY, delta);
-            if (Storage.getSortedPresets().size() > 1) {
-                if (index > 0) this.moveTop.extractContents(ctx, mouseX, mouseY, delta);
-                if (index < Storage.getSortedPresets().size() - 1) this.moveBottom.extractContents(ctx, mouseX, mouseY, delta);
+            if (this.isHovered && parent.isOpen() && index != currentPreset) RenderUtils.drawFill(ctx, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x0DFFFFFF);
+            if (index == currentPreset) RenderUtils.drawFill(ctx, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x1A4AFF00);
+            RenderUtils.drawText(ctx, TextUtils.literal(RenderUtils.truncateString(this.name, maxLength)), 0, getX() + nameX, getY() + 1 + (getHeight() / 2), "left", "center",0xFFFFFFFF, false);
+            this.editBtn.onRender(ctx, mouseX, mouseY, delta);
+
+            boolean canDelete = Storage.PRESET_REGISTRY.size() > 1;
+            this.deleteBtn.visible = canDelete;
+            this.deleteConfBtn.visible = canDelete;
+
+            if (canDelete) {
+                this.deleteBtn.onRender(ctx, mouseX, mouseY, delta);
+
+                if (isDeleteConfirmation()) {
+                    this.deleteConfBtn.onRender(ctx, mouseX, mouseY, delta);
+                }
             }
-            if (isDeleteConfirmation()) this.deleteConfBtn.extractContents(ctx, mouseX, mouseY, delta);
+
+            if (Storage.getSortedPresets().size() > 1) {
+                if (index > 0) this.moveTop.onRender(ctx, mouseX, mouseY, delta);
+                if (index < Storage.getSortedPresets().size() - 1) this.moveBottom.onRender(ctx, mouseX, mouseY, delta);
+            }
         }
     }
 
     @Override
-    //? if >=1.21.9 {
-    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        if (!parent.isOpen()) return false;
+    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
+        if (!active || !visible || !parent.isOpen() || button != InputConstants.MOUSE_BUTTON_LEFT || !isMouseOver(mouseX, mouseY)) {
+            return false;
+        }
 
         if (isEditing) {
-            if (newNameField.mouseClicked(event, bl) ||
-                    saveBtn.mouseClicked(event, bl)) {
-                return true;
-            }
-        } else {
-            if (editBtn.mouseClicked(event, bl) ||
-                    deleteBtn.mouseClicked(event, bl) ||
-                    moveTop.mouseClicked(event, bl) ||
-                    moveBottom.mouseClicked(event, bl)) {
-                return true;
-            }
-            if (isDeleteConfirmation()) {
-                if (deleteConfBtn.mouseClicked(event, bl)) return true;
-            }
+            return NitshaInput.mouseClicked(List.of(newNameField, saveBtn), mouseX, mouseY, button);
         }
-        return super.mouseClicked(event, bl);
+
+        if (NitshaInput.mouseClicked(List.of(editBtn, deleteBtn, moveTop, moveBottom), mouseX, mouseY, button)) {
+            return true;
+        }
+
+        if (isDeleteConfirmation() && NitshaInput.mouseClicked(List.of(deleteConfBtn), mouseX, mouseY, button)) {
+            return true;
+        }
+
+        playDownSound(Minecraft.getInstance().getSoundManager());
+        parent.screen.selectPreset(presetId);
+        parent.openSelector(false);
+        return true;
     }
-    //? } else {
-        /*public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (!parent.isOpen()) return false;
 
-            if (isEditing) {
-                if (newNameField.mouseClicked(mouseX, mouseY, button) ||
-                        saveBtn.mouseClicked(mouseX, mouseY, button)) {
-                    return true;
-                }
-            } else {
-                if (editBtn.mouseClicked(mouseX, mouseY, button) ||
-                        deleteBtn.mouseClicked(mouseX, mouseY, button) ||
-                        moveTop.mouseClicked(mouseX, mouseY, button) ||
-                        moveBottom.mouseClicked(mouseX, mouseY, button)) {
-                    return true;
-                }
-                if (isDeleteConfirmation()) {
-                    if (deleteConfBtn.mouseClicked(mouseX, mouseY, button)) return true;
-                }
-            }
-            return super.mouseClicked(mouseX, mouseY, button);
-        }
-    *///? }
-
-        @Override
-    //? if >=1.21.9 {
-    public boolean keyPressed(KeyEvent event) {
-        if (!parent.isOpen() || !isEditing) return false;
-        return newNameField.keyPressed(event);
-    }
-    //? } else {
-        /*public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-            if (!parent.isOpen() || !isEditing) return false;
-            return newNameField.keyPressed(keyCode, scanCode, modifiers);
-        }
-    *///? }
-
-        @Override
-    //? if >=1.21.9 {
-    public boolean charTyped(CharacterEvent event) {
-        if (!parent.isOpen() || !isEditing) return false;
-        return newNameField.charTyped(event);
-    }
-    //? } else {
-        /*public boolean charTyped(char codePoint, int modifiers) {
-            if (!parent.isOpen() || !isEditing) return false;
-            return newNameField.charTyped(codePoint, modifiers);
-        }
-    *///? }
-
-    //? if >=1.19.3 {
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput builder) {
+    public boolean onKeyPressed(int keyCode, int nativeCode, int modifiers) {
+        if (!parent.isOpen() || !isEditing) {
+            return false;
+        }
+
+        return NitshaInput.keyPressed(List.of(newNameField), keyCode, nativeCode, modifiers);
     }
-    //?} else if >=1.17 {
-    /*@Override
-    public void updateNarration(NarrationElementOutput builder) {
-    }*/
-    //?}
+
+    @Override
+    public boolean onCharTyped(int codePoint) {
+        if (!parent.isOpen() || !isEditing) {
+            return false;
+        }
+
+        return NitshaInput.charTyped(List.of(newNameField), codePoint);
+    }
 }

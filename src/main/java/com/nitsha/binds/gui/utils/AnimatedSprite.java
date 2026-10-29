@@ -1,5 +1,6 @@
 package com.nitsha.binds.gui.utils;
 
+import com.nitsha.binds.multiversions.RenderUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
@@ -45,7 +46,7 @@ public class AnimatedSprite {
     }
 
     public void render(GuiGraphicsExtractor ctx) {
-        GUIUtils.adaptiveDrawTexture(ctx, texture, this.x, y, textureU, texV, width, height, textureW, textureH, color);
+        RenderUtils.drawTexture(ctx, texture, this.x, y, textureU, texV, width, height, textureW, textureH, color);
         tick();
     }
 

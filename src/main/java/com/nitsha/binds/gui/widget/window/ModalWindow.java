@@ -1,10 +1,10 @@
 package com.nitsha.binds.gui.widget.window;
 
-import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.TextField;
-import com.nitsha.binds.guinew.widget.window.AnimatedWindow;
+import com.nitsha.binds.gui.widget.button.TexturedButton;
+import com.nitsha.binds.gui.utils.Textures;
+import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -12,11 +12,6 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.resources.Identifier;
 
 public class ModalWindow extends AnimatedWindow {
-
-    private static final Identifier CLOSE = Main.idSprite("close_modal");
-    private static final Identifier CLOSE_HOVER = Main.idSprite("close_modal_hover");
-    private static final Identifier SEARCH = Main.idSprite("search_modal");
-    private static final Identifier SEARCH_HOVER = Main.idSprite("search_modal_hover");
 
     private final BindsEditor screen;
     private AbstractWidget closeBtn;
@@ -27,8 +22,6 @@ public class ModalWindow extends AnimatedWindow {
     private float bgAlphaTarget = 0f;
     private static final float BG_MAX_ALPHA = 0.5f;
     private static final float BG_SPEED = 0.2f;
-
-    private String title = "Default";
 
     private boolean needSearch = false;
     private boolean searchMode = false;
@@ -41,12 +34,12 @@ public class ModalWindow extends AnimatedWindow {
 
         this.addDrawElement((ctx, mouseX, mouseY) -> {
             if (!this.searchMode) {
-                GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(TextUtils.translatable(title).getString(), 20)), 0,
+                RenderUtils.drawText(ctx, TextUtils.small(TextUtils.literal(RenderUtils.truncateString(TextUtils.translatable(title).getString(), 20))), 0,
                         7, 10, "left", "center", 0xFF212121, false);
             }
         }, 1);
 
-        this.closeBtn = GUIUtils.createTexturedBtn(width - 17, 5, 11, 11, new Identifier[]{CLOSE, CLOSE_HOVER}, button -> {
+        this.closeBtn = new TexturedButton(width - 17, 5, 11, 11, Textures.ICON_CLOSE_MODAL, Textures.ICON_CLOSE_MODAL_HOVER, button -> {
             if (searchMode) {
                 this.searchField.setText("");
             } else {
@@ -68,7 +61,7 @@ public class ModalWindow extends AnimatedWindow {
         this.searchField.setEscapeEvent(() -> setSearchMode(false));
         this.searchField.setClickOutEvent(() -> setSearchMode(false));
 
-        this.searchBtn = GUIUtils.createTexturedBtn(width - 17 - 11 - 2, 5, 11, 11, new Identifier[]{SEARCH, SEARCH_HOVER}, button -> {
+        this.searchBtn = new TexturedButton(width - 17 - 11 - 2, 5, 11, 11, Textures.ICON_SEARCH_MODAL, Textures.ICON_SEARCH_MODAL_HOVER, button -> {
             setSearchMode(true);
         });
 
@@ -101,18 +94,14 @@ public class ModalWindow extends AnimatedWindow {
     }
 
     @Override
-    public void renderWindow(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        int adjX = mouseX - this.getX();
-        int adjY = mouseY - this.getYOffset();
+    public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        bgAlpha += (bgAlphaTarget - bgAlpha) * Math.min(1.0F, BG_SPEED * delta);
 
-        bgAlpha += (bgAlphaTarget - bgAlpha) * Math.min(1f, BG_SPEED * delta);
+        int bgColor = (int) (bgAlpha * 255) << 24;
 
-        int alpha = (int)(bgAlpha * 255) << 24;
-        int bgColor = alpha | 0x00000000;
-
-        GUIUtils.matricesUtil(ctx, 0, 0, 200, () -> {
-            GUIUtils.drawFill(ctx, 0, 0, 10000, 10000, bgColor);
-            super.renderWindow(ctx, mouseX, mouseY, delta);
+        RenderUtils.matricesUtil(ctx, 0, 0, 200, () -> {
+            RenderUtils.drawFill(ctx, 0, 0, 10000, 10000, bgColor);
+            super.onRender(ctx, mouseX, mouseY, delta);
         });
     }
 

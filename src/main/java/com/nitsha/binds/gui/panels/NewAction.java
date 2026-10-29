@@ -3,15 +3,14 @@ package com.nitsha.binds.gui.panels;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.action.ActionType;
-import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.widget.button.TexturedButton;
 import com.nitsha.binds.gui.widget.list.NewActionItem;
 import com.nitsha.binds.gui.widget.window.ScrollableWindow;
-import com.nitsha.binds.guinew.panel.advanced.ActionsTab;
-import com.nitsha.binds.guinew.widget.button.SmallTextButton;
+import com.nitsha.binds.gui.panels.advanced.ActionsTab;
+import com.nitsha.binds.gui.widget.button.SmallTextButton;
 import com.nitsha.binds.multiversions.NitshaContainer;
 import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
-import com.nitsha.binds.utils.Renderable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -64,12 +63,12 @@ public class NewAction extends NitshaContainer {
             if (entries.isEmpty()) return;
 
             RenderUtils.drawFill(ctx, 5, 5, 7, 12, currentEntry().getLineColor());
-            RenderUtils.drawText(ctx, TextUtils.small(TextUtils.literal(GUIUtils.truncateString(currentEntry().getDisplayName(), 15))), 0, 9, 4, "left", "top", 0xFFFFFFFF, false);
+            RenderUtils.drawText(ctx, TextUtils.small(TextUtils.literal(RenderUtils.truncateString(currentEntry().getDisplayName(), 15))), 0, 9, 4, "left", "top", 0xFFFFFFFF, false);
         });
 
-        addElement(GUIUtils.createTexturedBtn(getWidth() - 14, 4, 9, 9, new Identifier[]{SPRESET, SPRESET_HOVER}, button -> openSelector(!isOpen)));
-        addElement(GUIUtils.createTexturedBtn(getWidth() - 25, 4, 9, 9, new Identifier[]{BOTTOM, BOTTOM_HOVER}, button -> selectActiveAction(1)));
-        addElement(GUIUtils.createTexturedBtn(getWidth() - 36, 4, 9, 9, new Identifier[]{TOP, TOP_HOVER}, button -> selectActiveAction(-1)));
+        addElement(new TexturedButton(getWidth() - 14, 4, 9, 9, SPRESET, SPRESET_HOVER, button -> openSelector(!isOpen)));
+        addElement(new TexturedButton(getWidth() - 25, 4, 9, 9, BOTTOM, BOTTOM_HOVER, button -> selectActiveAction(1)));
+        addElement(new TexturedButton(getWidth() - 36, 4, 9, 9, TOP, TOP_HOVER, button -> selectActiveAction(-1)));
 
         Runnable addCurrentAction = () -> {
             if (!entries.isEmpty()) {
@@ -78,7 +77,7 @@ public class NewAction extends NitshaContainer {
         };
         addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.advances.actions.addNew"), getWidth() - 38, 4, 0xFF4D9109, "right", ADD_NEW, addCurrentAction));
 
-        actionList = new ScrollableWindow(2, HEADER_HEIGHT - 2, getX(), getY(), getWidth() - 4, LIST_HEIGHT, false);
+        actionList = new ScrollableWindow(2, HEADER_HEIGHT - 2, getWidth() - 4, LIST_HEIGHT, false);
         actionList.setVisible(false);
         addElement(actionList);
 
@@ -175,20 +174,20 @@ public class NewAction extends NitshaContainer {
     }
 
     @Override
-    protected void renderChild(GuiGraphicsExtractor ctx, GuiEventListener child, Renderable renderable, int contentX, int contentY, int mouseX, int mouseY, float delta) {
+    protected void renderChild(GuiGraphicsExtractor ctx, GuiEventListener child, int contentX, int contentY, int mouseX, int mouseY, float delta) {
         if (child == actionList) {
             int viewportHeight = Math.min(actionList.getHeight(), getHeight() - actionList.getY() - 2);
 
             if (!isOpen || viewportHeight <= 0) return;
 
-            GUIUtils.customScissor(ctx, contentX + actionList.getX(), contentY + actionList.getY(), actionList.getWidth(), viewportHeight, () -> {
-                super.renderChild(ctx, child, renderable, contentX, contentY, mouseX, mouseY, delta);
+            RenderUtils.customScissor(ctx, contentX + actionList.getX(), contentY + actionList.getY(), actionList.getWidth(), viewportHeight, () -> {
+                super.renderChild(ctx, child, contentX, contentY, mouseX, mouseY, delta);
             });
 
             return;
         }
 
-        super.renderChild(ctx, child, renderable, contentX, contentY, mouseX, mouseY, delta);
+        super.renderChild(ctx, child, contentX, contentY, mouseX, mouseY, delta);
     }
 
     public boolean isMouseInsideArea(double mouseX, double mouseY) {

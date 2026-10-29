@@ -1,10 +1,9 @@
 package com.nitsha.binds.action;
 
-import com.nitsha.binds.gui.utils.TextUtils;
 import com.nitsha.binds.gui.widget.TextField;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import java.util.Map;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 
@@ -75,7 +74,7 @@ public class CommandAction extends ActionType<CommandActionData> {
 
     @Override
     public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        field.extractContents(ctx, mouseX, mouseY, delta);
+        field.onRender(ctx, mouseX, mouseY, delta);
     }
 
     @Override

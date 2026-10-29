@@ -7,12 +7,12 @@ import com.nitsha.binds.configs.dto.preset.BindData;
 import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
-import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.*;
-import com.nitsha.binds.guinew.utils.Textures;
-import com.nitsha.binds.guinew.widget.button.BedrockIconButton;
-import com.nitsha.binds.guinew.widget.button.ItemButton;
-import com.nitsha.binds.guinew.widget.window.AnimatedWindow;
+import com.nitsha.binds.gui.utils.Textures;
+import com.nitsha.binds.gui.widget.button.BedrockIconButton;
+import com.nitsha.binds.gui.widget.button.ItemButton;
+import com.nitsha.binds.gui.widget.window.AnimatedWindow;
+import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.utils.CodecUtil;
 import com.nitsha.binds.utils.EasterEgg;
@@ -97,9 +97,9 @@ public class BasicOptionsWindow extends AnimatedWindow {
         catTail.setPosition(122, 174);
         catTail.startAnimation(true);
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            GUIUtils.matricesUtil(ctx, 0, 0, 50, () -> {
-                GUIUtils.adaptiveDrawTexture(ctx, CAT_MENU, 4, 165, 0, 0, 126, 26, 126, 26);
-                GUIUtils.addText(
+            RenderUtils.matricesUtil(ctx, 0, 0, 50, () -> {
+                RenderUtils.drawTexture(ctx, CAT_MENU, 4, 165, 0, 0, 126, 26, 126, 26);
+                RenderUtils.drawText(
                         ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.autosave")), 0, 4, 178,
                         "left", "center", 0xFF7f7f7f, false);
                 int eyeCenterX = 105;
@@ -116,11 +116,8 @@ public class BasicOptionsWindow extends AnimatedWindow {
                 eyeDx += (targetDx - eyeDx) * 0.2f;
                 eyeDy += (targetDy - eyeDy) * 0.2f;
 
-                GUIUtils.matricesUtil(ctx, eyeDx, eyeDy, 0, () -> {
-                    GUIUtils.adaptiveDrawTexture(ctx, CAT_EYES,
-                            eyeCenterX, eyeCenterY,
-                            0, 0, 8, 6, 8, 6
-                    );
+                RenderUtils.matricesUtil(ctx, eyeDx, eyeDy, 0, () -> {
+                    RenderUtils.drawTexture(ctx, CAT_EYES, eyeCenterX, eyeCenterY, 0, 0, 8, 6, 8, 6);
                 });
 
                 catTail.render(ctx);

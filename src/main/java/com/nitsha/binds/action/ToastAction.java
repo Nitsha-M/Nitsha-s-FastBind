@@ -2,11 +2,11 @@ package com.nitsha.binds.action;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.ItemsMapper;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.gui.widget.*;
-import com.nitsha.binds.guinew.widget.button.BedrockIconOptionButton;
-import com.nitsha.binds.guinew.widget.button.ItemButton;
+import com.nitsha.binds.gui.widget.button.BedrockIconOptionButton;
+import com.nitsha.binds.gui.widget.button.ItemButton;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.FormattedTextUtils;
 import com.nitsha.binds.utils.ToastUtils;
@@ -93,7 +93,7 @@ public class ToastAction extends ActionType<ToastActionData> {
                 this.iconSelector.setKey((String) d[0]);
                 this.iconSelector.setItemStack(ItemsMapper.getItemStack((String) d[0]));
             });
-            EventBus.emit("selectIcon.open", null);
+            EventBus.emit("selectIcon.open");
         });
 
         this.iconStyle = new BedrockIconOptionButton(x + width - 26 - 18, y + 3, 18, 19, () -> {
@@ -149,12 +149,11 @@ public class ToastAction extends ActionType<ToastActionData> {
 
     @Override
     public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        titleField.extractContents(ctx, mouseX, mouseY, delta);
+        titleField.onRender(ctx, mouseX, mouseY, delta);
         iconStyle.onRender(ctx, mouseX, mouseY, delta);
 
-        GUIUtils.drawResizableBox(ctx, TOAST_BG, x, y + 24, width, 32, 4, 9);
-        //$ if >=26.1 'iconSelector.extractRenderState(ctx, mouseX, mouseY, delta);' else 'iconSelector.render(ctx, mouseX, mouseY, delta);'
-        iconSelector.extractRenderState(ctx, mouseX, mouseY, delta);
+        RenderUtils.drawResizableBox(ctx, TOAST_BG, x, y + 24, width, 32, 4, 9);
+        iconSelector.onRender(ctx, mouseX, mouseY, delta);
 
         String advMade = switch (this.iconStyle.getSelected()) {
             case "goal" -> "advancements.toast.goal";
@@ -162,16 +161,16 @@ public class ToastAction extends ActionType<ToastActionData> {
             default -> "advancements.toast.task";
         };
         int advColor = (this.iconStyle.getSelected().equals("challenge")) ? 0xFFFC86FC : 0xFFFCFC00;
-        GUIUtils.addText(ctx, TextUtils.translatable(advMade), 0, x + 30, y + 31, "left", "top", advColor, false);
+        RenderUtils.drawText(ctx, TextUtils.translatable(advMade), 0, x + 30, y + 31, "left", "top", advColor, false);
 
         if (this.titleField.getText().isEmpty()) {
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.typeSomeText"), 0, x + 30, y + 42, "left", "top", 0xFFAAAAAA, false);
+            RenderUtils.drawText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.typeSomeText"), 0, x + 30, y + 42, "left", "top", 0xFFAAAAAA, false);
         } else {
             TextFormatData data = saveFormattedText(titleField);
             int maxChars = (width - 44) / 7;
             MutableComponent formattedTitle = FormattedTextUtils.buildComponent(data, maxChars);
 
-            GUIUtils.addText(ctx, formattedTitle, 0, x + 30, y + 42, "left", "top", 0xFFFFFFFF, false);
+            RenderUtils.drawText(ctx, formattedTitle, 0, x + 30, y + 42, "left", "top", 0xFFFFFFFF, false);
         }
     }
 

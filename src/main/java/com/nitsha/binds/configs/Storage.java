@@ -10,6 +10,7 @@ import com.nitsha.binds.configs.dto.option.ModOptionsData;
 import com.nitsha.binds.configs.dto.preset.ActionData;
 import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.configs.dto.preset.PresetData;
+import com.nitsha.binds.configs.dto.preset.PresetsOrderData;
 import com.nitsha.binds.configs.dto.variables.VariableData;
 import com.nitsha.binds.utils.StorageUtils;
 
@@ -43,6 +44,11 @@ public class Storage {
     public static final Map<String, PresetData> PRESET_REGISTRY = new HashMap<>();
     public static ModOptionsData options = new ModOptionsData();
 
+    private static final File ORDER_FILE = MOD_DIR.resolve("fastbind_presets_order.json").toFile();
+    private static PresetsOrderData presetsOrder = new PresetsOrderData();
+
+    // Basic logic for load&save
+
     public static <T> void save(T config, File targetFile) {
         targetFile.getParentFile().mkdirs();
 
@@ -75,75 +81,127 @@ public class Storage {
         }
     }
 
+    // Presets order
+
+    private static void loadPresetsOrder() {
+        presetsOrder = load(PresetsOrderData.class, ORDER_FILE, new PresetsOrderData());
+
+        Set<String> orderedIds = new LinkedHashSet<>();
+
+        if (presetsOrder.ids != null) {
+            for (String id : presetsOrder.ids) {
+                if (PRESET_REGISTRY.containsKey(id)) {
+                    orderedIds.add(id);
+                }
+            }
+        }
+
+        List<String> discoveredIds = new ArrayList<>(PRESET_REGISTRY.keySet());
+        Collections.sort(discoveredIds);
+        orderedIds.addAll(discoveredIds);
+
+        presetsOrder.ids = new ArrayList<>(orderedIds);
+        savePresetsOrder();
+    }
+
+    private static void savePresetsOrder() {
+        save(presetsOrder, ORDER_FILE);
+        BindHandler.invalidateCache();
+    }
+
+    // Load presets
+
     public static void loadAllPresets() {
         LegacyMigrator.runSystemMigrations();
-        
+        PRESET_REGISTRY.clear();
+
         File[] files = PRESETS_DIR.toFile().listFiles((dir, name) -> name.endsWith(FILE_EXT));
 
-        if (files != null && files.length > 0) {
+        if (files != null) {
             for (File file : files) {
-                PresetData loadedPreset = load(PresetData.class, file, new PresetData());
-                loadedPreset.id = file.getName().replace(FILE_EXT, "");
-                
-                LegacyMigrator.migratePresetData(loadedPreset);
+                PresetData preset = load(PresetData.class, file, new PresetData());
+                preset.id = file.getName().substring(0, file.getName().length() - FILE_EXT.length());
 
-                if (loadedPreset.pages.isEmpty()) {
-                    loadedPreset.pages.add(new PageData());
+                LegacyMigrator.migratePresetData(preset);
+
+                if (preset.pages == null) {
+                    preset.pages = new ArrayList<>();
                 }
 
-                PRESET_REGISTRY.put(file.getName(), loadedPreset);
+                if (preset.pages.isEmpty()) {
+                    preset.pages.add(new PageData());
+                }
+
+                PRESET_REGISTRY.put(preset.id, preset);
             }
-            FBLogger.info("Presets loaded: {}", PRESET_REGISTRY.size());
-        } else {
-            createNewPreset();
-            FBLogger.info("Created default preset");
         }
+
+        loadPresetsOrder();
+
+        if (PRESET_REGISTRY.isEmpty()) {
+            createNewPreset();
+        }
+
         BindHandler.invalidateCache();
     }
 
     public static List<PresetData> getSortedPresets() {
-        List<PresetData> list = new ArrayList<>(PRESET_REGISTRY.values());
-        list.sort(Comparator.comparingInt(p -> p.index));
-        return list;
+        List<PresetData> result = new ArrayList<>();
+
+        for (String id : presetsOrder.ids) {
+            PresetData preset = PRESET_REGISTRY.get(id);
+
+            if (preset != null) {
+                result.add(preset);
+            }
+        }
+
+        return result;
     }
 
-    public static void createNewPreset() {
-        String newId = UUID.randomUUID().toString();
-
+    public static PresetData createNewPreset() {
         PresetData preset = new PresetData();
-        preset.id = newId;
+        preset.id = UUID.randomUUID().toString();
         preset.pages.add(new PageData());
 
-        Storage.PRESET_REGISTRY.put(newId, preset);
-        Storage.save(preset, PRESETS_DIR.resolve(newId + FILE_EXT).toFile());
-        BindHandler.invalidateCache();
+        PRESET_REGISTRY.put(preset.id, preset);
+        presetsOrder.ids.add(preset.id);
+
+        savePreset(preset, preset.id);
+        savePresetsOrder();
+
+        return preset;
     }
 
-    public static void deletePreset(String fileName) {
-        PRESET_REGISTRY.remove(fileName);
-
-        File file = PRESETS_DIR.resolve(fileName + FILE_EXT).toFile();
-        if (file.exists()) {
-            file.delete();
-            FBLogger.info("Preset {} deleted", fileName);
+    public static boolean deletePreset(String id) {
+        if (PRESET_REGISTRY.size() <= 1 || !PRESET_REGISTRY.containsKey(id)) {
+            return false;
         }
-        BindHandler.invalidateCache();
+
+        File file = PRESETS_DIR.resolve(id + FILE_EXT).toFile();
+
+        if (file.exists() && !file.delete()) {
+            return false;
+        }
+
+        PRESET_REGISTRY.remove(id);
+        presetsOrder.ids.remove(id);
+        savePresetsOrder();
+
+        return true;
     }
 
-    public static void swapPresets(String fileName1, String fileName2) {
-        PresetData p1 = PRESET_REGISTRY.get(fileName1);
-        PresetData p2 = PRESET_REGISTRY.get(fileName2);
+    public static void movePreset(String id, int direction) {
+        int currentIndex = presetsOrder.ids.indexOf(id);
+        int targetIndex = currentIndex + direction;
 
-        if (p1 != null && p2 != null) {
-            FBLogger.info("Swap presets: {} to {}", p1.index, p2.index);
-            int tempPos = p1.index;
-            p1.index = p2.index;
-            p2.index = tempPos;
-
-            Storage.save(p1, PRESETS_DIR.resolve(fileName1 + FILE_EXT).toFile());
-            Storage.save(p2, PRESETS_DIR.resolve(fileName2 + FILE_EXT).toFile());
-            BindHandler.invalidateCache();
+        if (currentIndex < 0 || targetIndex < 0 || targetIndex >= presetsOrder.ids.size()) {
+            return;
         }
+
+        presetsOrder.ids.remove(currentIndex);
+        presetsOrder.ids.add(targetIndex, id);
+        savePresetsOrder();
     }
 
     public static void savePreset(PresetData preset, String id) {

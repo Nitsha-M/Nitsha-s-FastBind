@@ -8,6 +8,11 @@ public final class NitshaCraft {
     private NitshaCraft() {
     }
 
+    public static Screen getScreen() {
+        //$ if >=26.3 'return Minecraft.getInstance().gui.screen();' else 'return Minecraft.getInstance().screen;'
+        return Minecraft.getInstance().gui.screen();
+    }
+
     public static void addToast(Toast toast) {
         //? if >=26.3 {
         Minecraft.getInstance().gui.toastManager().addToast(toast);

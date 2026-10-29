@@ -3,19 +3,18 @@ package com.nitsha.binds.gui.modals;
 import com.nitsha.binds.Main;
 import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
-import com.nitsha.binds.gui.widget.button.BedrockButton;
-import com.nitsha.binds.gui.widget.button.SmallTextButton;
 import com.nitsha.binds.gui.widget.button.SmallToggleButton;
 import com.nitsha.binds.gui.widget.list.SoundItem;
 import com.nitsha.binds.gui.widget.window.ModalWindow;
 import com.nitsha.binds.gui.widget.window.ScrollableWindow;
+import com.nitsha.binds.gui.utils.Textures;
+import com.nitsha.binds.gui.widget.button.BedrockButton;
+import com.nitsha.binds.gui.widget.button.SmallTextButton;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.SearchUtil;
-import net.minecraft.util.Util;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
 import java.io.File;
@@ -23,14 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-//? if >=1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-//? }
-
 public class SelectSound extends ModalWindow {
-    private static final Identifier TAB2_BG = Main.id("textures/gui/test/scroller.png");
-    private static final Identifier RANDOM_SMALL = Main.id("textures/gui/test/random.png");
-
     private final BindsEditor screen;
     private ScrollableWindow soundsList;
     private ScrollableWindow filterList;
@@ -47,8 +39,7 @@ public class SelectSound extends ModalWindow {
     private boolean noResult = false;
     private SmallTextButton resetFilter;
 
-    public SelectSound(BindsEditor screen, int x, int y, int width, int height, Identifier t1,
-                       Identifier t2) {
+    public SelectSound(BindsEditor screen, int x, int y, int width, int height, Identifier t1, Identifier t2) {
         super(screen, x, y, width, height, t1, t2, "nitsha.binds.advances.modals.selectSound");
         this.screen = screen;
         this.contentHeight = this.getHeight() - 20 - 38;
@@ -64,29 +55,29 @@ public class SelectSound extends ModalWindow {
         this.addElement(this.resetFilter);
 
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            GUIUtils.drawResizableBox(ctx, TAB2_BG, 4, 20, this.getWidth() - 8, contentHeight, 1, 3);
+            RenderUtils.drawResizableBox(ctx, Textures.INNER_BG, 4, 20, this.getWidth() - 8, contentHeight, 1, 3);
 
             if (noResult) {
-                GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.modals.noSound"),
+                RenderUtils.drawText(ctx, TextUtils.translatable("nitsha.binds.advances.modals.noSound"),
                         this.getWidth() - 8, 4, (contentHeight / 2) + 20, "center", "center", 0xFFAEAEAE, false);
             }
         });
 
         int btnWidth = (this.getWidth() - 8) / 2;
-        this.tab1 = new BedrockButton(TextUtils.translatable("nitsha.binds.advances.modals.buttons.minecraft").getString(), 4, this.getHeight() - 25, btnWidth, 20, true, () -> selectTab(0));
+        this.tab1 = new BedrockButton(TextUtils.translatable("nitsha.binds.advances.modals.buttons.minecraft"), 4, this.getHeight() - 25, btnWidth, 20, true, () -> selectTab(0));
         this.tab1.setButtonDirection(1);
-        this.tab2 = new BedrockButton(TextUtils.translatable("nitsha.binds.advances.modals.buttons.external").getString(), this.getWidth() - 4 - btnWidth, this.getHeight() - 25, btnWidth, 20, true, () -> selectTab(1));
+        this.tab2 = new BedrockButton(TextUtils.translatable("nitsha.binds.advances.modals.buttons.external"), this.getWidth() - 4 - btnWidth, this.getHeight() - 25, btnWidth, 20, true, () -> selectTab(1));
         this.tab2.setButtonDirection(2);
 
         this.tab1.setNeighbor(this.tab2);
         this.tab2.setNeighbor(this.tab1);
 
-        this.reload = new SmallTextButton(TextUtils.translatable("nitsha.binds.advances.modals.buttons.reload"), getWidth() - 4, getHeight() - 36, 7, 0x33000000, 0xFF232425, 0xFF232425, 0xFFe7bc1c, btnWidth - 1, "right", RANDOM_SMALL, () -> {
+        this.reload = new SmallTextButton(TextUtils.translatable("nitsha.binds.advances.modals.buttons.reload"), getWidth() - 4, getHeight() - 36, 7, 0x33000000, 0xFF232425, 0xFF232425, 0xFFe7bc1c, btnWidth - 1, "right", Textures.ICON_RELOAD, () -> {
             AudioPlayer.loadExternalSounds();
             generateList();
         });
 
-        this.openFolder = new SmallTextButton(TextUtils.translatable("nitsha.binds.advances.modals.buttons.openFolder"), 4, getHeight() - 36, 7, 0x33000000, 0xFF232425, 0xFF232425, 0xFFe7bc1c, btnWidth - 1, "left", RANDOM_SMALL, ()-> {
+        this.openFolder = new SmallTextButton(TextUtils.translatable("nitsha.binds.advances.modals.buttons.openFolder"), 4, getHeight() - 36, 7, 0x33000000, 0xFF232425, 0xFF232425, 0xFFe7bc1c, btnWidth - 1, "left", Textures.ICON_OPEN_FOLDER, ()-> {
             //$ if >=26.3 'com.mojang.blaze3d.Blaze3D.openPath(Storage.SOUNDS_DIR);' else 'Util.getPlatform().openFile(Storage.SOUNDS_DIR.toFile());'
             com.mojang.blaze3d.Blaze3D.openPath(Storage.SOUNDS_DIR);
         });
@@ -99,10 +90,10 @@ public class SelectSound extends ModalWindow {
         this.addElement(this.tab1);
         this.addElement(this.tab2);
 
-        this.soundsList = new ScrollableWindow(5, 21, 5, 21, getWidth() - 10, contentHeight - 2, false);
+        this.soundsList = new ScrollableWindow(5, 21, getWidth() - 10, contentHeight - 2, false);
         this.addElement(this.soundsList);
 
-        this.filterList = new ScrollableWindow(5, getHeight() - 36, 5, getHeight() - 36, getWidth() - 10 - (this.resetFilter.getWidth() + 2), 12, true);
+        this.filterList = new ScrollableWindow(5, getHeight() - 36, getWidth() - 10 - (this.resetFilter.getWidth() + 2), 12, true);
         this.filterList.setShowScrollbar(false);
         this.addElement(this.filterList);
 
@@ -146,7 +137,6 @@ public class SelectSound extends ModalWindow {
         this.filterList.setScrollableArea(filterX);
     }
 
-
     private void selectTab(int newTab) {
         this.tab = newTab;
 
@@ -169,16 +159,6 @@ public class SelectSound extends ModalWindow {
         }
         this.soundsList.setHeight(this.contentHeight - 2);
         generateList();
-    }
-
-    @Override
-    public void renderWindow(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        int adjX = mouseX - this.getX();
-        int adjY = mouseY - this.getYOffset();
-
-        GUIUtils.matricesUtil(ctx, 0, 0, 200, () -> {
-            super.renderWindow(ctx, mouseX, mouseY, delta);
-        });
     }
 
     private int actionIndex = 0;

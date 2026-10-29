@@ -1,22 +1,21 @@
-package com.nitsha.binds.guinew.panel.advanced;
+package com.nitsha.binds.gui.panels.advanced;
 
 import com.nitsha.binds.Main;
 import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.configs.dto.preset.ActionData;
 import com.nitsha.binds.gui.panels.NewAction;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.TextField;
 import com.nitsha.binds.gui.widget.list.ActionItem;
 import com.nitsha.binds.gui.widget.window.ScrollableWindow;
-import com.nitsha.binds.guinew.utils.Textures;
-import com.nitsha.binds.guinew.widget.button.BedrockIconButton;
-import com.nitsha.binds.guinew.widget.button.BedrockIconOptionButton;
-import com.nitsha.binds.guinew.widget.button.MainKeybindSelector;
+import com.nitsha.binds.gui.utils.Textures;
+import com.nitsha.binds.gui.widget.button.BedrockIconButton;
+import com.nitsha.binds.gui.widget.button.BedrockIconOptionButton;
+import com.nitsha.binds.gui.widget.button.MainKeybindSelector;
 import com.nitsha.binds.multiversions.NitshaContainer;
 import com.nitsha.binds.multiversions.NitshaInput;
+import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
-import com.nitsha.binds.utils.Renderable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -42,7 +41,7 @@ public class ActionsTab extends NitshaContainer {
         super(x, y, width, height);
         this.screen = screen;
 
-        this.list = new ScrollableWindow(5, 25, this.getX(), this.getY(), getWidth() - 10, getHeight() - 54, false);
+        this.list = new ScrollableWindow(5, 25, getWidth() - 10, getHeight() - 54, false);
 
         this.keybind = new MainKeybindSelector(4, this.getHeight() - 26, 80, 20);
         this.resetKeybind = new BedrockIconButton(84, this.getHeight() - 26, 13, 20, Textures.ICON_RESET, true, ()-> {
@@ -67,10 +66,10 @@ public class ActionsTab extends NitshaContainer {
         this.addNewAction = new NewAction(this, 4, actionY + 4, getWidth() - 8, 17);
 
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            GUIUtils.drawResizableBox(ctx, Textures.INNER_BG, 4, 24, this.getWidth() - 8, this.getHeight() - 52, 1, 3);
+            RenderUtils.drawResizableBox(ctx, Textures.INNER_BG, 4, 24, this.getWidth() - 8, this.getHeight() - 52, 1, 3);
 
             if (BindsEditor.getCBind().actions == null || BindsEditor.getCBind().actions.isEmpty()) {
-                GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.noActions"),
+                RenderUtils.drawText(ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.advances.actions.noActions")),
                         this.getWidth() - 8, 4, (this.getHeight() - 52) / 2 + 23, "center", "center", 0xFFAEAEAE, false);
             }
         });
@@ -211,7 +210,8 @@ public class ActionsTab extends NitshaContainer {
         if (addNewAction != null && addNewAction.isOpen()) {
             if (!addNewAction.isMouseInside(adjX, adjY)) {
                 addNewAction.openSelector(false);
-            } else if (NitshaInput.mouseClicked(List.of(addNewAction), adjX, adjY, button)) {
+            } else {
+                NitshaInput.mouseClicked(List.of(addNewAction), adjX, adjY, button);
                 return true;
             }
         }
@@ -229,7 +229,8 @@ public class ActionsTab extends NitshaContainer {
         if (addNewAction != null && addNewAction.isOpen()) {
             if (!addNewAction.isMouseInside(adjX, adjY)) {
                 addNewAction.openSelector(false);
-            } else if (NitshaInput.mouseScrolled(List.of(addNewAction), adjX, adjY, horizontalAmount, verticalAmount)) {
+            } else {
+                NitshaInput.mouseScrolled(List.of(addNewAction), adjX, adjY, horizontalAmount, verticalAmount);
                 return true;
             }
         }
@@ -238,15 +239,19 @@ public class ActionsTab extends NitshaContainer {
     }
 
     @Override
-    protected void renderChild(GuiGraphicsExtractor ctx, GuiEventListener child, Renderable renderable, int contentX, int contentY, int mouseX, int mouseY, float delta) {
+    protected void renderChild(GuiGraphicsExtractor ctx, GuiEventListener child, int contentX, int contentY, int mouseX, int mouseY, float delta) {
+        boolean blockHover = child != addNewAction && addNewAction.isOpen() && addNewAction.isMouseInside(mouseX, mouseY);
+        int childMouseX = blockHover ? -10000 : mouseX;
+        int childMouseY = blockHover ? -10000 : mouseY;
+
         if (child instanceof ScrollableWindow window) {
-            GUIUtils.customScissor(ctx, contentX + window.getX(), contentY + window.getY(), window.getWidth(), window.getHeight(), () -> {
-                super.renderChild(ctx, child, renderable, contentX, contentY, mouseX, mouseY, delta);
+            RenderUtils.customScissor(ctx, contentX + window.getX(), contentY + window.getY(), window.getWidth(), window.getHeight(), () -> {
+                super.renderChild(ctx, child, contentX, contentY, childMouseX, childMouseY, delta);
             });
 
             return;
         }
 
-        super.renderChild(ctx, child, renderable, contentX, contentY, mouseX, mouseY, delta);
+        super.renderChild(ctx, child, contentX, contentY, childMouseX, childMouseY, delta);
     }
 }

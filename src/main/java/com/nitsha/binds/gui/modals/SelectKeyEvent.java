@@ -1,18 +1,16 @@
 package com.nitsha.binds.gui.modals;
 
-import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.gui.widget.list.KeyEventItem;
 import com.nitsha.binds.gui.widget.window.ModalWindow;
 import com.nitsha.binds.gui.widget.window.ScrollableWindow;
-import com.nitsha.binds.guinew.utils.Textures;
+import com.nitsha.binds.gui.utils.Textures;
 import com.nitsha.binds.utils.EventBus;
 import com.nitsha.binds.utils.SearchUtil;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -26,33 +24,22 @@ public class SelectKeyEvent extends ModalWindow {
     private final BindsEditor screen;
     private ScrollableWindow eventsList;
 
-    public SelectKeyEvent(BindsEditor screen, int x, int y, int width, int height, Identifier t1,
-                          Identifier t2) {
+    public SelectKeyEvent(BindsEditor screen, int x, int y, int width, int height, Identifier t1, Identifier t2) {
         super(screen, x, y, width, height, t1, t2, "nitsha.binds.advances.modals.selectKeyEvent");
         this.screen = screen;
 
         this.setNeedSearch(true);
 
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            GUIUtils.drawResizableBox(ctx, Textures.INNER_BG, 4, 20, this.getWidth() - 8, this.getHeight() - 27, 1, 3);
+            RenderUtils.drawResizableBox(ctx, Textures.INNER_BG, 4, 20, this.getWidth() - 8, this.getHeight() - 27, 1, 3);
         });
 
-        this.eventsList = new ScrollableWindow(5, 21, 5, 21, getWidth() - 10, getHeight() - 29, false);
+        this.eventsList = new ScrollableWindow(5, 21, getWidth() - 10, getHeight() - 29, false);
         this.addElement(this.eventsList);
 
         this.getSearchField().setTypingEvent(this::generateList);
 
         generateList();
-    }
-
-    @Override
-    public void renderWindow(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        int adjX = mouseX - this.getX();
-        int adjY = mouseY - this.getYOffset();
-
-        GUIUtils.matricesUtil(ctx, 0, 0, 200, () -> {
-            super.renderWindow(ctx, mouseX, mouseY, delta);
-        });
     }
 
     private int actionIndex = 0;
@@ -88,9 +75,9 @@ public class SelectKeyEvent extends ModalWindow {
             final int capturedY = actionY;
             final String capturedCategory = category;
             this.eventsList.addDrawElement((ctx, mouseX, mouseY) -> {
-                GUIUtils.drawFill(ctx, 2, capturedY + 3, this.eventsList.getWidth() - 4, capturedY + 14, 0xFF212121);
-                GUIUtils.drawFill(ctx, 3, capturedY + 2, this.eventsList.getWidth() - 6, capturedY + 15, 0xFF212121);
-                GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(getCategoryLabel(capturedCategory).getString(), 26)), 0,
+                RenderUtils.drawFill(ctx, 2, capturedY + 3, this.eventsList.getWidth() - 4, capturedY + 14, 0xFF212121);
+                RenderUtils.drawFill(ctx, 3, capturedY + 2, this.eventsList.getWidth() - 6, capturedY + 15, 0xFF212121);
+                RenderUtils.drawText(ctx, TextUtils.literal(RenderUtils.truncateString(getCategoryLabel(capturedCategory).getString(), 26)), 0,
                         5, capturedY + 5, "top", "left", 0xFFFFFFFF, false);
             });
             actionY += 17;

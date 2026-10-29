@@ -1,156 +1,50 @@
 package com.nitsha.binds.gui.widget.button;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.nitsha.binds.multiversions.NitshaAbstractWidget;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.ImageButton;
-//? if >=1.20.2 {
-import net.minecraft.client.gui.components.WidgetSprites;
-//?}
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.resources.Identifier;
-//? if <1.17 {
-/*import net.minecraft.client.Minecraft;
-import org.lwjgl.opengl.GL11;
-*///?}
-//? if >=1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import com.mojang.blaze3d.platform.Window;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;
-//? }
 
-public class TexturedButton extends ImageButton {
+import java.util.function.Consumer;
+
+public class TexturedButton extends NitshaAbstractWidget {
+
     private final Identifier defaultTexture;
     private final Identifier hoverTexture;
+    private final Consumer<TexturedButton> onClick;
 
-    private int x, y, width, height;
-
-    //? if >=1.20.2 {
-    public TexturedButton(int x, int y, int width, int height, Identifier defaultTexture,
-                          Identifier hoverTexture, Button.OnPress onClick) {
-        super(x, y, width, height, new WidgetSprites(defaultTexture, hoverTexture), onClick);
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+    public TexturedButton(int x, int y, int width, int height, Identifier defaultTexture, Identifier hoverTexture, Consumer<TexturedButton> onClick) {
+        super(x, y, width, height, TextUtils.empty());
         this.defaultTexture = defaultTexture;
         this.hoverTexture = hoverTexture;
-    }
-    //?} else {
-    /*public TexturedButton(int x, int y, int width, int height, Identifier defaultTexture,
-                         Identifier hoverTexture, Button.OnPress onClick) {
-        //? if >=1.17 {
-        super(x, y, width, height, 0, 0, defaultTexture, onClick);
-        //? } else {
-        super(x, y, width, height, 0, 0, 0, defaultTexture, onClick);
-        //? }
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.defaultTexture = defaultTexture;
-        this.hoverTexture = hoverTexture;
-    }*/
-    //?}
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
+        this.onClick = onClick;
     }
 
     @Override
-    public void setX(int x) {
-        super.setX(x);
-        this.x = x;
+    public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        super.onRender(ctx, mouseX, mouseY, delta);
+
+        if (!visible) return;
+
+        RenderUtils.drawTexture(ctx, isHovered() ? hoverTexture : defaultTexture, getX(), getY(), 0, 0, getWidth(), getHeight(), getWidth(), getHeight());
     }
 
     @Override
-    public void setY(int y) {
-        super.setY(y);
-        this.y = y;
-    }
-
-    @Override
-    //? if >=1.21.9 {
-    public boolean keyPressed(KeyEvent event) {
-        return false;
-    }
-    //? } else {
-        /*public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
+        if (!active || !visible || button != InputConstants.MOUSE_BUTTON_LEFT || !isMouseOver(mouseX, mouseY)) {
             return false;
         }
-    *///? }
 
-    //? if >=1.20.2 {
-    @Override
-    public void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        this.isHovered = isMouseOver(mouseX, mouseY);
-        //? if <1.21.5 {
-        /*RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        *///? }
-        super.extractContents(context, mouseX, mouseY, delta);
-        //? if <1.21.5 {
-        /*RenderSystem.disableBlend();
-        *///? }
+        playDownSound(Minecraft.getInstance().getSoundManager());
+
+        if (onClick != null) {
+            onClick.accept(this);
+        }
+
+        return true;
     }
-    //? } else if >=1.20 {
-    /*@Override
-    public void extractContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        this.isHovered = isMouseOver(mouseX, mouseY);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        Identifier current = this.isHovered ? hoverTexture : defaultTexture;
-        ctx.blit(current, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
-        RenderSystem.disableBlend();
-    }
-    *///? } else if >=1.19.4 {
-    /*@Override
-    public void extractContents(GuiGraphicsExtractor matrices, int mouseX, int mouseY, float delta) {
-        this.isHovered = isMouseOver(mouseX, mouseY);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        Identifier current = this.isHovered ? hoverTexture : defaultTexture;
-        RenderSystem.setShaderTexture(0, current);
-        net.minecraft.client.gui.GuiComponent.blit(matrices, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
-        RenderSystem.disableBlend();
-    }
-    *///? } else if >=1.17 {
-    /*@Override
-    public void extractContents(GuiGraphicsExtractor matrices, int mouseX, int mouseY, float delta) {
-        this.isHovered = isMouseOver(mouseX, mouseY);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        Identifier current = this.isHovered ? hoverTexture : defaultTexture;
-        RenderSystem.setShaderTexture(0, current);
-        net.minecraft.client.gui.GuiComponent.blit(matrices, this.x, this.y, 0, 0, this.width, this.height, this.width, this.height);
-        RenderSystem.disableBlend();
-    }
-    *///?} else {
-    /*@Override
-    public void extractContents(GuiGraphicsExtractor matrices, int mouseX, int mouseY, float delta) {
-        this.isHovered = isMouseOver(mouseX, mouseY);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.alphaFunc(GL11.GL_GREATER, 0.0F);
-        Minecraft mc = Minecraft.getInstance();
-        Identifier current = this.isHovered ? hoverTexture : defaultTexture;
-        mc.getTextureManager().bind(current);
-        blit(matrices, this.x, this.y, 0, 0, this.width, this.height, this.width, this.height);
-        RenderSystem.disableAlphaTest();
-        RenderSystem.disableBlend();
-    }*/
-    //?}
 }

@@ -3,14 +3,104 @@ package com.nitsha.binds.multiversions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+
+//? if >=1.19.3 {
+import net.minecraft.client.gui.components.Renderable;
+//? } else {
+/*import net.minecraft.client.gui.components.Widget;*/
+//? }
 
 public class RenderUtils {
 
     private static final Minecraft MC = Minecraft.getInstance();
+
+    public static void renderElement(GuiGraphicsExtractor ctx, GuiEventListener element, int mouseX, int mouseY, float delta) {
+        //? if >=1.19.3 {
+        if (element instanceof Renderable renderable) {
+            //? if >=26.1 {
+            renderable.extractRenderState(ctx, mouseX, mouseY, delta);
+            //? } else {
+            /*renderable.render(ctx, mouseX, mouseY, delta);*/
+            //? }
+        }
+        //? } else {
+    /*if (element instanceof Widget widget) {
+        widget.render(ctx, mouseX, mouseY, delta);
+    }*/
+        //? }
+    }
+
+    public static float clampSpeed(float value) {
+        return Mth.clamp(value, 0.001f, 1.0f);
+    }
+
+    public static String truncateString(String str, int maxLength) {
+        if (str.length() > maxLength) {
+            return str.substring(0, maxLength) + "...";
+        }
+        return str;
+    }
+
+    public static int darkenColor(int color, float factor) {
+        int a = (color >> 24) & 0xFF;
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = color & 0xFF;
+        return (a << 24) | ((int)(r * factor) << 16) | ((int)(g * factor) << 8) | (int)(b * factor);
+    }
+
+    public static String getUL() {
+        //? if >=1.19.4 {
+        return Minecraft.getInstance().getLanguageManager().getSelected().toString();
+        //? } else {
+        // return Minecraft.getInstance().getLanguageManager().getSelected().getCode().toString();
+        //? }
+    }
+
+    public static void customScissor(GuiGraphicsExtractor ctx, int x, int y, int width, int height, Runnable action) {
+        //? if >=1.21.6 {
+        ctx.pose().pushMatrix();
+        ctx.enableScissor(x, y, x + width, y + height);
+        action.run();
+        ctx.disableScissor();
+        ctx.pose().popMatrix();
+        //? } else if >=1.21.4 {
+        /*ctx.pose().pushPose();
+        ctx.enableScissor(x, y, x + width, y + height);
+        action.run();
+        ctx.disableScissor();
+        ctx.pose().popPose();
+        *///?} else if >=1.20 {
+        /*ctx.pose().pushPose();
+        ctx.enableScissor(x, y, x + width, y + height);
+        action.run();
+        ctx.disableScissor();
+        ctx.pose().popPose();
+        *///?} else {
+        /*
+        Window window = Minecraft.getInstance().getWindow();
+        int i = window.getHeight();
+        double d = window.getGuiScale();
+        double e = (double)x * d;
+        double f = (double)i - ((double)y + (double)height) * d;  // ← ИСПРАВЛЕНО ЗДЕСЬ
+        double g = (double)width * d;
+        double h = (double)height * d;
+        RenderSystem.enableScissor(0, 0, 10000, 10000);
+        ctx.pushPose();
+        RenderSystem.enableScissor((int)e, (int)f, Math.max(0, (int)g), Math.max(0, (int)h));
+        action.run();
+        RenderSystem.disableScissor();
+        ctx.popPose();
+        RenderSystem.disableScissor();
+        */
+        //?}
+    }
 
     // ========================================================
     // Multiversion DrawText

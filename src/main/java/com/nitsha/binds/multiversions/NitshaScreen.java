@@ -1,7 +1,6 @@
 package com.nitsha.binds.multiversions;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.nitsha.binds.gui.utils.TextUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;

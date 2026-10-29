@@ -27,11 +27,11 @@ public class Main {
     public static final String MOD_ID = "nitsha_fastbind";
 
     public static final float GLOBAL_ANIMATION_SPEED = 0.6f;
+    private static boolean presetsLoaded;
 
     public static void init() {
         KeyBinds.register();
         Storage.loadModOptions();
-        Storage.loadAllPresets();
         AudioPlayer.loadExternalSounds();
 
         //? if fabric {
@@ -67,6 +67,14 @@ public class Main {
     //? }
 
     private static void tickClient(Minecraft client) {
+        if (!presetsLoaded) {
+            if (!client.isGameLoadFinished()) {
+                return;
+            }
+
+            Storage.loadAllPresets();
+            presetsLoaded = true;
+        }
         KeyBinds.tick(client);
         BindExecutor.tick();
         BindHandler.tick();
@@ -89,11 +97,7 @@ public class Main {
     *///?}
 
     public static Identifier idSprite(String path) {
-        //? if >=1.20.2 {
-        return id(path);
-        //?} else {
-        /*return id("textures/gui/sprites/" + path + ".png");*/
-        //?}
+        return id("textures/gui/sprites/" + path + ".png");
     }
 
     public static String getModVersion() {

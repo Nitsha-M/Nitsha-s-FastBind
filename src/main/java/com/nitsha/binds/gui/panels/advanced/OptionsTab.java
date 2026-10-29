@@ -1,4 +1,4 @@
-package com.nitsha.binds.guinew.panel.advanced;
+package com.nitsha.binds.gui.panels.advanced;
 
 import com.nitsha.binds.configs.KeyBinds;
 import com.nitsha.binds.configs.Storage;
@@ -6,12 +6,11 @@ import com.nitsha.binds.configs.dto.option.HiddenField;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.utils.AnimatedSprite;
 import com.nitsha.binds.gui.utils.DrawElement;
-import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.window.ScrollableWindow;
-import com.nitsha.binds.guinew.utils.Textures;
-import com.nitsha.binds.guinew.widget.button.BedrockIconTextButton;
-import com.nitsha.binds.guinew.widget.button.SmallTextButton;
-import com.nitsha.binds.guinew.widget.button.ToggleButton;
+import com.nitsha.binds.gui.utils.Textures;
+import com.nitsha.binds.gui.widget.button.BedrockIconTextButton;
+import com.nitsha.binds.gui.widget.button.SmallTextButton;
+import com.nitsha.binds.gui.widget.button.ToggleButton;
 import com.nitsha.binds.multiversions.NitshaContainer;
 import com.nitsha.binds.multiversions.NitshaCraft;
 import com.nitsha.binds.multiversions.RenderUtils;
@@ -28,7 +27,9 @@ public class OptionsTab extends NitshaContainer {
     private final ScrollableWindow optionsList;
     private final BindsEditor screen;
     private final BedrockIconTextButton boosty;
+    private final BedrockIconTextButton wiki;
     private final String boostyUrl = "https://boosty.to/nitsha_m";
+    private final String wikiUrl = "https://github.com/Nitsha-M/Nitsha-s-FastBind/wiki";
     private final AnimatedSprite catLook;
 
     public OptionsTab(BindsEditor screen, int x, int y, int width, int height) {
@@ -49,16 +50,28 @@ public class OptionsTab extends NitshaContainer {
             loadOptions();
         }));
 
-        this.optionsList = new ScrollableWindow(2, 20, this.getX(), this.getY() + 20, getWidth() - 4, getHeight() - 27 - 20 - 8, false);
+        this.optionsList = new ScrollableWindow(2, 20, getWidth() - 4, getHeight() - 27 - 20 - 8, false);
 
-        this.boosty = new BedrockIconTextButton(Textures.ICON_BOOSTY, TextUtils.small(TextUtils.translatable("nitsha.binds.advances.options.support.boosty")), 4, getHeight() - 25, getWidth() - 8, 20, true, () -> {
+        this.wiki = new BedrockIconTextButton(Textures.ICON_WIKI, TextUtils.small(TextUtils.translatable("nitsha.binds.advances.options.wiki")), 4, getHeight() - 25, 60, 20, true, () -> {
+            NitshaCraft.confirmLink(wikiUrl);
+        });
+        this.wiki.setColors(0xFF88899A, 0xFFA5A6B2, 0xFFFFFFFF, 0xFFFFFFFF);
+        this.wiki.setButtonDirection(1);
+
+        this.boosty = new BedrockIconTextButton(Textures.ICON_BOOSTY, TextUtils.small(TextUtils.translatable("nitsha.binds.advances.options.support.boosty")), 4 + 60, getHeight() - 25, getWidth() - 8 - 60, 20, true, () -> {
             NitshaCraft.confirmLink(boostyUrl);
         });
         this.boosty.setColors(0xFFF15F2C, 0xFFFF7D4A, 0xFFFFFFFF, 0xFFFFFFFF);
         addShine(this.boosty);
+        this.boosty.setButtonDirection(2);
+
+        this.wiki.setNeighbor(this.boosty);
+        this.boosty.setNeighbor(this.wiki);
+
 
         loadOptions();
         this.addElement(this.boosty);
+        this.addElement(this.wiki);
         this.addElement(this.optionsList);
 
         catLook = new AnimatedSprite(24, 14, Textures.CAT_LOOK, 0, false, 0, 0, 480, 24, 100, 504, 14);
@@ -105,7 +118,7 @@ public class OptionsTab extends NitshaContainer {
                     MutableComponent text;
                     if (field.getName().equals("holdToOpen")) {
                         text = TextUtils.translatable("nitsha.binds.advances.options.holdToOpen",
-                                GUIUtils.truncateString(TextUtils.translatable(KeyBinds.BINDS.getTranslatedKeyMessage().getString()).getString(), 6));
+                                RenderUtils.truncateString(TextUtils.translatable(KeyBinds.BINDS.getTranslatedKeyMessage().getString()).getString(), 6));
                     } else {
                         text = TextUtils.translatable(langKey);
                     }
@@ -141,7 +154,7 @@ public class OptionsTab extends NitshaContainer {
         int startX = x - texW;
         int endX = x + width;
         int currentX = (int) (startX + (endX - startX) * progress);
-        GUIUtils.customScissor(ctx, x, y, width, height, () -> {
+        RenderUtils.customScissor(ctx, x, y, width, height, () -> {
             RenderUtils.drawTexture(ctx, texture, currentX, y, 0, 0, texW, texH, texW, texH);
         });
     }
@@ -150,6 +163,7 @@ public class OptionsTab extends NitshaContainer {
         this.setHeight(newH);
         this.optionsList.setHeight(newH - 27 - 20 - 8);
         this.boosty.setY(newH - 25);
+        this.wiki.setY(newH - 25);
         addShine(this.boosty);
     }
 }

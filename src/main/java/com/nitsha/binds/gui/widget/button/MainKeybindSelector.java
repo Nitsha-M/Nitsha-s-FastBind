@@ -1,13 +1,11 @@
-package com.nitsha.binds.guinew.widget.button;
+package com.nitsha.binds.gui.widget.button;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.multiversions.NitshaInput;
+import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.input.InputWithModifiers;
-import net.minecraft.client.input.KeyEvent;
 
 public class MainKeybindSelector extends BedrockButton {
     private static MainKeybindSelector focusedKeybind = null;
@@ -38,7 +36,7 @@ public class MainKeybindSelector extends BedrockButton {
     @Override
     public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         int maxSymbols = (this.getWidth() / 7) - (isPressed() ? 4 : 0);
-        String displayName = (isPressed()) ? "> " + GUIUtils.truncateString(baseName, maxSymbols) + " <" : GUIUtils.truncateString(baseName, maxSymbols);
+        String displayName = (isPressed()) ? "> " + RenderUtils.truncateString(baseName, maxSymbols) + " <" : RenderUtils.truncateString(baseName, maxSymbols);
 
         int btnColor = isPressed() ? 0xFF07938d : 0xFFFFFFFF;
         int textColor = isPressed() ? 0xFFFFFFFF : 0xFF212121;

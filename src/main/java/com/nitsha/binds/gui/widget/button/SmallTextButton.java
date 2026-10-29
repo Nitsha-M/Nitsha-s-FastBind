@@ -2,26 +2,17 @@ package com.nitsha.binds.gui.widget.button;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.nitsha.binds.Main;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.multiversions.NitshaAbstractWidget;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-//? if >=1.17 {
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-//?}
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
-//? if >=1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.InputWithModifiers;
-import com.mojang.blaze3d.platform.Window;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;
-//? }
 
-public class SmallTextButton extends AbstractButton {
+public class SmallTextButton extends NitshaAbstractWidget {
+
     private Identifier NORMAL, HOVER;
     private final Runnable onClick;
     private final MutableComponent name;
@@ -33,7 +24,6 @@ public class SmallTextButton extends AbstractButton {
     protected int hoverTextColor;
     private final int iconSize;
 
-    protected int x, y, width, height;
     protected boolean isEnabled = true;
     protected boolean toggled = false;
 
@@ -42,10 +32,9 @@ public class SmallTextButton extends AbstractButton {
     public SmallTextButton(MutableComponent name, int x, int y, int iconSize, int color, int hoverColor, int textColor, int hoverTextColor, int width, String align,
                            Identifier icon, Runnable onClick) {
         super(x, y, 0, 9, TextUtils.empty());
-        this.name = name;
+        this.name = TextUtils.small(name);
         this.onClick = onClick;
         this.icon = icon;
-        this.y = y;
         this.color = color;
         this.hoverColor = hoverColor;
         this.textColor = textColor;
@@ -56,16 +45,16 @@ public class SmallTextButton extends AbstractButton {
 
         Font font = Minecraft.getInstance().font;
         int iconWidth = (icon != null) ? iconSize + 1 : 0;
-        int newWidth = iconWidth + font.width(name) + 4;
+        int newWidth = iconWidth + font.width(this.name) + 4;
         this.width = (width > 0) ? width : newWidth;
         this.height = 9;
 
         switch (align) {
             case "left":
-                this.x = x;
+                this.setX(x);
                 break;
             case "right":
-                this.x = x - getWidth();
+                this.setX(x - getWidth());
                 break;
         }
     }
@@ -92,18 +81,6 @@ public class SmallTextButton extends AbstractButton {
         this(name, x, y, 5, color, color, 0xFFFFFFFF, 0xFFFFFFFF, width, align, icon, onClick);
     }
 
-    @Override
-    public void setX(int newX) {
-        super.setX(newX);
-        this.x = newX;
-    }
-
-    @Override
-    public void setY(int newY) {
-        super.setY(newY);
-        this.y = newY;
-    }
-
     public Identifier getHoverTexture() {
         return HOVER;
     }
@@ -112,21 +89,13 @@ public class SmallTextButton extends AbstractButton {
         return NORMAL;
     }
 
-    public int getX() { return this.x; }
-    public int getY() { return this.y; }
-    public void setWidth(int newWidth) { this.width = newWidth; }
-    public void setHeight(int newHeight) { this.height = newHeight; }
-    public int getWidth() { return this.width; }
-    public int getHeight() { return this.height; }
-    public boolean isHovered() { return this.isHovered; }
     public boolean isEnabled() { return this.isEnabled; }
     public void setEnabled(boolean enabled) { this.isEnabled = enabled; }
     public void setIcon(Identifier icon) { this.icon = icon; }
     public boolean isToggled() { return toggled; }
     public void setToggled(boolean toggled) { this.toggled = toggled; }
-
     protected boolean isActiveState() {
-        return (isHovered && isEnabled) || toggled;
+        return (isHovered() && isEnabled) || toggled;
     }
 
     public void setColors(int btnColor, int btnHoverColor, int textColor, int textHoverColor) {
@@ -137,28 +106,32 @@ public class SmallTextButton extends AbstractButton {
     }
 
     @Override
-    public void onPress(InputWithModifiers inputWithModifiers) {}
+    public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        super.onRender(ctx, mouseX, mouseY, delta);
 
-    @Override
-    public void extractContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        this.isHovered = isMouseOver(mouseX, mouseY);
+        if (!visible) return;
+
+        renderContents(ctx, mouseX, mouseY, delta);
+    }
+
+    protected void renderContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         Font font = Minecraft.getInstance().font;
         int textWidth = font.width(name);
         int iconWidth = (icon != null) ? this.iconSize + 1 : 0;
 
-        GUIUtils.drawResizableBox(ctx, isActiveState() ? HOVER : NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5, isActiveState() ? hoverColor : color);
+        RenderUtils.drawResizableBox(ctx, isActiveState() ? HOVER : NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5, isActiveState() ? hoverColor : color);
 
         int contentX = this.getX() + ((getWidth() / 2) - ((iconWidth + textWidth) / 2));
 
         if (icon != null) {
-            GUIUtils.adaptiveDrawTexture(ctx, icon, contentX, this.getY() + ((this.height / 2) - (iconSize / 2)), 0, 0, iconSize, iconSize, iconSize, iconSize, isActiveState() ? hoverTextColor : textColor);
+            RenderUtils.drawTexture(ctx, icon, contentX, this.getY() + ((this.height / 2) - (iconSize / 2)), 0, 0, iconSize, iconSize, iconSize, iconSize, isActiveState() ? hoverTextColor : textColor);
             contentX += iconWidth;
         }
 
-        GUIUtils.addText(ctx, name, 0, contentX, this.getY() + (this.height / 2), "left", "center", isActiveState() ? hoverTextColor : textColor, false);
+        RenderUtils.drawText(ctx, name, 0, contentX, this.getY() + (this.height / 2), "left", "center", isActiveState() ? hoverTextColor : textColor, false);
 
         if (!this.isEnabled) {
-            GUIUtils.drawResizableBox(ctx, NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5, 0x66000000);
+            RenderUtils.drawResizableBox(ctx, NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5, 0x66000000);
         }
     }
 
@@ -171,34 +144,13 @@ public class SmallTextButton extends AbstractButton {
     }
 
     @Override
-            //? if >=1.21.9 {
-    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        int button = event.buttonInfo().button();
-        double mouseX = event.x();
-        double mouseY = event.y();
-        if (button == InputConstants.MOUSE_BUTTON_LEFT && isMouseOver(mouseX, mouseY) && this.isEnabled) {
+    public boolean onMouseClicked(double mouseX, double mouseY, int button) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && visible && isMouseOver(mouseX, mouseY) && this.isEnabled) {
             this.playDownSound(Minecraft.getInstance().getSoundManager());
             this.onClick.run();
             return true;
         }
-        return false;
-    }
-            //? } else {
-    /*public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == InputConstants.MOUSE_BUTTON_LEFT && isMouseOver(mouseX, mouseY) && this.isEnabled) {
-            this.playDownSound(Minecraft.getInstance().getSoundManager());
-            this.onClick.run();
-            return true;
-        }
-        return false;
-    }
-    *///? }
 
-    //? if >=1.19.3 {
-    @Override
-    protected void updateWidgetNarration(NarrationElementOutput builder) {}
-    //? } else if >=1.17 {
-    /*@Override
-    public void updateNarration(NarrationElementOutput builder) { }*/
-    //? }
+        return false;
+    }
 }

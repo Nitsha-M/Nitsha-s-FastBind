@@ -1,8 +1,8 @@
 package com.nitsha.binds.gui.widget;
 
 import com.nitsha.binds.Main;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.guinew.widget.button.BedrockButton;
+import com.nitsha.binds.gui.widget.button.BedrockButton;
+import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
@@ -36,7 +36,7 @@ public abstract class KeySelector extends BedrockButton {
         super.onRender(ctx, mouseX, mouseY, delta);
 
         boolean isHovered = isMouseOver(mouseX, mouseY);
-        GUIUtils.adaptiveDrawTexture(ctx, SELECT, this.getX() + 4, this.getY() + 7 + Math.round(this.getOffsetY()), 0, 0, 6, 5, 6, 5, (isHovered || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor());
+        RenderUtils.drawTexture(ctx, SELECT, this.getX() + 4, this.getY() + 7 + Math.round(this.getOffsetY()), 0, 0, 6, 5, 6, 5, (isHovered || this.isPressed()) ? this.getTextHoverColor() : this.getTextColor());
     }
 
     protected void updateName() {

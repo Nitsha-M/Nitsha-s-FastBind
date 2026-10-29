@@ -5,6 +5,10 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.Minecraft;
 
+//? if <26.3 {
+/*import org.lwjgl.glfw.GLFW;*/
+//? }
+
 //? if fabric {
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 //? }
@@ -17,6 +21,16 @@ import net.minecraft.client.input.CharacterEvent;
 
 public final class NitshaInput {
     private NitshaInput() {
+    }
+
+    public static boolean hasShiftDown() {
+        //? if >=26.3 {
+        return InputConstants.isKeyDown(InputConstants.KEY_LSHIFT) || InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);
+        //? } else if >=1.21.9 {
+        /*return InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_RIGHT_SHIFT);*/
+        //? } else {
+        /*return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_KEY_RIGHT_SHIFT);*/
+        //? }
     }
 
     public static boolean isKeyDown(KeyMapping mapping) {

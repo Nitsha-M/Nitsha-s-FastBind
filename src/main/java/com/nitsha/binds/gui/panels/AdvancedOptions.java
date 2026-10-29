@@ -1,20 +1,18 @@
-package com.nitsha.binds.guinew.panel;
+package com.nitsha.binds.gui.panels;
 
 import com.nitsha.binds.configs.Storage;
-import com.nitsha.binds.guinew.panel.advanced.VariablesTab;
+import com.nitsha.binds.gui.panels.advanced.VariablesTab;
 import com.nitsha.binds.gui.screen.BindsEditor;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.gui.widget.button.TexturedButton;
 import com.nitsha.binds.gui.widget.window.ScrollableWindow;
-import com.nitsha.binds.guinew.panel.advanced.ActionsTab;
-import com.nitsha.binds.guinew.panel.advanced.IconTab;
-import com.nitsha.binds.guinew.panel.advanced.OptionsTab;
-import com.nitsha.binds.guinew.utils.Textures;
-import com.nitsha.binds.guinew.widget.button.TabButton;
-import com.nitsha.binds.guinew.widget.window.AnimatedWindow;
+import com.nitsha.binds.gui.panels.advanced.ActionsTab;
+import com.nitsha.binds.gui.panels.advanced.IconTab;
+import com.nitsha.binds.gui.panels.advanced.OptionsTab;
+import com.nitsha.binds.gui.utils.Textures;
+import com.nitsha.binds.gui.widget.button.TabButton;
+import com.nitsha.binds.gui.widget.window.AnimatedWindow;
 import com.nitsha.binds.multiversions.NitshaInput;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
@@ -41,7 +39,7 @@ public class AdvancedOptions extends AnimatedWindow {
         tabsBtn.clear();
         this.screen = screen;
 
-        this.tabList = new ScrollableWindow(4, -16, 4, -16, this.getWidth() - 9, 16, true);
+        this.tabList = new ScrollableWindow(4, -16, this.getWidth() - 9, 16, true);
         this.tabList.setShowScrollbar(false);
 
         String[] tabKeys = {"actions", "icon", "variables", "options"};
@@ -52,6 +50,7 @@ public class AdvancedOptions extends AnimatedWindow {
             TabButton tab = new TabButton(bX, 0, i == 0,
                     TextUtils.translatable("nitsha.binds.advances.tab." + tabKeys[i]),
                     b -> selectTab(index));
+            tab.setScrollWindow(this.tabList);
             tabsBtn.add(tab);
             prev = tab;
         }
@@ -63,7 +62,7 @@ public class AdvancedOptions extends AnimatedWindow {
         }
         this.tabList.setScrollableArea(totalW);
 
-        this.changeHeight = GUIUtils.createTexturedBtn(getWidth() + 4, 0, 9, 9, new Identifier[]{Textures.RESIZE, Textures.RESIZE_HOVER}, button -> {
+        this.changeHeight = new TexturedButton(getWidth() + 4, 0, 9, 9, Textures.RESIZE, Textures.RESIZE_HOVER, button -> {
             Storage.options.fullHeightEditor = !Storage.options.fullHeightEditor;
 
             int newY = (Storage.options.fullHeightEditor) ? 16 : ((screen.height - 190) / 2);
@@ -71,9 +70,6 @@ public class AdvancedOptions extends AnimatedWindow {
 
             this.setHeight(newH);
             this.setY(newY);
-
-            this.actionsTab.updateHeight(newH);
-            this.optionsTab.updateHeight(newH);
 
             Storage.saveModOptions();
         });
@@ -131,24 +127,15 @@ public class AdvancedOptions extends AnimatedWindow {
     }
 
     @Override
-    public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        int adjX = mouseX - this.getX();
-        int adjY = mouseY - this.getYOffset();
+    protected void updateLayout() {
+        int currentHeight = getHeight();
 
-        if (this.actionsTab.getAddNewAction() != null && this.actionsTab.getAddNewAction().isMouseInside(adjX, adjY) && this.actionsTab.getAddNewAction().isOpen() && currentTab == 0) {
-            super.onRender(ctx, -10000, -10000, delta);
-        } else {
-            super.onRender(ctx, mouseX, mouseY, delta);
-        }
+        if (actionsTab.getHeight() == currentHeight) return;
 
-        GUIUtils.matricesUtil(ctx, getX(), getYOffset(), 2, () -> {
-            if (isVisible() && currentTab == 0 && this.actionsTab.getAddNewAction() != null)
-                //? if >=26.1 {
-                 this.actionsTab.getAddNewAction().extractRenderState(ctx, adjX, adjY, delta);
-                //? } else {
-                /*this.actionsTab.getAddNewAction().render(ctx, adjX, adjY, delta);
-            *///? }
-        });
+        actionsTab.updateHeight(currentHeight);
+        iconTab.setHeight(currentHeight);
+        variablesTab.updateHeight(currentHeight);
+        optionsTab.updateHeight(currentHeight);
     }
 
     public boolean isMouseInside(double mouseX, double mouseY) {

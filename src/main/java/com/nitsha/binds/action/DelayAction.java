@@ -70,7 +70,7 @@ public class DelayAction extends ActionType<DelayActionData> {
 
     @Override
     public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        field.extractContents(ctx, mouseX, mouseY, delta);
+        field.onRender(ctx, mouseX, mouseY, delta);
         RenderUtils.drawText(ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.advances.actions.delayDesс")), 0,
                 x + 2, y + 8, "top", "left", 0xFF212121, false);
     }

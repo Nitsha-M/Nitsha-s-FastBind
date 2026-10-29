@@ -1,8 +1,8 @@
 package com.nitsha.binds.gui.widget.list;
 
 import com.nitsha.binds.gui.modals.SelectKeyEvent;
-import com.nitsha.binds.gui.utils.GUIUtils;
-import com.nitsha.binds.gui.utils.TextUtils;
+import com.nitsha.binds.multiversions.RenderUtils;
+import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -52,11 +52,11 @@ public class KeyEventItem extends AbstractButton {
     @Override
     public void extractContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         if (index % 2 == 0)
-            GUIUtils.drawFill(ctx, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x4DFFFFFF);
+            RenderUtils.drawFill(ctx, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x4DFFFFFF);
         if (isHovered)
-            GUIUtils.drawFill(ctx, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x1AFFFFFF);
+            RenderUtils.drawFill(ctx, getX() - 4, getY(), getX() + getWidth() + 4, getY() + getHeight(), 0x1AFFFFFF);
 
-        GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.truncateString(TextUtils.translatable(value).getString(), 26)), 0,
+        RenderUtils.drawText(ctx, TextUtils.literal(RenderUtils.truncateString(TextUtils.translatable(value).getString(), 26)), 0,
                 4, getY() + 3, "top", "left", 0xFF212121, false);
     }
 

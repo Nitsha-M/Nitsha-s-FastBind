@@ -1,18 +1,15 @@
 package com.nitsha.binds.gui.widget.list;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.panels.NewAction;
-import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.gui.utils.Textures;
 import com.nitsha.binds.multiversions.NitshaAbstractWidget;
 import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
 
 public class NewActionItem extends NitshaAbstractWidget {
-    private static final Identifier ADD_NEW = Main.id("textures/gui/test/add_new_icon.png");
 
     private final NewAction parent;
     private final String name;
@@ -33,8 +30,8 @@ public class NewActionItem extends NitshaAbstractWidget {
     public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         RenderUtils.drawFill(ctx, getX() + 3, getY() + 5, getX() + 5, getY() + 12, color);
         RenderUtils.drawFill(ctx, getX() + 2, getY(), getX() + getWidth() - 2, getY() + 1, 0xFF555555);
-        RenderUtils.drawText(ctx, TextUtils.small(TextUtils.literal(GUIUtils.truncateString(name, 25))), 0, getX() + 7, getY() + 8, "left", "center", 0xFFFFFFFF, false);
-        RenderUtils.drawTexture(ctx, ADD_NEW, getX() + getWidth() - 10, getY() + 6, 0, 0, 5, 5, 5, 5);
+        RenderUtils.drawText(ctx, TextUtils.small(TextUtils.literal(RenderUtils.truncateString(name, 25))), 0, getX() + 7, getY() + 8, "left", "center", 0xFFFFFFFF, false);
+        RenderUtils.drawTexture(ctx, Textures.ICON_ADD_NEW, getX() + getWidth() - 10, getY() + 6, 0, 0, 5, 5, 5, 5);
 
         if (isMouseOver(mouseX, mouseY) && parent.isOpen()) {
             RenderUtils.drawFill(ctx, getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x0DFFFFFF);

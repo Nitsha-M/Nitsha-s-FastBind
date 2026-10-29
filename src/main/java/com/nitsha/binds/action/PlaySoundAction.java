@@ -1,12 +1,12 @@
 package com.nitsha.binds.action;
 
 import com.nitsha.binds.FBLogger;
-import com.nitsha.binds.gui.utils.GUIUtils;
 import com.nitsha.binds.gui.widget.KeySelector;
 import com.nitsha.binds.gui.widget.button.SmallToggleButton;
-import com.nitsha.binds.guinew.utils.Textures;
-import com.nitsha.binds.guinew.widget.Slider;
-import com.nitsha.binds.guinew.widget.button.BedrockIconButton;
+import com.nitsha.binds.gui.utils.Textures;
+import com.nitsha.binds.gui.widget.Slider;
+import com.nitsha.binds.gui.widget.button.BedrockIconButton;
+import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.EventBus;
@@ -18,17 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.function.LongConsumer;
-//? if >=1.21.9 {
-import net.minecraft.client.input.InputWithModifiers;
-//? }
-
-//? if >=1.21.9 {
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.InputWithModifiers;
-import com.mojang.blaze3d.platform.Window;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.CharacterEvent;
-//? }
 
 import com.nitsha.binds.configs.dto.actions.AllActionsData.PlaySoundActionData;
 import net.minecraft.network.chat.Component;
@@ -103,7 +92,7 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
                 this.isExternal = (boolean) d[1];
                 play(false);
             });
-            EventBus.emit("selectSound.open", null);
+            EventBus.emit("selectSound.open");
         })  {
             @Override
             protected void updateName() {
@@ -112,7 +101,7 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
                     Component name = TextUtils.literal(this.getSelectedItem());
                     int maxWidth = this.width - 8;
                     int avgCharWidth = 7;
-                    setName(GUIUtils.truncateString(name.getString(), maxWidth / avgCharWidth));
+                    setText(TextUtils.literal(RenderUtils.truncateString(name.getString(), maxWidth / avgCharWidth)));
                 }
             }
         };
@@ -154,30 +143,30 @@ public class PlaySoundAction extends ActionType<PlaySoundActionData> {
 
     @Override
     public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.playSound"), 0,
+        RenderUtils.drawText(ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.advances.actions.playSound")), 0,
                 x + 2, y + 12, "left", "center", 0xFF212121, false);
 
-        GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.volume"), 0,
+        RenderUtils.drawText(ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.advances.actions.volume")), 0,
                 x + 2, y + 52, "left", "center", 0xFF212121, false);
 
-        GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.pitch"), 0,
+        RenderUtils.drawText(ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.advances.actions.pitch")), 0,
                 x + 2, y + 67, "left", "center", 0xFF212121, false);
 
-        GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.slot"), 0,
+        RenderUtils.drawText(ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.advances.actions.slot")), 0,
                 x + 2, y + 82, "left", "center", 0xFF212121, false);
 
         // Volume
-        GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.toSuper(String.valueOf(this.volumeSlider.getValue()))), 0,
-                x + width - 70 - 2, y + 54, "right", "center", 0xFF212121, false);
+        RenderUtils.drawText(ctx, TextUtils.small(TextUtils.literal(String.valueOf(this.volumeSlider.getValue()))), 0,
+                x + width - 70 - 2, y + 52, "right", "center", 0xFF212121, false);
         // Pitch
-        GUIUtils.addText(ctx, TextUtils.literal(GUIUtils.toSuper(String.valueOf(this.pitchSlider.getValue()))), 0,
-                x + width - 70 - 2, y + 69, "right", "center", 0xFF212121, false);
+        RenderUtils.drawText(ctx, TextUtils.small(TextUtils.literal(String.valueOf(this.pitchSlider.getValue()))), 0,
+                x + width - 70 - 2, y + 67, "right", "center", 0xFF212121, false);
 
-        selector.extractContents(ctx, mouseX, mouseY, delta);
+        selector.onRender(ctx, mouseX, mouseY, delta);
         volumeSlider.onRender(ctx, mouseX, mouseY, delta);
         pitchSlider.onRender(ctx, mouseX, mouseY, delta);
         playButton.onRender(ctx, mouseX, mouseY, delta);
-        slotBtns.forEach(btn -> btn.extractContents(ctx, mouseX, mouseY, delta));
+        slotBtns.forEach(btn -> btn.onRender(ctx, mouseX, mouseY, delta));
     }
 
     @Override

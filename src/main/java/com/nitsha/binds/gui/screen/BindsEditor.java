@@ -14,17 +14,12 @@ import com.nitsha.binds.gui.modals.SelectSound;
 import com.nitsha.binds.gui.panels.*;
 import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.gui.widget.window.ModalWindow;
-import com.nitsha.binds.guinew.panel.AdvancedOptions;
-import com.nitsha.binds.guinew.widget.button.MainKeybindSelector;
-import com.nitsha.binds.multiversions.NitshaCraft;
-import com.nitsha.binds.multiversions.NitshaInput;
-import com.nitsha.binds.multiversions.NitshaScreen;
-import com.nitsha.binds.multiversions.TextUtils;
+import com.nitsha.binds.gui.panels.AdvancedOptions;
+import com.nitsha.binds.gui.widget.button.MainKeybindSelector;
+import com.nitsha.binds.multiversions.*;
 import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.EventBus;
-import com.nitsha.binds.utils.RenderUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import com.nitsha.binds.utils.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.Identifier;
@@ -77,6 +72,7 @@ public class BindsEditor extends NitshaScreen {
         //?} else {
         /*this.children().clear();*/
         //? }
+        modalWindows.clear();
         this.centerX = (this.width / 2) - (TEXTURE_WIDTH / 2);
         this.centerY = (this.height - TEXTURE_HEIGHT) / 2;
 
@@ -114,6 +110,8 @@ public class BindsEditor extends NitshaScreen {
         //?} else {
         // this.addWidget(window_BindsList);
         //?}
+
+//        this.addNWidget(window_BindsList);
 
         // Preset selector and editor
         window_PresetSelector = new PresetSelector(this, centerX + 7 - 100, centerY - 19, 127, 17,250);
@@ -165,15 +163,15 @@ public class BindsEditor extends NitshaScreen {
         selectBind();
         window_BindsList.updateSelected(ItemsMapper.getItemStack(getCBind().icon));
 
-        EventBus.on("selectKeyEvent.open", (Void v) -> {
+        EventBus.on("selectKeyEvent.open", (Object[] data) -> {
             modal_SelectKeyEvent.open(() -> {});
         });
 
-        EventBus.on("selectIcon.open", (Void v) -> {
+        EventBus.on("selectIcon.open", (Object[] data) -> {
             modal_SelectIcon.open(() -> {});
         });
 
-        EventBus.on("selectSound.open", (Void v) -> {
+        EventBus.on("selectSound.open", (Object[] data) -> {
             modal_SelectSound.open(() -> {});
         });
     }
@@ -262,6 +260,21 @@ public class BindsEditor extends NitshaScreen {
     }
 
     // Functions
+    public void selectPreset(String id) {
+        List<PresetData> presets = Storage.getSortedPresets();
+
+        for (int i = 0; i < presets.size(); i++) {
+            if (presets.get(i).id.equals(id)) {
+                selectPreset(i);
+                return;
+            }
+        }
+
+        if (!presets.isEmpty()) {
+            selectPreset(0);
+        }
+    }
+
     public void selectPreset(int i) {
         List<PresetData> sortedPresets = Storage.getSortedPresets();
         if (i >= 0 && i < sortedPresets.size()) {
@@ -269,11 +282,11 @@ public class BindsEditor extends NitshaScreen {
             activePresetId = activePreset.id;
             currentPage = 0;
             setActiveBind(0);
-            
+
             Storage.options.lastPresetId = activePresetId;
             Storage.options.lastPageIndex = currentPage;
             Storage.saveModOptions();
-            
+
             window_BindsList.generateButtons(7, 31);
             selectBind();
         }
@@ -443,66 +456,33 @@ public class BindsEditor extends NitshaScreen {
         }
     }
 
-    // Render
     @Override
-     public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        //? if >=1.20.2 {
-        /*? if <1.21.6 { *//*this.renderBackground(ctx, mouseX, mouseY, delta); *//*? } */
-        //? } else if >=1.19.4 {
-        /* if (this.minecraft.level == null) this.renderBackground(ctx); */
-        //? } else {
-        /* if (this.minecraft.level == null) this.renderBackground(ctx); */
-        //? }
-        //? if >=26.1 {
-        
+    public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         boolean anyModalOpen = false;
-        for (ModalWindow m : modalWindows) { if (m.isVisible()) { anyModalOpen = true; break; } }
-        
-        for (GuiEventListener element : children()) {
-            Renderable dr = RenderUtils.wrapRenderable(element);
-            if (dr != null) {
-                if (element instanceof PresetSelector) {
-                    PresetSelector pS = (PresetSelector) element;
-                    pS.extractRenderState(ctx, mouseX, mouseY, delta);
-                } else if (element instanceof ModalWindow) {
-                    ModalWindow modal = (ModalWindow) element;
-                    if (modal.isVisible()) {
-                        modal.extractRenderState(ctx, mouseX, mouseY, delta);
-                    }
-                } else {
-                    if (window_PresetSelector.isMouseInside(mouseX, mouseY) && window_PresetSelector.isOpen() || anyModalOpen) {
-                        dr.extractRenderState(ctx, -10000, -10000, delta);
-                    } else {
-                        dr.extractRenderState(ctx, mouseX, mouseY, delta);
-                    }
-                }
+
+        for (ModalWindow modal : modalWindows) {
+            if (modal.isVisible()) {
+                anyModalOpen = true;
+                break;
             }
         }
-        //? } else {
-        /*boolean anyModalOpen = false;
-        for (ModalWindow m : modalWindows) { if (m.isVisible()) { anyModalOpen = true; break; } }
-        
+
+        boolean selectorHovered = window_PresetSelector.isOpen() && window_PresetSelector.isMouseInside(mouseX, mouseY);
+
         for (GuiEventListener element : children()) {
-            Renderable dr = RenderUtils.wrapRenderable(element);
-            if (dr != null) {
-                if (element instanceof PresetSelector) {
-                    PresetSelector pS = (PresetSelector) element;
-                    pS.render(ctx, mouseX, mouseY, delta);
-                } else if (element instanceof ModalWindow) {
-                    ModalWindow modal = (ModalWindow) element;
-                    if (modal.isVisible()) {
-                        modal.render(ctx, mouseX, mouseY, delta);
-                    }
-                } else {
-                    if (window_PresetSelector.isMouseInside(mouseX, mouseY) && window_PresetSelector.isOpen() || anyModalOpen) {
-                        dr.render(ctx, -10000, -10000, delta);
-                    } else {
-                        dr.render(ctx, mouseX, mouseY, delta);
-                    }
+            if (element instanceof ModalWindow modal) {
+                if (modal.isVisible()) {
+                    RenderUtils.renderElement(ctx, modal, mouseX, mouseY, delta);
                 }
+                continue;
             }
+
+            boolean blockHover = anyModalOpen || (selectorHovered && element != window_PresetSelector);
+            int elementMouseX = blockHover ? -10000 : mouseX;
+            int elementMouseY = blockHover ? -10000 : mouseY;
+
+            RenderUtils.renderElement(ctx, element, elementMouseX, elementMouseY, delta);
         }
-        *///? }
     }
 
     @Override

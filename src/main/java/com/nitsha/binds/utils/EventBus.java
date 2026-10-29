@@ -9,10 +9,8 @@ import java.util.function.Consumer;
 public class EventBus {
     private static final Map<String, List<Consumer<Object[]>>> listeners = new HashMap<>();
 
-    @SuppressWarnings("unchecked")
-    public static <T> void on(String event, Consumer<T> listener) {
-        listeners.computeIfAbsent(event, k -> new ArrayList<>())
-                .add(data -> listener.accept((T) data));
+    public static void on(String event, Consumer<Object[]> listener) {
+        listeners.computeIfAbsent(event, key -> new ArrayList<>()).add(listener);
     }
 
     public static void off(String event) {

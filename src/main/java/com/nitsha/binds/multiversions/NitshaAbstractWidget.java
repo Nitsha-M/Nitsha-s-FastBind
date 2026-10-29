@@ -169,8 +169,29 @@ public class NitshaAbstractWidget extends AbstractWidget {
     */
     //? }
 
-    protected void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) { }
+    //? if >=1.20.2 {
+    @Override
+    public final boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        return onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    }
+    //? } else {
+    /*@Override
+    public final boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        return onMouseScrolled(mouseX, mouseY, 0.0, amount);
+    }
+    *///? }
 
+    protected void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        this.isHovered = visible && isMouseOver(mouseX, mouseY);
+
+        //? if >=1.21.6 {
+        if (this.isHovered) {
+            int screenMouseX = (int) Math.floor(ctx.pose().m00() * mouseX + ctx.pose().m10() * mouseY + ctx.pose().m20());
+            int screenMouseY = (int) Math.floor(ctx.pose().m01() * mouseX + ctx.pose().m11() * mouseY + ctx.pose().m21());
+            this.isHovered = ctx.containsPointInScissor(screenMouseX, screenMouseY);
+        }
+        //? }
+    }
     protected boolean onMouseClicked(double mouseX, double mouseY, int button) {
         return false;
     }

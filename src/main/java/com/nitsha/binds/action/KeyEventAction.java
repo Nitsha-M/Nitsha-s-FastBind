@@ -1,9 +1,10 @@
 package com.nitsha.binds.action;
 
-import com.nitsha.binds.Main;import com.nitsha.binds.gui.utils.GUIUtils;
+import com.nitsha.binds.Main;
 import com.nitsha.binds.gui.widget.*;
-import com.nitsha.binds.guinew.widget.button.BedrockIconOptionButton;
+import com.nitsha.binds.gui.widget.button.BedrockIconOptionButton;
 import com.nitsha.binds.mixin.KeyMappingAccessor;
+import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.utils.EventBus;
 import net.minecraft.client.KeyMapping;
@@ -85,7 +86,7 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
             EventBus.on("selectKeyEvent.result", (Object[] d) -> {
                 selector.setSelectedItem((String) d[0]);
             });
-            EventBus.emit("selectKeyEvent.open", null);
+            EventBus.emit("selectKeyEvent.open");
         }) {
             @Override
             protected void updateName() {
@@ -94,7 +95,7 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
                     Component name = TextUtils.translatable(KeyMappingAccessor.binds$getAll().get(this.getSelectedItem()).getName());
                     int maxWidth = this.width - 8;
                     int avgCharWidth = 7;
-                    setText(TextUtils.literal(GUIUtils.truncateString(name.getString(), maxWidth / avgCharWidth)));
+                    setText(TextUtils.literal(RenderUtils.truncateString(name.getString(), maxWidth / avgCharWidth)));
                 }
             }
         };
@@ -136,19 +137,21 @@ public class KeyEventAction extends ActionType<KeyEventActionData> {
 
     @Override
     public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        String userLanguage = GUIUtils.getUL();
+        String userLanguage = RenderUtils.getUL();
         if (userLanguage.equals("ja_jp") || userLanguage.equals("uk_ua")) {
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent_1"), 0,
+            RenderUtils.drawText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent_1"), 0,
                     x + 2, y + 4, "top", "left", 0xFF212121, false);
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent_2"), 0,
+            RenderUtils.drawText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent_2"), 0,
                     x + 2, y + 12, "top", "left", 0xFF212121, false);
         } else {
-            GUIUtils.addText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent"), 0,
+            RenderUtils.drawText(ctx, TextUtils.translatable("nitsha.binds.advances.actions.keyEvent"), 0,
                     x + 2, y + 8, "top", "left", 0xFF212121, false);
         }
-        selector.onRender(ctx, mouseX, mouseY, delta);
-        msField.extractContents(ctx, mouseX, mouseY, delta);
-        modeButton.onRender(ctx, mouseX, mouseY, delta);
+        //$ if >=26.1 'selector.extractRenderState(ctx, mouseX, mouseY, delta);' else 'selector.render(ctx, mouseX, mouseY, delta);'
+        selector.extractRenderState(ctx, mouseX, mouseY, delta);
+        msField.onRender(ctx, mouseX, mouseY, delta);
+        //$ if >=26.1 'modeButton.extractRenderState(ctx, mouseX, mouseY, delta);' else 'modeButton.render(ctx, mouseX, mouseY, delta);'
+        modeButton.extractRenderState(ctx, mouseX, mouseY, delta);
     }
 
     @Override

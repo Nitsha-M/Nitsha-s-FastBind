@@ -81,6 +81,14 @@ public class AnimatedWindow extends NitshaContainer {
         targetX = x - delta;
     }
 
+    protected void setPositionImmediately(float x, float y) {
+        baseYOffset += y - this.y;
+        this.x = x;
+        this.y = y;
+        targetX = x;
+        targetY = y;
+    }
+
     public void updateY(float delta) {
         targetY = y - delta;
     }

@@ -1,6 +1,7 @@
 package com.nitsha.binds.action;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.nitsha.binds.multiversions.NitshaInput;
 import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.gui.widget.KeybindSelector;
@@ -14,9 +15,6 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.CharacterEvent;
 //? }
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-//? if <26.3 {
-/*import org.lwjgl.glfw.GLFW;
-*///? }
 
 import java.util.Map;
 import java.util.Queue;
@@ -48,33 +46,13 @@ public class KeyPressAction extends ActionType<KeybindActionData> {
         int keyCode = data.value;
         if (keyCode == 0) return;
 
-            //? if >=1.21.9 {
-            final int finalKeyCode = keyCode;
-            actions.add(() -> {
-                //$ if >=26.3 'InputConstants.Key key = InputConstants.Type.KEYBOARD.getOrCreate(finalKeyCode);' else 'InputConstants.Key key = InputConstants.Type.KEYSYM.getOrCreate(finalKeyCode);'
-                InputConstants.Key key = InputConstants.Type.KEYBOARD.getOrCreate(finalKeyCode);
-                KeyMapping.set(key, true);
-                KeyMapping.click(key);
-            });
-            actions.add(() -> setWaitUntil.accept(Util.getMillis() + 100));
-            actions.add(() -> {
-                //$ if >=26.3 'InputConstants.Key key = InputConstants.Type.KEYBOARD.getOrCreate(finalKeyCode);' else 'InputConstants.Key key = InputConstants.Type.KEYSYM.getOrCreate(finalKeyCode);'
-                InputConstants.Key key = InputConstants.Type.KEYBOARD.getOrCreate(finalKeyCode);
-                KeyMapping.set(key, false);
-            });
-            //? } else {
-            /*int scancode = GLFW.glfwGetKeyScancode(keyCode);
-            actions.add(() -> {
-                InputConstants.Key key = InputConstants.getKey(keyCode, scancode);
-                KeyMapping.set(key, true);
-                KeyMapping.click(key);
-            });
-            actions.add(() -> setWaitUntil.accept(Util.getMillis() + 100));
-            actions.add(() -> {
-                InputConstants.Key key = InputConstants.getKey(keyCode, scancode);
-                KeyMapping.set(key, false);
-            });
-            *///? }
+        InputConstants.Key key = NitshaInput.getInputKey(keyCode);
+        actions.add(() -> {
+            KeyMapping.set(key, true);
+            KeyMapping.click(key);
+        });
+        actions.add(() -> setWaitUntil.accept(Util.getMillis() + 100));
+        actions.add(() -> KeyMapping.set(key, false));
     }
 
     @Override

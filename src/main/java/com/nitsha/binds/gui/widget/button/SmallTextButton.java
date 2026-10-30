@@ -29,8 +29,7 @@ public class SmallTextButton extends NitshaAbstractWidget {
 
     private String dir;
 
-    public SmallTextButton(MutableComponent name, int x, int y, int iconSize, int color, int hoverColor, int textColor, int hoverTextColor, int width, String align,
-                           Identifier icon, Runnable onClick) {
+    public SmallTextButton(MutableComponent name, int x, int y, int iconSize, int color, int hoverColor, int textColor, int hoverTextColor, int width, String align, Identifier icon, Runnable onClick) {
         super(x, y, 0, 9, TextUtils.empty());
         this.name = TextUtils.small(name);
         this.onClick = onClick;
@@ -44,8 +43,9 @@ public class SmallTextButton extends NitshaAbstractWidget {
         setButtonDirection("");
 
         Font font = Minecraft.getInstance().font;
-        int iconWidth = (icon != null) ? iconSize + 1 : 0;
-        int newWidth = iconWidth + font.width(this.name) + 4;
+        int textWidth = font.width(this.name);
+        int iconWidth = icon != null ? iconSize + (textWidth > 0 ? 1 : 0) : 0;
+        int newWidth = iconWidth + textWidth + 4;
         this.width = (width > 0) ? width : newWidth;
         this.height = 9;
 
@@ -117,18 +117,20 @@ public class SmallTextButton extends NitshaAbstractWidget {
     protected void renderContents(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         Font font = Minecraft.getInstance().font;
         int textWidth = font.width(name);
-        int iconWidth = (icon != null) ? this.iconSize + 1 : 0;
+        int iconWidth = icon != null ? iconSize + (textWidth > 0 ? 1 : 0) : 0;
 
         RenderUtils.drawResizableBox(ctx, isActiveState() ? HOVER : NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5, isActiveState() ? hoverColor : color);
 
-        int contentX = this.getX() + ((getWidth() / 2) - ((iconWidth + textWidth) / 2));
+        int contentX = getX() + (getWidth() - iconWidth - textWidth) / 2;
 
         if (icon != null) {
-            RenderUtils.drawTexture(ctx, icon, contentX, this.getY() + ((this.height / 2) - (iconSize / 2)), 0, 0, iconSize, iconSize, iconSize, iconSize, isActiveState() ? hoverTextColor : textColor);
+            RenderUtils.drawTexture(ctx, icon, contentX, getY() + (getHeight() - iconSize) / 2, 0, 0, iconSize, iconSize, iconSize, iconSize, isActiveState() ? hoverTextColor : textColor);
             contentX += iconWidth;
         }
 
-        RenderUtils.drawText(ctx, name, 0, contentX, this.getY() + (this.height / 2), "left", "center", isActiveState() ? hoverTextColor : textColor, false);
+        if (textWidth > 0) {
+            RenderUtils.drawText(ctx, name, 0, contentX, this.getY() + (this.height / 2), "left", "center", isActiveState() ? hoverTextColor : textColor, false);
+        }
 
         if (!this.isEnabled) {
             RenderUtils.drawResizableBox(ctx, NORMAL, getX(), getY(), getWidth(), getHeight(), 2, 5, 0x66000000);

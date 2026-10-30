@@ -58,6 +58,10 @@ public class ItemButton extends NitshaAbstractWidget {
 
     @Override
     public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        super.onRender(ctx, mouseX, mouseY, delta);
+
+        if (!visible) return;
+
         RenderUtils.matricesUtil(ctx, 0, 0, 1, () -> {
             RenderUtils.drawTexture(ctx, texture, this.getX(), this.getY(), 0, 0, this.size, this.size, this.size * 3, this.size);
             try {

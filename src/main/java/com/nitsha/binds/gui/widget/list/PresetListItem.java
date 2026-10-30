@@ -81,6 +81,17 @@ public class PresetListItem extends NitshaAbstractWidget {
         this.moveBottom = new TexturedButton(x + 3, y + 12, 9, 9, Textures.ICON_SMALL_BOTTOM, Textures.ICON_SMALL_BOTTOM_HOVER, button -> {
             movePreset(1);
         });
+        setWidth(width);
+    }
+
+    @Override
+    public void setWidth(int width) {
+        super.setWidth(width);
+        newNameField.setWidth(width - 20);
+        editBtn.setX(getX() + width - 12);
+        saveBtn.setX(getX() + width - 12);
+        deleteBtn.setX(getX() + width - 22);
+        deleteConfBtn.setX(getX() + width - 32);
     }
 
     public void movePreset(int direction) {

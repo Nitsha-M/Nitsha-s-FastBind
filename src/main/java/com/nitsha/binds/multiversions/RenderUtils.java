@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import com.nitsha.binds.gui.utils.Textures;
 
 //? if >=1.19.3 {
 import net.minecraft.client.gui.components.Renderable;
@@ -19,6 +20,72 @@ import net.minecraft.client.gui.components.Renderable;
 public class RenderUtils {
 
     private static final Minecraft MC = Minecraft.getInstance();
+    private static Component pendingHoverTooltip;
+    private static int pendingHoverTooltipColor;
+    private static long frameId;
+
+    public static void beginFrame() {
+        frameId++;
+        clearHoverTooltip();
+    }
+
+    public static long getFrameId() {
+        return frameId;
+    }
+
+    public record WidgetBounds(int x, int y, int width, int height, boolean fullyVisible) {
+    }
+
+    public static WidgetBounds getWidgetBounds(GuiGraphicsExtractor ctx, int x, int y, int width, int height) {
+        var pose = ctx.pose();
+        float centerX = pose.m00() * (x + width / 2.0F) + pose.m10() * (y + height / 2.0F) + pose.m20();
+        float centerY = pose.m01() * (x + width / 2.0F) + pose.m11() * (y + height / 2.0F) + pose.m21();
+        float halfWidth = (Math.abs(pose.m00() * width) + Math.abs(pose.m10() * height)) / 2.0F;
+        float halfHeight = (Math.abs(pose.m01() * width) + Math.abs(pose.m11() * height)) / 2.0F;
+        int left = (int) Math.floor(centerX - halfWidth);
+        int top = (int) Math.floor(centerY - halfHeight);
+        int right = (int) Math.ceil(centerX + halfWidth);
+        int bottom = (int) Math.ceil(centerY + halfHeight);
+        boolean visible = ctx.containsPointInScissor(left, top) && ctx.containsPointInScissor(right - 1, bottom - 1);
+        return new WidgetBounds(left, top, right - left, bottom - top, visible);
+    }
+
+    public static void renderOverlay(GuiGraphicsExtractor ctx, GuiEventListener element, int mouseX, int mouseY, float delta) {
+        //? if >=1.21.6 {
+        ctx.nextStratum();
+        //? }
+        renderElement(ctx, element, mouseX, mouseY, delta);
+    }
+
+    public static void clearHoverTooltip() {
+        pendingHoverTooltip = null;
+    }
+
+    public static void queueHoverTooltip(Component tooltip, int backgroundColor) {
+        pendingHoverTooltip = tooltip;
+        pendingHoverTooltipColor = backgroundColor;
+    }
+
+    public static void renderQueuedHoverTooltip(GuiGraphicsExtractor ctx, int mouseX, int mouseY, int screenWidth, int screenHeight) {
+        Component tooltip = pendingHoverTooltip;
+        int backgroundColor = pendingHoverTooltipColor;
+        clearHoverTooltip();
+        if (tooltip == null) return;
+
+        int tooltipWidth = MC.font.width(tooltip);
+        int tooltipHeight = MC.font.lineHeight + 4;
+        int tx = Mth.clamp(mouseX - tooltipWidth - 4, 2, Math.max(2, screenWidth - tooltipWidth - 4));
+        int ty = Mth.clamp(mouseY - tooltipHeight - 2, 2, Math.max(2, screenHeight - tooltipHeight));
+
+        //? if >=1.21.6 {
+        ctx.nextStratum();
+        //? }
+
+        matricesUtil(ctx, tx, ty, 200, () -> {
+            drawResizableBox(ctx, Textures.TOOLTIP, -2, -2, tooltipWidth + 6, tooltipHeight, 3, 7, backgroundColor);
+            drawText(ctx, tooltip, 0, 2, 0, "left", "top", 0xFFFFFFFF, false);
+        });
+    }
 
     public static void renderElement(GuiGraphicsExtractor ctx, GuiEventListener element, int mouseX, int mouseY, float delta) {
         //? if >=1.19.3 {
@@ -53,6 +120,21 @@ public class RenderUtils {
         int g = (color >> 8) & 0xFF;
         int b = color & 0xFF;
         return (a << 24) | ((int)(r * factor) << 16) | ((int)(g * factor) << 8) | (int)(b * factor);
+    }
+
+    public static int lightenColor(int color, float factor) {
+        factor = Math.max(0.0F, Math.min(1.0F, factor));
+
+        int a = (color >>> 24) & 0xFF;
+        int r = (color >>> 16) & 0xFF;
+        int g = (color >>> 8) & 0xFF;
+        int b = color & 0xFF;
+
+        r = Math.round(r + (255 - r) * factor);
+        g = Math.round(g + (255 - g) * factor);
+        b = Math.round(b + (255 - b) * factor);
+
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     public static String getUL() {

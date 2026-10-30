@@ -25,6 +25,14 @@ public abstract class NitshaScreen extends Screen {
         //? }
     }
 
+    protected <T extends NitshaContainer> T addNWidget(T widget) {
+        //? if >=1.17 {
+        return this.addRenderableWidget(widget);
+        //? } else {
+        /*return this.addWidget(widget);*/
+        //? }
+    }
+
     protected void removeNWidget(AbstractWidget widget) {
         //? if >=1.17 {
         this.removeWidget(widget);
@@ -39,16 +47,27 @@ public abstract class NitshaScreen extends Screen {
     //? if >=26.1 {
     @Override
     public final void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        onRender(ctx, mouseX, mouseY, delta);
+        renderFrame(ctx, mouseX, mouseY, delta);
     }
     //? } else {
     /*
     @Override
     public final void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        onRender(ctx, mouseX, mouseY, delta);
+        renderFrame(ctx, mouseX, mouseY, delta);
     }
     */
     //? }
+
+    private void renderFrame(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        RenderUtils.beginFrame();
+
+        try {
+            onRender(ctx, mouseX, mouseY, delta);
+            RenderUtils.renderQueuedHoverTooltip(ctx, mouseX, mouseY, width, height);
+        } finally {
+            RenderUtils.clearHoverTooltip();
+        }
+    }
 
     //? if >=1.18.1 {
     @Override

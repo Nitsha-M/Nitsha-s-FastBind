@@ -19,7 +19,7 @@ public class IconTab extends NitshaContainer {
         super(x, y, width, height);
         this.screen = screen;
 
-        this.iconSelectorWindow = new IconSelectorWindow(4, 20, 162, 144, (stack, key) -> {
+        this.iconSelectorWindow = new IconSelectorWindow(4, 20, 162, Math.max(18, height - 46), (stack, key) -> {
             screen.getBasicOptionsWindow().getEditIcon().setItemStack(stack);
             this.iconSelectorWindow.updateButtons(key);
             BindsEditor.editIconBtnString = key;
@@ -53,5 +53,11 @@ public class IconTab extends NitshaContainer {
 
     public IconSelectorWindow getIconSelectorWindow() {
         return iconSelectorWindow;
+    }
+
+    @Override
+    public void setHeight(float height) {
+        super.setHeight(height);
+        iconSelectorWindow.setHeight(Math.max(18, height - 46));
     }
 }

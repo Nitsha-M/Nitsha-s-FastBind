@@ -61,5 +61,4 @@ public abstract class ActionType<T extends ActionData> implements GuiEventListen
     *///? }
     public boolean mouseScrolled(double mx, double my, double amount) { return false; }
 
-    public boolean isMouseOverColorButtons(double mouseX, double mouseY) { return false; }
 }

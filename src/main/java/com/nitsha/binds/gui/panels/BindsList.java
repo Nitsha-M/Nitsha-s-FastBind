@@ -17,6 +17,7 @@ import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.Identifier;
@@ -33,7 +34,7 @@ public class BindsList extends AnimatedWindow {
     private AbstractWidget closeBtn;
 
     // Textures
-    private static final Identifier FRAME = Main.id("textures/gui/test/frame.png");
+    private static final Identifier FRAME = Main.id("textures/gui/frame_bg.png");
     private static final Identifier ARROW_SPRITE = Main.id("textures/gui/test/arrow_animation.png");
     private static final Identifier ARROW_SPRITE_LEFT = Main.id("textures/gui/test/arrow_animation_left.png");
     private static final Identifier ARROW_L = Main.idSprite("arrow_left");
@@ -52,25 +53,23 @@ public class BindsList extends AnimatedWindow {
     private final List<ItemButton> buttons = new ArrayList<>();
 
     private final BindsEditor screen;
-
-    private SmallTextButton deleteBtn;
-    private long deleteConfirmationTime = 0;
-    private boolean deleteConfirmShown = false;
+    private final float anchorCenterX;
+    private final float anchorBottomY;
 
     public BindsList(BindsEditor screen, float x, int y, float width, int height, Identifier t1, Identifier t2, int delay) {
         super(x, y, width, height, t1, t2, delay);
         this.screen = screen;
+        anchorCenterX = x + width / 2.0F;
+        anchorBottomY = y + height;
         initUI(screen);
     }
 
     private void initUI(BindsEditor screen) {
         this.leftA = new TexturedButton(-19, 43, 11, 11, ARROW_L, ARROW_L_HOVER, button -> {
             screen.setNewPage(-1);
-            confirm(false);
         });
         this.rightA = new TexturedButton(141, 43, 11, 11, ARROW_R, ARROW_R_HOVER, button -> {
             screen.setNewPage(1);
-            confirm(false);
         });
 
         this.closeBtn = new TexturedButton(110, 7, 16, 16, CLOSE, CLOSE_HOVER, button -> {
@@ -84,9 +83,6 @@ public class BindsList extends AnimatedWindow {
         this.rightBtn.setPosition(131, 42);
 
         this.addDrawElement((ctx, mouseX, mouseY) -> {
-            RenderUtils.drawTexture(ctx, FRAME, 4, 4, 0, 0, 125, 90, 125, 90);
-            RenderUtils.drawText(ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.configure")), 141, 8, 11);
-
             int pageCount = BindsEditor.activePreset != null ? BindsEditor.activePreset.pages.size() : 1;
 
             MutableComponent page = TextUtils.small(TextUtils.translatable("nitsha.binds.page"));
@@ -97,60 +93,16 @@ public class BindsList extends AnimatedWindow {
             int currentPageWidth = Minecraft.getInstance().font.width(currentPage);
             int totalPageWidth = Minecraft.getInstance().font.width(totalPage);
 
-            RenderUtils.drawText(ctx, page, 126, 4, 96, "left", "top", 0xFFFFFFFF, false);
-            RenderUtils.drawText(ctx, totalPage, 125, 129, 96, "right", "top", 0xFFFFFFFF, false);
-            RenderUtils.drawTexture(ctx, SEPARATOR, 129 - totalPageWidth - 4, 98, 0, 0, 3, 6, 3, 6);
-            RenderUtils.drawText(ctx, currentPage, 125, 129 - totalPageWidth - 4, 96, "right", "top", 0xFFFFFFFF, false);
+            RenderUtils.drawText(ctx, totalPage, 125, this.getWidth() - 24, 11, "right", "top", 0xFFFFFFFF, false);
+            RenderUtils.drawTexture(ctx, SEPARATOR, this.getWidth() - 24 - totalPageWidth - 4, 13, 0, 0, 3, 6, 3, 6);
+            RenderUtils.drawText(ctx, currentPage, 125, this.getWidth() - 24 - totalPageWidth - 4, 11, "right", "top", 0xFFFFFFFF, false);
 
-            RenderUtils.drawFill(ctx, pageWidth + 6, 100, getWidth() - 6 - currentPageWidth - totalPageWidth - 4, 101, 0xFF555555);
+            drawFrame(ctx);
+            RenderUtils.drawText(ctx, TextUtils.small(TextUtils.translatable("nitsha.binds.configure")), 141, 8, 11);
 
             rightBtn.render(ctx);
             leftBtn.render(ctx);
         });
-
-        this.deleteBtn = new SmallTextButton(TextUtils.translatable("nitsha.binds.delete"), 4, 107, 0xFF790e06, 61, "left", DELETE_SMALL, ()-> {
-            if (deleteConfirmShown) {
-                int currentPage = BindsEditor.getCurrentPage();
-                int activeBind = screen.getActiveBind();
-
-                boolean activeBindOnDeletedPage = screen.isActiveBindOnPage(currentPage);
-
-                if (BindsEditor.activePreset != null && BindsEditor.activePreset.pages.size() > 1) {
-                    BindsEditor.activePreset.pages.remove(currentPage);
-                    Storage.savePreset(BindsEditor.activePreset, BindsEditor.activePresetId);
-                }
-
-                int newTotalPages = BindsEditor.activePreset != null ? BindsEditor.activePreset.pages.size() : 1;
-
-                if (currentPage >= newTotalPages) {
-                    currentPage = newTotalPages - 1;
-                }
-
-                if (activeBindOnDeletedPage) {
-                    screen.setActiveBind(screen.getFirstBindOfPage(currentPage));
-                    screen.selectBind();
-                }
-                else if (activeBind > screen.getFirstBindOfPage(currentPage)) {
-                    screen.setActiveBind(activeBind - 8);
-                    screen.selectBind();
-                }
-
-                screen.selectPage(currentPage);
-                screen.getBindsListWindow().generateButtons(7, 31);
-                confirm(false);
-            } else {
-                deleteConfirmationTime = System.currentTimeMillis();
-                confirm(true);
-            }
-        });
-
-        this.addElement(new SmallTextButton(TextUtils.translatable("nitsha.binds.addNew"), 67, 107, 0xFF4d9109, 62, "left", ADD_NEW, ()-> {
-            if (BindsEditor.activePreset != null) {
-                BindsEditor.activePreset.pages.add(new PageData());
-                Storage.savePreset(BindsEditor.activePreset, BindsEditor.activePresetId);
-            }
-            deleteBtn.setEnabled(true);
-        }));
 
         this.open(() -> {
             rightBtn.startAnimation(true);
@@ -160,42 +112,37 @@ public class BindsList extends AnimatedWindow {
         });
 
         this.addElement(closeBtn);
-        this.addElement(deleteBtn);
         generateButtons(7, 31);
     }
 
-    public void confirm(boolean status) {
-        deleteConfirmShown = status;
-        if (status) {
-            deleteBtn.setColors(0xFFfac70c, 0xFFF5CC35, 0xFFFFFFFF, 0xFFFFFFFF);
-            deleteBtn.setIcon(SURE_SMALL);
-        } else {
-            deleteBtn.setColors(0xFF790e06, 0xFF8C150B, 0xFFFFFFFF, 0xFFFFFFFF);
-            deleteBtn.setIcon(DELETE_SMALL);
-        }
-    }
-
-    public boolean isDeleteConfirmation() {
-        return System.currentTimeMillis() - deleteConfirmationTime < 5000;
-    }
-
      public void updateSelected(ItemStack icon) {
-        int aB = (int) Math.floor((double) BindsEditor.getActiveBind() / 8);
-        if (aB == BindsEditor.getCurrentPage()) buttons.get(BindsEditor.getActiveBind() - (8 * aB)).setItemStack(icon);
+        int slot = BindsEditor.getActiveBind() - BindsEditor.getFirstBindOfPage(BindsEditor.getCurrentPage());
+        if (BindsEditor.isActiveBindOnPage(BindsEditor.getCurrentPage()) && slot >= 0 && slot < buttons.size()) {
+            buttons.get(slot).setItemStack(icon);
+        }
     }
 
     public void generateButtons(int startX, int startY) {
         this.buttons.clear();
         this.removeElementsOfType(ItemButton.class);
 
-        int currentX = startX;
-        int currentY = startY;
-
         int currentPage = BindsEditor.getCurrentPage();
         int activeBind = BindsEditor.getActiveBind();
+        if (BindsEditor.activePreset == null) return;
 
-        for (int row = 0; row < 8; row++) {
-            int bindIndex = row + (8 * currentPage);
+        int columns = BindsEditor.activePreset.columns;
+        int rows = BindsEditor.activePreset.rows;
+        int targetWidth = columns * 31 + 9;
+        int targetHeight = rows * 31 + 38;
+        setWidth(targetWidth);
+        setHeight(targetHeight);
+        setX(anchorCenterX - targetWidth / 2.0F);
+        setY(anchorBottomY - targetHeight);
+
+        for (int slot = 0; slot < columns * rows; slot++) {
+            int currentX = startX + (slot % columns) * 31;
+            int currentY = startY + (slot / columns) * 31;
+            int bindIndex = slot + BindsEditor.getFirstBindOfPage(currentPage);
             BindData currentBind = null;
             if (BindsEditor.activePreset != null && currentPage < BindsEditor.activePreset.pages.size()) {
                 PageData page = BindsEditor.activePreset.pages.get(currentPage);
@@ -228,18 +175,40 @@ public class BindsList extends AnimatedWindow {
             this.addElement(button);
             buttons.add(button);
 
-            currentX += 31;
-            if (row == 3) {
-                currentX = startX;
-                currentY = startY + 31;
-            }
         }
 
-        int aB = (int) Math.floor((double) activeBind / 8);
-        if (aB == currentPage) {
-            buttons.get(activeBind - (8 * aB)).setSelected(true);
+        int selectedSlot = activeBind - BindsEditor.getFirstBindOfPage(currentPage);
+        if (BindsEditor.isActiveBindOnPage(currentPage) && selectedSlot >= 0 && selectedSlot < buttons.size()) {
+            buttons.get(selectedSlot).setSelected(true);
         }
-        deleteBtn.setEnabled(BindsEditor.activePreset != null && BindsEditor.activePreset.pages.size() > 1);
+    }
+
+    private void drawFrame(GuiGraphicsExtractor ctx) {
+        RenderUtils.drawResizableBox(ctx, FRAME, 4, 4, getWidth() - 8, getHeight() - 10, 3, 7);
+        RenderUtils.drawResizableBox(ctx, FRAME, 4, 4, getWidth() - 8, 23, 3, 7);
+    }
+
+    @Override
+    protected void updateLayout() {
+        closeBtn.setX(getWidth() - 23);
+        int arrowY = (getHeight() - 15) / 2;
+        leftA.setY(arrowY + 1);
+        rightA.setX(getWidth() + 8);
+        rightA.setY(arrowY + 1);
+        leftBtn.setPosition(-20, arrowY);
+        rightBtn.setPosition(getWidth() - 2, arrowY);
+    }
+
+    @Override
+    protected void renderChild(GuiGraphicsExtractor ctx, GuiEventListener child, int contentX, int contentY, int mouseX, int mouseY, float delta) {
+        if (child instanceof ItemButton) {
+            RenderUtils.customScissor(ctx, contentX + 4, contentY + 27, getWidth() - 8, getHeight() - 33, () -> {
+                super.renderChild(ctx, child, contentX, contentY, mouseX, mouseY, delta);
+            });
+            return;
+        }
+
+        super.renderChild(ctx, child, contentX, contentY, mouseX, mouseY, delta);
     }
 
     @Override
@@ -247,13 +216,5 @@ public class BindsList extends AnimatedWindow {
         RenderUtils.matricesUtil(ctx, 0, 0, 2, () -> {
             super.renderWindow(ctx, mouseX, mouseY, delta);
         });
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        if (deleteConfirmShown && !isDeleteConfirmation()) {
-            confirm(false);
-        }
     }
 }

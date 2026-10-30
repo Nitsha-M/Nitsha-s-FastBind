@@ -2,8 +2,12 @@ package com.nitsha.binds.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.configs.dto.preset.ActionData;
+import com.nitsha.binds.configs.dto.preset.BindData;
+import com.nitsha.binds.configs.dto.preset.PageData;
+import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.configs.adapters.ActionAdapter;
 
 import java.io.ByteArrayInputStream;
@@ -11,6 +15,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStream;
 import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
@@ -24,6 +30,38 @@ public class CodecUtil {
             .create();
 
     private static final String PREFIX = "fastbind://";
+
+    public static String exportPageToText(PageData page, int firstBindIndex) {
+        if (page == null || page.binds == null) return null;
+
+        JsonObject payload = MINIFIED_GSON.toJsonTree(page).getAsJsonObject();
+        for (var element : payload.getAsJsonArray("binds")) {
+            JsonObject bind = element.getAsJsonObject();
+            bind.addProperty("index", bind.get("index").getAsInt() - firstBindIndex);
+        }
+
+        return exportToText(payload);
+    }
+
+    public static PageData importPageFromText(String text, int firstBindIndex) {
+        JsonObject payload = importFromText(text, JsonObject.class);
+        if (payload == null || !payload.has("binds") || !payload.get("binds").isJsonArray()) return null;
+
+        try {
+            PageData page = MINIFIED_GSON.fromJson(payload, PageData.class);
+            Set<Integer> indices = new HashSet<>();
+
+            for (BindData bind : page.binds) {
+                if (bind == null || bind.index < 0 || !indices.add(bind.index)) return null;
+                bind.index = Math.addExact(bind.index, firstBindIndex);
+            }
+
+            return page;
+        } catch (RuntimeException exception) {
+            FBLogger.error("Import error: invalid page format");
+            return null;
+        }
+    }
 
     public static String exportToText(Object data) {
         try {
@@ -62,7 +100,11 @@ public class CodecUtil {
             try (InflaterInputStream is = new InflaterInputStream(byteArrayInputStream, inflater)) {
                 byte[] uncompressedBytes = is.readAllBytes();
                 String json = new String(uncompressedBytes, "UTF-8");
-                return MINIFIED_GSON.fromJson(json, clazz);
+                T data = MINIFIED_GSON.fromJson(json, clazz);
+                if (data instanceof PresetData preset) {
+                    preset.clampGridSize();
+                }
+                return data;
             } finally {
                 inflater.end();
             }

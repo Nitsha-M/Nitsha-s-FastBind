@@ -54,6 +54,30 @@ public class TextField extends NitshaAbstractWidget {
     private Runnable heightChangeListener;
 
     private boolean renderBackground = true;
+    private boolean formattingAllowed;
+    private long lastRenderedFrame = -1;
+    private RenderUtils.WidgetBounds screenBounds;
+
+    public void setFormattingAllowed(boolean allowed) {
+        formattingAllowed = allowed;
+    }
+
+    public boolean isFormattingAllowed() {
+        return formattingAllowed;
+    }
+
+    public RenderUtils.WidgetBounds getFormattingBounds() {
+        return lastRenderedFrame == RenderUtils.getFrameId() ? screenBounds : null;
+    }
+
+    public void applyFormatting(int styleCode) {
+        if (!formattingAllowed || !isFocused()) return;
+
+        setStyle(styleCode);
+        if (multiline) recalculateLines();
+        updateFirstCharacterIndex(selectionStart);
+        if (typingEvent != null) typingEvent.run();
+    }
 
     public static class LineInfo {
         public int startIndex, endIndex;
@@ -251,71 +275,53 @@ public class TextField extends NitshaAbstractWidget {
 
         int start = Math.min(selectionStart, selectionEnd);
         int end = Math.max(selectionStart, selectionEnd);
-
-        setStyle(styleCode, start);
-
-        Style styleBefore = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
-
+        SortedSet<Integer> boundaries = new TreeSet<>();
+        boundaries.add(0);
+        boundaries.add(start);
+        boundaries.add(end);
         for (FormatMark mark : formatMarks) {
-            if (mark.position < start) {
-                styleBefore = applyStyleCode(mark.styleCode, styleBefore);
-            } else if (mark.position == start) {
-                continue;
-            } else {
-                break;
+            if (mark.position >= 0 && mark.position <= text.length()) {
+                boundaries.add(mark.position);
             }
         }
 
-        if (styleCode >= 0 && styleCode <= 15) {
-            Integer previousColor = null;
-            for (FormatMark mark : formatMarks) {
-                if (mark.position < start && mark.styleCode >= 0 && mark.styleCode <= 15) {
-                    previousColor = mark.styleCode;
-                }
+        List<FormatMark> replacement = new ArrayList<>();
+        Style original = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
+        Style previous = original;
+        int markIndex = 0;
+
+        for (int position : boundaries) {
+            while (markIndex < formatMarks.size() && formatMarks.get(markIndex).position <= position) {
+                original = applyStyleCode(formatMarks.get(markIndex).styleCode, original);
+                markIndex++;
             }
 
-            int restoreColor = (previousColor != null) ? previousColor : 15;
-
-            formatMarks.removeIf(mark -> mark.position == end && mark.styleCode >= 0 && mark.styleCode <= 15);
-            formatMarks.add(new FormatMark(end, restoreColor));
-        } else if (styleCode >= 20 && styleCode <= 24) {
-            boolean wasStyleActive = false;
-            Style checkStyle = Style.EMPTY;
-
-            for (FormatMark mark : formatMarks) {
-                if (mark.position < start) {
-                    checkStyle = applyStyleCode(mark.styleCode, checkStyle);
-                }
+            Style styled = position >= start && position < end ? applyStyleCode(styleCode, original) : original;
+            if (!styled.equals(previous)) {
+                appendStyleSnapshot(replacement, position, styled);
+                previous = styled;
             }
-
-            switch (styleCode) {
-                case 20:
-                    wasStyleActive = checkStyle.isBold();
-                    break;
-                case 21:
-                    wasStyleActive = checkStyle.isItalic();
-                    break;
-                case 22:
-                    wasStyleActive = checkStyle.isUnderlined();
-                    break;
-                case 23:
-                    wasStyleActive = checkStyle.isStrikethrough();
-                    break;
-                case 24:
-                    wasStyleActive = checkStyle.isObfuscated();
-                    break;
-            }
-
-            if (!wasStyleActive) {
-                formatMarks.removeIf(mark -> mark.position == end && mark.styleCode == styleCode);
-            }
-        } else if (styleCode == 99) {
-            formatMarks.removeIf(mark -> mark.position == end && mark.styleCode == 99);
         }
 
+        formatMarks.clear();
+        formatMarks.addAll(replacement);
         Collections.sort(formatMarks);
     }
 
+    private void appendStyleSnapshot(List<FormatMark> marks, int position, Style style) {
+        marks.add(new FormatMark(position, 99));
+        for (int color = 0; color <= 15; color++) {
+            if (Objects.equals(applyStyleCode(color, Style.EMPTY).getColor(), style.getColor())) {
+                marks.add(new FormatMark(position, color));
+                break;
+            }
+        }
+        if (style.isBold()) marks.add(new FormatMark(position, 20));
+        if (style.isItalic()) marks.add(new FormatMark(position, 21));
+        if (style.isUnderlined()) marks.add(new FormatMark(position, 22));
+        if (style.isStrikethrough()) marks.add(new FormatMark(position, 23));
+        if (style.isObfuscated()) marks.add(new FormatMark(position, 24));
+    }
     public void removeStyle(int position) {
         formatMarks.removeIf(mark -> mark.position == position);
     }
@@ -736,6 +742,10 @@ public class TextField extends NitshaAbstractWidget {
     @Override
     public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         if (!visible) return;
+        if (formattingAllowed && isFocused()) {
+            screenBounds = RenderUtils.getWidgetBounds(ctx, getX(), getY(), getWidth(), getHeight());
+            lastRenderedFrame = RenderUtils.getFrameId();
+        }
         if (multiline) {
             renderMultiline(ctx, mouseX, mouseY, delta);
             return;
@@ -1011,26 +1021,16 @@ public class TextField extends NitshaAbstractWidget {
         this.setCursorToEnd(false);
     }
 
-    private static boolean blockFocus = false;
     private static GuiEventListener lastClickedWidget = null;
 
     public static void setLastClickedWidget(GuiEventListener widget) {
         lastClickedWidget = widget;
     }
 
-    public static void setBlockFocus() {
-        blockFocus = true;
-    }
-
     public static void controlFocus() {
         if (focusedField == null) return;
 
         if (lastClickedWidget == focusedField) {
-            return;
-        }
-
-        if (blockFocus) {
-            blockFocus = false;
             return;
         }
 

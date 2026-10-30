@@ -1,20 +1,14 @@
 package com.nitsha.binds.bind;
 
-import com.mojang.blaze3d.platform.InputConstants;
+import com.nitsha.binds.multiversions.NitshaInput;
 import com.nitsha.binds.FBLogger;
 import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.configs.dto.preset.BindData;
 import com.nitsha.binds.configs.dto.preset.PageData;
 import com.nitsha.binds.configs.dto.preset.PresetData;
-import net.minecraft.client.Minecraft;
-//? if <26.3 {
-/*import org.lwjgl.glfw.GLFW;
-*///? }
 import java.util.*;
 
 public class BindHandler {
-    private static Minecraft client;
-
     private static final Map<Integer, Long> keyPressStartTime = new HashMap<>();
     private static final Set<Integer> activeKeys = new HashSet<>();
 
@@ -98,13 +92,6 @@ public class BindHandler {
     }
 
     private static boolean isKeyPressed(int keyCode) {
-        if (client == null) client = Minecraft.getInstance();
-        //? if <1.21.9 {
-        /*long handle = client.getWindow().getWindow();
-        *///? } else {
-        long handle = client.getWindow().handle();
-        //? }
-        //$ if >=26.3 'return InputConstants.isKeyDown(keyCode);' else 'return GLFW.glfwGetKey(handle, keyCode) == GLFW.GLFW_PRESS;'
-        return InputConstants.isKeyDown(keyCode);
+        return NitshaInput.isInputDown(keyCode);
     }
 }

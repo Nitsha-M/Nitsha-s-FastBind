@@ -6,6 +6,7 @@ import com.nitsha.binds.gui.utils.Textures;
 import com.nitsha.binds.gui.widget.button.BedrockIconButton;
 import com.nitsha.binds.gui.widget.button.ItemButton;
 import com.nitsha.binds.multiversions.NitshaContainer;
+import com.nitsha.binds.multiversions.NitshaInput;
 import com.nitsha.binds.multiversions.RenderUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -22,7 +23,8 @@ import java.util.function.BiConsumer;
 public class IconSelectorWindow extends NitshaContainer {
 
     private static final int COLUMNS = 9;
-    private static final int VISIBLE_ROWS = 8;
+    private static final int ROW_HEIGHT = 18;
+    private int rowAmount;
 
     private final List<BedrockIconButton> catBtns = new ArrayList<>();
     private final String[] categoriesList = {"blocks", "tools", "colored", "foods", "gold", "mods"};
@@ -99,29 +101,61 @@ public class IconSelectorWindow extends NitshaContainer {
         buttonsDirty = false;
 
         List<ItemsMapper.IconEntry> filtered = ItemsMapper.getCategories().getOrDefault(currentCategory, List.of());
-        int rowAmount = (filtered.size() + COLUMNS - 1) / COLUMNS;
+        rowAmount = (filtered.size() + COLUMNS - 1) / COLUMNS;
         updateScrollLogic(rowAmount);
 
         int offset = scrollOffset * COLUMNS;
-        int maxVisible = COLUMNS * VISIBLE_ROWS;
+        int maxVisible = COLUMNS * getRenderedRows();
 
         for (int i = 0; i < maxVisible && i + offset < filtered.size(); i++) {
             ItemsMapper.IconEntry entry = filtered.get(i + offset);
             ItemStack icon = ItemsMapper.createIcon(entry.icon());
             String key = entry.key();
-            int buttonX = i % COLUMNS * 18;
-            int buttonY = i / COLUMNS * 18;
+            int buttonX = i % COLUMNS * ROW_HEIGHT;
+            int buttonY = i / COLUMNS * ROW_HEIGHT;
 
             Runnable selectIcon = () -> {
                 updateButtons(key);
                 onClick.accept(icon, key);
             };
-            ItemButton button = new ItemButton(buttonX, buttonY, 18, icon, Textures.ICON_SELECTOR_ITEM, key, selectIcon);
+            ItemButton button = new ItemButton(buttonX, buttonY, ROW_HEIGHT, icon, Textures.ICON_SELECTOR_ITEM, key, selectIcon);
 
             addElement(button);
         }
 
         updateButtons(activeKey);
+    }
+
+    private int getRenderedRows() {
+        return Math.max(1, (getHeight() + ROW_HEIGHT - 1) / ROW_HEIGHT);
+    }
+
+    @Override
+    public void setHeight(float height) {
+        int previousRows = getRenderedRows();
+        int previousScroll = scrollOffset;
+        super.setHeight(Math.max(ROW_HEIGHT, height));
+        updateScrollLogic(rowAmount);
+
+        for (BedrockIconButton button : catBtns) {
+            button.setY(getHeight() + 1);
+        }
+
+        if (previousRows != getRenderedRows() || previousScroll != scrollOffset) {
+            buttonsDirty = true;
+        }
+    }
+
+    @Override
+    protected void renderChild(GuiGraphicsExtractor ctx, GuiEventListener child, int contentX, int contentY, int mouseX, int mouseY, float delta) {
+        if (child instanceof ItemButton) {
+            RenderUtils.customScissor(ctx, contentX, contentY, getWidth(), getHeight(), () -> {
+                super.renderChild(ctx, child, contentX, contentY, mouseX, mouseY, delta);
+            });
+            return;
+        }
+
+        super.renderChild(ctx, child, contentX, contentY, mouseX, mouseY, delta);
     }
 
     public void updateButtons(String key) {
@@ -168,7 +202,7 @@ public class IconSelectorWindow extends NitshaContainer {
     }
 
     public void updateScrollLogic(int rowAmount) {
-        maxScroll = Math.max(0, rowAmount - VISIBLE_ROWS);
+        maxScroll = Math.max(0, rowAmount - Math.max(1, getHeight() / ROW_HEIGHT));
         int trackHeight = Math.max(0, getHeight() - 2);
         barSize = Math.min(trackHeight, Math.max(20, trackHeight - maxScroll * 5));
         scrollOffset = Mth.clamp(scrollOffset, 0, maxScroll);
@@ -217,6 +251,10 @@ public class IconSelectorWindow extends NitshaContainer {
                 dragStartScrollOffset = scrollOffset;
                 return true;
             }
+        }
+
+        if (!isMouseInside(mouseX, mouseY)) {
+            return NitshaInput.mouseClicked(catBtns, mouseX - getContentX(), mouseY - getContentY(), button);
         }
 
         return super.onMouseClicked(mouseX, mouseY, button);

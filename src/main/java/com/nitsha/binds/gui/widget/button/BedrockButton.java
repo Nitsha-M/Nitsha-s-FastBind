@@ -10,6 +10,7 @@ import com.nitsha.binds.multiversions.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 
@@ -21,6 +22,8 @@ public class BedrockButton extends NitshaAbstractWidget {
     private boolean isEnabled = false;
     private boolean isPressed = false;
     private boolean isToggle = false;
+    private Component hoverTooltip;
+    private boolean hoverTooltipEnabled;
 
     private float yOffset = 0;
     private float targetOffset = 0;
@@ -89,6 +92,29 @@ public class BedrockButton extends NitshaAbstractWidget {
 
     public void setText(MutableComponent text) {
         this.text = text;
+    }
+
+    public void setHoverTooltip(Component tooltip) {
+        hoverTooltip = tooltip;
+        hoverTooltipEnabled = tooltip != null;
+    }
+
+    public void setHoverTooltipEnabled(boolean enabled) {
+        hoverTooltipEnabled = enabled;
+    }
+
+    protected Component getHoverTooltip() {
+        return hoverTooltip;
+    }
+
+    protected void renderHoverTooltip(GuiGraphicsExtractor ctx, int mouseX, int mouseY) {
+        if (!visible || !isHovered() || !hoverTooltipEnabled) return;
+
+        Component tooltip = getHoverTooltip();
+        if (tooltip == null || tooltip.getString().isEmpty()) return;
+
+        int transparentColor = (getBtnColor() & 0x00FFFFFF) | 0xCC000000;
+        RenderUtils.queueHoverTooltip(tooltip, transparentColor);
     }
 
     public int getBtnColor() {
@@ -191,6 +217,8 @@ public class BedrockButton extends NitshaAbstractWidget {
 
         RenderUtils.drawResizableBox(ctx, Textures.BEDROCK_ATLAS,
                 fX, fY + Math.round(yOffset), fW, fH - Math.round(yOffset), 36, stateV, 2, 64, 64, oC);
+
+        renderHoverTooltip(ctx, mouseX, mouseY);
     }
 
     @Override

@@ -1,77 +1,74 @@
 package com.nitsha.binds.gui.panels;
 
-import com.nitsha.binds.Main;
 import com.nitsha.binds.configs.Storage;
 import com.nitsha.binds.configs.dto.preset.PresetData;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.gui.widget.button.TexturedButton;
 import com.nitsha.binds.gui.widget.list.PresetListItem;
 import com.nitsha.binds.gui.widget.window.ScrollableWindow;
+import com.nitsha.binds.gui.widget.window.AnimatedWindow;
 import com.nitsha.binds.gui.utils.Textures;
 import com.nitsha.binds.gui.widget.button.SmallTextButton;
-import com.nitsha.binds.multiversions.NitshaContainer;
 import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PresetSelector extends NitshaContainer {
-    private static final int HEADER_HEIGHT = 17;
+public class PresetSelector extends AnimatedWindow {
+    private static final int HEADER_HEIGHT = 19;
     private static final int OPEN_HEIGHT = 160;
     private static final int ROW_HEIGHT = 22;
+    private static final int BOTTOM_PADDING = 7;
+    private static final int LIST_Y = 16;
+    private static final int ADD_BUTTON_HEIGHT = 9;
+    private static final int ADD_BUTTON_Y = OPEN_HEIGHT - BOTTOM_PADDING - ADD_BUTTON_HEIGHT;
 
     public final BindsEditor screen;
 
     private final List<PresetListItem> items = new ArrayList<>();
-    private final float speed = Main.GLOBAL_ANIMATION_SPEED - 0.1F;
     private ScrollableWindow presetsList;
     private SmallTextButton addButton;
     private boolean isOpen;
-    private float targetWidth;
-    private float targetHeight;
-    private float yOffset = 80.0F;
-    private long delayMs;
-    private long lastUpdateTime;
 
-    public PresetSelector(BindsEditor screen, int x, int y, float width, int height, int delay) {
-        super(x, y, width, height);
+    public PresetSelector(BindsEditor screen, int x, int y, float width, int height, Identifier bottomTexture, Identifier topTexture, int delay) {
+        super(x, y, width, HEADER_HEIGHT, bottomTexture, topTexture, delay);
         this.screen = screen;
-        targetWidth = width;
-        targetHeight = height;
-        delayMs = Math.max(0, delay);
         initUI();
-        open();
+        open(() -> {});
     }
 
     private void initUI() {
         addDrawElement((ctx, mouseX, mouseY) -> {
-            RenderUtils.drawText(ctx, TextUtils.literal(RenderUtils.truncateString(BindsEditor.getPresetName(), 13)), 0, 5, 5, "left", "top", 0xFFFFFFFF, false);
+            RenderUtils.drawText(ctx, TextUtils.small(TextUtils.literal(RenderUtils.truncateString(BindsEditor.getPresetName(), 13))), 0, 5, 4, "left", "top", 0xFFFFFFFF, false);
+            if (isOpen) {
+                RenderUtils.drawFill(ctx, 4, 15, getWidth() - 4, 16, 0xFF555555);
+            }
         });
 
-        addElement(new TexturedButton(113, 4, 9, 9, Textures.SELECT_PRESET, Textures.SELECT_PRESET_HOVER, button -> {
-            openSelector(!isOpen);
-        }));
-        addElement(new TexturedButton(91, 4, 9, 9, Textures.ICON_SMALL_TOP, Textures.ICON_SMALL_TOP_HOVER, button -> {
+        addElement(new TexturedButton(getWidth() - 14, 4, 9, 9, Textures.SELECT_PRESET, Textures.SELECT_PRESET_HOVER, button -> openSelector(!isOpen)));
+        TexturedButton previousButton = new TexturedButton(getWidth() - 36, 4, 9, 9, Textures.ICON_SMALL_TOP, Textures.ICON_SMALL_TOP_HOVER, button -> {
             saveAll();
             screen.setNewPreset(-1);
-        }));
-        addElement(new TexturedButton(102, 4, 9, 9, Textures.ICON_SMALL_BOTTOM, Textures.ICON_SMALL_BOTTOM_HOVER, button -> {
+        });
+        addElement(previousButton);
+        TexturedButton nextButton = new TexturedButton(getWidth() - 25, 4, 9, 9, Textures.ICON_SMALL_BOTTOM, Textures.ICON_SMALL_BOTTOM_HOVER, button -> {
             saveAll();
             screen.setNewPreset(1);
-        }));
+        });
+        addElement(nextButton);
 
-        presetsList = new ScrollableWindow(2, 15, getWidth() - 4, 130, false);
+        presetsList = new ScrollableWindow(2, LIST_Y, getWidth() - 4, ADD_BUTTON_Y - LIST_Y - 3, false);
         presetsList.setVisible(false);
         addElement(presetsList);
         generatePresetsList();
 
-        addButton = new SmallTextButton(TextUtils.translatable("nitsha.binds.addNew"), 4, 147, 0xFF4d9109, getWidth() - 8, "left", Textures.ICON_ADD_NEW, () -> {
+        addButton = new SmallTextButton(TextUtils.translatable("nitsha.binds.addNew"), 4, ADD_BUTTON_Y, 0xFF4d9109, getWidth() - 8, "left", Textures.ICON_ADD_NEW, () -> {
             saveAll();
             Storage.createNewPreset();
             generatePresetsList();
@@ -79,11 +76,6 @@ public class PresetSelector extends NitshaContainer {
         addButton.visible = false;
         addElement(addButton);
 
-        addDrawElement((ctx, mouseX, mouseY) -> {
-            if (isOpen) {
-                RenderUtils.drawFill(ctx, 5, 15, getWidth() - 5, 16, 0xFF555555);
-            }
-        }, 1);
     }
 
     public void generatePresetsList() {
@@ -96,7 +88,7 @@ public class PresetSelector extends NitshaContainer {
         int rowY = 0;
 
         for (int i = 0; i < presets.size(); i++) {
-            PresetListItem item = new PresetListItem(this, presets.get(i), 0, rowY, getWidth() - 4, ROW_HEIGHT, i);
+            PresetListItem item = new PresetListItem(this, presets.get(i), 0, rowY, presetsList.getWidth(), ROW_HEIGHT, i);
             presetsList.addElement(item);
             items.add(item);
             rowY += ROW_HEIGHT;
@@ -116,26 +108,6 @@ public class PresetSelector extends NitshaContainer {
                 item.savePreset();
             }
         }
-    }
-
-    @Override
-    public void setWidth(float width) {
-        targetWidth = width;
-    }
-
-    @Override
-    public void setHeight(float height) {
-        targetHeight = height;
-    }
-
-    @Override
-    protected int getContentY() {
-        return getY() - Math.round(yOffset);
-    }
-
-    @Override
-    protected boolean canClick() {
-        return isVisible() && delayMs == 0;
     }
 
     @Override
@@ -160,76 +132,23 @@ public class PresetSelector extends NitshaContainer {
         addButton.visible = open;
     }
 
-    public void open() {
-        setVisible(true);
-        lastUpdateTime = System.currentTimeMillis();
-    }
-
     public boolean isOpen() {
         return isOpen;
     }
 
-    public void tick() {
-        long now = System.currentTimeMillis();
-
-        if (lastUpdateTime == 0) {
-            lastUpdateTime = now;
-            return;
-        }
-
-        long elapsed = Math.max(0, now - lastUpdateTime);
-        lastUpdateTime = now;
-
-        if (delayMs > 0) {
-            long delayed = Math.min(delayMs, elapsed);
-            delayMs -= delayed;
-            elapsed -= delayed;
-        }
-
-        if (elapsed == 0) return;
-
-        float factor = 1.0F - (float) Math.pow(1.0F - speed, elapsed / 16.666F);
-        float sizeFactor = 1.0F - (1.0F - factor) * (1.0F - factor);
-        width = Mth.lerp(sizeFactor, width, targetWidth);
-        height = Mth.lerp(sizeFactor, height, targetHeight);
-        yOffset = Mth.lerp(factor, yOffset, 0.0F);
-
-        if (Math.abs(width - targetWidth) < 0.1F) {
-            width = targetWidth;
-        }
-
-        if (Math.abs(height - targetHeight) < 0.1F) {
-            height = targetHeight;
-        }
-
-        if (Math.abs(yOffset) < 0.001F) {
-            yOffset = 0.0F;
-        }
-    }
-
     @Override
-    public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        tick();
-
-        if (!isVisible() || delayMs > 0) return;
-
+    public void renderWindow(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         RenderUtils.customScissor(ctx, getContentX(), getContentY(), getWidth(), getHeight(), () -> {
-            RenderUtils.matricesUtil(ctx, 0, 0, 499, () -> {
-                super.onRender(ctx, mouseX, mouseY, delta);
-            });
+            super.renderWindow(ctx, mouseX, mouseY, delta);
         });
-    }
-
-    @Override
-    protected void renderBackground(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
-        RenderUtils.drawResizableBox(ctx, Textures.DARK_MENU_BG, 0, 0, getWidth(), getHeight(), 3, 7);
     }
 
     @Override
     public boolean onMouseClicked(double mouseX, double mouseY, int button) {
         if (!isMouseInside(mouseX, mouseY)) return false;
 
-        return super.onMouseClicked(mouseX, mouseY, button);
+        super.onMouseClicked(mouseX, mouseY, button);
+        return true;
     }
 
     @Override

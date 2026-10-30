@@ -3,6 +3,7 @@ package com.nitsha.binds;
 import com.nitsha.binds.mixin.CreativeModeTabPreviewAccessor;
 import com.nitsha.binds.preview.PreviewComponentContext;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Collections;
@@ -41,6 +42,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.block.entity.PotDecorations;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.validation.DirectoryValidator;
@@ -48,7 +50,7 @@ import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 
 public class ItemsMapper {
 
-    private static final Set<Item> SINGLE_ICON_ITEMS = Set.of(Items.PAINTING, Items.GOAT_HORN);
+    private static final Set<Item> SINGLE_ICON_ITEMS = Set.of(Items.PAINTING, Items.GOAT_HORN, Items.SUSPICIOUS_STEW);
     private static Map<Item, DataComponentMap> itemComponents = Map.of();
     private static Map<String, List<IconEntry>> categories = Map.of();
     private static Map<String, ItemStackTemplate> iconsByKey = Map.of();
@@ -202,7 +204,22 @@ public class ItemsMapper {
 
         Map<String, List<IconEntry>> result = new LinkedHashMap<>();
         unique.forEach((category, entries) -> {
-            result.put(category, List.copyOf(entries.values()));
+            List<IconEntry> icons = new ArrayList<>();
+            Map<Item, Set<Integer>> potionColors = new HashMap<>();
+
+            for (IconEntry entry : entries.values()) {
+                Item item = entry.icon().item().value();
+                if (item == Items.POTION || item == Items.SPLASH_POTION || item == Items.LINGERING_POTION) {
+                    PotionContents contents = createIcon(entry.icon()).get(DataComponents.POTION_CONTENTS);
+                    if (contents != null && !potionColors.computeIfAbsent(item, ignored -> new HashSet<>()).add(contents.getColor())) {
+                        continue;
+                    }
+                }
+
+                icons.add(entry);
+            }
+
+            result.put(category, List.copyOf(icons));
         });
         return Collections.unmodifiableMap(result);
     }

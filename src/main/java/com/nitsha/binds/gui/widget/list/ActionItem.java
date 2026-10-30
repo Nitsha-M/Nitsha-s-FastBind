@@ -5,7 +5,6 @@ import com.nitsha.binds.action.ActionRegistry;
 import com.nitsha.binds.action.ActionType;
 import com.nitsha.binds.gui.screen.BindsEditor;
 import com.nitsha.binds.multiversions.TextUtils;
-import com.nitsha.binds.gui.widget.TextField;
 import com.nitsha.binds.gui.widget.button.TexturedButton;
 import com.nitsha.binds.gui.panels.advanced.ActionsTab;
 import com.nitsha.binds.multiversions.NitshaAbstractWidget;
@@ -97,10 +96,6 @@ public class ActionItem extends NitshaAbstractWidget {
         return action;
     }
 
-    public boolean isMouseOverColorButtons(double mouseX, double mouseY) {
-        return action.isMouseOverColorButtons(mouseX, mouseY);
-    }
-
     @Override
     public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         if (index % 2 == 1)
@@ -125,9 +120,6 @@ public class ActionItem extends NitshaAbstractWidget {
 
     @Override
     public boolean onMouseClicked(double mouseX, double mouseY, int button) {
-        if (isMouseOverColorButtons(mouseX, mouseY)) {
-            TextField.setBlockFocus();
-        }
 
         boolean clicked = false;
 

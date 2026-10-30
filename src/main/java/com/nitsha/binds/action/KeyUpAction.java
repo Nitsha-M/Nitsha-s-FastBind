@@ -1,6 +1,7 @@
 package com.nitsha.binds.action;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.nitsha.binds.multiversions.NitshaInput;
 import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.gui.widget.KeybindSelector;
@@ -36,12 +37,8 @@ public class KeyUpAction extends ActionType<KeybindActionData> {
         int keyCode = data.value;
         if (keyCode == 0) return;
 
-        final int finalKeyCode = keyCode;
-        actions.add(() -> {
-            //$ if >=26.3 'InputConstants.Key key = InputConstants.Type.KEYBOARD.getOrCreate(finalKeyCode);' else 'InputConstants.Key key = InputConstants.Type.KEYSYM.getOrCreate(finalKeyCode);'
-            InputConstants.Key key = InputConstants.Type.KEYBOARD.getOrCreate(finalKeyCode);
-            KeyMapping.set(key, false);
-        });
+        InputConstants.Key key = NitshaInput.getInputKey(keyCode);
+        actions.add(() -> KeyMapping.set(key, false));
     }
 
     @Override

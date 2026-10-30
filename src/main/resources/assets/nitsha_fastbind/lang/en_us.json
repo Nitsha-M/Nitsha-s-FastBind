@@ -16,7 +16,9 @@
   "nitsha.binds.untitled" : "Untitled",
   "nitsha.binds.list" : "List of binds",
   "nitsha.binds.empty" : "Empty",
-  "nitsha.binds.page" : "page",
+  "nitsha.binds.totalPages" : "total pages: %s",
+  "nitsha.binds.columns" : "columns: %s",
+  "nitsha.binds.rows" : "rows: %s",
   "nitsha.binds.autosave" : "autosave",
 
   "nitsha.binds.control.copy" : "Copy bind",

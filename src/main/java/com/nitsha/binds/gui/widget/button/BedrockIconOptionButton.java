@@ -1,10 +1,8 @@
 package com.nitsha.binds.gui.widget.button;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.nitsha.binds.gui.utils.Textures;
 import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -44,6 +42,7 @@ public class BedrockIconOptionButton extends BedrockButton {
         super(TextUtils.empty(), x, y, width, height, true, onRelease);
         this.xO = (width - 16) / 2;
         this.yO = (height - 16) / 2;
+        setHoverTooltipEnabled(true);
     }
 
     public BedrockIconOptionButton addOption(String id, String nameKey, Identifier icon, int color1, int color2, int color3, int color4) {
@@ -70,6 +69,14 @@ public class BedrockIconOptionButton extends BedrockButton {
         return selectedIndex;
     }
 
+    @Override
+    protected Component getHoverTooltip() {
+        Component tooltip = super.getHoverTooltip();
+        if (tooltip != null) return tooltip;
+
+        return options.isEmpty() ? null : TextUtils.translatable(options.get(selectedIndex).nameKey);
+    }
+
     public void setSelectedIndex(int index) {
         if (index >= 0 && index < options.size()) {
             this.selectedIndex = index;
@@ -94,21 +101,6 @@ public class BedrockIconOptionButton extends BedrockButton {
 
         Option opt = options.get(selectedIndex);
         RenderUtils.drawTexture(ctx, opt.icon, this.getX() + xO, this.getY() + yO + Math.round(this.getOffsetY()), 0, 0, 16, 14, 16, 14);
-        if (isMouseOver(mouseX, mouseY)) {
-            Component tooltip = TextUtils.translatable(opt.nameKey);
-            int tooltipWidth = Minecraft.getInstance().font.width(tooltip);
-            int tooltipHeight = Minecraft.getInstance().font.lineHeight + 4;
-
-            int tx = mouseX - tooltipWidth - 4;
-            int ty = mouseY - tooltipHeight - 2;
-
-            int color = this.getBtnColor();
-            int transparentColor = (color & 0x00FFFFFF) | (0xCC << 24);
-            RenderUtils.matricesUtil(ctx, tx, ty, 200, () -> {
-                RenderUtils.drawResizableBox(ctx, Textures.TOOLTIP, -2, -2, tooltipWidth + 6, tooltipHeight, 3, 7, transparentColor);
-                RenderUtils.drawText(ctx, tooltip, 0, 2, 0, "top", "left", 0xFFFFFFFF, false);
-            });
-        }
     }
 
     @Override

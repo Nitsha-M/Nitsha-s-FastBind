@@ -87,6 +87,8 @@ public class ToastAction extends ActionType<ToastActionData> {
                 TextUtils.translatable("nitsha.binds.advances.actions.toastText").getString()
         );
 
+        this.titleField.setFormattingAllowed(true);
+
         this.iconSelector = new ItemButton(x + 5, y + 29, 22, ItemsMapper.getItemStack(data.value.icon), getIconSelectorTexture(data.value.toastType), data.value.icon, () -> {
             EventBus.off("selectIcon.result");
             EventBus.on("selectIcon.result", (Object[] d) -> {

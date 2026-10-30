@@ -123,6 +123,7 @@ public class Storage {
                 preset.id = file.getName().substring(0, file.getName().length() - FILE_EXT.length());
 
                 LegacyMigrator.migratePresetData(preset);
+                preset.clampGridSize();
 
                 if (preset.pages == null) {
                     preset.pages = new ArrayList<>();
@@ -160,9 +161,20 @@ public class Storage {
     }
 
     public static PresetData createNewPreset() {
-        PresetData preset = new PresetData();
+        return addPreset(new PresetData());
+    }
+
+    public static PresetData addPreset(PresetData preset) {
+        preset.clampGridSize();
         preset.id = UUID.randomUUID().toString();
-        preset.pages.add(new PageData());
+
+        if (preset.pages == null) {
+            preset.pages = new ArrayList<>();
+        }
+
+        if (preset.pages.isEmpty()) {
+            preset.pages.add(new PageData());
+        }
 
         PRESET_REGISTRY.put(preset.id, preset);
         presetsOrder.ids.add(preset.id);
@@ -205,6 +217,7 @@ public class Storage {
     }
 
     public static void savePreset(PresetData preset, String id) {
+        preset.clampGridSize();
         save(preset, PRESETS_DIR.resolve(id + FILE_EXT).toFile());
         BindHandler.invalidateCache();
     }

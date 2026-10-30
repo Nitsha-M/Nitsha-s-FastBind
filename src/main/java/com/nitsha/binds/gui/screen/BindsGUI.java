@@ -33,7 +33,9 @@ public class BindsGUI extends NitshaScreen {
     private String displayText = TextUtils.translatable("nitsha.binds.list").getString();
     private int centerX;
     private int centerY;
-    private final int MENU_WIDTH = 125;
+    private int MENU_WIDTH = 125;
+    private int MENU_HEIGHT = 106;
+    private AbstractWidget configBtn;
 
     private String textLEFT, textRIGHT;
     private Component leftArrow, rightArrow;
@@ -92,10 +94,12 @@ public class BindsGUI extends NitshaScreen {
                 + " ]";
         this.leftArrow = TextUtils.literal(textLEFT).withStyle(ChatFormatting.AQUA);
         this.rightArrow = TextUtils.literal(textRIGHT).withStyle(ChatFormatting.AQUA);
+        MENU_WIDTH = activePreset.columns * 31 + 1;
+        MENU_HEIGHT = activePreset.rows * 31 + 44;
         this.centerX = (this.width - MENU_WIDTH) / 2;
-        this.centerY = (this.height - 106) / 2 - 21;
+        this.centerY = (this.height - MENU_HEIGHT) / 2 - 21;
 
-        AbstractWidget configBtn = new TexturedButton(centerX + 57, centerY + 93, 10, 10, Textures.EDIT_BTN, Textures.EDIT_BTN_HOVER, b -> {
+        configBtn = new TexturedButton(centerX + MENU_WIDTH / 2 - 5, centerY + MENU_HEIGHT - 13, 10, 10, Textures.EDIT_BTN, Textures.EDIT_BTN_HOVER, b -> {
             NitshaCraft.setScreen(new BindsEditor(null));
         });
 
@@ -104,7 +108,7 @@ public class BindsGUI extends NitshaScreen {
         this.catTail = new AnimatedSprite(14, 12, Textures.CAT_SPRITE, 0, false, 0, 0, 490, 14, 60, 504, 12);
         if (Storage.options.easterEgg) {
             this.catTail.setLoop(true);
-            this.catTail.setPosition(centerX + 101, centerY + 9);
+            this.catTail.setPosition(centerX + MENU_WIDTH - 24, centerY + 9);
             this.catTail.startAnimation(true);
         }
 
@@ -114,7 +118,7 @@ public class BindsGUI extends NitshaScreen {
     @Override
      public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         if (!this.checkForClose()) {
-            RenderUtils.drawResizableBox(ctx, Textures.MENU_BG, centerX, centerY, MENU_WIDTH, 106, 3, 7);
+            RenderUtils.drawResizableBox(ctx, Textures.MENU_BG, centerX, centerY, MENU_WIDTH, MENU_HEIGHT, 3, 7);
             RenderUtils.drawResizableBox(ctx, Textures.MENU_HEADER, centerX, centerY, MENU_WIDTH, 22, 4, 9);
 
             RenderUtils.drawText(ctx, TextUtils.literal(displayText), 0, centerX + 5, centerY + 7);
@@ -126,17 +130,17 @@ public class BindsGUI extends NitshaScreen {
 
             int lAC = 0xFFFFFFFF;
             int rAC = 0xFFFFFFFF;
-            if (isInside(mouseX, mouseY, centerX + 3, centerY + 92, 51, 12))
+            if (isInside(mouseX, mouseY, centerX + 3, centerY + MENU_HEIGHT - 14, MENU_WIDTH / 2 - 11, 12))
                 lAC = 0xFFE7BC1C;
-            if (isInside(mouseX, mouseY, centerX + 70, centerY + 92, 51, 12))
+            if (isInside(mouseX, mouseY, centerX + MENU_WIDTH / 2 + 8, centerY + MENU_HEIGHT - 14, MENU_WIDTH / 2 - 11, 12))
                 rAC = 0xFFE7BC1C;
 
-            RenderUtils.drawText(ctx, leftArrow, 125, centerX + 52, centerY + 94, "right", "top");
-            RenderUtils.drawText(ctx, rightArrow, 125, centerX + 72, centerY + 94, "left", "top");
+            RenderUtils.drawText(ctx, leftArrow, MENU_WIDTH, centerX + MENU_WIDTH / 2 - 10, centerY + MENU_HEIGHT - 12, "right", "top");
+            RenderUtils.drawText(ctx, rightArrow, MENU_WIDTH, centerX + MENU_WIDTH / 2 + 10, centerY + MENU_HEIGHT - 12, "left", "top");
 
-            RenderUtils.drawText(ctx, TextUtils.literal("⏴"), 125, centerX + 48 - font.width(textLEFT), centerY + 94,
+            RenderUtils.drawText(ctx, TextUtils.literal("⏴"), MENU_WIDTH, centerX + MENU_WIDTH / 2 - 14 - font.width(textLEFT), centerY + MENU_HEIGHT - 12,
                     "right", "top", lAC);
-            RenderUtils.drawText(ctx, TextUtils.literal("⏵"), 125, centerX + 76 + font.width(textRIGHT), centerY + 94,
+            RenderUtils.drawText(ctx, TextUtils.literal("⏵"), MENU_WIDTH, centerX + MENU_WIDTH / 2 + 14 + font.width(textRIGHT), centerY + MENU_HEIGHT - 12,
                     "left", "top", rAC);
 
             // Пресеты
@@ -165,8 +169,8 @@ public class BindsGUI extends NitshaScreen {
 
             if (Storage.options.easterEgg) {
                 RenderUtils.matricesUtil(ctx, 0, 0, 5, () -> {
-                    RenderUtils.drawTexture(ctx, Textures.CAT, centerX + 77, centerY, 0, 0, 35, 26, 35, 26);
-                    int eyeCenterX = centerX + 84;
+                    RenderUtils.drawTexture(ctx, Textures.CAT, centerX + MENU_WIDTH - 48, centerY, 0, 0, 35, 26, 35, 26);
+                    int eyeCenterX = centerX + MENU_WIDTH - 41;
                     int eyeCenterY = centerY + 10;
                     float maxOffsetX = 1.4f;
                     float maxOffsetY = 1.1f;
@@ -194,7 +198,20 @@ public class BindsGUI extends NitshaScreen {
         }
     }
 
+    private void updateMenuLayout() {
+        MENU_WIDTH = activePreset.columns * 31 + 1;
+        MENU_HEIGHT = activePreset.rows * 31 + 44;
+        centerX = (width - MENU_WIDTH) / 2;
+        centerY = (height - MENU_HEIGHT) / 2 - 21;
+        configBtn.setX(centerX + MENU_WIDTH / 2 - 5);
+        configBtn.setY(centerY + MENU_HEIGHT - 13);
+        catTail.setPosition(centerX + MENU_WIDTH - 24, centerY + 9);
+    }
+
     public void generateButtons(int startX, int startY) {
+        updateMenuLayout();
+        startX = centerX + 3;
+        startY = centerY + 27;
         for (ItemButton button : itemButtons) {
             removeNWidget(button);
         }
@@ -216,7 +233,7 @@ public class BindsGUI extends NitshaScreen {
 
             if (page.binds != null) {
                 for (BindData bind : page.binds) {
-                    if (bind.index == slot) {
+                    if (bind.index == BindsEditor.getFirstBindOfPage(currentPageIndex) + slot) {
                         foundBind = bind;
                         break;
                     }
@@ -266,7 +283,8 @@ public class BindsGUI extends NitshaScreen {
 
     @Override
     public void onClose() {
-        KeyMapping.set(KeyBinds.BINDS.getDefaultKey(), false);
+        KeyBinds.BINDS.setDown(false);
+        NitshaCraft.setScreen(null);
     }
 
     private boolean checkForClose() {
@@ -278,7 +296,7 @@ public class BindsGUI extends NitshaScreen {
         }
 
         if (!NitshaInput.isKeyDown(KeyBinds.BINDS)) {
-            NitshaCraft.setScreen(null);
+            onClose();
             return true;
         }
         return false;
@@ -368,8 +386,13 @@ public class BindsGUI extends NitshaScreen {
 
     @Override
     protected boolean onMouseClicked(double mouseX, double mouseY, int button) {
-        if (handleClick(mouseX, mouseY, centerX + 3, centerY + 92, 51, 12, () -> updatePage(-1))) return true;
-        if (handleClick(mouseX, mouseY, centerX + 70, centerY + 92, 51, 12, () -> updatePage(1))) return true;
+        if (NitshaInput.matchesMouse(KeyBinds.BINDS, button) && !Storage.options.holdToOpen && !ignoreHoldToOpenOnce) {
+            onClose();
+            return true;
+        }
+
+        if (handleClick(mouseX, mouseY, centerX + 3, centerY + MENU_HEIGHT - 14, MENU_WIDTH / 2 - 11, 12, () -> updatePage(-1))) return true;
+        if (handleClick(mouseX, mouseY, centerX + MENU_WIDTH / 2 + 8, centerY + MENU_HEIGHT - 14, MENU_WIDTH / 2 - 11, 12, () -> updatePage(1))) return true;
         if (handleClick(mouseX, mouseY, centerX, centerY - 20, 22, 18, () -> updatePreset(-1))) return true;
         if (handleClick(mouseX, mouseY, centerX + MENU_WIDTH - 22, centerY - 20, 22, 18, () -> updatePreset(1))) return true;
 
@@ -387,6 +410,16 @@ public class BindsGUI extends NitshaScreen {
     }
 
     @Override
+    protected boolean onMouseReleased(double mouseX, double mouseY, int button) {
+        if (NitshaInput.matchesMouse(KeyBinds.BINDS, button)) {
+            ignoreHoldToOpenOnce = false;
+            return true;
+        }
+
+        return super.onMouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
     protected boolean onMouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (verticalAmount == 0.0) {
             return super.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
@@ -394,9 +427,9 @@ public class BindsGUI extends NitshaScreen {
 
         int direction = verticalAmount > 0 ? -1 : 1;
 
-        if (isInside(mouseX, mouseY, centerX, centerY - 20, 125, 18)) {
+        if (isInside(mouseX, mouseY, centerX, centerY - 20, MENU_WIDTH, 18)) {
             updatePreset(direction);
-        } else if (isInside(mouseX, mouseY, centerX, centerY, MENU_WIDTH, 106)) {
+        } else if (isInside(mouseX, mouseY, centerX, centerY, MENU_WIDTH, MENU_HEIGHT)) {
             updatePage(direction);
         } else {
             return super.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
@@ -411,7 +444,7 @@ public class BindsGUI extends NitshaScreen {
     protected boolean onKeyPressed(int keyCode, int nativeCode, int modifiers) {
         if ((NitshaInput.matchesKey(KeyBinds.BINDS, keyCode, nativeCode) && !Storage.options.holdToOpen && !ignoreHoldToOpenOnce) || keyCode == InputConstants.KEY_ESCAPE) {
             ignoreHoldToOpenOnce = false;
-            NitshaCraft.setScreen(null);
+            onClose();
             return true;
         }
 

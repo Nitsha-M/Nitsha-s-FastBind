@@ -83,6 +83,10 @@ public class KeybindSelector extends BedrockButton {
 
     @Override
     public boolean onMouseClicked(double mouseX, double mouseY, int button) {
+        if (captureMouseButton(button)) {
+            return true;
+        }
+
         if (!active || !super.onMouseClicked(mouseX, mouseY, button)) {
             return false;
         }
@@ -91,6 +95,16 @@ public class KeybindSelector extends BedrockButton {
         setFocusedField(this);
         setPressed(true);
         setFocused(true);
+        return true;
+    }
+
+    public boolean captureMouseButton(int button) {
+        if (focusedKeybind != this || !active || !visible || !isEnabled()) {
+            return false;
+        }
+
+        setKeyCode(NitshaInput.encodeMouseButton(button));
+        setFocusedField(null);
         return true;
     }
 

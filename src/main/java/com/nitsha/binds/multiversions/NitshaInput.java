@@ -4,6 +4,9 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.Minecraft;
+//? if >=26.3 {
+import org.lwjgl.sdl.SDLMouse;
+//? }
 
 //? if <26.3 {
 /*import org.lwjgl.glfw.GLFW;*/
@@ -35,10 +38,47 @@ public final class NitshaInput {
 
     public static boolean isKeyDown(KeyMapping mapping) {
         //? if fabric {
-        int keyCode = KeyMappingHelper.getBoundKeyOf(mapping).getValue();
+        InputConstants.Key key = KeyMappingHelper.getBoundKeyOf(mapping);
         //? } else {
-        /*int keyCode = mapping.getKey().getValue();*/
+        /*InputConstants.Key key = mapping.getKey();*/
         //? }
+
+        return isInputDown(key.getType() == InputConstants.Type.MOUSE ? encodeMouseButton(key.getValue()) : key.getValue());
+    }
+
+    // Mouse codes are separate from keyboard codes; zero remains unbound
+    public static int encodeMouseButton(int button) {
+        return -1000 - button;
+    }
+
+    public static boolean isMouseCode(int keyCode) {
+        return keyCode <= -1000 && keyCode >= -1032;
+    }
+
+    public static InputConstants.Key getInputKey(int keyCode) {
+        if (isMouseCode(keyCode)) {
+            return InputConstants.Type.MOUSE.getOrCreate(-1000 - keyCode);
+        }
+
+        //$ if >=26.3 'return InputConstants.Type.KEYBOARD.getOrCreate(keyCode);' else 'return InputConstants.Type.KEYSYM.getOrCreate(keyCode);'
+        return InputConstants.Type.KEYBOARD.getOrCreate(keyCode);
+    }
+
+    public static boolean isInputDown(int keyCode) {
+        if (isMouseCode(keyCode)) {
+            int button = -1000 - keyCode;
+            //? if >=26.3 {
+            return button >= 1 && (SDLMouse.nSDL_GetMouseState(0L, 0L) & (1 << (button - 1))) != 0;
+            //? } else if >=1.21.9 {
+            /*return GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().handle(), button) == GLFW.GLFW_PRESS;*/
+            //? } else {
+            /*return GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().getWindow(), button) == GLFW.GLFW_PRESS;*/
+            //? }
+        }
+
+        if (keyCode <= 0) {
+            return false;
+        }
 
         //? if >=26.3 {
         return InputConstants.isKeyDown(keyCode);
@@ -50,8 +90,7 @@ public final class NitshaInput {
     }
 
     public static String getKeyName(int keyCode) {
-        //$ if >=26.3 'return InputConstants.Type.KEYBOARD.getOrCreate(keyCode).getDisplayName().getString();' else 'return InputConstants.Type.KEYSYM.getOrCreate(keyCode).getDisplayName().getString();'
-        return InputConstants.Type.KEYBOARD.getOrCreate(keyCode).getDisplayName().getString();
+        return getInputKey(keyCode).getDisplayName().getString();
     }
 
     public static boolean matchesKey(KeyMapping mapping, int keyCode, int nativeCode) {

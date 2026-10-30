@@ -31,6 +31,8 @@ public class Slider extends NitshaAbstractWidget {
 
     private float value, max, min;
 
+    private int bgColor = 0xFF212121;
+
     public Slider(int x, int y, int width, int height, boolean isEnabled, float min, float max, float value) {
         super(x, y, width, height, TextUtils.empty());
         this.isEnabled = isEnabled;
@@ -61,6 +63,10 @@ public class Slider extends NitshaAbstractWidget {
     public void setOutlineColor(int outlineColor, int outlineHoverColor) {
         this.outlineColor = outlineColor;
         this.outlineHoverColor = outlineHoverColor;
+    }
+
+    public void setBgColor(int bgColor) {
+        this.bgColor = bgColor;
     }
 
     public float getValue() {
@@ -139,7 +145,7 @@ public class Slider extends NitshaAbstractWidget {
 
         RenderUtils.drawFill(ctx, fX + 1, fY, fX + getWidth() - 1, fY + sliderH, oC);
         RenderUtils.drawFill(ctx, fX, fY +  1, fX + getWidth(), fY + sliderH - 1, oC);
-        RenderUtils.drawFill(ctx, fX + 1, fY + 1, fX + getWidth() - 1, fY + sliderH - 1, 0xFF212121);
+        RenderUtils.drawFill(ctx, fX + 1, fY + 1, fX + getWidth() - 1, fY + sliderH - 1, bgColor);
 
         // fill line
         RenderUtils.drawFill(ctx, fX + 1, fY + 1, fX + sliderOffset + 3, fY + sliderH - 1, 0xFF3C8527);

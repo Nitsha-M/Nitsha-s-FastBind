@@ -1,25 +1,14 @@
 package com.nitsha.binds.action;
 
-import com.mojang.blaze3d.platform.InputConstants;
-import com.nitsha.binds.Main;
-import com.nitsha.binds.gui.widget.button.SmallTextButton;
-import com.nitsha.binds.multiversions.RenderUtils;
 import com.nitsha.binds.multiversions.TextUtils;
 import com.nitsha.binds.gui.widget.TextField;
-import com.nitsha.binds.gui.widget.button.TexturedButton;
+
 import com.nitsha.binds.utils.FormattedTextUtils;
 import net.minecraft.client.Minecraft;
-//? if >=1.21.9 {
-//? }
+
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.Identifier;
-//? if <26.3 {
-/*import org.lwjgl.glfw.GLFW;
-*///? }
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import java.util.function.LongConsumer;
 
@@ -29,24 +18,10 @@ import com.nitsha.binds.configs.dto.actions.AllActionsData.TextFormatData;
 
 public class TitleMessageAction extends ActionType<TitleMessageActionData> {
 
-    private static final Identifier LEFT        = Main.idSprite("action_left_normal");
-    private static final Identifier LEFT_HOVER  = Main.idSprite("action_left_hover");
-    private static final Identifier RIGHT       = Main.idSprite("action_right_normal");
-    private static final Identifier RIGHT_HOVER = Main.idSprite("action_right_hover");
-
-    private static final int VISIBLE_COLORS = 13;
     private static final int FIELD_HEIGHT = 19;
     private static final int GAP = 2;
-
     private TextField titleField;
     private TextField subtitleField;
-    private TexturedButton leftBtn;
-    private TexturedButton rightBtn;
-    private final List<SmallTextButton> colorsItem = new ArrayList<>();
-    private int colorOffset = 0;
-
-    private int x, y, width;
-    private int colorButtonsY;
 
     @Override public String getId() { return "titleMessage"; }
 
@@ -57,7 +32,7 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
 
     @Override public String getDefaultValue() { return ""; }
     @Override public int getLineColor() { return 0xFF5facfa; }
-    @Override public int getHeight() { return 57; }
+    @Override public int getHeight() { return 46; }
 
     @Override
     public TitleMessageActionData createDefaultData() { return new TitleMessageActionData(); }
@@ -110,24 +85,10 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
 
     @Override
     public void init(int x, int y, int width, TitleMessageActionData data) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.colorButtonsY = y + 3 + FIELD_HEIGHT + GAP + FIELD_HEIGHT + GAP;
-
-        this.titleField = new TextField(
-                Minecraft.getInstance().font,
-                x, y + 3, width - 26, FIELD_HEIGHT,
-                Integer.MAX_VALUE, "",
-                TextUtils.translatable("nitsha.binds.advances.actions.titleLine").getString()
-        );
-
-        this.subtitleField = new TextField(
-                Minecraft.getInstance().font,
-                x, y + 3 + FIELD_HEIGHT + GAP, width, FIELD_HEIGHT,
-                Integer.MAX_VALUE, "",
-                TextUtils.translatable("nitsha.binds.advances.actions.subtitleLine").getString()
-        );
+        this.titleField = new TextField(Minecraft.getInstance().font, x, y + 3, width - 26, FIELD_HEIGHT, Integer.MAX_VALUE, "", TextUtils.translatable("nitsha.binds.advances.actions.titleLine").getString());
+        this.subtitleField = new TextField(Minecraft.getInstance().font, x, y + 3 + FIELD_HEIGHT + GAP, width, FIELD_HEIGHT, Integer.MAX_VALUE, "", TextUtils.translatable("nitsha.binds.advances.actions.subtitleLine").getString());
+        this.titleField.setFormattingAllowed(true);
+        this.subtitleField.setFormattingAllowed(true);
 
         if (data.value != null) {
             if (data.value.title != null) {
@@ -137,24 +98,7 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
                 loadFormattedText(this.subtitleField, data.value.subtitle);
             }
         }
-
-        this.leftBtn = new TexturedButton(x, colorButtonsY, 9, 9, LEFT, LEFT_HOVER,
-                button -> colorOffset = (colorOffset - 1 + ChatMessageAction.COLORS_DATA.length) % ChatMessageAction.COLORS_DATA.length);
-
-        this.rightBtn = new TexturedButton(x + width - 9, colorButtonsY, 9, 9, RIGHT, RIGHT_HOVER,
-                button -> colorOffset = (colorOffset + 1) % ChatMessageAction.COLORS_DATA.length);
-
-        for (int i = 0; i < ChatMessageAction.COLORS_DATA.length; i++) {
-            int color = (int) ChatMessageAction.COLORS_DATA[i][0];
-            int code  = (int) ChatMessageAction.COLORS_DATA[i][1];
-            MutableComponent text = (MutableComponent) ChatMessageAction.COLORS_DATA[i][2];
-            colorsItem.add(new SmallTextButton(text, x + 10, colorButtonsY, color, 10, "left", () -> {
-                TextField focused = TextField.getFocusedField();
-                if (focused != null) focused.setStyle(code);
-            }));
-        }
     }
-
     private void loadFormattedText(TextField field, TextFormatData data) {
         String text = data.text;
         if (text != null) field.setText(text);
@@ -174,42 +118,18 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
     public void render(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         titleField.onRender(ctx, mouseX, mouseY, delta);
         subtitleField.onRender(ctx, mouseX, mouseY, delta);
-
-        for (int i = 0; i < VISIBLE_COLORS; i++) {
-            int actualIndex = (colorOffset + i) % ChatMessageAction.COLORS_DATA.length;
-            SmallTextButton item = colorsItem.get(actualIndex);
-            item.setX(x + 10 + (i * 11));
-            item.setY(colorButtonsY);
-
-            int itemWidth  = item.isHovered() ? 12 : 10;
-            int itemHeight = item.isHovered() ? 11 : 9;
-            int itemOffset = item.isHovered() ? -1 : 0;
-            item.setWidth(itemWidth);
-            item.setHeight(itemHeight);
-
-            RenderUtils.matricesUtil(ctx, itemOffset, itemOffset, 0, () -> item.onRender(ctx, mouseX, mouseY, delta));
-        }
-
-        leftBtn.setY(colorButtonsY);
-        rightBtn.setY(colorButtonsY);
-        leftBtn.onRender(ctx, mouseX, mouseY, delta);
-        rightBtn.onRender(ctx, mouseX, mouseY, delta);
     }
-
     @Override
     public void setPosition(int x, int y) {
-        this.y = y;
-        this.x = x;
-        this.colorButtonsY = y + 3 + FIELD_HEIGHT + GAP + FIELD_HEIGHT + GAP;
-        if (titleField != null) titleField.setY(y + 3);
-        if (subtitleField != null) subtitleField.setY(y + 3 + FIELD_HEIGHT + GAP);
-        if (leftBtn != null) leftBtn.setY(colorButtonsY);
-        if (rightBtn != null) rightBtn.setY(colorButtonsY);
-        for (SmallTextButton btn : colorsItem) {
-            btn.setY(colorButtonsY);
+        if (titleField != null) {
+            titleField.setX(x);
+            titleField.setY(y + 3);
+        }
+        if (subtitleField != null) {
+            subtitleField.setX(x);
+            subtitleField.setY(y + 3 + FIELD_HEIGHT + GAP);
         }
     }
-
     @Override
     public TitleMessageActionData getValue() {
         TitleMessageActionData result = new TitleMessageActionData();
@@ -224,22 +144,10 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
         subtitleField.setText("");
     }
 
-    @Override
-    public boolean isMouseOverColorButtons(double mouseX, double mouseY) {
-        return mouseX >= x + 10 && mouseX <= x + 10 + width - 20
-                && mouseY >= colorButtonsY && mouseY <= colorButtonsY + 10;
-    }
-
     //? if >=1.21.9 {
     @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
-        boolean clicked = titleField.mouseClicked(event, bl) || subtitleField.mouseClicked(event, bl);
-        if (leftBtn.mouseClicked(event, bl) || rightBtn.mouseClicked(event, bl)) clicked = true;
-        for (int i = 0; i < VISIBLE_COLORS; i++) {
-            int actualIndex = (colorOffset + i) % ChatMessageAction.COLORS_DATA.length;
-            if (colorsItem.get(actualIndex).mouseClicked(event, bl)) clicked = true;
-        }
-        return clicked;
+        return titleField.mouseClicked(event, bl) || subtitleField.mouseClicked(event, bl);
     }
 
     @Override
@@ -254,14 +162,7 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
     //? } else {
     /*@Override
     public boolean mouseClicked(double mx, double my, int btn) {
-        boolean clicked = titleField.mouseClicked(mx, my, btn)
-                || subtitleField.mouseClicked(mx, my, btn);
-        if (leftBtn.mouseClicked(mx, my, btn) || rightBtn.mouseClicked(mx, my, btn)) clicked = true;
-        for (int i = 0; i < VISIBLE_COLORS; i++) {
-            int actualIndex = (colorOffset + i) % ChatMessageAction.COLORS_DATA.length;
-            if (colorsItem.get(actualIndex).mouseClicked(mx, my, btn)) clicked = true;
-        }
-        return clicked;
+        return titleField.mouseClicked(mx, my, btn) || subtitleField.mouseClicked(mx, my, btn);
     }
 
     @Override
@@ -276,23 +177,4 @@ public class TitleMessageAction extends ActionType<TitleMessageActionData> {
                 || subtitleField.charTyped(c, mods);
     }
     *///? }
-
-    @Override
-    public boolean mouseScrolled(double mx, double my, double amount) {
-        if (!isMouseOverColorButtons(mx, my)) return false;
-        //? if >=1.21.9 {
-         com.mojang.blaze3d.platform.Window window = Minecraft.getInstance().getWindow();
-        //? } else {
-        /*long window = Minecraft.getInstance().getWindow().getWindow();
-        *///? }
-        //$ if >=26.3 'boolean shift = InputConstants.isKeyDown(InputConstants.KEY_LSHIFT) || InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);' else 'boolean shift = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT);'
-        boolean shift = InputConstants.isKeyDown(InputConstants.KEY_LSHIFT) || InputConstants.isKeyDown(InputConstants.KEY_RSHIFT);
-        if (!shift) return false;
-        if (amount > 0) {
-            colorOffset = (colorOffset - 1 + ChatMessageAction.COLORS_DATA.length) % ChatMessageAction.COLORS_DATA.length;
-        } else if (amount < 0) {
-            colorOffset = (colorOffset + 1) % ChatMessageAction.COLORS_DATA.length;
-        }
-        return true;
-    }
 }

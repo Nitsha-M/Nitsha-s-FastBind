@@ -14,8 +14,7 @@ public class MainKeybindSelector extends BedrockButton {
     private int keyCode;
 
     public MainKeybindSelector(int x, int y, int width, int height) {
-        super(TextUtils.small(TextUtils.translatable("nitsha.binds.advances.noKeyBind")),
-                x, y, width, height, true, () -> {}, 0xFFFFFFFF, 0xFF07938d, 0xFF212121, 0xFFFFFFFF);
+        super(TextUtils.small(TextUtils.translatable("nitsha.binds.advances.noKeyBind")), x, y, width, height, true, () -> {}, 0xFFFFFFFF, 0xFF07938d, 0xFF212121, 0xFFFFFFFF);
         this.setButtonDirection(1);
     }
 
@@ -29,7 +28,10 @@ public class MainKeybindSelector extends BedrockButton {
     public static MainKeybindSelector getFocusedField() { return focusedKeybind; }
 
     public static void setFocusedField(MainKeybindSelector fK) {
-        if (focusedKeybind != null) focusedKeybind.setPressed(false);
+        if (focusedKeybind != null) {
+            focusedKeybind.setPressed(false);
+            focusedKeybind.setFocused(false);
+        }
         focusedKeybind = fK;
     }
 
@@ -63,6 +65,10 @@ public class MainKeybindSelector extends BedrockButton {
 
     @Override
     public boolean onMouseClicked(double mouseX, double mouseY, int button) {
+        if (captureMouseButton(button)) {
+            return true;
+        }
+
         if (!super.onMouseClicked(mouseX, mouseY, button)) {
             return false;
         }
@@ -72,6 +78,16 @@ public class MainKeybindSelector extends BedrockButton {
         setPressed(true);
         setFocused(true);
 
+        return true;
+    }
+
+    public boolean captureMouseButton(int button) {
+        if (focusedKeybind != this || !active || !visible || !isEnabled()) {
+            return false;
+        }
+
+        setKeyCode(NitshaInput.encodeMouseButton(button));
+        setFocusedField(null);
         return true;
     }
 

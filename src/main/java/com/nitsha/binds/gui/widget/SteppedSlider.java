@@ -5,6 +5,7 @@ import com.nitsha.binds.multiversions.RenderUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.math.BigDecimal;
+import java.util.function.Consumer;
 
 public class SteppedSlider extends Slider {
     private static final int KNOB_WIDTH = 10;
@@ -12,6 +13,11 @@ public class SteppedSlider extends Slider {
 
     private final StepRange range;
     private int selectedIndex;
+    private Consumer<Float> changeListener;
+
+    public void setChangeListener(Consumer<Float> listener) {
+        changeListener = listener;
+    }
 
     public SteppedSlider(int x, int y, int width, int height, boolean isEnabled, float min, float max, float step, float value) {
         super(x, y, width, height, isEnabled, min, max, value);
@@ -37,8 +43,12 @@ public class SteppedSlider extends Slider {
             throw new IllegalArgumentException("Slider value must be finite");
         }
 
+        float previousValue = getValue();
         selectedIndex = range.nearestIndex(value);
         super.setValue(range.valueAt(selectedIndex));
+        if (changeListener != null && Float.compare(previousValue, getValue()) != 0) {
+            changeListener.accept(getValue());
+        }
     }
 
     @Override
@@ -56,9 +66,13 @@ public class SteppedSlider extends Slider {
 
         if (travelWidth == 0) return;
 
+        float previousValue = range.valueAt(selectedIndex);
         double progress = (mouseX - getX() - TRACK_PADDING - KNOB_WIDTH / 2.0) / travelWidth;
         selectedIndex = range.indexAtProgress(progress);
         super.setValue(range.valueAt(selectedIndex));
+        if (changeListener != null && Float.compare(previousValue, getValue()) != 0) {
+            changeListener.accept(getValue());
+        }
     }
 
     @Override

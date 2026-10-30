@@ -65,8 +65,8 @@ public class AdvancedOptions extends AnimatedWindow {
         this.changeHeight = new TexturedButton(getWidth() + 4, 0, 9, 9, Textures.RESIZE, Textures.RESIZE_HOVER, button -> {
             Storage.options.fullHeightEditor = !Storage.options.fullHeightEditor;
 
-            int newY = (Storage.options.fullHeightEditor) ? 16 : ((screen.height - 190) / 2);
-            int newH = (Storage.options.fullHeightEditor) ? screen.height - 16 : 190;
+            int newY = (Storage.options.fullHeightEditor) ? 26 : ((screen.height - 190) / 2);
+            int newH = (Storage.options.fullHeightEditor) ? screen.height - 36 : 190;
 
             this.setHeight(newH);
             this.setY(newY);

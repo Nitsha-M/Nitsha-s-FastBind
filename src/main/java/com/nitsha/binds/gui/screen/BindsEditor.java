@@ -12,27 +12,24 @@ import com.nitsha.binds.gui.modals.SelectIcon;
 import com.nitsha.binds.gui.modals.SelectKeyEvent;
 import com.nitsha.binds.gui.modals.SelectSound;
 import com.nitsha.binds.gui.panels.*;
+import com.nitsha.binds.gui.utils.Textures;
 import com.nitsha.binds.gui.widget.*;
 import com.nitsha.binds.gui.widget.window.ModalWindow;
 import com.nitsha.binds.gui.panels.AdvancedOptions;
 import com.nitsha.binds.gui.widget.button.MainKeybindSelector;
+import com.nitsha.binds.gui.widget.window.TextFormattingWindow;
 import com.nitsha.binds.multiversions.*;
 import com.nitsha.binds.utils.AudioPlayer;
 import com.nitsha.binds.utils.EventBus;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 import com.nitsha.binds.configs.dto.preset.ActionData;
 
 public class BindsEditor extends NitshaScreen {
-    private static final Identifier BACKGROUND = Main.id("textures/gui/test/editor_bg.png");
-    private static final Identifier BACKGROUND_FLAT = Main.id("textures/gui/test/editor_bg_flat.png");
-    private static final Identifier BACKGROUND_DARK = Main.id("textures/gui/test/editor_bg_dark.png");
-    private static final Identifier BACKGROUND_DARK_FLAT = Main.id("textures/gui/test/editor_bg_dark_flat.png");
-
+    
     private final int TEXTURE_WIDTH = 141;
     private final int TEXTURE_HEIGHT = 190;
 
@@ -43,6 +40,7 @@ public class BindsEditor extends NitshaScreen {
     public static PresetData activePreset;
     public static int currentPage = 0;
     public static int activeBind = 0;
+    private static int activeBindPage;
     public static String editIconBtnString = "minecraft:structure_void";
 
     public BindData copied = new BindData();
@@ -51,6 +49,10 @@ public class BindsEditor extends NitshaScreen {
     private BindsList window_BindsList;
     private AdvancedOptions window_AdvancedOptions;
     private PresetSelector window_PresetSelector;
+    private PresetOptions window_PresetOptions;
+    private TextFormattingWindow window_TextFormatting;
+    private GuiEventListener mouseCapture;
+    private int mouseCaptureButton = -1;
 
     private SelectKeyEvent modal_SelectKeyEvent;
     private SelectSound modal_SelectSound;
@@ -58,11 +60,16 @@ public class BindsEditor extends NitshaScreen {
 
     private final Screen parent;
 
-    private List<ModalWindow> modalWindows = new ArrayList<>();
+    private final List<ModalWindow> modalWindows = new ArrayList<>();
 
     public BindsEditor(Screen parent) {
         super();
         this.parent = parent;
+    }
+
+    private void addModal(ModalWindow modal) {
+        addNWidget(modal);
+        modalWindows.add(modal);
     }
 
     protected void init() {
@@ -73,6 +80,8 @@ public class BindsEditor extends NitshaScreen {
         /*this.children().clear();*/
         //? }
         modalWindows.clear();
+        mouseCapture = null;
+        mouseCaptureButton = -1;
         this.centerX = (this.width / 2) - (TEXTURE_WIDTH / 2);
         this.centerY = (this.height - TEXTURE_HEIGHT) / 2;
 
@@ -93,72 +102,43 @@ public class BindsEditor extends NitshaScreen {
             }
         }
 
-        // Basic options (bind name, single-command, icon)
-        window_BasicOptions = new BasicOptionsWindow(this, centerX - 100, centerY, TEXTURE_WIDTH, TEXTURE_HEIGHT,
-                BACKGROUND, BACKGROUND_FLAT, 0);
-        //? if >=1.17 {
-        this.addRenderableWidget(window_BasicOptions);
-        //?} else {
-        // this.addWidget(window_BasicOptions);
-        //?}
+        setActiveBind(getFirstBindOfPage(currentPage));
+
+        // Basic options (bind name, icon)
+        window_BasicOptions = new BasicOptionsWindow(this, centerX - 100, centerY, TEXTURE_WIDTH, TEXTURE_HEIGHT, Textures.BACKGROUND, Textures.BACKGROUND_FLAT, 0);
+        this.addNWidget(window_BasicOptions);
 
         // Binds list (gray window with all buttons)
-        window_BindsList = new BindsList(this, centerX + 4 - 100, centerY - 1, 133, 122, BACKGROUND_DARK,
-                BACKGROUND_DARK_FLAT, 140);
-        //? if >=1.17 {
-        this.addRenderableWidget(window_BindsList);
-        //?} else {
-        // this.addWidget(window_BindsList);
-        //?}
+        window_BindsList = new BindsList(this, centerX + 4 - 100, centerY - 20, 133, 100, Textures.BACKGROUND_DARK, Textures.BACKGROUND_DARK_FLAT, 140);
+        this.addNWidget(window_BindsList);
 
-//        this.addNWidget(window_BindsList);
+        // Preset options
+        window_PresetOptions = new PresetOptions(this, centerX + 4 - 100, centerY + 103, 133, 30, Textures.BACKGROUND_DARK, Textures.BACKGROUND_DARK_FLAT, 250);
+        this.addNWidget(window_PresetOptions);
 
         // Preset selector and editor
-        window_PresetSelector = new PresetSelector(this, centerX + 7 - 100, centerY - 19, 127, 17,250);
-        //? if >=1.17 {
-        this.addRenderableWidget(window_PresetSelector);
-        //? } else {
-        // this.addWidget(window_PresetSelector);
-        //? }
+        window_PresetSelector = new PresetSelector(this, centerX + 4 - 100, centerY + 82, 133, 19, Textures.BACKGROUND_DARK, Textures.BACKGROUND_DARK_FLAT, 350);
+        this.addNWidget(window_PresetSelector);
 
         // Advanced options (icon, actions, mod options)
-        window_AdvancedOptions = new AdvancedOptions(this, centerX + 61, (Storage.options.fullHeightEditor) ? 16 : centerY, 180, (Storage.options.fullHeightEditor) ? this.height - 16 : TEXTURE_HEIGHT,
-                BACKGROUND, BACKGROUND_FLAT, 140);
-        //? if >=1.17 {
-        this.addRenderableWidget(window_AdvancedOptions);
-        //?} else {
-        // this.addWidget(window_AdvancedOptions);
-        //?}
+        window_AdvancedOptions = new AdvancedOptions(this, centerX + 61, (Storage.options.fullHeightEditor) ? 26 : centerY, 180, (Storage.options.fullHeightEditor) ? this.height - 36 : TEXTURE_HEIGHT,
+                Textures.BACKGROUND, Textures.BACKGROUND_FLAT, 140);
+        this.addNWidget(window_AdvancedOptions);
 
         // Select key event
         modal_SelectKeyEvent = new SelectKeyEvent(this, centerX, centerY, 180, TEXTURE_HEIGHT,
-                BACKGROUND, BACKGROUND_FLAT);
-        //? if >=1.17 {
-        this.addRenderableWidget(modal_SelectKeyEvent);
-        //?} else {
-        // this.addWidget(modal_SelectKeyEvent);
-        //?}
-        modalWindows.add(modal_SelectKeyEvent);
+                Textures.BACKGROUND, Textures.BACKGROUND_FLAT);
+        addModal(modal_SelectKeyEvent);
 
         // Select icon
         modal_SelectIcon = new SelectIcon(this, centerX, centerY, 180, TEXTURE_HEIGHT,
-                BACKGROUND, BACKGROUND_FLAT);
-        //? if >=1.17 {
-        this.addRenderableWidget(modal_SelectIcon);
-        //?} else {
-        // this.addWidget(modal_SelectIcon);
-        //?}
-        modalWindows.add(modal_SelectIcon);
+                Textures.BACKGROUND, Textures.BACKGROUND_FLAT);
+        addModal(modal_SelectIcon);
 
         // Select icon
         modal_SelectSound = new SelectSound(this, centerX, centerY, 180, TEXTURE_HEIGHT,
-                BACKGROUND, BACKGROUND_FLAT);
-        //? if >=1.17 {
-        this.addRenderableWidget(modal_SelectSound);
-        //?} else {
-        // this.addWidget(modal_SelectSound);
-        //?}
-        modalWindows.add(modal_SelectSound);
+                Textures.BACKGROUND, Textures.BACKGROUND_FLAT);
+        addModal(modal_SelectSound);
 
         selectBind();
         window_BindsList.updateSelected(ItemsMapper.getItemStack(getCBind().icon));
@@ -174,6 +154,10 @@ public class BindsEditor extends NitshaScreen {
         EventBus.on("selectSound.open", (Object[] data) -> {
             modal_SelectSound.open(() -> {});
         });
+
+
+        window_TextFormatting = new TextFormattingWindow(0, 0);
+        addNWidget(window_TextFormatting);
     }
 
     public BasicOptionsWindow getBasicOptionsWindow() {
@@ -192,6 +176,10 @@ public class BindsEditor extends NitshaScreen {
         return this.window_PresetSelector;
     }
 
+    public PresetOptions getPresetOptionsWindow() {
+        return this.window_PresetOptions;
+    }
+
     public static String getPresetName() {
         return activePreset != null ? activePreset.name : "";
     }
@@ -206,10 +194,11 @@ public class BindsEditor extends NitshaScreen {
 
     public static void setActiveBind(int aB) {
         activeBind = aB;
+        activeBindPage = currentPage;
     }
 
     public static int getPageOfActiveBind() {
-        return activeBind / 8;
+        return activeBindPage;
     }
 
     public static boolean isActiveBindOnPage(int page) {
@@ -217,13 +206,34 @@ public class BindsEditor extends NitshaScreen {
     }
 
     public static int getFirstBindOfPage(int page) {
+        // The stored page offset stays fixed when the visible grid changes.
         return page * 8;
+    }
+
+    public void setPresetGridSize(int columns, int rows) {
+        columns = Math.max(PresetData.MIN_COLUMNS, Math.min(PresetData.MAX_COLUMNS, columns));
+        rows = Math.max(PresetData.MIN_ROWS, Math.min(PresetData.MAX_ROWS, rows));
+        if (activePreset == null || (activePreset.columns == columns && activePreset.rows == rows)) return;
+
+        saveBind();
+        int selectedSlot = isActiveBindOnPage(currentPage) ? activeBind - getFirstBindOfPage(currentPage) : 0;
+        activePreset.columns = columns;
+        activePreset.rows = rows;
+        Storage.savePreset(activePreset, activePresetId);
+
+        if (selectedSlot >= columns * rows || selectedSlot < 0) {
+            setActiveBind(getFirstBindOfPage(currentPage));
+            selectBind();
+        }
+
+        window_BindsList.generateButtons(7, 31);
     }
 
     public void setNewPage(int dir) {
         if (activePreset == null) return;
         int totalPages = activePreset.pages.size();
         if (totalPages == 0) return;
+        saveBind();
         if (dir == -1 && currentPage == 0)
             currentPage = totalPages;
         currentPage += dir;
@@ -233,7 +243,9 @@ public class BindsEditor extends NitshaScreen {
         Storage.options.lastPresetId = activePresetId;
         Storage.options.lastPageIndex = currentPage;
         Storage.saveModOptions();
+        setActiveBind(getFirstBindOfPage(currentPage));
         window_BindsList.generateButtons(7, 31);
+        selectBind();
     }
 
     public void selectPage(int i) {
@@ -288,6 +300,7 @@ public class BindsEditor extends NitshaScreen {
             Storage.saveModOptions();
 
             window_BindsList.generateButtons(7, 31);
+            window_PresetOptions.syncPreset();
             selectBind();
         }
     }
@@ -458,6 +471,11 @@ public class BindsEditor extends NitshaScreen {
 
     @Override
     public void onRender(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
+        if (activePreset != null) {
+            float gridExpansion = Math.max(0, activePreset.columns - 4) * 31 / 2.0F;
+            window_AdvancedOptions.setX(centerX + 61 + gridExpansion);
+        }
+
         boolean anyModalOpen = false;
 
         for (ModalWindow modal : modalWindows) {
@@ -468,20 +486,46 @@ public class BindsEditor extends NitshaScreen {
         }
 
         boolean selectorHovered = window_PresetSelector.isOpen() && window_PresetSelector.isMouseInside(mouseX, mouseY);
+        boolean optionsHovered = window_PresetOptions.isOpen() && window_PresetOptions.isMouseInside(mouseX, mouseY);
+        boolean formattingHovered = window_TextFormatting.hasTarget() && window_TextFormatting.isMouseInside(mouseX, mouseY);
 
         for (GuiEventListener element : children()) {
-            if (element instanceof ModalWindow modal) {
-                if (modal.isVisible()) {
-                    RenderUtils.renderElement(ctx, modal, mouseX, mouseY, delta);
-                }
-                continue;
-            }
+            if (element instanceof ModalWindow || element == window_PresetSelector || element == window_PresetOptions || element == window_TextFormatting) continue;
 
-            boolean blockHover = anyModalOpen || (selectorHovered && element != window_PresetSelector);
+            boolean blockHover = anyModalOpen || selectorHovered || optionsHovered || formattingHovered;
             int elementMouseX = blockHover ? -10000 : mouseX;
             int elementMouseY = blockHover ? -10000 : mouseY;
 
             RenderUtils.renderElement(ctx, element, elementMouseX, elementMouseY, delta);
+        }
+
+        boolean blockOptionsHover = anyModalOpen || selectorHovered || formattingHovered;
+        RenderUtils.renderElement(ctx, window_PresetOptions, blockOptionsHover ? -10000 : mouseX, blockOptionsHover ? -10000 : mouseY, delta);
+        RenderUtils.renderElement(ctx, window_PresetSelector, anyModalOpen || formattingHovered ? -10000 : mouseX, anyModalOpen || formattingHovered ? -10000 : mouseY, delta);
+
+        for (GuiEventListener element : children()) {
+            if (element instanceof ModalWindow modal && modal.isVisible()) {
+                RenderUtils.renderElement(ctx, modal, mouseX, mouseY, delta);
+            }
+        }
+
+        TextField field = TextField.getFocusedField();
+        RenderUtils.WidgetBounds bounds = field != null ? field.getFormattingBounds() : null;
+        boolean showFormatting = !anyModalOpen && !window_PresetSelector.isOpen() && !window_PresetOptions.isOpen() && !window_AdvancedOptions.getActionsTab().getAddNewAction().isOpen();
+
+        if (showFormatting && field != null && field.isFormattingAllowed() && field.isFocused() && bounds != null && bounds.fullyVisible() && bounds.y() >= 0 && bounds.y() + bounds.height() <= height) {
+            window_TextFormatting.showFor(field, bounds, width, height);
+        } else {
+            window_TextFormatting.hide();
+            if (!anyModalOpen && field != null && field.isFormattingAllowed() && bounds == null) {
+                TextField.setFocusedField(null);
+            }
+        }
+
+        if (anyModalOpen) {
+            window_TextFormatting.tick();
+        } else if (window_TextFormatting.isVisible()) {
+            RenderUtils.renderOverlay(ctx, window_TextFormatting, window_TextFormatting.hasTarget() ? mouseX : -10000, window_TextFormatting.hasTarget() ? mouseY : -10000, delta);
         }
     }
 
@@ -510,6 +554,7 @@ public class BindsEditor extends NitshaScreen {
     }
 
     public void closeEditor() {
+        window_TextFormatting.hide();
         TextField.setFocusedField(null);
         KeybindSelector.setFocusedField(null);
         MainKeybindSelector.setFocusedField(null);
@@ -520,51 +565,111 @@ public class BindsEditor extends NitshaScreen {
 
     @Override
     public boolean onMouseClicked(double mouseX, double mouseY, int button) {
+        KeybindSelector keybind = KeybindSelector.getFocusedField();
+        MainKeybindSelector mainKeybind = MainKeybindSelector.getFocusedField();
+
+        if (keybind != null && keybind.captureMouseButton(button)) {
+            mouseCapture = keybind;
+            mouseCaptureButton = button;
+            return true;
+        }
+
+        if (mainKeybind != null && mainKeybind.captureMouseButton(button)) {
+            mouseCapture = mainKeybind;
+            mouseCaptureButton = button;
+            return true;
+        }
+
         TextField.setLastClickedWidget(null);
         KeybindSelector.setLastClickedWidget(null);
         MainKeybindSelector.setLastClickedWidget(null);
 
         for (ModalWindow modal : modalWindows) {
             if (modal.isVisible()) {
+                mouseCapture = modal;
+                mouseCaptureButton = button;
                 NitshaInput.mouseClicked(List.of(modal), mouseX, mouseY, button);
 
                 if (!modal.isMouseInside(mouseX, mouseY)) {
                     modal.close(() -> {});
                 }
 
+                controlInputFocus();
                 return true;
             }
         }
 
+        if (window_TextFormatting.hasTarget() && window_TextFormatting.isMouseInside(mouseX, mouseY)) {
+            mouseCapture = window_TextFormatting;
+            mouseCaptureButton = button;
+            NitshaInput.mouseClicked(List.of(window_TextFormatting), mouseX, mouseY, button);
+            return true;
+        }
+
         if (window_PresetSelector.isMouseInside(mouseX, mouseY)) {
+            window_PresetOptions.openSelector(false);
+            mouseCapture = window_PresetSelector;
+            mouseCaptureButton = button;
             NitshaInput.mouseClicked(List.of(window_PresetSelector), mouseX, mouseY, button);
+            controlInputFocus();
             return true;
         } else if (window_PresetSelector.isOpen()) {
             window_PresetSelector.openSelector(false);
         }
 
+        if (window_PresetOptions.isMouseInside(mouseX, mouseY)) {
+            mouseCapture = window_PresetOptions;
+            mouseCaptureButton = button;
+            NitshaInput.mouseClicked(List.of(window_PresetOptions), mouseX, mouseY, button);
+            controlInputFocus();
+            return true;
+        } else if (window_PresetOptions.isOpen()) {
+            window_PresetOptions.openSelector(false);
+        }
+
         boolean clicked = false;
 
         for (GuiEventListener element : children()) {
-            if (element != window_PresetSelector && NitshaInput.mouseClicked(List.of(element), mouseX, mouseY, button)) {
+            if (element != window_PresetSelector && element != window_PresetOptions && element != window_TextFormatting && NitshaInput.mouseClicked(List.of(element), mouseX, mouseY, button)) {
                 clicked = true;
             }
         }
 
-        TextField.controlFocus();
-        KeybindSelector.controlFocus();
-        MainKeybindSelector.controlFocus();
+        controlInputFocus();
 
         return clicked;
     }
 
+    private void controlInputFocus() {
+        TextField.controlFocus();
+        KeybindSelector.controlFocus();
+        MainKeybindSelector.controlFocus();
+    }
+
     @Override
     public boolean onMouseReleased(double mouseX, double mouseY, int button) {
+        if (mouseCapture != null) {
+            if (button == mouseCaptureButton) {
+                GuiEventListener captured = mouseCapture;
+                mouseCapture = null;
+                mouseCaptureButton = -1;
+                NitshaInput.mouseReleased(List.of(captured), mouseX, mouseY, button);
+            }
+            return true;
+        }
+
         return NitshaInput.mouseReleased(children(), mouseX, mouseY, button);
     }
 
     @Override
     public boolean onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        if (mouseCapture != null) {
+            if (button == mouseCaptureButton) {
+                NitshaInput.mouseDragged(List.of(mouseCapture), mouseX, mouseY, button, deltaX, deltaY);
+            }
+            return true;
+        }
+
         return NitshaInput.mouseDragged(children(), mouseX, mouseY, button, deltaX, deltaY);
     }
 
@@ -575,6 +680,20 @@ public class BindsEditor extends NitshaScreen {
                 NitshaInput.mouseScrolled(List.of(modal), mouseX, mouseY, horizontalAmount, verticalAmount);
                 return true;
             }
+        }
+
+        if (window_TextFormatting.hasTarget() && window_TextFormatting.isMouseInside(mouseX, mouseY)) {
+            return true;
+        }
+
+        if (window_PresetSelector.isMouseInside(mouseX, mouseY)) {
+            NitshaInput.mouseScrolled(List.of(window_PresetSelector), mouseX, mouseY, horizontalAmount, verticalAmount);
+            return true;
+        }
+
+        if (window_PresetOptions.isMouseInside(mouseX, mouseY)) {
+            NitshaInput.mouseScrolled(List.of(window_PresetOptions), mouseX, mouseY, horizontalAmount, verticalAmount);
+            return true;
         }
 
         return NitshaInput.mouseScrolled(children(), mouseX, mouseY, horizontalAmount, verticalAmount);
@@ -640,6 +759,16 @@ public class BindsEditor extends NitshaScreen {
                     modal.close(() -> {});
                     return true;
                 }
+            }
+
+            if (window_PresetSelector.isOpen()) {
+                window_PresetSelector.openSelector(false);
+                return true;
+            }
+
+            if (window_PresetOptions.isOpen()) {
+                window_PresetOptions.openSelector(false);
+                return true;
             }
 
             closeEditor();

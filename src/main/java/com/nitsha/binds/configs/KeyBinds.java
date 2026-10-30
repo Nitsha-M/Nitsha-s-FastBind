@@ -32,6 +32,7 @@ public class KeyBinds {
     public static KeyMapping PREV_PAGE;
     public static KeyMapping NEXT_PAGE;
     public static KeyMapping EDITOR;
+    private static boolean menuKeyWasDown;
 
     //? if <1.21.9 {
     /*private static String category = "category.nitsha.binds";
@@ -117,13 +118,23 @@ public class KeyBinds {
             return;
         }
 
-        if (BINDS.consumeClick() && !BindsGUI.ignoreHoldToOpenOnce && !(NitshaCraft.getScreen() instanceof BindsGUI)) {
-            BindsGUI.ignoreHoldToOpenOnce = true;
-            NitshaCraft.setScreen(new BindsGUI());
+        boolean menuKeyDown = NitshaInput.isKeyDown(BINDS);
+        boolean menuClicked = false;
+
+        while (BINDS.consumeClick()) {
+            menuClicked = true;
         }
 
-        if (!NitshaInput.isKeyDown(BINDS)) {
+        boolean menuPressed = menuKeyDown ? !menuKeyWasDown : menuClicked;
+        menuKeyWasDown = menuKeyDown;
+
+        if (!menuKeyDown) {
             BindsGUI.ignoreHoldToOpenOnce = false;
+        }
+
+        if (menuPressed && !BindsGUI.ignoreHoldToOpenOnce && client.player != null && NitshaCraft.getScreen() == null) {
+            BindsGUI.ignoreHoldToOpenOnce = true;
+            NitshaCraft.setScreen(new BindsGUI());
         }
 
         if (EDITOR.consumeClick() && !(NitshaCraft.getScreen() instanceof BindsGUI)) {
